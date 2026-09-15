@@ -3,15 +3,16 @@ package core
 import "time"
 
 type Snapshot struct {
-	SchemaVersion int              `json:"schema_version"`
-	CapturedAt    time.Time        `json:"captured_at"`
-	Host          HostInfo         `json:"host"`
-	Interfaces    []InterfaceInfo  `json:"interfaces,omitempty"`
-	Filesystems   []FilesystemInfo `json:"filesystems,omitempty"`
-	Routes        []string         `json:"routes,omitempty"`
-	Listeners     []Listener       `json:"listeners,omitempty"`
-	Services      []ServiceInfo    `json:"services,omitempty"`
-	Containers    []ContainerInfo  `json:"containers,omitempty"`
+	SchemaVersion  int                 `json:"schema_version"`
+	CapturedAt     time.Time           `json:"captured_at"`
+	Host           HostInfo            `json:"host"`
+	Interfaces     []InterfaceInfo     `json:"interfaces,omitempty"`
+	Filesystems    []FilesystemInfo    `json:"filesystems,omitempty"`
+	Routes         []string            `json:"routes,omitempty"`
+	Listeners      []Listener          `json:"listeners,omitempty"`
+	Services       []ServiceInfo       `json:"services,omitempty"`
+	Containers     []ContainerInfo     `json:"containers,omitempty"`
+	ReverseProxies []ReverseProxyRoute `json:"reverse_proxies,omitempty"`
 }
 
 type HostInfo struct {
@@ -58,6 +59,17 @@ type ContainerInfo struct {
 	Status   string `json:"status"`
 	Ports    string `json:"ports,omitempty"`
 	Networks string `json:"networks,omitempty"`
+}
+
+type ReverseProxyRoute struct {
+	Provider      string   `json:"provider"`
+	Container     string   `json:"container,omitempty"`
+	RouteID       string   `json:"route_id,omitempty"`
+	Hostnames     []string `json:"hostnames,omitempty"`
+	ListenPorts   []string `json:"listen_ports,omitempty"`
+	BackendScheme string   `json:"backend_scheme,omitempty"`
+	BackendHost   string   `json:"backend_host,omitempty"`
+	BackendPort   string   `json:"backend_port,omitempty"`
 }
 
 type Event struct {
