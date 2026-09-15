@@ -21,11 +21,11 @@
   - merged to `main` at `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`.
   - unit uses `StateDirectory=hostsleuth` and `StateDirectoryMode=0700`.
 - [x] Stage HostSleuth as the first HomeCommander Managed Administrative Deployment UAT target on `openmediavault`.
-  - staged binary: `/srv/homecommander-deployments/hostsleuth/hostsleuth`
-  - binary SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`
+  - original staged release binary: `/srv/homecommander-deployments/hostsleuth/hostsleuth`
+  - original binary SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`
   - staged unit: `/srv/homecommander-deployments/hostsleuth/hostsleuth.service`
   - unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`
-- [x] Owner/root approved the exact staged HostSleuth artifacts through `homecommander-approve-deployment`.
+- [x] Owner/root approved the exact initial HostSleuth artifacts through `homecommander-approve-deployment`.
   - approval remains exact-hash/fixed-destination and does not add a generic root shell, unrestricted sudo, arbitrary privileged writes, or HostSleuth-specific HomeCommander privilege code.
 - [x] Exercise privileged install and lifecycle through HomeCommander Managed Administrative Deployment.
   - exact-hash install passed;
@@ -40,22 +40,50 @@
   - `/var/lib/hostsleuth` is `root:root 0700`.
   - state directory remains after managed uninstall as intended.
 - [x] Validate Docker inventory in the final system-service privilege model.
-  - final service snapshot observed 21 Docker containers.
-  - dashboard returned HTTP 200; schema version 1; 219 services and 328 listeners observed.
+  - service snapshot observed 21 Docker containers.
+  - dashboard returned HTTP 200.
 - [x] Validate installed CLI diagnosis after managed restart.
   - `diagnose 127.0.0.1:22` returned reachable/high confidence.
 - [x] Add read-only `status` to the root-owned HomeCommander approval and verify `deployment_status`.
-  - approval now contains install/uninstall/enable/disable/start/stop/status/restart.
-  - executable and unit both match their approved SHA-256 exactly.
+  - approval contains install/uninstall/enable/disable/start/stop/status/restart.
+  - executable and unit both matched their approved SHA-256 exactly.
   - `recordedInstalled=true`.
-  - service is loaded, enabled, active, and running.
-- [ ] Perform one owner-authorized reboot of `openmediavault` and verify HostSleuth reboot persistence.
-  - after reboot verify approved hashes still match;
-  - verify enabled + active/running;
-  - verify dashboard/API HTTP health;
-  - verify Docker inventory remains available;
-  - verify recorded state persists.
-- [ ] Close M1 after the reboot check is green.
+  - service loaded, enabled, active, and running.
+- [x] Perform one owner-authorized reboot of `openmediavault` and verify HostSleuth reboot persistence.
+  - real reboot confirmed by ~635-second uptime at first post-reboot check;
+  - HomeCommander recovered;
+  - approved installed hashes still matched;
+  - HostSleuth returned loaded + enabled + active/running with PID 1360;
+  - dashboard returned HTTP 200;
+  - `/var/lib/hostsleuth` remained `root:root 0700`;
+  - Docker inventory remained available with 21 containers;
+  - SSH diagnosis remained reachable/high confidence.
+- [x] Fix Docker uptime-only flight-recorder event churn discovered during post-reboot validation.
+  - 99 of the latest 100 API events were container-change records caused primarily by `Up N minutes -> Up N+1 minutes` raw Docker status text.
+  - PR #2 normalizes semantic state only for diffing while keeping full raw status in snapshots/UI.
+  - uptime-only and restart-timer-only changes are ignored; health/exit/restart/paused/dead/removal transitions remain meaningful.
+  - regression tests cover uptime churn, restart timer churn, health transitions, and exits.
+  - CI run `34991719610` passed format, vet, tests, and build.
+  - merged to `main` at `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`.
+- [x] Build and stage the merged Docker-event fix as a non-release managed-update candidate.
+  - no public release was created;
+  - source commit: `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`;
+  - version: `0.1.0-dev+d702804`;
+  - candidate SHA-256: `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`;
+  - staged path: `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate`;
+  - original `v0.1.0-alpha.1` staged binary remains untouched for recovery/reference;
+  - systemd unit bytes/hash are unchanged.
+- [ ] Owner/root re-approves the new `hostsleuth.candidate` exact hash with the unchanged unit and normal default actions.
+- [ ] Exercise a real HomeCommander managed update to candidate `0.1.0-dev+d702804`.
+  - managed `install` should update the recorded deployment only after verifying the current installed files still match their prior state;
+  - managed restart after install;
+  - verify `deployment_status` pins/observes candidate SHA `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1` and unchanged unit SHA.
+- [ ] Validate the Docker event-noise fix under the real root system-service model.
+  - verify dashboard/API and 21-container Docker inventory remain healthy;
+  - observe at least two normal 60-second capture intervals;
+  - confirm uptime progression no longer creates repeated container-change events;
+  - do not erase existing history merely to make validation easier.
+- [ ] Close M1 after the managed update + live event-noise validation are green.
 
 ## Shared-infrastructure finding recorded in HomeCommander
 
