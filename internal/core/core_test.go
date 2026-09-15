@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -98,6 +99,67 @@ func TestDiagnoseRejectsInvalidTarget(t *testing.T) {
 	if d.Confidence != "high" {
 		t.Fatalf("unexpected confidence: %q", d.Confidence)
 	}
+}
+
+func TestRouteCheckPassesKernelEvidence(t *testing.T) {
+	old := routeLookup
+	routeLookup = func(context.Context, string) (string, error) {
+		return "203.0.113.10 via 192.0.2.1 dev eth0 src 192.0.2.20 uid 1000\n", nil
+	}
+	defer func() { routeLookup = old }()
+
+	check := routeCheck(context.Background(), "203.0.113.10")
+	if check.Status != "pass" {
+		t.Fatalf("expected pass, got %#v", check)
+	}
+	if !strings.Contains(check.Evidence, "via 192.0.2.1 dev eth0") {
+		t.Fatalf("unexpected evidence: %q", check.Evidence)
+	}
+}
+
+func TestRouteCheckTreatsExecutionRestrictionAsUnknown(t *testing.T) {
+	old := routeLookup
+	routeLookup = func(context.Context, string) (string, error) {
+		return "Cannot open netlink socket: Address family not supported by protocol\n", errors.New("exit status 1")
+	}
+	defer func() { routeLookup = old }()
+
+	check := routeCheck(context.Background(), "203.0.113.10")
+	if check.Status != "unknown" {
+		t.Fatalf("expected unknown, got %#v", check)
+	}
+}
+
+func TestRouteCheckDetectsKernelUnreachable(t *testing.T) {
+	old := routeLookup
+	routeLookup = func(context.Context, string) (string, error) {
+		return "RTNETLINK answers: Network is unreachable\n", errors.New("exit status 2")
+	}
+	defer func() { routeLookup = old }()
+
+	check := routeCheck(context.Background(), "203.0.113.10")
+	if check.Status != "fail" {
+		t.Fatalf("expected fail, got %#v", check)
+	}
+}
+
+func TestDiagnoseIncludesRouteEvidence(t *testing.T) {
+	old := routeLookup
+	routeLookup = func(context.Context, string) (string, error) {
+		return "local 127.0.0.1 dev lo src 127.0.0.1\n", nil
+	}
+	defer func() { routeLookup = old }()
+
+	d := Diagnose(context.Background(), "127.0.0.1:0", Snapshot{})
+	for _, check := range d.Checks {
+		if check.Name == "route" {
+			if check.Status != "pass" || !strings.Contains(check.Evidence, "dev lo") {
+				t.Fatalf("unexpected route check: %#v", check)
+			}
+			return
+		}
+	}
+	t.Fatal("expected route check in diagnosis")
 }
 
 func TestStorePersistsSchemaAndReturnsEmptyEvents(t *testing.T) {
