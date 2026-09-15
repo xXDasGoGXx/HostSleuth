@@ -51,11 +51,11 @@ Merged at:
 
 `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`
 
-### HomeCommander managed-deployment UAT
+### Managed-deployment UAT
 
-HostSleuth became the first real consumer of HomeCommander's root-approved Managed Administrative Deployment mechanism.
+HostSleuth became the first real consumer of an owner-approved managed administrative deployment mechanism used in the development environment.
 
-Validated on `openmediavault`:
+Validated on a Debian 13 host:
 
 - exact-hash install;
 - enable/start/status/restart;
@@ -66,7 +66,7 @@ Validated on `openmediavault`:
 - reboot persistence;
 - root service Docker inventory.
 
-HomeCommander is deployment infrastructure only. It is not part of HostSleuth's product architecture.
+That deployment mechanism is external infrastructure only. It is not part of HostSleuth's product architecture.
 
 ### Docker event-noise fix
 
@@ -131,7 +131,7 @@ Added:
 - Docker network names in snapshot evidence;
 - target-aware TCP listener matching.
 
-This fixed a correctness bug where a listener on `192.168.2.181:8789` could previously be treated as evidence for `127.0.0.1:8789` simply because the port number matched.
+This fixed a correctness bug where a listener bound to one local address could previously be treated as evidence for a different local address simply because the port number matched.
 
 Merged at:
 
@@ -153,28 +153,22 @@ Merged at:
 
 ### M2 live deployment validation
 
-Owner-approved M2 build:
-
-- version: `0.1.0-dev+3352a7e`
-- executable SHA-256: `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`
-- systemd unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`
-
-Managed install and restart succeeded. Post-update PID was `443538` at validation time.
+The owner-approved M2 build was installed and restarted successfully on Debian 13.
 
 Real root-context validation confirmed:
 
 - route lookup succeeds as root;
 - nftables evidence is readable;
-- 21 Docker containers include network names;
-- SSH `127.0.0.1:22` is reachable/high confidence;
-- a closed local port produces a high-confidence no-listener result;
-- Chaptarr loopback diagnosis correctly identifies publication only on `192.168.2.181:8789`;
-- FlareSolverr `8192/tcp` is correctly identified as container-internal and not host-published;
-- `192.168.2.181:8789` is reachable/high confidence;
+- Docker network names are captured;
+- reachable local services produce high-confidence reachable results;
+- closed local ports produce high-confidence no-listener results;
+- loopback diagnosis does not misattribute a listener bound only to another local address;
+- container-internal ports are distinguished from host-published ports;
+- correctly published host ports are reachable on the address where they are actually bound;
 - dashboard returns HTTP 200;
 - normal change recording continues.
 
-The live host had zero failed systemd services, so journal excerpt collection was not artificially triggered by breaking a service. The behavior remains covered by tests.
+The live host had zero failed systemd services at validation time, so journal excerpt collection was not artificially triggered by breaking a service. The behavior remains covered by tests.
 
 M2 is complete.
 
