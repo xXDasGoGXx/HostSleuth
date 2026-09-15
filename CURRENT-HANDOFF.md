@@ -306,6 +306,28 @@ The snapshot contained zero failed systemd services, so `systemd-failures: pass`
 
 The older M1 candidate file remains staged separately at `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate` with SHA-256 `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`, but it is no longer the active approval.
 
+## M3 progress — Nginx Proxy Manager route awareness merged
+
+PR #8 begins reverse-proxy awareness with the provider actually running on this host: `jc21-npm` using `jc21/nginx-proxy-manager:latest`, publishing ports 80/443 and attached to `proxy-security_default`.
+
+The merged slice adds an optional backward-compatible `reverse_proxies` snapshot field containing only structured, non-secret route data:
+
+- provider/container identity;
+- generated route ID;
+- frontend hostnames;
+- frontend listen ports;
+- backend scheme/host/port.
+
+Collection discovers the NPM container from existing Docker inventory, performs bounded read-only Docker mount inspection, finds only the mounted `/data` tree, and parses generated `nginx/proxy_host/*.conf` files. It does not persist raw Nginx configuration, authorization headers, credentials, arbitrary custom snippets, or certificate material. Reads are capped at 256 proxy-host files and 256 KiB per file, and final config symlinks are rejected.
+
+Diagnosis can now add `reverse-proxy` candidate dependency evidence when a failed backend target is known to serve an NPM frontend. This evidence appears before weaker firewall/systemd candidates but does not override stronger M2 listener/Docker/route conclusions or weaken successful TCP evidence.
+
+Regression coverage includes safe field extraction, synthetic bearer-secret non-retention, symlink rejection, Docker `/data` mount discovery, unavailable Docker inspection, resolved-IP backend matching, and evidence-order preservation.
+
+Validation: PR #8 CI run `35029513723` passed format, vet, tests, and build; PR #8 merged at `df7e926b0ad07c0224004c644d5c4a1d667df547`.
+
+The live managed HostSleuth service has **not** been updated for M3 yet. It intentionally remains on the exact-hash validated M2 build while additional M3 provider/TLS work is batched before another owner approval.
+
 ## Current live state
 
 Host: `openmediavault`
@@ -329,7 +351,8 @@ The root-owned HomeCommander approval currently points to `hostsleuth.m2-candida
 - No authentication yet; keep dashboard loopback-only.
 - Storage is JSON/JSONL, not SQLite yet.
 - Collectors degrade if optional tools are unavailable/inaccessible.
-- Diagnosis now correlates route, nftables candidates, local listeners, Docker port/bind/network evidence, and bounded failed-systemd candidates, but does not yet understand reverse proxies, TLS, or package/config changes.
+- Current `main` now includes Nginx Proxy Manager route awareness and failed-backend dependency correlation, but the live managed service remains on M2 until more M3 work is batched and re-approved.
+- Reverse-proxy coverage is not complete yet: generic Nginx, Caddy, and Traefik support remain open, along with TLS and package/config change evidence.
 - Firewall and failed-unit correlations are deliberately conservative candidate evidence rather than causal verdicts.
 - M2 root-context validation is complete. Journal excerpt collection itself remains intentionally unforced because the live snapshot had zero failed services; the no-failure branch is validated without manufacturing a service failure.
 - Journal evidence has a narrow first-pass credential redactor; general redaction rules remain a security backlog item.
@@ -347,17 +370,19 @@ M2 firewall evidence: `2fe64640093b258b3c52b148fc2e32507eeae584`
 M2 systemd/journal evidence: `37c97227a829fc341f943d0b4731242ee2a39650`
 M2 Docker port/bind/network correlation: `bc939ae0c6339b355bd33916629a93f4a07803c9`
 M2 evidence precedence/confidence policy: `3352a7e8407eae855f4a88550cfaaf867f86ddf1`
+M3 Nginx Proxy Manager route awareness: `df7e926b0ad07c0224004c644d5c4a1d667df547`
 
 Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Next sequence
 
-M1 and M2 are both closed. Continue in this order:
+M1 and M2 are closed. M3 Nginx Proxy Manager awareness is merged. Continue in this order:
 
-1. begin reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager without turning HostSleuth into a config editor;
-2. add deterministic TLS/certificate evidence after proxy awareness so certificate failures can be distinguished from backend reachability failures;
-3. keep configuration fingerprinting/package-change timeline and the planned SQLite migration as separate subsequent slices;
-4. do not publish a new public alpha unless the owner explicitly authorizes release promotion;
-5. keep the current exact M2 managed-deployment approval/staged candidate reproducible until a later reviewed build replaces it.
+1. add generic Nginx/Caddy/Traefik provider coverage in separate reviewable slices, preserving the safe structured-only proxy model;
+2. add deterministic TLS/certificate evidence so certificate failures can be distinguished from backend reachability failures;
+3. batch the meaningful M3 source, build a separate candidate, obtain a new exact-hash owner approval, and validate proxy/TLS evidence under the real root system-service context without mutating production proxy configuration merely for tests;
+4. keep configuration fingerprinting/package-change timeline and the planned SQLite migration as separate subsequent slices;
+5. do not publish a new public alpha unless the owner explicitly authorizes release promotion;
+6. keep the current exact M2 managed-deployment approval/staged candidate reproducible until the later reviewed M3 build replaces it.
 
 Publishing a new public HostSleuth release remains a separate owner-controlled action and must not occur without explicit approval.
