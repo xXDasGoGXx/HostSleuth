@@ -68,7 +68,13 @@
 
 Start with evidence that helps explain why a service/port is unreachable without turning HostSleuth into an automatic repair tool.
 
-- [ ] Add route-path evidence to diagnosis.
+- [x] Add route-path evidence to diagnosis.
+  - PR #3 adds bounded `ip route get` evidence after DNS resolution;
+  - kernel-reported unreachable routes are surfaced as failures;
+  - command/netlink restrictions are `unknown`, not false route failures;
+  - PR #3 CI run `34996674672` passed format, vet, tests, and build;
+  - merged at `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`;
+  - Normal-mode Debian validation confirmed the real netlink-restriction case still yields reachable/high confidence when TCP succeeds.
 - [ ] Add firewall evidence with safe bounded reads of the host's active firewall state.
 - [ ] Add bounded systemd/journal failure evidence for relevant units.
 - [ ] Add Docker port/bind/network correlation.
