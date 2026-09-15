@@ -13,10 +13,11 @@
 - [x] Add GitHub Actions CI definition (`gofmt`, `go vet`, `go test`, build).
 - [x] Add systemd unit and release/source install + uninstall scripts.
 - [x] Exercise the core runtime on a real Debian 13 host: snapshots, events, diagnostics, web dashboard/API, filesystem inventory, native build, and cross-builds.
-- [x] Add tagged-release workflow for static Linux `amd64`/`arm64` binaries with checksums and release version stamping.
-- [ ] Verify the current M1 code commit is green in GitHub Actions and record the exact successful run in `CURRENT-HANDOFF.md`.
-- [ ] Publish the first alpha GitHub release and exercise the no-Go release installer end-to-end.
-- [ ] Exercise the privileged systemd installation/enable path on an approved host with administrative execution available.
+- [x] Add release automation for static Linux `amd64`/`arm64` binaries with checksums, tag creation, and release version stamping.
+- [x] Verify the hardened M1 code is green in GitHub Actions: run `34936129425` passed format, vet, tests, and build.
+- [x] Publish `v0.1.0-alpha.1` and validate its published amd64 artifact on Debian without a system Go installation, including checksum, version, snapshot, diagnosis, and `/releases/latest/download/...` URL.
+- [ ] Exercise the privileged systemd installation/enable path on an approved host with administrative execution available; verify reboot persistence and uninstall behavior.
+- [ ] Validate Docker inventory in the final service privilege model.
 
 ## Planned immediately after M1
 
