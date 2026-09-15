@@ -75,6 +75,7 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 			d.Confidence = "medium"
 		} else {
 			d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "fail", Evidence: "no local listener found for TCP/" + port})
+			d.Checks = append(d.Checks, systemdFailureCheck(ctx, snap))
 			d.Conclusion = "no process appears to be listening on the requested local port"
 			d.Confidence = "high"
 		}
