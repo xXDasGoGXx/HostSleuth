@@ -36,7 +36,6 @@ func Collect(ctx context.Context) Snapshot {
 	s.Listeners = collectListeners(ctx)
 	s.Services = collectServices(ctx)
 	s.Containers = collectContainers(ctx)
-	s.ReverseProxies = collectReverseProxies(ctx, s.Containers)
 	return s
 }
 
@@ -275,5 +274,5 @@ func listenerHostMatchesTarget(host string, resolvedIPs []string) bool {
 }
 
 func SnapshotSummary(s Snapshot) string {
-	return fmt.Sprintf("%s | %s | filesystems=%d services=%d listeners=%d containers=%d proxy_routes=%d", s.Host.Hostname, s.Host.OS, len(s.Filesystems), len(s.Services), len(s.Listeners), len(s.Containers), len(s.ReverseProxies))
+	return fmt.Sprintf("%s | %s | filesystems=%d services=%d listeners=%d containers=%d", s.Host.Hostname, s.Host.OS, len(s.Filesystems), len(s.Services), len(s.Listeners), len(s.Containers))
 }

@@ -26,7 +26,7 @@ func TestDiagnosisPolicyReachableStopsBeforeSecondaryEvidence(t *testing.T) {
 		nftRulesetLookup = oldFirewall
 	}()
 
-	d := Diagnose(context.Background(), "127.0.0.1:8080", Snapshot{})
+	d := Diagnose(context.Background(), "127.0.0.1:443", Snapshot{})
 	assertCheckOrder(t, d, []string{"dns", "route", "tcp"})
 	if d.Conclusion != "target is reachable" || d.Confidence != "high" {
 		t.Fatalf("unexpected diagnosis: %#v", d)
