@@ -64,7 +64,7 @@
   - historical pre-fix events were not erased.
 - [x] Close M1 and the first real HomeCommander Managed Administrative Deployment UAT.
 
-## Active milestone — M2: Deeper deterministic diagnosis
+## Completed milestone — M2: Deeper deterministic diagnosis
 
 Start with evidence that helps explain why a service/port is unreachable without turning HostSleuth into an automatic repair tool.
 
@@ -108,22 +108,34 @@ Start with evidence that helps explain why a service/port is unreachable without
   - merged at `3352a7e8407eae855f4a88550cfaaf867f86ddf1`.
 - [x] Add regression tests for reachable, locally blocked, service-failed, and container-port mismatch cases.
   - scenario-level tests lock check ordering and confidence for reachable, local-listener/firewall candidate, failed-systemd candidate, Docker bind mismatch, contradictory Docker publication, confirmed remote no-route, and unavailable optional evidence.
-- [ ] Validate the merged M2 build under the real root system-service privilege model.
+- [x] Validate the merged M2 build under the real root system-service privilege model.
   - merged M2 source is `3352a7e8407eae855f4a88550cfaaf867f86ddf1`; main CI run `35000071547` passed format, vet, tests, and build;
-  - exact staged candidate version is `0.1.0-dev+3352a7e`;
-  - staged separately at `/srv/homecommander-deployments/hostsleuth/hostsleuth.m2-candidate` with SHA-256 `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa` and mode `0755`;
-  - the still-approved M1 candidate `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate` remains unchanged at SHA-256 `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`;
-  - systemd unit remains unchanged at SHA-256 `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`;
-  - Normal-mode/source validation and live root-collected snapshot replay are complete without mutating firewall/service/container state;
-  - remaining root-context validation requires owner/root to re-approve the new M2 candidate path/hash before any `deployment_action install` is attempted.
+  - owner/root approved `/srv/homecommander-deployments/hostsleuth/hostsleuth.m2-candidate` with SHA-256 `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`;
+  - managed install and restart succeeded; PID changed `31172 -> 443538`;
+  - final `deployment_status` reports executable and unchanged unit hashes both matching approval; service remains enabled, active, and running;
+  - installed version is `0.1.0-dev+3352a7e`;
+  - root-service `ip route get` evidence is readable and reports `route: pass` for local targets;
+  - root-service nftables reads are available and produce bounded candidate evidence rather than permission/netlink errors;
+  - all 21 Docker containers now carry network names in the live snapshot;
+  - `127.0.0.1:8789` correctly identifies Chaptarr as published only on `192.168.2.181:8789`; `127.0.0.1:8192` correctly identifies FlareSolverr as internal-only; `192.168.2.181:8789` and `127.0.0.1:22` remain reachable/high confidence;
+  - dashboard returns HTTP 200; schema remains 1; service inventory is 219 and Docker inventory is 21;
+  - live snapshot contains zero failed systemd services, so the no-failure branch is validated and journal excerpt collection was intentionally not forced by breaking a service merely for testing;
+  - no firewall, service, or container state was mutated to manufacture diagnosis evidence.
+- [x] Close M2 after merged-code, CI, exact-hash managed deployment, and live root-context validation all passed.
 
-## Planned after/alongside M2
+## Active milestone — M3: Reverse-proxy and TLS awareness
+
+- [ ] Add read-only reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager.
+- [ ] Correlate proxy listener/frontend evidence with backend host:port targets without editing proxy configuration.
+- [ ] Add deterministic TLS/certificate diagnostics after proxy correlation.
+- [ ] Add regression scenarios for direct backend success, proxy-to-backend mismatch, certificate expiry/not-yet-valid, hostname mismatch, and unavailable proxy/TLS evidence.
+- [ ] Validate M3 on the real Debian 13 host without mutating production proxy configuration merely for tests.
+
+## Planned after M3
 
 - [ ] SQLite storage backend and migration path from JSON/JSONL.
 - [ ] Configuration fingerprinting for selected `/etc` files without storing secrets by default.
 - [ ] Package-change timeline from dpkg/apt logs.
-- [ ] Reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager.
-- [ ] TLS/certificate diagnostics.
 - [ ] `.deb` package and signed release artifacts.
 - [ ] Multi-host architecture research without compromising local-first operation.
 
@@ -132,7 +144,7 @@ Start with evidence that helps explain why a service/port is unreachable without
 - [ ] When explicitly authorized by the owner, prepare the next public alpha release containing the final M1 fixes.
   - Do not publish automatically.
   - Current published release remains `v0.1.0-alpha.1` and predates the Docker semantic-event fix.
-  - Current live validated build is `0.1.0-dev+d702804` from commit `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`.
+  - Current live validated build is `0.1.0-dev+3352a7e` from commit `3352a7e8407eae855f4a88550cfaaf867f86ddf1`.
 
 ## Shared-infrastructure finding recorded in HomeCommander
 
