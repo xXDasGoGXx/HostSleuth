@@ -219,6 +219,28 @@ First-time UAT exposed a narrow HomeCommander staging ergonomics issue:
 
 This belongs in HomeCommander shared infrastructure, not in HostSleuth. Do not solve it with broader broker capabilities, generic sudo/root shell, or weak ownership.
 
+## M2 progress — route-path evidence merged
+
+PR #3 begins M2 by adding bounded route-path evidence to deterministic diagnosis.
+
+Merged behavior:
+
+- after DNS resolution, HostSleuth runs a bounded read-only `ip route get <resolved-ip>` lookup;
+- a successful kernel lookup is recorded as `route: pass` with compact route evidence;
+- kernel-reported unreachable/no-route results become `route: fail`;
+- command absence, sandbox restrictions, or unavailable netlink access become `route: unknown` rather than a false routing failure;
+- a confirmed route failure plus remote TCP failure raises the routing conclusion to high confidence;
+- existing reachable and local-listener conclusions remain authoritative when those stronger signals are present.
+
+Validation:
+
+- PR #3 CI run `34996674672` passed format, vet, tests, and build;
+- PR #3 merged to `main` at `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`;
+- Debian Normal-mode validation reproduced a real HomeCommander netlink restriction (`Cannot open netlink socket: Address family not supported by protocol`);
+- HostSleuth correctly reported `route: unknown` while TCP/22 still produced `target is reachable` with high confidence.
+
+The live managed system service has **not** been updated to this M2 source yet. It remains on the validated M1 build `0.1.0-dev+d702804`. Batch the next meaningful M2 diagnostics before requesting another exact-hash managed deployment approval unless live root-context validation becomes necessary sooner.
+
 ## Current live state
 
 Host: `openmediavault`
@@ -251,16 +273,18 @@ Default branch: `main`
 First published release: `v0.1.0-alpha.1`
 Systemd state-directory fix: `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`
 Docker semantic-event fix: `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`
+M2 route-path evidence: `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`
 
 Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Next sequence
 
-M1 is closed. The next engineering milestone should deepen deterministic diagnosis, starting with:
+M1 is closed and M2 route-path evidence is merged. Continue deterministic diagnosis in this order:
 
-1. route/firewall evidence;
+1. firewall evidence with safe bounded reads of active policy;
 2. bounded systemd/journal failure evidence;
 3. Docker port/bind/network correlation;
-4. then reverse-proxy/TLS awareness and the planned SQLite migration as appropriate.
+4. define final evidence ordering/confidence behavior and regression scenarios;
+5. then reverse-proxy/TLS awareness and the planned SQLite migration as appropriate.
 
 Publishing a new public HostSleuth release containing the final M1 fixes is a separate owner-controlled action and must not occur without explicit approval.
