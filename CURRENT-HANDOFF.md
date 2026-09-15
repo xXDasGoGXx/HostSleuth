@@ -18,47 +18,71 @@ HostSleuth is intentionally not a full metrics/observability platform. Its diffe
 ## Architectural decisions
 
 - Language: Go.
-- Initial distribution: one static Linux binary with embedded web UI.
+- Distribution direction: one Linux binary with built-in web UI.
 - Default web bind: `127.0.0.1:8787`; remote/LAN exposure must be explicit.
-- Initial persistence: local JSON snapshots plus append-only JSONL events, using atomic writes. This keeps V0.1 dependency-free and makes captures inspectable by humans.
+- Initial persistence: local JSON snapshot plus append-only JSONL events, using atomic snapshot writes.
 - SQLite remains a planned storage backend once the event/snapshot schema has stabilized.
 - Diagnosis is deterministic first. AI, if ever added, may explain collected evidence but must not be required for core findings.
 - V0.1 is read-only. No automatic remediation.
 
-## Milestones
+## Completed work
 
 ### M0 — Repository foundation
 
-Status: **in progress**
+Status: **complete**
 
-Deliverables: project docs, security posture, handoff, to-do list, Go module skeleton.
+- Public repository created: `xXDasGoGXx/HostSleuth`.
+- `CURRENT-HANDOFF.md` and `TO-DO.md` established as continuity/source-of-truth documents.
+- Go module initialized.
+- README documents scope, safety posture, local build, CLI, and deployment path.
 
 ### M1 — Single-host deployable MVP
 
-Status: **planned next**
+Status: **in progress; first runnable vertical slice committed**
 
-Required capabilities:
+Implemented:
 
-- host inventory;
-- periodic state snapshots;
-- meaningful change events;
-- deterministic `host:port` diagnosis;
-- embedded local web UI;
-- systemd packaging/install path;
-- CI that builds and tests on Linux.
+- host model and snapshot schema;
+- host/OS/kernel/CPU/memory/uptime inventory;
+- interface/address collection;
+- route collection;
+- listening socket collection via `ss` when available;
+- systemd service inventory via `systemctl` when available;
+- Docker container inventory when Docker is available;
+- atomic local snapshot storage;
+- append-only JSONL change events;
+- deterministic service/container/listener snapshot diffing;
+- `diagnose host:port` with target validation, DNS, TCP connection evidence, and local-listener correlation;
+- CLI commands: `snapshot`, `diagnose`, `events`, `serve`, `version`;
+- built-in local dashboard and JSON endpoints;
+- default loopback-only web bind on `127.0.0.1:8787`;
+- initial unit tests;
+- GitHub Actions workflow for formatting, vet, tests, and build;
+- systemd unit and source install script.
+
+## Validation state
+
+A GitHub Actions CI run is currently queued for the latest commit. **M1 must not be marked complete until CI has passed and deployment is exercised on a real Debian/Ubuntu host.**
+
+## Important limitations in current code
+
+- No authentication yet; keep the dashboard loopback-only.
+- Installer currently builds from source and therefore requires Go on the target host.
+- State storage is JSON/JSONL, not SQLite yet.
+- Collectors intentionally degrade if optional tools (`ip`, `ss`, `systemctl`, `docker`) are absent.
+- Diagnosis does not yet correlate nftables/UFW, reverse proxies, Docker namespaces, systemd journal failures, TLS, or package/config changes.
 
 ## Source of truth
 
 Repository: `xXDasGoGXx/HostSleuth`
 Default branch: `main`
 
-This file and `TO-DO.md` must be kept synchronized with meaningful project progress.
+Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Next actions
 
-1. Complete M0 documentation and project skeleton.
-2. Implement core model, collectors, state store, differ, and diagnosis engine.
-3. Add embedded web UI and CLI/server orchestration.
-4. Add unit tests and GitHub Actions CI.
-5. Add source/release deployment scripts and systemd unit.
-6. Verify CI is green before declaring M1 complete.
+1. Inspect the first CI result and fix any formatting/build/test failures.
+2. Once CI is green, deploy to a Debian/Ubuntu test host and verify `snapshot`, `events`, `diagnose`, systemd service, and dashboard behavior.
+3. Harden the installer so normal deployment does not require a Go toolchain (release binary / `.deb`).
+4. Improve diagnosis with routes, firewall evidence, failed systemd state/journal evidence, and Docker port correlation.
+5. Add configuration/package change tracking only after the baseline deployment is stable.
