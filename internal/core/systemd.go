@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -62,7 +63,7 @@ func systemdFailureCheck(ctx context.Context, snap Snapshot) Check {
 		parts = append(parts, detail)
 	}
 	if len(failed) > limit {
-		parts = append(parts, "+"+itoa(len(failed)-limit)+" additional failed service(s) omitted")
+		parts = append(parts, "+"+strconv.Itoa(len(failed)-limit)+" additional failed service(s) omitted")
 	}
 
 	return Check{
@@ -87,18 +88,4 @@ func sanitizeJournal(value string) string {
 	value = journalBearerToken.ReplaceAllString(value, "Bearer [REDACTED]")
 	value = journalSensitiveAssignment.ReplaceAllString(value, "$1$2[REDACTED]")
 	return strings.TrimSpace(value)
-}
-
-func itoa(value int) string {
-	if value == 0 {
-		return "0"
-	}
-	var buf [20]byte
-	i := len(buf)
-	for value > 0 {
-		i--
-		buf[i] = byte('0' + value%10)
-		value /= 10
-	}
-	return string(buf[i:])
 }
