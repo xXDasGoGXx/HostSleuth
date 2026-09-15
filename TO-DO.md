@@ -133,8 +133,16 @@ Start with evidence that helps explain why a service/port is unreachable without
 - [ ] Correlate proxy listener/frontend evidence with backend host:port targets without editing proxy configuration.
   - [x] NPM backend dependency correlation is implemented as candidate evidence after TCP failure and preserves M2 evidence precedence.
   - [ ] Extend correlation to the remaining providers and validate against live root-service proxy inventory before marking complete.
-- [ ] Add deterministic TLS/certificate diagnostics after proxy correlation.
+- [x] Add deterministic TLS/certificate diagnostics after proxy correlation.
+  - PR #9 distinguishes TCP reachability from TLS health and separately checks handshake, certificate validity window, hostname coverage, and system-trust-chain validation.
+  - TCP/443 is treated as TLS by convention; NPM `listen ... ssl` metadata can mark nonstandard frontend ports as TLS without storing certificate material.
+  - Specific conclusions cover handshake failure, expired/not-yet-valid certificates, hostname mismatch, and untrusted chains.
+  - PR #9 CI run `35030366952` passed format, vet, tests, and build on exact final head `05dd89d5e57f65c158b595a2cf5557f31b6b840c`; merged at `5a549d977e2cc853338b728c1814732467c828d1`.
+  - Branch-binary Debian validation correctly distinguished the live NPM TCP/443 listener from an IP-SNI TLS failure, preserved SSH behavior, and validated TLS 1.3/time/hostname/system trust for `example.com:443`.
 - [ ] Add regression scenarios for direct backend success, proxy-to-backend mismatch, certificate expiry/not-yet-valid, hostname mismatch, and unavailable proxy/TLS evidence.
+  - [x] TLS success, handshake failure, expiry, not-yet-valid, hostname mismatch, trust failure, and non-TLS short-circuit scenarios are covered.
+  - [x] NPM proxy-to-backend dependency ordering/mismatch evidence is covered.
+  - [ ] Complete provider-unavailable/correlation scenarios as generic Nginx/Caddy/Traefik support is added.
 - [ ] Validate M3 on the real Debian 13 host without mutating production proxy configuration merely for tests.
 
 ## Planned after M3

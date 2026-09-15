@@ -326,7 +326,30 @@ Regression coverage includes safe field extraction, synthetic bearer-secret non-
 
 Validation: PR #8 CI run `35029513723` passed format, vet, tests, and build; PR #8 merged at `df7e926b0ad07c0224004c644d5c4a1d667df547`.
 
-The live managed HostSleuth service has **not** been updated for M3 yet. It intentionally remains on the exact-hash validated M2 build while additional M3 provider/TLS work is batched before another owner approval.
+### M3 deterministic TLS diagnostics merged
+
+PR #9 extends diagnosis so a successful TCP connection is definitive transport evidence but does not automatically imply a TLS endpoint is healthy.
+
+TLS is expected on TCP/443 by convention and can also be inferred for nonstandard proxy frontends from the structured `frontend_tls` route field populated by Nginx `listen ... ssl` directives. HostSleuth then separates:
+
+- TLS handshake success/failure;
+- leaf certificate validity window;
+- requested-host coverage;
+- system trust-chain validation.
+
+This produces specific high-confidence conclusions for handshake failure, expired/not-yet-valid certificates, hostname mismatch, and untrusted chains. Certificate bodies/private material are not persisted. The probe performs the handshake without automatic verification only so time, hostname, and trust failures can be checked and explained independently afterward.
+
+Regression coverage includes TLS expectation by conventional/nonstandard ports, valid certificate path, expiry, not-yet-valid, hostname mismatch, unknown authority, TCP-success/TLS-failure distinction, and preservation of the existing non-TLS TCP short-circuit.
+
+Live branch-binary validation on Debian, without changing the installed service, showed:
+
+- `127.0.0.1:443`: NPM accepted TCP but rejected the IP-based TLS handshake with `tls: unrecognized name`; HostSleuth correctly reported TCP reachable / TLS handshake failed;
+- `127.0.0.1:22`: existing reachable/high-confidence non-TLS behavior remained unchanged;
+- `example.com:443`: TLS 1.3 negotiated and validity, hostname, and system trust checks all passed.
+
+Validation: PR #9 CI run `35030366952` passed format, vet, tests, and build on exact final head `05dd89d5e57f65c158b595a2cf5557f31b6b840c`; PR #9 merged at `5a549d977e2cc853338b728c1814732467c828d1`.
+
+The live managed HostSleuth service has **not** been updated for M3 yet. It intentionally remains on the exact-hash validated M2 build while remaining provider work is batched before another owner approval.
 
 ## Current live state
 
@@ -351,8 +374,8 @@ The root-owned HomeCommander approval currently points to `hostsleuth.m2-candida
 - No authentication yet; keep dashboard loopback-only.
 - Storage is JSON/JSONL, not SQLite yet.
 - Collectors degrade if optional tools are unavailable/inaccessible.
-- Current `main` now includes Nginx Proxy Manager route awareness and failed-backend dependency correlation, but the live managed service remains on M2 until more M3 work is batched and re-approved.
-- Reverse-proxy coverage is not complete yet: generic Nginx, Caddy, and Traefik support remain open, along with TLS and package/config change evidence.
+- Current `main` now includes Nginx Proxy Manager route awareness, failed-backend dependency correlation, and deterministic TLS certificate diagnostics, but the live managed service remains on M2 until more M3 provider work is batched and re-approved.
+- Reverse-proxy coverage is not complete yet: generic Nginx, Caddy, and Traefik support remain open, along with package/config change evidence.
 - Firewall and failed-unit correlations are deliberately conservative candidate evidence rather than causal verdicts.
 - M2 root-context validation is complete. Journal excerpt collection itself remains intentionally unforced because the live snapshot had zero failed services; the no-failure branch is validated without manufacturing a service failure.
 - Journal evidence has a narrow first-pass credential redactor; general redaction rules remain a security backlog item.
@@ -371,15 +394,16 @@ M2 systemd/journal evidence: `37c97227a829fc341f943d0b4731242ee2a39650`
 M2 Docker port/bind/network correlation: `bc939ae0c6339b355bd33916629a93f4a07803c9`
 M2 evidence precedence/confidence policy: `3352a7e8407eae855f4a88550cfaaf867f86ddf1`
 M3 Nginx Proxy Manager route awareness: `df7e926b0ad07c0224004c644d5c4a1d667df547`
+M3 deterministic TLS diagnostics: `5a549d977e2cc853338b728c1814732467c828d1`
 
 Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Next sequence
 
-M1 and M2 are closed. M3 Nginx Proxy Manager awareness is merged. Continue in this order:
+M1 and M2 are closed. M3 Nginx Proxy Manager awareness and deterministic TLS diagnostics are merged. Continue in this order:
 
 1. add generic Nginx/Caddy/Traefik provider coverage in separate reviewable slices, preserving the safe structured-only proxy model;
-2. add deterministic TLS/certificate evidence so certificate failures can be distinguished from backend reachability failures;
+2. complete remaining provider-unavailable/correlation regressions;
 3. batch the meaningful M3 source, build a separate candidate, obtain a new exact-hash owner approval, and validate proxy/TLS evidence under the real root system-service context without mutating production proxy configuration merely for tests;
 4. keep configuration fingerprinting/package-change timeline and the planned SQLite migration as separate subsequent slices;
 5. do not publish a new public alpha unless the owner explicitly authorizes release promotion;
