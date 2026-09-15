@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"os"
 	"os/exec"
 	"strings"
 	"sync"
@@ -62,7 +63,21 @@ func runBoundedCommand(ctx context.Context, maxBytes int, name string, args ...s
 var nftRulesetLookup = func(ctx context.Context) (boundedCommandResult, error) {
 	lookupCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
-	return runBoundedCommand(lookupCtx, firewallOutputLimit, "nft", "-nn", "list", "ruleset")
+	command := resolveCommand("nft", "/usr/sbin/nft", "/sbin/nft")
+	return runBoundedCommand(lookupCtx, firewallOutputLimit, command, "-nn", "list", "ruleset")
+}
+
+func resolveCommand(name string, candidates ...string) string {
+	if path, err := exec.LookPath(name); err == nil {
+		return path
+	}
+	for _, path := range candidates {
+		info, err := os.Stat(path)
+		if err == nil && !info.IsDir() && info.Mode()&0111 != 0 {
+			return path
+		}
+	}
+	return name
 }
 
 func firewallCheck(ctx context.Context, port string) Check {
