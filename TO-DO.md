@@ -2,18 +2,21 @@
 
 ## Active milestone — M1: Single-host deployable MVP
 
-- [ ] Define stable snapshot and event schemas.
-- [ ] Collect host identity, OS, kernel, uptime, CPU count, memory, filesystems, interfaces, addresses, routes, listeners, systemd service state, and Docker state when available.
-- [ ] Persist snapshots atomically under `/var/lib/hostsleuth` (configurable).
-- [ ] Diff snapshots into concise human-readable change events.
-- [ ] Implement deterministic `diagnose host:port` checks with evidence.
-- [ ] Add local HTTP API and embedded web UI.
-- [ ] Add CLI subcommands: `serve`, `snapshot`, `diagnose`, `events`, `version`.
-- [ ] Add tests for parsing, diffing, diagnostics, and storage behavior.
-- [ ] Add GitHub Actions CI (`go test`, `go vet`, build).
-- [ ] Add systemd unit and install/uninstall scripts.
-- [ ] Document first deployment on Debian/Ubuntu.
-- [ ] Verify CI green and record exact validation in `CURRENT-HANDOFF.md`.
+- [x] Define versioned snapshot and event schemas (`schema_version: 1`).
+- [x] Collect host identity, OS, kernel, uptime, CPU count, memory, filesystems/capacity, interfaces, addresses, routes, listeners, systemd service state, and Docker state when available/readable.
+- [x] Persist snapshots atomically under a configurable state directory; system service target is `/var/lib/hostsleuth`.
+- [x] Diff snapshots into concise human-readable service/container/listener change events.
+- [x] Implement deterministic `diagnose host:port` checks with evidence.
+- [x] Add local HTTP API and embedded web UI.
+- [x] Add CLI subcommands: `serve`, `snapshot`, `diagnose`, `events`, `version`.
+- [x] Add tests for diffing, diagnostics, schema, and storage behavior.
+- [x] Add GitHub Actions CI definition (`gofmt`, `go vet`, `go test`, build).
+- [x] Add systemd unit and release/source install + uninstall scripts.
+- [x] Exercise the core runtime on a real Debian 13 host: snapshots, events, diagnostics, web dashboard/API, filesystem inventory, native build, and cross-builds.
+- [x] Add tagged-release workflow for static Linux `amd64`/`arm64` binaries with checksums and release version stamping.
+- [ ] Verify the current M1 code commit is green in GitHub Actions and record the exact successful run in `CURRENT-HANDOFF.md`.
+- [ ] Publish the first alpha GitHub release and exercise the no-Go release installer end-to-end.
+- [ ] Exercise the privileged systemd installation/enable path on an approved host with administrative execution available.
 
 ## Planned immediately after M1
 
@@ -22,6 +25,7 @@
 - [ ] Package-change timeline from dpkg/apt logs.
 - [ ] Improved systemd failure evidence using bounded journal excerpts.
 - [ ] Docker port/bind/network correlation.
+- [ ] Route and firewall evidence in diagnosis.
 - [ ] Reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager.
 - [ ] TLS/certificate diagnostics.
 - [ ] `.deb` package and signed release artifacts.
