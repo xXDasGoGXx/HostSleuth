@@ -85,7 +85,8 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 	proxyCheck, hasProxyDependency := reverseProxyBackendCheck(snap, host, port, ips)
 
 	// Evidence precedence is deliberate:
-	// 1. successful TCP is definitive and already returned above;
+	// 1. successful TCP is definitive transport evidence; TLS endpoints must
+	//    also pass TLS validation before health is concluded;
 	// 2. for local failures, exact listener/Docker binding evidence outranks
 	//    firewall and failed-unit candidates;
 	// 3. for remote failures, a kernel no-route result outranks firewall evidence;
