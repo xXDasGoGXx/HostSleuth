@@ -2,12 +2,20 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var routeLookup = func(ctx context.Context, destination string) (string, error) {
+	cmd := exec.CommandContext(ctx, "ip", "route", "get", destination)
+	out, err := cmd.CombinedOutput()
+	return string(out), err
+}
 
 func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 	d := Diagnosis{Target: target, StartedAt: time.Now().UTC(), Confidence: "medium"}
@@ -33,6 +41,12 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		return d
 	}
 	d.Checks = append(d.Checks, Check{Name: "dns", Status: "pass", Evidence: strings.Join(ips, ", ")})
+
+	route := Check{Name: "route", Status: "unknown", Evidence: "no resolved IP was available for route lookup"}
+	if destinationIP := firstResolvedIP(ips); destinationIP != "" {
+		route = routeCheck(ctx, destinationIP)
+	}
+	d.Checks = append(d.Checks, route)
 
 	dialer := net.Dialer{Timeout: 3 * time.Second}
 	conn, err := dialer.DialContext(ctx, "tcp", net.JoinHostPort(host, port))
@@ -66,8 +80,58 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		return d
 	}
 
+	if route.Status == "fail" {
+		d.Conclusion = "kernel route lookup reports the destination unreachable; inspect routing before the remote service"
+		d.Confidence = "high"
+		return d
+	}
+
 	d.Conclusion = "remote TCP connection failed; inspect routing, firewall policy, and the destination service"
 	return d
+}
+
+func firstResolvedIP(ips []string) string {
+	for _, ip := range ips {
+		if net.ParseIP(ip) != nil {
+			return ip
+		}
+	}
+	return ""
+}
+
+func routeCheck(ctx context.Context, destination string) Check {
+	out, err := routeLookup(ctx, destination)
+	evidence := boundedEvidence(out, 512)
+	if err == nil {
+		if evidence == "" {
+			return Check{Name: "route", Status: "unknown", Evidence: "kernel route lookup returned no evidence"}
+		}
+		return Check{Name: "route", Status: "pass", Evidence: evidence}
+	}
+
+	if evidence != "" {
+		lower := strings.ToLower(evidence)
+		if strings.Contains(lower, "network is unreachable") || strings.Contains(lower, "no route") || strings.Contains(lower, "unreachable") {
+			return Check{Name: "route", Status: "fail", Evidence: evidence}
+		}
+		return Check{Name: "route", Status: "unknown", Evidence: evidence}
+	}
+	if errors.Is(err, exec.ErrNotFound) {
+		return Check{Name: "route", Status: "unknown", Evidence: "ip command is unavailable"}
+	}
+	return Check{Name: "route", Status: "unknown", Evidence: "route lookup unavailable: " + boundedEvidence(err.Error(), 384)}
+}
+
+func boundedEvidence(value string, max int) string {
+	value = strings.TrimSpace(value)
+	value = strings.Join(strings.Fields(value), " ")
+	if len(value) <= max {
+		return value
+	}
+	if max <= 3 {
+		return value[:max]
+	}
+	return value[:max-3] + "..."
 }
 
 func isLocalIP(target net.IP) bool {
