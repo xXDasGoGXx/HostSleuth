@@ -60,6 +60,13 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 
 	if err := tcpConnect(ctx, net.JoinHostPort(host, port)); err == nil {
 		d.Checks = append(d.Checks, Check{Name: "tcp", Status: "pass", Evidence: fmt.Sprintf("TCP/%s accepted a connection", port)})
+		if targetExpectsTLS(snap, host, port) {
+			checks, conclusion, confidence := tlsDiagnosis(ctx, host, port)
+			d.Checks = append(d.Checks, checks...)
+			d.Conclusion = conclusion
+			d.Confidence = confidence
+			return d
+		}
 		d.Conclusion = "target is reachable"
 		d.Confidence = "high"
 		return d
@@ -78,7 +85,8 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 	proxyCheck, hasProxyDependency := reverseProxyBackendCheck(snap, host, port, ips)
 
 	// Evidence precedence is deliberate:
-	// 1. successful TCP is definitive and already returned above;
+	// 1. successful TCP is definitive transport evidence; TLS endpoints must
+	//    also pass TLS validation before health is concluded;
 	// 2. for local failures, exact listener/Docker binding evidence outranks
 	//    firewall and failed-unit candidates;
 	// 3. for remote failures, a kernel no-route result outranks firewall evidence;

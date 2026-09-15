@@ -143,8 +143,12 @@ func parseNPMProxyConfig(text string) (ReverseProxyRoute, bool) {
 				}
 			}
 		case strings.HasPrefix(line, "listen "):
-			if port := nginxListenPort(directiveValue(line, "listen")); port != "" {
+			listenValue := directiveValue(line, "listen")
+			if port := nginxListenPort(listenValue); port != "" {
 				ports[port] = true
+			}
+			if nginxListenUsesTLS(listenValue) {
+				route.FrontendTLS = true
 			}
 		case strings.HasPrefix(line, "set $forward_scheme ") && route.BackendScheme == "":
 			route.BackendScheme = cleanNginxValue(strings.TrimPrefix(line, "set $forward_scheme "))
@@ -208,6 +212,15 @@ func nginxListenPort(value string) string {
 		}
 	}
 	return ""
+}
+
+func nginxListenUsesTLS(value string) bool {
+	for _, field := range strings.Fields(value) {
+		if strings.EqualFold(field, "ssl") {
+			return true
+		}
+	}
+	return false
 }
 
 func sortReverseProxyRoutes(routes []ReverseProxyRoute) {

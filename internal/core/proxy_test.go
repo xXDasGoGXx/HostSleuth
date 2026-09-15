@@ -44,6 +44,9 @@ func TestParseNPMProxyConfigSafeFieldsOnly(t *testing.T) {
 	if strings.Join(route.ListenPorts, ",") != "80,443" {
 		t.Fatalf("unexpected listen ports: %#v", route.ListenPorts)
 	}
+	if !route.FrontendTLS {
+		t.Fatal("expected ssl listen directive to mark the frontend as TLS")
+	}
 	encoded, err := json.Marshal(route)
 	if err != nil {
 		t.Fatal(err)
