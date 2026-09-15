@@ -11,13 +11,15 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 )
 
 func Collect(ctx context.Context) Snapshot {
 	hostname, _ := os.Hostname()
 	s := Snapshot{
-		CapturedAt: time.Now().UTC(),
+		SchemaVersion: 1,
+		CapturedAt:    time.Now().UTC(),
 		Host: HostInfo{
 			Hostname:     hostname,
 			OS:           readOSRelease(),
@@ -29,6 +31,7 @@ func Collect(ctx context.Context) Snapshot {
 		},
 	}
 	s.Interfaces = collectInterfaces()
+	s.Filesystems = collectFilesystems()
 	s.Routes = lines(run(ctx, "ip", "route", "show"))
 	s.Listeners = collectListeners(ctx)
 	s.Services = collectServices(ctx)
@@ -89,6 +92,48 @@ func collectInterfaces() []InterfaceInfo {
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out
+}
+
+func collectFilesystems() []FilesystemInfo {
+	b, err := os.ReadFile("/proc/self/mountinfo")
+	if err != nil {
+		return nil
+	}
+	seen := map[string]bool{}
+	var out []FilesystemInfo
+	for _, line := range strings.Split(string(b), "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		parts := strings.SplitN(line, " - ", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		left := strings.Fields(parts[0])
+		right := strings.Fields(parts[1])
+		if len(left) < 5 || len(right) < 2 {
+			continue
+		}
+		mountPoint := unescapeMountField(left[4])
+		if seen[mountPoint] {
+			continue
+		}
+		seen[mountPoint] = true
+		entry := FilesystemInfo{MountPoint: mountPoint, FilesystemType: right[0], Source: unescapeMountField(right[1])}
+		var st syscall.Statfs_t
+		if syscall.Statfs(mountPoint, &st) == nil {
+			entry.TotalBytes = st.Blocks * uint64(st.Bsize)
+			entry.AvailableBytes = st.Bavail * uint64(st.Bsize)
+		}
+		out = append(out, entry)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].MountPoint < out[j].MountPoint })
+	return out
+}
+
+func unescapeMountField(s string) string {
+	r := strings.NewReplacer("\\040", " ", "\\011", "\t", "\\012", "\n", "\\134", "\\")
+	return r.Replace(s)
 }
 
 func collectListeners(ctx context.Context) []Listener {
@@ -180,5 +225,5 @@ func LocalListenerForPort(s Snapshot, port string) (Listener, bool) {
 }
 
 func SnapshotSummary(s Snapshot) string {
-	return fmt.Sprintf("%s | %s | services=%d listeners=%d containers=%d", s.Host.Hostname, s.Host.OS, len(s.Services), len(s.Listeners), len(s.Containers))
+	return fmt.Sprintf("%s | %s | filesystems=%d services=%d listeners=%d containers=%d", s.Host.Hostname, s.Host.OS, len(s.Filesystems), len(s.Services), len(s.Listeners), len(s.Containers))
 }

@@ -32,6 +32,9 @@ func (s Store) LoadSnapshot() (Snapshot, error) {
 }
 
 func (s Store) SaveSnapshot(snap Snapshot) error {
+	if snap.SchemaVersion == 0 {
+		snap.SchemaVersion = 1
+	}
 	if err := s.ensure(); err != nil {
 		return err
 	}
@@ -60,6 +63,9 @@ func (s Store) AppendEvents(events []Event) error {
 	defer f.Close()
 	enc := json.NewEncoder(f)
 	for _, e := range events {
+		if e.SchemaVersion == 0 {
+			e.SchemaVersion = 1
+		}
 		if e.At.IsZero() {
 			e.At = time.Now().UTC()
 		}
@@ -73,7 +79,7 @@ func (s Store) AppendEvents(events []Event) error {
 func (s Store) ReadEvents(limit int) ([]Event, error) {
 	f, err := os.Open(s.EventsPath())
 	if errors.Is(err, os.ErrNotExist) {
-		return nil, nil
+		return []Event{}, nil
 	}
 	if err != nil {
 		return nil, err

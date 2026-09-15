@@ -13,7 +13,7 @@ It is intentionally not a full monitoring platform. The goal is a small, inspect
 
 ## Current capabilities
 
-- Collects host identity, OS/kernel, memory, interfaces, routes, listeners, systemd services, and Docker containers when available.
+- Collects host identity, OS/kernel, memory, filesystems/capacity, interfaces, routes, listeners, systemd services, and Docker containers when available.
 - Stores the latest snapshot locally using an atomic write.
 - Appends detected service/container/listener changes to a JSONL event timeline.
 - Runs deterministic `host:port` diagnosis with DNS, TCP, and local-listener evidence.
@@ -59,13 +59,35 @@ Start the local dashboard:
 
 Then open `http://127.0.0.1:8787` on the same machine.
 
-## Source install with systemd
+## Install a release with systemd
+
+Release installation does **not** require Go on the target host. Clone or download the release source tree, then run:
 
 ```bash
 sudo ./scripts/install.sh
 ```
 
-This builds `/usr/local/bin/hostsleuth`, creates `/var/lib/hostsleuth`, installs the systemd unit, and starts HostSleuth on loopback port 8787.
+The installer detects `amd64` or `arm64`, downloads the matching binary from the latest GitHub release, installs `/usr/local/bin/hostsleuth`, creates `/var/lib/hostsleuth`, installs the systemd unit, and starts HostSleuth on loopback port 8787.
+
+To install a specific release:
+
+```bash
+sudo HOSTSLEUTH_VERSION=v0.1.0-alpha.1 ./scripts/install.sh
+```
+
+Developers who intentionally want to build on the target host can instead use:
+
+```bash
+sudo ./scripts/install-source.sh
+```
+
+That source-install path requires Go 1.24+.
+
+Uninstall the binary and service while preserving recorded state with:
+
+```bash
+sudo ./scripts/uninstall.sh
+```
 
 ## Safety posture
 
@@ -80,4 +102,4 @@ Those files are maintained as part of the project source of truth.
 
 ## License
 
-A project license will be selected before the first public release. Until then, source is visible for development and evaluation but no additional reuse rights are granted beyond applicable law.
+HostSleuth is released under the MIT License. See `LICENSE`.

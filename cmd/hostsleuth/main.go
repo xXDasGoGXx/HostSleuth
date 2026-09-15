@@ -15,7 +15,7 @@ import (
 	"github.com/xXDasGoGXx/HostSleuth/internal/core"
 )
 
-const version = "0.1.0-dev"
+var version = "0.1.0-dev"
 
 func main() {
 	if len(os.Args) < 2 {

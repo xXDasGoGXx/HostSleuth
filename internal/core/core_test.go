@@ -31,3 +31,40 @@ func TestDiagnoseRejectsInvalidTarget(t *testing.T) {
 		t.Fatalf("unexpected confidence: %q", d.Confidence)
 	}
 }
+
+func TestStorePersistsSchemaAndReturnsEmptyEvents(t *testing.T) {
+	dir := t.TempDir()
+	store := Store{Dir: dir}
+	if err := store.SaveSnapshot(Snapshot{Host: HostInfo{Hostname: "test-host"}}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := store.LoadSnapshot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.SchemaVersion != 1 {
+		t.Fatalf("expected snapshot schema 1, got %d", got.SchemaVersion)
+	}
+	events, err := store.ReadEvents(10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if events == nil || len(events) != 0 {
+		t.Fatalf("expected empty non-nil events slice, got %#v", events)
+	}
+}
+
+func TestStoreAddsEventSchemaVersion(t *testing.T) {
+	dir := t.TempDir()
+	store := Store{Dir: dir}
+	if err := store.AppendEvents([]Event{{Summary: "test"}}); err != nil {
+		t.Fatal(err)
+	}
+	events, err := store.ReadEvents(10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(events) != 1 || events[0].SchemaVersion != 1 {
+		t.Fatalf("unexpected events: %#v", events)
+	}
+}

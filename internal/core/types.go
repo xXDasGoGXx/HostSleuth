@@ -3,13 +3,15 @@ package core
 import "time"
 
 type Snapshot struct {
-	CapturedAt time.Time       `json:"captured_at"`
-	Host       HostInfo        `json:"host"`
-	Interfaces []InterfaceInfo `json:"interfaces,omitempty"`
-	Routes     []string        `json:"routes,omitempty"`
-	Listeners  []Listener      `json:"listeners,omitempty"`
-	Services   []ServiceInfo   `json:"services,omitempty"`
-	Containers []ContainerInfo `json:"containers,omitempty"`
+	SchemaVersion int              `json:"schema_version"`
+	CapturedAt    time.Time        `json:"captured_at"`
+	Host          HostInfo         `json:"host"`
+	Interfaces    []InterfaceInfo  `json:"interfaces,omitempty"`
+	Filesystems   []FilesystemInfo `json:"filesystems,omitempty"`
+	Routes        []string         `json:"routes,omitempty"`
+	Listeners     []Listener       `json:"listeners,omitempty"`
+	Services      []ServiceInfo    `json:"services,omitempty"`
+	Containers    []ContainerInfo  `json:"containers,omitempty"`
 }
 
 type HostInfo struct {
@@ -26,6 +28,14 @@ type InterfaceInfo struct {
 	Name      string   `json:"name"`
 	Addresses []string `json:"addresses,omitempty"`
 	State     string   `json:"state,omitempty"`
+}
+
+type FilesystemInfo struct {
+	MountPoint     string `json:"mount_point"`
+	FilesystemType string `json:"filesystem_type"`
+	Source         string `json:"source,omitempty"`
+	TotalBytes     uint64 `json:"total_bytes,omitempty"`
+	AvailableBytes uint64 `json:"available_bytes,omitempty"`
 }
 
 type Listener struct {
@@ -50,10 +60,11 @@ type ContainerInfo struct {
 }
 
 type Event struct {
-	At       time.Time `json:"at"`
-	Category string    `json:"category"`
-	Severity string    `json:"severity"`
-	Summary  string    `json:"summary"`
+	SchemaVersion int       `json:"schema_version"`
+	At            time.Time `json:"at"`
+	Category      string    `json:"category"`
+	Severity      string    `json:"severity"`
+	Summary       string    `json:"summary"`
 }
 
 type Check struct {
