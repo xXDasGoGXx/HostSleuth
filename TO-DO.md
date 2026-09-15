@@ -126,7 +126,13 @@ Start with evidence that helps explain why a service/port is unreachable without
 ## Active milestone — M3: Reverse-proxy and TLS awareness
 
 - [ ] Add read-only reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager.
+  - [x] Nginx Proxy Manager first slice: PR #8 safely inventories generated proxy-host routes from the NPM `/data` mount without persisting raw config, credentials, custom snippets, or certificate material.
+  - [x] NPM reads are bounded to 256 proxy-host files and 256 KiB per file; final config symlinks are rejected.
+  - [x] PR #8 CI run `35029513723` passed format, vet, tests, and build; merged at `df7e926b0ad07c0224004c644d5c4a1d667df547`.
+  - [ ] Add remaining Nginx/Caddy/Traefik provider coverage in separate reviewable slices.
 - [ ] Correlate proxy listener/frontend evidence with backend host:port targets without editing proxy configuration.
+  - [x] NPM backend dependency correlation is implemented as candidate evidence after TCP failure and preserves M2 evidence precedence.
+  - [ ] Extend correlation to the remaining providers and validate against live root-service proxy inventory before marking complete.
 - [ ] Add deterministic TLS/certificate diagnostics after proxy correlation.
 - [ ] Add regression scenarios for direct backend success, proxy-to-backend mismatch, certificate expiry/not-yet-valid, hostname mismatch, and unavailable proxy/TLS evidence.
 - [ ] Validate M3 on the real Debian 13 host without mutating production proxy configuration merely for tests.
