@@ -160,7 +160,7 @@ func TestDiagnoseDistinguishesListenerAndDockerBindMismatch(t *testing.T) {
 	if dockerCheck == nil || dockerCheck.Status != "fail" || !strings.Contains(dockerCheck.Evidence, "different host address") {
 		t.Fatalf("expected Docker bind mismatch, got %#v", dockerCheck)
 	}
-	if d.Conclusion != "no process appears to be listening on the requested local port" || d.Confidence != "high" {
+	if d.Conclusion != "no process is listening on the requested local address; Docker publishes TCP/0 only on a different host address" || d.Confidence != "high" {
 		t.Fatalf("unexpected diagnosis: %#v", d)
 	}
 }

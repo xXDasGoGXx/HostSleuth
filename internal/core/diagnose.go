@@ -17,6 +17,16 @@ var routeLookup = func(ctx context.Context, destination string) (string, error) 
 	return string(out), err
 }
 
+var tcpConnect = func(ctx context.Context, address string) error {
+	dialer := net.Dialer{Timeout: 3 * time.Second}
+	conn, err := dialer.DialContext(ctx, "tcp", address)
+	if err != nil {
+		return err
+	}
+	_ = conn.Close()
+	return nil
+}
+
 func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 	d := Diagnosis{Target: target, StartedAt: time.Now().UTC(), Confidence: "medium"}
 	host, port, err := net.SplitHostPort(target)
@@ -48,17 +58,14 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 	}
 	d.Checks = append(d.Checks, route)
 
-	dialer := net.Dialer{Timeout: 3 * time.Second}
-	conn, err := dialer.DialContext(ctx, "tcp", net.JoinHostPort(host, port))
-	if err == nil {
-		_ = conn.Close()
+	if err := tcpConnect(ctx, net.JoinHostPort(host, port)); err == nil {
 		d.Checks = append(d.Checks, Check{Name: "tcp", Status: "pass", Evidence: fmt.Sprintf("TCP/%s accepted a connection", port)})
 		d.Conclusion = "target is reachable"
 		d.Confidence = "high"
 		return d
+	} else {
+		d.Checks = append(d.Checks, Check{Name: "tcp", Status: "fail", Evidence: err.Error()})
 	}
-	d.Checks = append(d.Checks, Check{Name: "tcp", Status: "fail", Evidence: err.Error()})
-	d.Checks = append(d.Checks, firewallCheck(ctx, port))
 
 	local := false
 	for _, ip := range ips {
@@ -68,20 +75,30 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 			break
 		}
 	}
+
+	// Evidence precedence is deliberate:
+	// 1. successful TCP is definitive and already returned above;
+	// 2. for local failures, exact listener/Docker binding evidence outranks
+	//    firewall and failed-unit candidates;
+	// 3. for remote failures, a kernel no-route result outranks firewall evidence;
+	// 4. unavailable optional evidence remains neutral and cannot lower a
+	//    conclusion supported by stronger evidence.
 	if local {
-		docker := dockerPortCheck(snap, port, ips)
-		if l, ok := LocalListenerForTarget(snap, port, ips); ok {
-			d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "pass", Evidence: l.Protocol + " " + l.Address + " " + l.Process})
-			d.Checks = append(d.Checks, docker)
-			d.Conclusion = "service is listening locally but the TCP connection failed; inspect bind address, firewall, or network namespace"
+		docker := assessDockerPort(snap, port, ips)
+		if listener, ok := LocalListenerForTarget(snap, port, ips); ok {
+			d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "pass", Evidence: listener.Protocol + " " + listener.Address + " " + listener.Process})
+			d.Checks = append(d.Checks, docker.Check)
+			d.Checks = append(d.Checks, firewallCheck(ctx, port))
+			d.Conclusion = "snapshot shows a listener on the requested local address but the current TCP connection failed; inspect firewall, network namespace, or snapshot freshness"
 			d.Confidence = "medium"
-		} else {
-			d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "fail", Evidence: "no local listener found for TCP/" + port})
-			d.Checks = append(d.Checks, docker)
-			d.Checks = append(d.Checks, systemdFailureCheck(ctx, snap))
-			d.Conclusion = "no process appears to be listening on the requested local port"
-			d.Confidence = "high"
+			return d
 		}
+
+		d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "fail", Evidence: "no local listener found for TCP/" + port + " on the requested address"})
+		d.Checks = append(d.Checks, docker.Check)
+		d.Checks = append(d.Checks, firewallCheck(ctx, port))
+		d.Checks = append(d.Checks, systemdFailureCheck(ctx, snap))
+		d.Conclusion, d.Confidence = localNoListenerOutcome(port, docker.Relation)
 		return d
 	}
 
@@ -91,8 +108,22 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		return d
 	}
 
+	d.Checks = append(d.Checks, firewallCheck(ctx, port))
 	d.Conclusion = "remote TCP connection failed; inspect routing, firewall policy, and the destination service"
 	return d
+}
+
+func localNoListenerOutcome(port string, relation dockerPortRelation) (string, string) {
+	switch relation {
+	case dockerPortPublishedOtherBind:
+		return "no process is listening on the requested local address; Docker publishes TCP/" + port + " only on a different host address", "high"
+	case dockerPortInternalOnly:
+		return "no process is listening on the requested local address; Docker exposes TCP/" + port + " inside a container but does not publish it on the host", "high"
+	case dockerPortPublishedTarget:
+		return "snapshot says Docker publishes TCP/" + port + " on the requested local address, but current TCP/listener evidence disagrees; inspect Docker proxy/network state or snapshot freshness", "medium"
+	default:
+		return "no process appears to be listening on the requested local address and port", "high"
+	}
 }
 
 func firstResolvedIP(ips []string) string {
