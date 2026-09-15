@@ -27,7 +27,6 @@
   - unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`
 - [x] Owner/root approved the exact staged HostSleuth artifacts through `homecommander-approve-deployment`.
   - approval remains exact-hash/fixed-destination and does not add a generic root shell, unrestricted sudo, arbitrary privileged writes, or HostSleuth-specific HomeCommander privilege code.
-  - current approval omitted the read-only `status` action; add it in a re-approval before closing the shared-control-plane UAT.
 - [x] Exercise privileged install and lifecycle through HomeCommander Managed Administrative Deployment.
   - exact-hash install passed;
   - enable/start passed;
@@ -45,13 +44,18 @@
   - dashboard returned HTTP 200; schema version 1; 219 services and 328 listeners observed.
 - [x] Validate installed CLI diagnosis after managed restart.
   - `diagnose 127.0.0.1:22` returned reachable/high confidence.
-- [ ] Add read-only `status` to the root-owned HomeCommander approval and verify `deployment_status`.
+- [x] Add read-only `status` to the root-owned HomeCommander approval and verify `deployment_status`.
+  - approval now contains install/uninstall/enable/disable/start/stop/status/restart.
+  - executable and unit both match their approved SHA-256 exactly.
+  - `recordedInstalled=true`.
+  - service is loaded, enabled, active, and running.
 - [ ] Perform one owner-authorized reboot of `openmediavault` and verify HostSleuth reboot persistence.
-  - after reboot verify enabled + active/running;
+  - after reboot verify approved hashes still match;
+  - verify enabled + active/running;
   - verify dashboard/API HTTP health;
   - verify Docker inventory remains available;
   - verify recorded state persists.
-- [ ] Close M1 after the reboot/status checks are green.
+- [ ] Close M1 after the reboot check is green.
 
 ## Shared-infrastructure finding recorded in HomeCommander
 
