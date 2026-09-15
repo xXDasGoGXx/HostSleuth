@@ -75,7 +75,15 @@ Start with evidence that helps explain why a service/port is unreachable without
   - PR #3 CI run `34996674672` passed format, vet, tests, and build;
   - merged at `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`;
   - Normal-mode Debian validation confirmed the real netlink-restriction case still yields reachable/high confidence when TCP succeeds.
-- [ ] Add firewall evidence with safe bounded reads of the host's active firewall state.
+- [x] Add firewall evidence with safe bounded reads of the host's active firewall state.
+  - PR #4 adds read-only `nft -nn list ruleset` evidence only after TCP failure;
+  - lookup is capped at two seconds and 64 KiB of captured output;
+  - PATH plus standard `/usr/sbin` and `/sbin` locations are supported;
+  - base-policy/direct TCP-port matches are labeled candidate evidence, not a proven verdict;
+  - unavailable netlink/permission access degrades to `unknown` without changing the stronger diagnosis conclusion;
+  - PR #4 CI run `34997617382` passed format, vet, tests, and build;
+  - merged at `2fe64640093b258b3c52b148fc2e32507eeae584`;
+  - Debian Normal-mode validation reproduced the real nft netlink restriction and preserved the correct no-listener/high-confidence conclusion.
 - [ ] Add bounded systemd/journal failure evidence for relevant units.
 - [ ] Add Docker port/bind/network correlation.
 - [ ] Define deterministic evidence ordering and confidence behavior when evidence is unavailable.
