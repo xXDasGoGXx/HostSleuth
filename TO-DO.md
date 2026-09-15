@@ -10,16 +10,41 @@ This file is intentionally short. Completed milestone history belongs in `docs/h
 - [x] Real Debian 13 managed deployment and reboot validation.
 - [x] Docker uptime-noise fix.
 - [x] Route, nftables, systemd/journal candidate, Docker bind/network, and evidence-precedence diagnosis work.
+- [x] Public-repository cleanup and documentation sanitization.
 
-## Active — product hardening through real use
+## M3 — Product Experience
 
-Do not add a major subsystem until a real troubleshooting case shows why it is needed.
+This sequence is intentionally fixed. Finish each section before starting the next one. Do not pull unrelated backlog work into M3.
 
-- [ ] Use the current HostSleuth build during real incidents and normal homelab troubleshooting.
-- [ ] Capture concrete cases where the dashboard or diagnosis output is confusing, incomplete, or wrong.
-- [ ] Improve wording, evidence presentation, and navigation based on those real cases.
-- [ ] Add concise screenshots/examples to the README once the current UI/output is stable enough to represent the product.
-- [ ] Decide separately whether the current validated build is ready for the next public alpha. Publication requires explicit owner approval.
+### M3.1 — Web UI — active
+
+- [ ] Modern responsive interface.
+- [ ] Human-readable diagnosis results instead of raw JSON as the normal user experience.
+- [ ] Clean recent-change timeline.
+- [ ] Clear host overview.
+- [ ] Good loading, empty, and error states.
+- [ ] Mobile-friendly layout.
+- [ ] Keep the UI self-contained in the Go binary with no frontend framework or external runtime dependency.
+
+### M3.2 — Usability — next
+
+- [ ] Review and simplify user-facing wording.
+- [ ] Make first-run state obvious and non-confusing.
+- [ ] Make version/build information easy to find.
+- [ ] Add concise screenshots/examples to the README once the M3.1 UI is stable.
+- [ ] Simplify installation documentation around the recommended deployment paths.
+
+### M3.3 — Docker release — after M3.2
+
+- [ ] Create an official Dockerfile.
+- [ ] Provide one recommended `compose.yaml` rather than many deployment variants.
+- [ ] Persist HostSleuth state cleanly.
+- [ ] Support amd64 and arm64 builds.
+- [ ] Preserve host-aware collection rather than accidentally diagnosing only the HostSleuth container.
+- [ ] Use the minimum host access necessary; do not default to unrestricted privileged mode.
+- [ ] Keep the same HostSleuth UI and product behavior where technically possible.
+- [ ] Add CI image-build validation.
+- [ ] Do not publish a container image until explicitly approved.
 
 ## Backlog — only pull forward when justified
 
