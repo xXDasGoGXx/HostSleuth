@@ -19,13 +19,13 @@ func Collect(ctx context.Context) Snapshot {
 	s := Snapshot{
 		CapturedAt: time.Now().UTC(),
 		Host: HostInfo{
-			Hostname: hostname,
-			OS: readOSRelease(),
-			Kernel: strings.TrimSpace(run(ctx, "uname", "-r")),
+			Hostname:     hostname,
+			OS:           readOSRelease(),
+			Kernel:       strings.TrimSpace(run(ctx, "uname", "-r")),
 			Architecture: runtime.GOARCH,
-			CPUCount: runtime.NumCPU(),
-			MemoryTotal: memoryTotal(),
-			Uptime: strings.TrimSpace(run(ctx, "uptime", "-p")),
+			CPUCount:     runtime.NumCPU(),
+			MemoryTotal:  memoryTotal(),
+			Uptime:       strings.TrimSpace(run(ctx, "uptime", "-p")),
 		},
 	}
 	s.Interfaces = collectInterfaces()
@@ -38,7 +38,9 @@ func Collect(ctx context.Context) Snapshot {
 
 func readOSRelease() string {
 	b, err := os.ReadFile("/etc/os-release")
-	if err != nil { return runtime.GOOS }
+	if err != nil {
+		return runtime.GOOS
+	}
 	var pretty string
 	for _, line := range strings.Split(string(b), "\n") {
 		if strings.HasPrefix(line, "PRETTY_NAME=") {
@@ -46,13 +48,17 @@ func readOSRelease() string {
 			break
 		}
 	}
-	if pretty == "" { return runtime.GOOS }
+	if pretty == "" {
+		return runtime.GOOS
+	}
 	return pretty
 }
 
 func memoryTotal() string {
 	f, err := os.Open("/proc/meminfo")
-	if err != nil { return "" }
+	if err != nil {
+		return ""
+	}
 	defer f.Close()
 	s := bufio.NewScanner(f)
 	for s.Scan() {
@@ -65,13 +71,19 @@ func memoryTotal() string {
 
 func collectInterfaces() []InterfaceInfo {
 	ifs, err := net.Interfaces()
-	if err != nil { return nil }
+	if err != nil {
+		return nil
+	}
 	out := make([]InterfaceInfo, 0, len(ifs))
 	for _, iface := range ifs {
 		addrs, _ := iface.Addrs()
 		entry := InterfaceInfo{Name: iface.Name, State: "down"}
-		if iface.Flags&net.FlagUp != 0 { entry.State = "up" }
-		for _, a := range addrs { entry.Addresses = append(entry.Addresses, a.String()) }
+		if iface.Flags&net.FlagUp != 0 {
+			entry.State = "up"
+		}
+		for _, a := range addrs {
+			entry.Addresses = append(entry.Addresses, a.String())
+		}
 		sort.Strings(entry.Addresses)
 		out = append(out, entry)
 	}
@@ -84,15 +96,21 @@ func collectListeners(ctx context.Context) []Listener {
 	var out []Listener
 	for _, line := range lines(text) {
 		fields := strings.Fields(line)
-		if len(fields) < 5 { continue }
+		if len(fields) < 5 {
+			continue
+		}
 		proto := fields[0]
 		addr := fields[4]
 		process := ""
-		if len(fields) > 6 { process = strings.Join(fields[6:], " ") }
+		if len(fields) > 6 {
+			process = strings.Join(fields[6:], " ")
+		}
 		out = append(out, Listener{Protocol: proto, Address: addr, Process: process})
 	}
 	sort.Slice(out, func(i, j int) bool {
-		if out[i].Protocol == out[j].Protocol { return out[i].Address < out[j].Address }
+		if out[i].Protocol == out[j].Protocol {
+			return out[i].Address < out[j].Address
+		}
 		return out[i].Protocol < out[j].Protocol
 	})
 	return out
@@ -103,7 +121,9 @@ func collectServices(ctx context.Context) []ServiceInfo {
 	var out []ServiceInfo
 	for _, line := range lines(text) {
 		f := strings.Fields(line)
-		if len(f) < 4 { continue }
+		if len(f) < 4 {
+			continue
+		}
 		out = append(out, ServiceInfo{Name: f[0], Load: f[1], Active: f[2], Sub: f[3]})
 	}
 	return out
@@ -115,9 +135,13 @@ func collectContainers(ctx context.Context) []ContainerInfo {
 	var out []ContainerInfo
 	for _, line := range lines(text) {
 		f := strings.Split(line, "\t")
-		if len(f) < 4 { continue }
+		if len(f) < 4 {
+			continue
+		}
 		c := ContainerInfo{ID: f[0], Name: f[1], Image: f[2], Status: f[3]}
-		if len(f) > 4 { c.Ports = f[4] }
+		if len(f) > 4 {
+			c.Ports = f[4]
+		}
 		out = append(out, c)
 	}
 	return out
@@ -128,7 +152,9 @@ func run(ctx context.Context, name string, args ...string) string {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil { return "" }
+	if err := cmd.Run(); err != nil {
+		return ""
+	}
 	return stdout.String()
 }
 
@@ -136,7 +162,9 @@ func lines(s string) []string {
 	var out []string
 	for _, line := range strings.Split(s, "\n") {
 		line = strings.TrimSpace(line)
-		if line != "" { out = append(out, line) }
+		if line != "" {
+			out = append(out, line)
+		}
 	}
 	return out
 }

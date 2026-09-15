@@ -9,12 +9,12 @@ import (
 func TestDiffSnapshotsDetectsServiceAndListenerChanges(t *testing.T) {
 	oldSnap := Snapshot{
 		CapturedAt: time.Now().Add(-time.Minute),
-		Services: []ServiceInfo{{Name: "demo.service", Active: "active", Sub: "running"}},
-		Listeners: []Listener{{Protocol: "tcp", Address: "0.0.0.0:8080"}},
+		Services:   []ServiceInfo{{Name: "demo.service", Active: "active", Sub: "running"}},
+		Listeners:  []Listener{{Protocol: "tcp", Address: "0.0.0.0:8080"}},
 	}
 	newSnap := Snapshot{
 		CapturedAt: time.Now(),
-		Services: []ServiceInfo{{Name: "demo.service", Active: "failed", Sub: "failed"}},
+		Services:   []ServiceInfo{{Name: "demo.service", Active: "failed", Sub: "failed"}},
 	}
 	events := DiffSnapshots(oldSnap, newSnap)
 	if len(events) < 2 {

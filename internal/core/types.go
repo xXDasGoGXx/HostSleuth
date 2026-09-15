@@ -3,23 +3,23 @@ package core
 import "time"
 
 type Snapshot struct {
-	CapturedAt time.Time        `json:"captured_at"`
-	Host       HostInfo         `json:"host"`
-	Interfaces []InterfaceInfo  `json:"interfaces,omitempty"`
-	Routes     []string         `json:"routes,omitempty"`
-	Listeners  []Listener       `json:"listeners,omitempty"`
-	Services   []ServiceInfo    `json:"services,omitempty"`
-	Containers []ContainerInfo  `json:"containers,omitempty"`
+	CapturedAt time.Time       `json:"captured_at"`
+	Host       HostInfo        `json:"host"`
+	Interfaces []InterfaceInfo `json:"interfaces,omitempty"`
+	Routes     []string        `json:"routes,omitempty"`
+	Listeners  []Listener      `json:"listeners,omitempty"`
+	Services   []ServiceInfo   `json:"services,omitempty"`
+	Containers []ContainerInfo `json:"containers,omitempty"`
 }
 
 type HostInfo struct {
-	Hostname    string `json:"hostname"`
-	OS          string `json:"os"`
-	Kernel      string `json:"kernel"`
+	Hostname     string `json:"hostname"`
+	OS           string `json:"os"`
+	Kernel       string `json:"kernel"`
 	Architecture string `json:"architecture"`
-	CPUCount    int    `json:"cpu_count"`
-	MemoryTotal string `json:"memory_total,omitempty"`
-	Uptime      string `json:"uptime,omitempty"`
+	CPUCount     int    `json:"cpu_count"`
+	MemoryTotal  string `json:"memory_total,omitempty"`
+	Uptime       string `json:"uptime,omitempty"`
 }
 
 type InterfaceInfo struct {
@@ -63,9 +63,9 @@ type Check struct {
 }
 
 type Diagnosis struct {
-	Target     string  `json:"target"`
+	Target     string    `json:"target"`
 	StartedAt  time.Time `json:"started_at"`
-	Checks     []Check `json:"checks"`
-	Conclusion string  `json:"conclusion"`
-	Confidence string  `json:"confidence"`
+	Checks     []Check   `json:"checks"`
+	Conclusion string    `json:"conclusion"`
+	Confidence string    `json:"confidence"`
 }

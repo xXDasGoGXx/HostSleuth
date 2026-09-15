@@ -45,8 +45,12 @@ func usage() {
 }
 
 func defaultStateDir() string {
-	if v := os.Getenv("HOSTSLEUTH_STATE_DIR"); v != "" { return v }
-	if os.Geteuid() == 0 { return "/var/lib/hostsleuth" }
+	if v := os.Getenv("HOSTSLEUTH_STATE_DIR"); v != "" {
+		return v
+	}
+	if os.Geteuid() == 0 {
+		return "/var/lib/hostsleuth"
+	}
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".local", "state", "hostsleuth")
 }
@@ -62,10 +66,14 @@ func runSnapshot(args []string) {
 	cur := core.Collect(ctx)
 	if oldErr == nil {
 		events := core.DiffSnapshots(old, cur)
-		if err := store.AppendEvents(events); err != nil { log.Fatal(err) }
+		if err := store.AppendEvents(events); err != nil {
+			log.Fatal(err)
+		}
 		fmt.Printf("recorded %d change event(s)\n", len(events))
 	}
-	if err := store.SaveSnapshot(cur); err != nil { log.Fatal(err) }
+	if err := store.SaveSnapshot(cur); err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(core.SnapshotSummary(cur))
 }
 
@@ -73,12 +81,16 @@ func runDiagnose(args []string) {
 	fs := flag.NewFlagSet("diagnose", flag.ExitOnError)
 	state := fs.String("state-dir", defaultStateDir(), "state directory")
 	_ = fs.Parse(args)
-	if fs.NArg() != 1 { log.Fatal("diagnose requires target in host:port form") }
+	if fs.NArg() != 1 {
+		log.Fatal("diagnose requires target in host:port form")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	store := core.Store{Dir: *state}
 	snap, err := store.LoadSnapshot()
-	if err != nil { snap = core.Collect(ctx) }
+	if err != nil {
+		snap = core.Collect(ctx)
+	}
 	d := core.Diagnose(ctx, fs.Arg(0), snap)
 	b, _ := json.MarshalIndent(d, "", "  ")
 	fmt.Println(string(b))
@@ -90,7 +102,9 @@ func runEvents(args []string) {
 	limit := fs.Int("limit", 50, "maximum recent events")
 	_ = fs.Parse(args)
 	events, err := (core.Store{Dir: *state}).ReadEvents(*limit)
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		log.Fatal(err)
+	}
 	b, _ := json.MarshalIndent(events, "", "  ")
 	fmt.Println(string(b))
 }
@@ -109,37 +123,65 @@ func runServe(args []string) {
 		cctx, ccancel := context.WithTimeout(ctx, 20*time.Second)
 		defer ccancel()
 		cur := core.Collect(cctx)
-		if old, err := store.LoadSnapshot(); err == nil { _ = store.AppendEvents(core.DiffSnapshots(old, cur)) }
+		if old, err := store.LoadSnapshot(); err == nil {
+			_ = store.AppendEvents(core.DiffSnapshots(old, cur))
+		}
 		_ = store.SaveSnapshot(cur)
 	}
 	capture()
 	go func() {
 		t := time.NewTicker(*interval)
 		defer t.Stop()
-		for { select { case <-ctx.Done(): return; case <-t.C: capture() } }
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				capture()
+			}
+		}
 	}()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		s, err := store.LoadSnapshot(); if err != nil { http.Error(w, err.Error(), 500); return }
+		s, err := store.LoadSnapshot()
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
 		_ = json.NewEncoder(w).Encode(s)
 	})
 	mux.HandleFunc("/api/events", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		e, err := store.ReadEvents(100); if err != nil { http.Error(w, err.Error(), 500); return }
+		e, err := store.ReadEvents(100)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
 		_ = json.NewEncoder(w).Encode(e)
 	})
 	mux.HandleFunc("/api/diagnose", func(w http.ResponseWriter, r *http.Request) {
 		target := r.URL.Query().Get("target")
-		if target == "" { http.Error(w, "target is required", 400); return }
-		s, err := store.LoadSnapshot(); if err != nil { s = core.Collect(r.Context()) }
+		if target == "" {
+			http.Error(w, "target is required", 400)
+			return
+		}
+		s, err := store.LoadSnapshot()
+		if err != nil {
+			s = core.Collect(r.Context())
+		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(core.Diagnose(r.Context(), target, s))
 	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		s, _ := store.LoadSnapshot(); e, _ := store.ReadEvents(20)
-		_ = dashboard.Execute(w, struct { Snapshot core.Snapshot; Events []core.Event; Version string }{s, e, version})
+		s, _ := store.LoadSnapshot()
+		e, _ := store.ReadEvents(20)
+		_ = dashboard.Execute(w, struct {
+			Snapshot core.Snapshot
+			Events   []core.Event
+			Version  string
+		}{s, e, version})
 	})
 	log.Printf("HostSleuth %s listening on http://%s", version, *listen)
 	log.Fatal(http.ListenAndServe(*listen, mux))

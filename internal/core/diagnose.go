@@ -48,7 +48,10 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 	local := false
 	for _, ip := range ips {
 		parsed := net.ParseIP(ip)
-		if parsed != nil && (parsed.IsLoopback() || isLocalIP(parsed)) { local = true; break }
+		if parsed != nil && (parsed.IsLoopback() || isLocalIP(parsed)) {
+			local = true
+			break
+		}
 	}
 	if local {
 		if l, ok := LocalListenerForPort(snap, port); ok {
@@ -69,16 +72,22 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 
 func isLocalIP(target net.IP) bool {
 	ifs, err := net.Interfaces()
-	if err != nil { return false }
+	if err != nil {
+		return false
+	}
 	for _, iface := range ifs {
 		addrs, _ := iface.Addrs()
 		for _, addr := range addrs {
 			var ip net.IP
 			switch v := addr.(type) {
-			case *net.IPNet: ip = v.IP
-			case *net.IPAddr: ip = v.IP
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
 			}
-			if ip != nil && ip.Equal(target) { return true }
+			if ip != nil && ip.Equal(target) {
+				return true
+			}
 		}
 	}
 	return false
