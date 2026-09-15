@@ -1,26 +1,52 @@
 # HostSleuth
 
-Local-first Linux change recorder and deterministic root-cause diagnostics.
+**A small, local-first Linux flight recorder for two questions: what changed, and why can I not reach this host/service/port?**
 
-> **Status:** early development. The current milestone is a read-only single-host MVP for Debian/Ubuntu.
+HostSleuth is intentionally not a full monitoring platform. It records meaningful Linux state changes and performs deterministic, evidence-backed `host:port` diagnosis without requiring a cloud account, AI model, external database, or API key.
 
-HostSleuth is designed around two questions:
+The full product boundary is defined in [`PRODUCT.md`](PRODUCT.md).
 
-1. **What changed on this Linux host?**
-2. **Why can I not reach this host/service/port?**
+## What it does
 
-It is intentionally not a full monitoring platform. The goal is a small, inspectable Linux "flight recorder" that preserves meaningful host state, turns changes into concise events, and performs evidence-backed diagnostics without requiring a cloud account, AI model, or external database.
+### Remember meaningful changes
 
-## Current capabilities
+HostSleuth periodically captures useful local state including:
 
-- Collects host identity, OS/kernel, memory, filesystems/capacity, interfaces, routes, listeners, systemd services, and Docker containers when available.
-- Stores the latest snapshot locally using an atomic write.
-- Appends detected service/container/listener changes to a JSONL event timeline.
-- Runs deterministic `host:port` diagnosis with DNS, TCP, and local-listener evidence.
-- Serves a small built-in dashboard and JSON API.
-- Defaults to `127.0.0.1:8787` so host data is not exposed to the LAN automatically.
+- host identity, OS, kernel, memory, and filesystems;
+- interfaces and routes;
+- listening sockets;
+- systemd services;
+- Docker containers, published ports, state, and network names when Docker is readable.
 
-## Build
+It compares snapshots and records meaningful service/container/listener changes in a local event timeline. Known noisy changes such as Docker uptime progression are suppressed.
+
+### Diagnose `host:port`
+
+HostSleuth can combine:
+
+- DNS resolution;
+- kernel route evidence;
+- TCP connectivity;
+- target-aware local TCP listener evidence;
+- Docker port publication, bind address, and network context;
+- bounded nftables candidate evidence;
+- bounded failed-systemd candidate evidence.
+
+The diagnosis engine has explicit evidence precedence: successful TCP is definitive, stronger local bind/listener evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
+
+## Product boundaries
+
+The current product is:
+
+- local-first;
+- single-host first;
+- read-only;
+- deterministic before explanatory;
+- loopback-only by default for the web UI.
+
+HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, or reconfigure the host.
+
+## Try it from source
 
 Requirements: Linux and Go 1.24+.
 
@@ -30,8 +56,6 @@ cd HostSleuth
 go test ./...
 go build -o hostsleuth ./cmd/hostsleuth
 ```
-
-## Try it without installing
 
 Capture a snapshot:
 
@@ -45,7 +69,7 @@ Diagnose a target:
 ./hostsleuth diagnose example.com:443
 ```
 
-Show recent change events:
+Show recent events:
 
 ```bash
 ./hostsleuth events
@@ -61,13 +85,11 @@ Then open `http://127.0.0.1:8787` on the same machine.
 
 ## Install a release with systemd
 
-Release installation does **not** require Go on the target host. Clone or download the release source tree, then run:
+Release installation does **not** require Go on the target host.
 
 ```bash
 sudo ./scripts/install.sh
 ```
-
-The installer detects `amd64` or `arm64`, downloads the matching binary from the latest GitHub release, installs `/usr/local/bin/hostsleuth`, creates `/var/lib/hostsleuth`, installs the systemd unit, and starts HostSleuth on loopback port 8787.
 
 To install a specific release:
 
@@ -75,30 +97,30 @@ To install a specific release:
 sudo HOSTSLEUTH_VERSION=v0.1.0-alpha.1 ./scripts/install.sh
 ```
 
-Developers who intentionally want to build on the target host can instead use:
+Developers who intentionally want to build on the target host can use:
 
 ```bash
 sudo ./scripts/install-source.sh
 ```
 
-That source-install path requires Go 1.24+.
-
-Uninstall the binary and service while preserving recorded state with:
+Uninstall the binary/service while preserving recorded state:
 
 ```bash
 sudo ./scripts/uninstall.sh
 ```
 
-## Safety posture
+## Current stage
 
-The current MVP is **read-only**. HostSleuth does not repair, restart, reconfigure, or mutate monitored services. Remote/LAN dashboard exposure is not a supported default until authentication is implemented.
+M0 repository foundation, M1 deployable single-host MVP, and M2 deeper deterministic diagnosis are complete and have been validated on Debian 13.
 
-## Project continuity
+The next phase is deliberately boring: **use the current build on real troubleshooting cases and improve the product where actual use exposes confusion or missing evidence.** New large subsystems are not the default next step.
 
-- `CURRENT-HANDOFF.md` — exact current project state and next actions.
-- `TO-DO.md` — active milestone and future backlog.
+## Project files
 
-Those files are maintained as part of the project source of truth.
+- `PRODUCT.md` — what HostSleuth is and is not.
+- `CURRENT-HANDOFF.md` — current live/project state and the next task.
+- `TO-DO.md` — short active backlog.
+- `docs/history/DEVELOPMENT-HISTORY.md` — milestone/validation history.
 
 ## License
 
