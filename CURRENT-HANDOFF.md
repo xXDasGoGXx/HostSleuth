@@ -219,7 +219,7 @@ First-time UAT exposed a narrow HomeCommander staging ergonomics issue:
 
 This belongs in HomeCommander shared infrastructure, not in HostSleuth. Do not solve it with broader broker capabilities, generic sudo/root shell, or weak ownership.
 
-## M2 progress — route, firewall, and systemd evidence merged
+## M2 progress — route, firewall, systemd, Docker, and evidence policy merged
 
 PR #3 adds bounded route-path evidence after DNS resolution:
 
@@ -253,7 +253,47 @@ PR #5 adds bounded systemd/journal failure evidence only for local TCP failures 
 
 Validation: PR #5 CI `34998204162` passed and merged at `37c97227a829fc341f943d0b4731242ee2a39650`. A Debian Normal-mode snapshot collected 219 services with zero failed units; closed TCP/65534 added a passing systemd-failure check while preserving the correct high-confidence no-listener conclusion. Normal-mode journal reads are permission-restricted and this is handled as unavailable evidence.
 
-The live managed system service has **not** been updated to M2 source yet. It remains on the validated M1 build `0.1.0-dev+d702804`. Batch the next meaningful M2 diagnostics before requesting another exact-hash managed deployment approval unless live root-context validation becomes necessary sooner.
+PR #6 adds Docker port/bind/network correlation and fixes listener matching to respect the requested local address:
+
+- parses wildcard, exact-address, IPv4/IPv6, and internal-only Docker port strings from the existing snapshot;
+- distinguishes a host-port publish on the requested address, the same host port bound only to another address, internal-only container exposure, and no matching Docker exposure;
+- retains Docker network names as an optional backward-compatible `networks` snapshot field and includes them in matching evidence when available;
+- local listener matching is now TCP-specific, target-address-aware, and family-aware instead of matching only the port number;
+- diagnosis remains read-only and does not invoke Docker during a diagnosis.
+
+Validation: PR #6 CI `34999319318` passed and merged at `bc939ae0c6339b355bd33916629a93f4a07803c9`. Using the live root-collected snapshot without changing containers, `127.0.0.1:8789` correctly identified Chaptarr as published only on `192.168.2.181:8789`, `127.0.0.1:8192` identified FlareSolverr `8192/tcp` as internal-only, and `192.168.2.181:8789` remained reachable/high confidence.
+
+PR #7 defines the deterministic evidence precedence and confidence policy:
+
+1. successful TCP is definitive and stops secondary evidence collection;
+2. for local failures, target-aware listener and Docker bind evidence outrank firewall/systemd candidates;
+3. for remote failures, confirmed kernel no-route evidence outranks firewall inspection;
+4. unavailable optional evidence remains neutral and cannot weaken a stronger conclusion;
+5. contradictory snapshot-vs-current evidence lowers confidence instead of pretending certainty.
+
+Scenario-level regressions now lock behavior for reachable targets, listener-plus-firewall candidates, failed-systemd candidates, Docker bind mismatch, contradictory Docker publication, remote no-route, and unavailable optional evidence.
+
+Validation: PR #7 CI `34999939216` passed on exact PR head `8e2b675c1a3cf7084e19e6b966d34ba9327f5a2f`; PR #7 merged at `3352a7e8407eae855f4a88550cfaaf867f86ddf1`. Main CI run `35000071547` also passed on that merged commit.
+
+### M2 managed-deployment candidate — staged, not yet approved
+
+The exact merged M2 source was rebuilt and revalidated on Debian 13:
+
+- source: `3352a7e8407eae855f4a88550cfaaf867f86ddf1`;
+- version: `0.1.0-dev+3352a7e`;
+- staged path: `/srv/homecommander-deployments/hostsleuth/hostsleuth.m2-candidate`;
+- candidate SHA-256: `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`;
+- staged mode: `0755`;
+- unchanged unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`.
+
+The existing approved M1 candidate was deliberately **not overwritten**:
+
+- `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate`;
+- SHA-256 `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`.
+
+The staged M2 binary itself was replayed against the live root-collected snapshot and reproduced the expected Chaptarr bind mismatch, FlareSolverr internal-only exposure, and reachable SSH conclusions. No firewall, service, or container state was mutated for these tests.
+
+The live managed system service has **not** been updated to M2 yet. It remains on the validated M1 build `0.1.0-dev+d702804`. Do not call `deployment_action install` until owner/root changes the managed deployment approval to the new M2 candidate path/hash.
 
 ## Current live state
 
@@ -277,8 +317,9 @@ The root-owned HomeCommander approval currently points to staged source `hostsle
 - No authentication yet; keep dashboard loopback-only.
 - Storage is JSON/JSONL, not SQLite yet.
 - Collectors degrade if optional tools are unavailable/inaccessible.
-- Diagnosis does not yet correlate Docker port/bind/network paths, reverse proxies, TLS, or package/config changes.
+- Diagnosis now correlates route, nftables candidates, local listeners, Docker port/bind/network evidence, and bounded failed-systemd candidates, but does not yet understand reverse proxies, TLS, or package/config changes.
 - Firewall and failed-unit correlations are deliberately conservative candidate evidence rather than causal verdicts.
+- Full M2 root-context validation is still pending because the live managed service remains on M1 until the new exact candidate hash is owner-approved.
 - Journal evidence has a narrow first-pass credential redactor; general redaction rules remain a security backlog item.
 - Historical pre-fix container uptime-noise events remain in the append-only history and will age out of the API window naturally; they were not deleted merely to make validation look cleaner.
 
@@ -292,16 +333,19 @@ Docker semantic-event fix: `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`
 M2 route-path evidence: `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`
 M2 firewall evidence: `2fe64640093b258b3c52b148fc2e32507eeae584`
 M2 systemd/journal evidence: `37c97227a829fc341f943d0b4731242ee2a39650`
+M2 Docker port/bind/network correlation: `bc939ae0c6339b355bd33916629a93f4a07803c9`
+M2 evidence precedence/confidence policy: `3352a7e8407eae855f4a88550cfaaf867f86ddf1`
 
 Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Next sequence
 
-M1 is closed and M2 route/firewall/systemd evidence is merged. Continue deterministic diagnosis in this order:
+M1 is closed and the planned M2 diagnosis code is merged, CI-green, and staged as an exact candidate. Continue in this order:
 
-1. Docker port/bind/network correlation;
-2. define final evidence ordering/confidence behavior and regression scenarios;
-3. validate the combined M2 source under the real root system-service privilege model;
-4. then reverse-proxy/TLS awareness and the planned SQLite migration as appropriate.
+1. owner/root re-approves managed deployment `hostsleuth` to use `/srv/homecommander-deployments/hostsleuth/hostsleuth.m2-candidate` with SHA-256 `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`; keep the unchanged unit approval SHA `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`;
+2. re-check `deployment_status` and only then use `deployment_action install` followed by `restart`;
+3. validate route, nftables, journal, Docker network-name collection, target-aware listener behavior, dashboard/API, state persistence, and change recording under the real root system-service context without manufacturing destructive failures;
+4. if validation passes, mark M2 complete and decide separately whether to prepare a new public alpha;
+5. after M2, continue with reverse-proxy/TLS awareness and the planned SQLite migration as appropriate.
 
-Publishing a new public HostSleuth release containing the final M1 fixes is a separate owner-controlled action and must not occur without explicit approval.
+Publishing a new public HostSleuth release remains a separate owner-controlled action and must not occur without explicit approval.
