@@ -84,7 +84,16 @@ Start with evidence that helps explain why a service/port is unreachable without
   - PR #4 CI run `34997617382` passed format, vet, tests, and build;
   - merged at `2fe64640093b258b3c52b148fc2e32507eeae584`;
   - Debian Normal-mode validation reproduced the real nft netlink restriction and preserved the correct no-listener/high-confidence conclusion.
-- [ ] Add bounded systemd/journal failure evidence for relevant units.
+- [x] Add bounded systemd/journal failure evidence for relevant units.
+  - PR #5 runs only for a local TCP failure with no listener;
+  - selects failed units from the existing snapshot, capped at three candidates;
+  - current-boot journal evidence is capped at six lines, 8 KiB, and two seconds per candidate;
+  - common credential/token patterns are redacted before journal text becomes diagnosis evidence;
+  - no failed units means `systemd-failures: pass` and no journal command is run;
+  - failed-unit evidence is explicitly candidate evidence, not proof of port ownership;
+  - PR #5 CI run `34998204162` passed format, vet, tests, and build;
+  - merged at `37c97227a829fc341f943d0b4731242ee2a39650`;
+  - Debian Normal-mode validation collected 219 services with zero failed units and preserved the correct high-confidence no-listener result; direct journal access was restricted as expected and is handled as unavailable evidence.
 - [ ] Add Docker port/bind/network correlation.
 - [ ] Define deterministic evidence ordering and confidence behavior when evidence is unavailable.
 - [ ] Add regression tests for reachable, locally blocked, service-failed, and container-port mismatch cases.
