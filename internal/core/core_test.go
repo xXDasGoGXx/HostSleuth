@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 )
@@ -19,6 +20,73 @@ func TestDiffSnapshotsDetectsServiceAndListenerChanges(t *testing.T) {
 	events := DiffSnapshots(oldSnap, newSnap)
 	if len(events) < 2 {
 		t.Fatalf("expected at least 2 events, got %d", len(events))
+	}
+}
+
+func TestDiffSnapshotsIgnoresContainerUptimeOnlyChanges(t *testing.T) {
+	oldSnap := Snapshot{
+		CapturedAt: time.Now().Add(-time.Minute),
+		Containers: []ContainerInfo{{Name: "demo", Status: "Up 5 minutes (healthy)"}},
+	}
+	newSnap := Snapshot{
+		CapturedAt: time.Now(),
+		Containers: []ContainerInfo{{Name: "demo", Status: "Up 6 minutes (healthy)"}},
+	}
+	if events := DiffSnapshots(oldSnap, newSnap); len(events) != 0 {
+		t.Fatalf("expected uptime-only container change to be ignored, got %#v", events)
+	}
+}
+
+func TestDiffSnapshotsIgnoresContainerRestartTimerChurn(t *testing.T) {
+	oldSnap := Snapshot{
+		CapturedAt: time.Now().Add(-time.Minute),
+		Containers: []ContainerInfo{{Name: "demo", Status: "Restarting (1) 5 seconds ago"}},
+	}
+	newSnap := Snapshot{
+		CapturedAt: time.Now(),
+		Containers: []ContainerInfo{{Name: "demo", Status: "Restarting (1) 15 seconds ago"}},
+	}
+	if events := DiffSnapshots(oldSnap, newSnap); len(events) != 0 {
+		t.Fatalf("expected restart-timer-only container change to be ignored, got %#v", events)
+	}
+}
+
+func TestDiffSnapshotsDetectsContainerHealthChange(t *testing.T) {
+	oldSnap := Snapshot{
+		CapturedAt: time.Now().Add(-time.Minute),
+		Containers: []ContainerInfo{{Name: "demo", Status: "Up 5 minutes (healthy)"}},
+	}
+	newSnap := Snapshot{
+		CapturedAt: time.Now(),
+		Containers: []ContainerInfo{{Name: "demo", Status: "Up 6 minutes (unhealthy)"}},
+	}
+	events := DiffSnapshots(oldSnap, newSnap)
+	if len(events) != 1 {
+		t.Fatalf("expected one health-change event, got %#v", events)
+	}
+	if events[0].Severity != "warning" {
+		t.Fatalf("expected warning severity, got %q", events[0].Severity)
+	}
+	if events[0].Summary != "container changed: demo: running (healthy) -> running (unhealthy)" {
+		t.Fatalf("unexpected summary: %q", events[0].Summary)
+	}
+}
+
+func TestDiffSnapshotsDetectsContainerExitWithoutAgeNoise(t *testing.T) {
+	oldSnap := Snapshot{
+		CapturedAt: time.Now().Add(-time.Minute),
+		Containers: []ContainerInfo{{Name: "demo", Status: "Up 5 minutes"}},
+	}
+	newSnap := Snapshot{
+		CapturedAt: time.Now(),
+		Containers: []ContainerInfo{{Name: "demo", Status: "Exited (1) 3 seconds ago"}},
+	}
+	events := DiffSnapshots(oldSnap, newSnap)
+	if len(events) != 1 {
+		t.Fatalf("expected one exit event, got %#v", events)
+	}
+	if events[0].Severity != "warning" || !strings.Contains(events[0].Summary, "running -> exited (1)") {
+		t.Fatalf("unexpected exit event: %#v", events[0])
 	}
 }
 

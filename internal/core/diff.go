@@ -49,7 +49,7 @@ func diffNamedStates(at time.Time, category string, oldMap, newMap map[string]st
 			out = append(out, Event{At: at, Category: category, Severity: "warning", Summary: fmt.Sprintf("%s disappeared: %s (was %s)", category, k, o)})
 		case o != n:
 			sev := "info"
-			if strings.Contains(n, "failed") || strings.Contains(n, "exited") || strings.Contains(n, "inactive") {
+			if strings.Contains(n, "failed") || strings.Contains(n, "exited") || strings.Contains(n, "inactive") || strings.Contains(n, "unhealthy") || strings.Contains(n, "dead") || strings.Contains(n, "restarting") || strings.Contains(n, "paused") {
 				sev = "warning"
 			}
 			out = append(out, Event{At: at, Category: category, Severity: sev, Summary: fmt.Sprintf("%s changed: %s: %s -> %s", category, k, o, n)})
@@ -85,9 +85,56 @@ func serviceMap(in []ServiceInfo) map[string]string {
 func containerMap(in []ContainerInfo) map[string]string {
 	m := map[string]string{}
 	for _, c := range in {
-		m[c.Name] = c.Status
+		m[c.Name] = stableContainerState(c.Status)
 	}
 	return m
+}
+
+func stableContainerState(status string) string {
+	s := strings.TrimSpace(status)
+	if s == "" {
+		return ""
+	}
+	lower := strings.ToLower(s)
+	switch {
+	case strings.HasPrefix(lower, "up "):
+		if strings.Contains(lower, "(paused)") {
+			return "paused"
+		}
+		if suffix := containerStatusSuffix(s); suffix != "" {
+			return "running " + suffix
+		}
+		return "running"
+	case strings.HasPrefix(lower, "exited"):
+		return containerStatusPrefixThroughParen(lower, "exited")
+	case strings.HasPrefix(lower, "restarting"):
+		return containerStatusPrefixThroughParen(lower, "restarting")
+	case strings.HasPrefix(lower, "created"):
+		return "created"
+	case strings.HasPrefix(lower, "dead"):
+		return "dead"
+	case strings.HasPrefix(lower, "paused"):
+		return "paused"
+	case strings.HasPrefix(lower, "removal in progress"), strings.HasPrefix(lower, "removing"):
+		return "removing"
+	default:
+		return lower
+	}
+}
+
+func containerStatusSuffix(status string) string {
+	start := strings.LastIndex(status, " (")
+	if start < 0 || !strings.HasSuffix(status, ")") {
+		return ""
+	}
+	return strings.ToLower(strings.TrimSpace(status[start+1:]))
+}
+
+func containerStatusPrefixThroughParen(status, fallback string) string {
+	if end := strings.Index(status, ")"); end >= 0 {
+		return strings.TrimSpace(status[:end+1])
+	}
+	return fallback
 }
 
 func listenerSet(in []Listener) map[string]bool {
