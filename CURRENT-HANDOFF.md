@@ -1,6 +1,6 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-09-14
+Last updated: 2026-09-15
 
 ## Current objective
 
@@ -27,6 +27,7 @@ HostSleuth is intentionally not a full metrics/observability platform. Its diffe
 - V0.1 is read-only. No automatic remediation.
 - Normal release installation must not require Go on the target host; source installation remains available for developers.
 - Release automation is driven by `release/v*` branches. The workflow tests, cross-builds, creates SHA256 sums, creates the matching `v*` tag, and publishes the GitHub release.
+- HostSleuth remains independent from HomeCommander. HomeCommander is only the shared owner-approved administrative transport for privileged installation/lifecycle operations.
 
 ## Milestones
 
@@ -42,7 +43,7 @@ Status: **complete**
 
 ### M1 — Single-host deployable MVP
 
-Status: **release candidate validated; one privileged installation check remains environment-blocked**
+Status: **release candidate validated; managed administrative deployment UAT staged; owner root approval is the current boundary**
 
 Implemented:
 
@@ -66,6 +67,39 @@ Implemented:
 - systemd unit;
 - release-binary installer, source installer, and uninstall script;
 - release workflow for static Linux `amd64` and `arm64` binaries, version stamping, SHA256 sums, tag creation, and GitHub release publication.
+
+## Managed Administrative Deployment UAT — 2026-09-15
+
+HomeCommander is live on `openmediavault` with the reviewed exact-hash Managed Administrative Deployment capability. HostSleuth is the first real UAT consumer.
+
+Verified before staging:
+
+- HomeCommander gateway healthy on `openmediavault`;
+- Normal-mode read/write policy unchanged;
+- `/srv/homecommander-deployments` initially empty;
+- no `hostsleuth` managed-deployment approval exists yet;
+- `/usr/local/bin/hostsleuth` is not managed/installed through this path yet;
+- `/var/lib/hostsleuth` does not yet exist.
+
+Staged UAT artifacts:
+
+- `/srv/homecommander-deployments/hostsleuth/hostsleuth`
+  - source: published `v0.1.0-alpha.1` Linux amd64 release;
+  - SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`;
+  - checksum matches the published release handoff exactly.
+- `/srv/homecommander-deployments/hostsleuth/hostsleuth.service`
+  - SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`.
+
+A first-install integration issue was caught before root approval: the original `scripts/install.sh` created `/var/lib/hostsleuth`, but managed deployment intentionally promotes only the exact approved binary and systemd unit. The unit has therefore been adjusted to use:
+
+- `StateDirectory=hostsleuth`
+- `StateDirectoryMode=0700`
+
+This lets systemd create and manage `/var/lib/hostsleuth` without broadening HomeCommander privileged capabilities. The change is isolated in branch `uat/systemd-state-directory`, commit `bb7552a43130072fb47cef30c8eed2a6e8ecb013`, PR #1. CI run `34987407246` was started for the PR.
+
+`systemd-analyze verify` accepts the staged unit; its only warning is the expected absence of `/usr/local/bin/hostsleuth` before managed installation.
+
+Current owner boundary: the staged artifacts must be approved out-of-band by root using `homecommander-approve-deployment`. HomeCommander must not self-approve them.
 
 ## Real Debian 13 validation
 
@@ -109,8 +143,8 @@ Confirmed working:
 
 ## Important validation limitation
 
-- HomeCommander Normal mode does not permit privileged writes to `/usr/local/bin`, `/etc/systemd/system`, or administrative `systemctl enable --now`, so the final root-level copy/unit-enable portion of `scripts/install.sh` has **not** been executed through this environment.
-- HomeCommander also blocks direct Docker commands and the test process is unprivileged, so the observed `containers=0` does **not** prove that the host has no containers. Docker collection still needs validation in a context where the HostSleuth process can read Docker state.
+- The previous HomeCommander limitation around first-time privileged installation is now solved by the shared Managed Administrative Deployment mechanism. The current remaining boundary is the deliberate owner/root approval of the exact staged HostSleuth artifacts.
+- HomeCommander blocks direct Docker commands and the prior test process was unprivileged, so the earlier observed `containers=0` does **not** prove that the host has no containers. Docker collection still needs validation once HostSleuth is running under the final system service privilege model.
 
 ## Important current limitations
 
@@ -124,12 +158,16 @@ Confirmed working:
 Repository: `xXDasGoGXx/HostSleuth`
 Default branch: `main`
 First published release: `v0.1.0-alpha.1`
+Active UAT branch: `uat/systemd-state-directory`
+Active UAT PR: #1
 
 Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Next actions
 
-1. Exercise the privileged `scripts/install.sh` systemd installation path on an approved host whenever administrative execution is available; verify restart/reboot persistence and uninstall behavior.
-2. Validate Docker collection under the eventual service privilege model.
-3. Once that M1 installation check is closed, begin the next diagnosis milestone with route/firewall evidence and bounded systemd/journal failure evidence.
-4. Continue with Docker port/network correlation, then package/config change tracking.
+1. Let PR #1 CI complete and merge the systemd-owned state-directory fix only if validation is green.
+2. Owner/root approves the exact staged `hostsleuth` deployment; no generic sudo/root bypass.
+3. Use HomeCommander `deployment_action`/`deployment_status` for install, enable/start, restart, stop/disable, uninstall/reinstall and managed update behavior as appropriate.
+4. Verify service runtime, `/var/lib/hostsleuth` creation/mode, dashboard/API, reboot persistence, and Docker inventory under the actual service privilege model.
+5. Close M1 only after privileged installation/reboot/uninstall/reinstall UAT is complete.
+6. Then begin the next diagnosis milestone with route/firewall evidence and bounded systemd/journal failure evidence.
