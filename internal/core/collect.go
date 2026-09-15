@@ -175,7 +175,7 @@ func collectServices(ctx context.Context) []ServiceInfo {
 }
 
 func collectContainers(ctx context.Context) []ContainerInfo {
-	format := "{{.ID}}\\t{{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.Ports}}"
+	format := "{{.ID}}\\t{{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.Ports}}\\t{{.Networks}}"
 	text := run(ctx, "docker", "ps", "-a", "--format", format)
 	var out []ContainerInfo
 	for _, line := range lines(text) {
@@ -186,6 +186,9 @@ func collectContainers(ctx context.Context) []ContainerInfo {
 		c := ContainerInfo{ID: f[0], Name: f[1], Image: f[2], Status: f[3]}
 		if len(f) > 4 {
 			c.Ports = f[4]
+		}
+		if len(f) > 5 {
+			c.Networks = f[5]
 		}
 		out = append(out, c)
 	}
@@ -222,6 +225,52 @@ func LocalListenerForPort(s Snapshot, port string) (Listener, bool) {
 		}
 	}
 	return Listener{}, false
+}
+
+func LocalListenerForTarget(s Snapshot, port string, resolvedIPs []string) (Listener, bool) {
+	for _, listener := range s.Listeners {
+		if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(listener.Protocol)), "tcp") {
+			continue
+		}
+		host, listenerPort, err := net.SplitHostPort(strings.TrimSpace(listener.Address))
+		if err != nil || listenerPort != port {
+			continue
+		}
+		if listenerHostMatchesTarget(host, resolvedIPs) {
+			return listener, true
+		}
+	}
+	return Listener{}, false
+}
+
+func listenerHostMatchesTarget(host string, resolvedIPs []string) bool {
+	host = strings.TrimSpace(host)
+	if host == "*" {
+		return len(resolvedIPs) > 0
+	}
+	if zone := strings.LastIndexByte(host, '%'); zone >= 0 {
+		host = host[:zone]
+	}
+	listenerIP := net.ParseIP(host)
+	if listenerIP == nil {
+		return false
+	}
+	for _, value := range resolvedIPs {
+		targetIP := net.ParseIP(value)
+		if targetIP == nil {
+			continue
+		}
+		if listenerIP.IsUnspecified() {
+			if (listenerIP.To4() != nil) == (targetIP.To4() != nil) {
+				return true
+			}
+			continue
+		}
+		if listenerIP.Equal(targetIP) {
+			return true
+		}
+	}
+	return false
 }
 
 func SnapshotSummary(s Snapshot) string {
