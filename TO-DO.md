@@ -94,10 +94,28 @@ Start with evidence that helps explain why a service/port is unreachable without
   - PR #5 CI run `34998204162` passed format, vet, tests, and build;
   - merged at `37c97227a829fc341f943d0b4731242ee2a39650`;
   - Debian Normal-mode validation collected 219 services with zero failed units and preserved the correct high-confidence no-listener result; direct journal access was restricted as expected and is handled as unavailable evidence.
-- [ ] Add Docker port/bind/network correlation.
-- [ ] Define deterministic evidence ordering and confidence behavior when evidence is unavailable.
-- [ ] Add regression tests for reachable, locally blocked, service-failed, and container-port mismatch cases.
-- [ ] Validate M2 behavior on a real Debian 13 host without mutating firewall/service state merely for tests.
+- [x] Add Docker port/bind/network correlation.
+  - PR #6 parses Docker wildcard, exact-address, and internal-only TCP port mappings from the existing snapshot;
+  - Docker network names are retained as an optional backward-compatible snapshot field and surfaced in matching evidence;
+  - local listener matching is now TCP-specific and target-address-aware, fixing false positives where the same port was bound on a different host address;
+  - PR #6 CI run `34999319318` passed format, vet, tests, and build;
+  - merged at `bc939ae0c6339b355bd33916629a93f4a07803c9`;
+  - live root-collected snapshot validation correctly distinguished Chaptarr bound only to `192.168.2.181:8789`, FlareSolverr `8192/tcp` as internal-only, and the reachable Chaptarr host address.
+- [x] Define deterministic evidence ordering and confidence behavior when evidence is unavailable.
+  - PR #7 makes successful TCP definitive; local listener/Docker evidence outranks firewall/systemd candidates; confirmed remote no-route outranks firewall; unavailable optional evidence stays neutral;
+  - conflicting snapshot evidence lowers confidence instead of pretending certainty;
+  - PR #7 CI run `34999939216` passed on exact head `8e2b675c1a3cf7084e19e6b966d34ba9327f5a2f`;
+  - merged at `3352a7e8407eae855f4a88550cfaaf867f86ddf1`.
+- [x] Add regression tests for reachable, locally blocked, service-failed, and container-port mismatch cases.
+  - scenario-level tests lock check ordering and confidence for reachable, local-listener/firewall candidate, failed-systemd candidate, Docker bind mismatch, contradictory Docker publication, confirmed remote no-route, and unavailable optional evidence.
+- [ ] Validate the merged M2 build under the real root system-service privilege model.
+  - merged M2 source is `3352a7e8407eae855f4a88550cfaaf867f86ddf1`; main CI run `35000071547` passed format, vet, tests, and build;
+  - exact staged candidate version is `0.1.0-dev+3352a7e`;
+  - staged separately at `/srv/homecommander-deployments/hostsleuth/hostsleuth.m2-candidate` with SHA-256 `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa` and mode `0755`;
+  - the still-approved M1 candidate `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate` remains unchanged at SHA-256 `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`;
+  - systemd unit remains unchanged at SHA-256 `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`;
+  - Normal-mode/source validation and live root-collected snapshot replay are complete without mutating firewall/service/container state;
+  - remaining root-context validation requires owner/root to re-approve the new M2 candidate path/hash before any `deployment_action install` is attempted.
 
 ## Planned after/alongside M2
 
