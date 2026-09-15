@@ -60,6 +60,13 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 
 	if err := tcpConnect(ctx, net.JoinHostPort(host, port)); err == nil {
 		d.Checks = append(d.Checks, Check{Name: "tcp", Status: "pass", Evidence: fmt.Sprintf("TCP/%s accepted a connection", port)})
+		if targetExpectsTLS(snap, host, port) {
+			checks, conclusion, confidence := tlsDiagnosis(ctx, host, port)
+			d.Checks = append(d.Checks, checks...)
+			d.Conclusion = conclusion
+			d.Confidence = confidence
+			return d
+		}
 		d.Conclusion = "target is reachable"
 		d.Confidence = "high"
 		return d

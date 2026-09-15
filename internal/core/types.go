@@ -67,6 +67,7 @@ type ReverseProxyRoute struct {
 	RouteID       string   `json:"route_id,omitempty"`
 	Hostnames     []string `json:"hostnames,omitempty"`
 	ListenPorts   []string `json:"listen_ports,omitempty"`
+	FrontendTLS   bool     `json:"frontend_tls,omitempty"`
 	BackendScheme string   `json:"backend_scheme,omitempty"`
 	BackendHost   string   `json:"backend_host,omitempty"`
 	BackendPort   string   `json:"backend_port,omitempty"`
