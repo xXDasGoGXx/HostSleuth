@@ -219,45 +219,39 @@ First-time UAT exposed a narrow HomeCommander staging ergonomics issue:
 
 This belongs in HomeCommander shared infrastructure, not in HostSleuth. Do not solve it with broader broker capabilities, generic sudo/root shell, or weak ownership.
 
-## M2 progress — route and firewall evidence merged
+## M2 progress — route, firewall, and systemd evidence merged
 
-PR #3 begins M2 by adding bounded route-path evidence to deterministic diagnosis.
+PR #3 adds bounded route-path evidence after DNS resolution:
 
-Route behavior:
+- successful `ip route get <resolved-ip>` is `route: pass` with compact evidence;
+- kernel no-route/unreachable is `route: fail`;
+- command/netlink restrictions are `route: unknown`, not false failures;
+- route failure can raise a remote TCP-failure conclusion to high confidence.
 
-- after DNS resolution, HostSleuth runs a bounded read-only `ip route get <resolved-ip>` lookup;
-- a successful kernel lookup is recorded as `route: pass` with compact route evidence;
-- kernel-reported unreachable/no-route results become `route: fail`;
-- command absence, sandbox restrictions, or unavailable netlink access become `route: unknown` rather than a false routing failure;
-- a confirmed route failure plus remote TCP failure raises the routing conclusion to high confidence;
-- existing reachable and local-listener conclusions remain authoritative when those stronger signals are present.
+Validation: PR #3 CI `34996674672` passed and merged at `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`. Debian Normal-mode validation reproduced the real netlink restriction while reachable TCP/22 still returned reachable/high confidence.
 
-Route validation:
+PR #4 adds bounded read-only nftables evidence after TCP failure:
 
-- PR #3 CI run `34996674672` passed format, vet, tests, and build;
-- PR #3 merged to `main` at `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`;
-- Debian Normal-mode validation reproduced a real HomeCommander netlink restriction (`Cannot open netlink socket: Address family not supported by protocol`);
-- HostSleuth correctly reported `route: unknown` while TCP/22 still produced `target is reachable` with high confidence.
+- runs `nft -nn list ruleset` only when TCP fails;
+- two-second timeout, 64 KiB captured-output cap;
+- finds `nft` through PATH or standard `/usr/sbin`/`/sbin` locations;
+- base-policy/direct-port matches are candidate evidence, not proven verdicts;
+- command/netlink/permission failure degrades to `firewall: unknown`;
+- successful TCP skips firewall collection.
 
-PR #4 adds bounded read-only nftables evidence after a TCP connection failure.
+Validation: PR #4 CI `34997617382` passed and merged at `2fe64640093b258b3c52b148fc2e32507eeae584`. Debian Normal-mode validation reproduced the nft netlink restriction while preserving the correct no-listener/high-confidence conclusion.
 
-Firewall behavior:
+PR #5 adds bounded systemd/journal failure evidence only for local TCP failures with no listener:
 
-- runs `nft -nn list ruleset` only after TCP failure;
-- lookup timeout is two seconds and captured stdout/stderr is capped at 64 KiB;
-- resolves `nft` through PATH and standard `/usr/sbin`/`/sbin` locations;
-- input/output base-policy and direct matching TCP-port rules are shown as **candidate evidence**, explicitly not as a proven verdict;
-- command absence or netlink/permission restrictions become `firewall: unknown`;
-- successful TCP diagnoses skip firewall collection entirely;
-- no firewall state is modified.
+- failed candidates come from the existing HostSleuth snapshot;
+- maximum three failed units are examined;
+- each current-boot journal read is capped at six lines, 8 KiB, and two seconds;
+- common password/secret/token/API-key/authorization/cookie assignments and bearer tokens are redacted before evidence is returned;
+- no failed units produces `systemd-failures: pass` and does not invoke journalctl;
+- failed-unit evidence is explicitly candidate evidence, not proof that a unit owns the port;
+- systemd/journal evidence is skipped when a listener already exists.
 
-Firewall validation:
-
-- PR #4 CI run `34997617382` passed format, vet, tests, and build;
-- PR #4 merged to `main` at `2fe64640093b258b3c52b148fc2e32507eeae584`;
-- Debian Normal-mode validation reproduced the real nft netlink restriction;
-- closed TCP/65534 still correctly concluded no local listener/high confidence while firewall evidence degraded to `unknown`;
-- reachable TCP/22 remained reachable/high confidence and skipped firewall evidence.
+Validation: PR #5 CI `34998204162` passed and merged at `37c97227a829fc341f943d0b4731242ee2a39650`. A Debian Normal-mode snapshot collected 219 services with zero failed units; closed TCP/65534 added a passing systemd-failure check while preserving the correct high-confidence no-listener conclusion. Normal-mode journal reads are permission-restricted and this is handled as unavailable evidence.
 
 The live managed system service has **not** been updated to M2 source yet. It remains on the validated M1 build `0.1.0-dev+d702804`. Batch the next meaningful M2 diagnostics before requesting another exact-hash managed deployment approval unless live root-context validation becomes necessary sooner.
 
@@ -283,8 +277,9 @@ The root-owned HomeCommander approval currently points to staged source `hostsle
 - No authentication yet; keep dashboard loopback-only.
 - Storage is JSON/JSONL, not SQLite yet.
 - Collectors degrade if optional tools are unavailable/inaccessible.
-- Diagnosis does not yet correlate Docker port/network paths, bounded journal failure evidence, reverse proxies, TLS, or package/config changes.
-- Firewall evidence is deliberately conservative: candidate rules are not yet promoted to definitive block verdicts.
+- Diagnosis does not yet correlate Docker port/bind/network paths, reverse proxies, TLS, or package/config changes.
+- Firewall and failed-unit correlations are deliberately conservative candidate evidence rather than causal verdicts.
+- Journal evidence has a narrow first-pass credential redactor; general redaction rules remain a security backlog item.
 - Historical pre-fix container uptime-noise events remain in the append-only history and will age out of the API window naturally; they were not deleted merely to make validation look cleaner.
 
 ## Source of truth
@@ -296,17 +291,17 @@ Systemd state-directory fix: `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`
 Docker semantic-event fix: `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`
 M2 route-path evidence: `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`
 M2 firewall evidence: `2fe64640093b258b3c52b148fc2e32507eeae584`
+M2 systemd/journal evidence: `37c97227a829fc341f943d0b4731242ee2a39650`
 
 Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Next sequence
 
-M1 is closed and M2 route/firewall evidence is merged. Continue deterministic diagnosis in this order:
+M1 is closed and M2 route/firewall/systemd evidence is merged. Continue deterministic diagnosis in this order:
 
-1. bounded systemd/journal failure evidence;
-2. Docker port/bind/network correlation;
-3. define final evidence ordering/confidence behavior and regression scenarios;
-4. validate the combined M2 source under the real root system-service privilege model;
-5. then reverse-proxy/TLS awareness and the planned SQLite migration as appropriate.
+1. Docker port/bind/network correlation;
+2. define final evidence ordering/confidence behavior and regression scenarios;
+3. validate the combined M2 source under the real root system-service privilege model;
+4. then reverse-proxy/TLS awareness and the planned SQLite migration as appropriate.
 
 Publishing a new public HostSleuth release containing the final M1 fixes is a separate owner-controlled action and must not occur without explicit approval.
