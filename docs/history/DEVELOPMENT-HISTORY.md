@@ -178,6 +178,21 @@ The live host had zero failed systemd services, so journal excerpt collection wa
 
 M2 is complete.
 
+## Post-M2 experiments and cleanup
+
+After M2, two experimental M3 slices were briefly merged into `main`:
+
+- PR #8 — Nginx Proxy Manager awareness (`df7e926b0ad07c0224004c644d5c4a1d667df547`);
+- PR #9 — TLS diagnostics (`5a549d977e2cc853338b728c1814732467c828d1`).
+
+Those experiments were never deployed as the validated live HostSleuth build. During the subsequent project-clarity cleanup, they were deliberately removed from the active product source rather than allowed to blur the validated M2 boundary.
+
+Cleanup commit:
+
+`8dda0368e2f1e8df46325713fe1dac68df0fc9f1`
+
+After that cleanup, executable source on `main` matches the validated M2 code at `3352a7e8407eae855f4a88550cfaaf867f86ddf1`; only current documentation/history differs. The M3 commits and branches remain available as historical/experimental work and are not active product state.
+
 ## Historical source references
 
 - First published alpha: `v0.1.0-alpha.1`
