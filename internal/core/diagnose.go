@@ -75,6 +75,7 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 			break
 		}
 	}
+	proxyCheck, hasProxyDependency := reverseProxyBackendCheck(snap, host, port, ips)
 
 	// Evidence precedence is deliberate:
 	// 1. successful TCP is definitive and already returned above;
@@ -88,6 +89,9 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		if listener, ok := LocalListenerForTarget(snap, port, ips); ok {
 			d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "pass", Evidence: listener.Protocol + " " + listener.Address + " " + listener.Process})
 			d.Checks = append(d.Checks, docker.Check)
+			if hasProxyDependency {
+				d.Checks = append(d.Checks, proxyCheck)
+			}
 			d.Checks = append(d.Checks, firewallCheck(ctx, port))
 			d.Conclusion = "snapshot shows a listener on the requested local address but the current TCP connection failed; inspect firewall, network namespace, or snapshot freshness"
 			d.Confidence = "medium"
@@ -96,6 +100,9 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 
 		d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "fail", Evidence: "no local listener found for TCP/" + port + " on the requested address"})
 		d.Checks = append(d.Checks, docker.Check)
+		if hasProxyDependency {
+			d.Checks = append(d.Checks, proxyCheck)
+		}
 		d.Checks = append(d.Checks, firewallCheck(ctx, port))
 		d.Checks = append(d.Checks, systemdFailureCheck(ctx, snap))
 		d.Conclusion, d.Confidence = localNoListenerOutcome(port, docker.Relation)
@@ -108,6 +115,9 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		return d
 	}
 
+	if hasProxyDependency {
+		d.Checks = append(d.Checks, proxyCheck)
+	}
 	d.Checks = append(d.Checks, firewallCheck(ctx, port))
 	d.Conclusion = "remote TCP connection failed; inspect routing, firewall policy, and the destination service"
 	return d
