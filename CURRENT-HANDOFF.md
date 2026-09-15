@@ -43,7 +43,7 @@ Status: **complete**
 
 ### M1 — Single-host deployable MVP
 
-Status: **managed installation UAT passed; only real reboot-persistence validation remains before M1 closure**
+Status: **managed installation/control-plane UAT passed; only real reboot-persistence validation remains before M1 closure**
 
 Implemented:
 
@@ -99,11 +99,24 @@ Staged and owner-approved artifacts:
 
 The root-owned approval pins the exact artifacts, destinations, `hostsleuth.service`, and approved lifecycle actions. HostSleuth gained no sudo/root mechanism of its own.
 
+The owner re-approved the same exact hashes using the helper's normal default action set so the read-only `status` action is also approved. `deployment_status` now succeeds.
+
+Current approved actions:
+
+- `install`
+- `uninstall`
+- `enable`
+- `disable`
+- `start`
+- `stop`
+- `status`
+- `restart`
+
 The initial staging directory/file modes produced by generic HomeCommander Normal-mode file creation were too restrictive for the intentionally capability-stripped broker (`0700` deployment directory and `0600` unit). UAT corrected only the unprivileged staging permissions to `0750` for the deployment directory and `0640` for the unit; hashes were unchanged. This is recorded as a HomeCommander shared-infrastructure follow-up, not HostSleuth privilege code.
 
 ### Managed deployment results
 
-Confirmed through HomeCommander `deployment_action`:
+Confirmed through HomeCommander:
 
 - exact-hash `install` succeeded;
 - binary installed at `/usr/local/bin/hostsleuth`, mode `0755`, expected SHA-256;
@@ -118,9 +131,21 @@ Confirmed through HomeCommander `deployment_action`:
 - exact managed `uninstall` removed only `/usr/local/bin/hostsleuth` and `/etc/systemd/system/hostsleuth.service`;
 - `/var/lib/hostsleuth` remained present after uninstall as intended;
 - exact managed reinstall succeeded;
-- HostSleuth was re-enabled and re-started successfully.
+- HostSleuth was re-enabled and re-started successfully;
+- corrected `deployment_status` succeeded and verified both installed artifact hashes exactly against the root-owned approval.
 
-Final runtime state after reinstall:
+Latest `deployment_status` result:
+
+- `recordedInstalled`: true;
+- executable present and SHA match: true;
+- systemd unit present and SHA match: true;
+- `hostsleuth.service`: loaded;
+- unit-file state: enabled;
+- active state: active;
+- substate: running;
+- result: success.
+
+Final runtime state after reinstall/status validation:
 
 - service: active/running;
 - unit: enabled;
@@ -138,13 +163,11 @@ Systemd-created state directory:
 - owner/group: `root:root`;
 - mode: `0700`.
 
-This closes the previous Docker-inventory uncertainty: Docker collection works under the current system-service privilege model.
+This closes the previous Docker-inventory uncertainty and the managed-deployment status/control-plane check.
 
 ### Remaining UAT boundary
 
-The current owner approval was created without the optional read-only `status` action, so HomeCommander `deployment_status` correctly refuses that one operation. Lifecycle/install/uninstall operations are approved and have already passed. Re-approving the same hashes with `status` included will close that shared-control-plane check.
-
-The only HostSleuth M1 runtime item still requiring real-world proof is **reboot persistence**. HomeCommander intentionally does not expose arbitrary reboot/root execution; the owner must perform a normal authorized reboot, after which HomeCommander can verify HostSleuth returns active/running/enabled and the dashboard/API remain healthy.
+The only HostSleuth M1 runtime item still requiring real-world proof is **reboot persistence**. HomeCommander intentionally does not expose arbitrary reboot/root execution. The owner must perform a normal authorized reboot of `openmediavault`; after the host and HomeCommander return, verify that HostSleuth is still enabled, active/running, hash-valid, dashboard/API healthy, Docker-aware, and using the preserved state directory.
 
 ## Real Debian 13 validation
 
@@ -169,7 +192,8 @@ Confirmed working:
 - schema persistence and empty event-list behavior (`[]`, not JSON `null`);
 - install/source-install/uninstall shell syntax;
 - systemd unit syntax;
-- real managed root-level install/lifecycle/uninstall/reinstall through HomeCommander.
+- real managed root-level install/lifecycle/uninstall/reinstall through HomeCommander;
+- exact managed status verification through HomeCommander.
 
 ## GitHub CI and release validation
 
@@ -203,8 +227,7 @@ Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Exact next actions
 
-1. Re-approve the same HostSleuth hashes with the read-only `status` action included so `deployment_status` can be validated.
-2. Perform one owner-authorized reboot of `openmediavault`.
-3. After reboot, verify through HomeCommander that HostSleuth is loaded, enabled, active/running; dashboard/API are healthy; Docker inventory still works; and state persists.
-4. Close M1.
-5. Begin the next diagnosis milestone with route/firewall evidence and bounded systemd/journal failure evidence.
+1. Perform one owner-authorized reboot of `openmediavault`.
+2. After reboot, verify through HomeCommander that HostSleuth is hash-valid, loaded, enabled, active/running; dashboard/API are healthy; Docker inventory still works; and state persists.
+3. Close M1.
+4. Begin the next diagnosis milestone with route/firewall evidence and bounded systemd/journal failure evidence.
