@@ -69,12 +69,15 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		}
 	}
 	if local {
+		docker := dockerPortCheck(snap, port, ips)
 		if l, ok := LocalListenerForPort(snap, port); ok {
 			d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "pass", Evidence: l.Protocol + " " + l.Address + " " + l.Process})
+			d.Checks = append(d.Checks, docker)
 			d.Conclusion = "service is listening locally but the TCP connection failed; inspect bind address, firewall, or network namespace"
 			d.Confidence = "medium"
 		} else {
 			d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "fail", Evidence: "no local listener found for TCP/" + port})
+			d.Checks = append(d.Checks, docker)
 			d.Checks = append(d.Checks, systemdFailureCheck(ctx, snap))
 			d.Conclusion = "no process appears to be listening on the requested local port"
 			d.Confidence = "high"
