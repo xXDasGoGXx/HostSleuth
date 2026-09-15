@@ -219,7 +219,7 @@ First-time UAT exposed a narrow HomeCommander staging ergonomics issue:
 
 This belongs in HomeCommander shared infrastructure, not in HostSleuth. Do not solve it with broader broker capabilities, generic sudo/root shell, or weak ownership.
 
-## M2 progress — route, firewall, systemd, Docker, and evidence policy merged
+## M2 — COMPLETE: deeper deterministic diagnosis
 
 PR #3 adds bounded route-path evidence after DNS resolution:
 
@@ -275,25 +275,36 @@ Scenario-level regressions now lock behavior for reachable targets, listener-plu
 
 Validation: PR #7 CI `34999939216` passed on exact PR head `8e2b675c1a3cf7084e19e6b966d34ba9327f5a2f`; PR #7 merged at `3352a7e8407eae855f4a88550cfaaf867f86ddf1`. Main CI run `35000071547` also passed on that merged commit.
 
-### M2 managed-deployment candidate — staged, not yet approved
+### M2 managed deployment and root-context validation — PASSED
 
-The exact merged M2 source was rebuilt and revalidated on Debian 13:
+The exact merged M2 source was rebuilt, owner-approved, installed through HomeCommander, restarted, and validated on Debian 13:
 
 - source: `3352a7e8407eae855f4a88550cfaaf867f86ddf1`;
 - version: `0.1.0-dev+3352a7e`;
-- staged path: `/srv/homecommander-deployments/hostsleuth/hostsleuth.m2-candidate`;
-- candidate SHA-256: `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`;
-- staged mode: `0755`;
-- unchanged unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`.
+- approved/staged path: `/srv/homecommander-deployments/hostsleuth/hostsleuth.m2-candidate`;
+- executable SHA-256: `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`;
+- unchanged unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`;
+- managed install succeeded after the approval changed from the M1 hash to the exact M2 hash;
+- managed restart changed PID `31172 -> 443538`;
+- final `deployment_status` reports both installed artifacts present and exactly matching approval; service is loaded, enabled, active/running.
 
-The existing approved M1 candidate was deliberately **not overwritten**:
+Live root-service validation through the built-in API showed:
 
-- `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate`;
-- SHA-256 `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`.
+- `ip route get` now succeeds in the actual root service context and returns `route: pass` evidence instead of the expected Normal-mode netlink restriction;
+- nftables reads succeed in the actual root service context and return bounded candidate evidence rather than permission/netlink failures;
+- all 21 Docker containers include network names in the live snapshot;
+- `127.0.0.1:8789` correctly reports no loopback listener and identifies Chaptarr as published only on `192.168.2.181:8789` with `networks=admin`;
+- `127.0.0.1:8192` correctly identifies FlareSolverr `8192/tcp` as container-internal only with `networks=admin`;
+- `192.168.2.181:8789` is reachable/high confidence;
+- `127.0.0.1:22` is reachable/high confidence;
+- a closed local port correctly reports no listener/high confidence while Docker has no matching exposure and nftables remains only candidate evidence;
+- dashboard returns HTTP 200;
+- schema remains version 1;
+- live snapshot contained 21 containers, 219 services, and 325 listeners at validation time.
 
-The staged M2 binary itself was replayed against the live root-collected snapshot and reproduced the expected Chaptarr bind mismatch, FlareSolverr internal-only exposure, and reachable SSH conclusions. No firewall, service, or container state was mutated for these tests.
+The snapshot contained zero failed systemd services, so `systemd-failures: pass` was validated and no journal command was invoked. A failed unit was deliberately not manufactured merely to force journal excerpt collection. No firewall, service, or container state was mutated to create artificial diagnosis evidence.
 
-The live managed system service has **not** been updated to M2 yet. It remains on the validated M1 build `0.1.0-dev+d702804`. Do not call `deployment_action install` until owner/root changes the managed deployment approval to the new M2 candidate path/hash.
+The older M1 candidate file remains staged separately at `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate` with SHA-256 `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`, but it is no longer the active approval.
 
 ## Current live state
 
@@ -301,16 +312,17 @@ Host: `openmediavault`
 
 Current installed HostSleuth:
 
-- version: `0.1.0-dev+d702804`
-- executable SHA: `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`
+- version: `0.1.0-dev+3352a7e`
+- executable SHA: `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`
 - unit SHA: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`
 - service: loaded, enabled, active/running
-- current validated PID: `31172`
+- current validated PID: `443538`
 - dashboard: HTTP 200 on `127.0.0.1:8787`
 - state: `/var/lib/hostsleuth`, `root:root 0700`
-- Docker inventory: 21 containers
+- Docker inventory: 21 containers, all with network-name data in the current snapshot
+- systemd service inventory: 219
 
-The root-owned HomeCommander approval currently points to staged source `hostsleuth.candidate`. Keep that staged candidate available while this approval is current so approved reinstall/update behavior remains reproducible.
+The root-owned HomeCommander approval currently points to `hostsleuth.m2-candidate` with the exact M2 executable hash above. Keep that staged candidate available while this approval is current so approved reinstall/update behavior remains reproducible.
 
 ## Important limitations
 
@@ -319,7 +331,7 @@ The root-owned HomeCommander approval currently points to staged source `hostsle
 - Collectors degrade if optional tools are unavailable/inaccessible.
 - Diagnosis now correlates route, nftables candidates, local listeners, Docker port/bind/network evidence, and bounded failed-systemd candidates, but does not yet understand reverse proxies, TLS, or package/config changes.
 - Firewall and failed-unit correlations are deliberately conservative candidate evidence rather than causal verdicts.
-- Full M2 root-context validation is still pending because the live managed service remains on M1 until the new exact candidate hash is owner-approved.
+- M2 root-context validation is complete. Journal excerpt collection itself remains intentionally unforced because the live snapshot had zero failed services; the no-failure branch is validated without manufacturing a service failure.
 - Journal evidence has a narrow first-pass credential redactor; general redaction rules remain a security backlog item.
 - Historical pre-fix container uptime-noise events remain in the append-only history and will age out of the API window naturally; they were not deleted merely to make validation look cleaner.
 
@@ -340,12 +352,12 @@ Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
 ## Next sequence
 
-M1 is closed and the planned M2 diagnosis code is merged, CI-green, and staged as an exact candidate. Continue in this order:
+M1 and M2 are both closed. Continue in this order:
 
-1. owner/root re-approves managed deployment `hostsleuth` to use `/srv/homecommander-deployments/hostsleuth/hostsleuth.m2-candidate` with SHA-256 `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`; keep the unchanged unit approval SHA `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`;
-2. re-check `deployment_status` and only then use `deployment_action install` followed by `restart`;
-3. validate route, nftables, journal, Docker network-name collection, target-aware listener behavior, dashboard/API, state persistence, and change recording under the real root system-service context without manufacturing destructive failures;
-4. if validation passes, mark M2 complete and decide separately whether to prepare a new public alpha;
-5. after M2, continue with reverse-proxy/TLS awareness and the planned SQLite migration as appropriate.
+1. begin reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager without turning HostSleuth into a config editor;
+2. add deterministic TLS/certificate evidence after proxy awareness so certificate failures can be distinguished from backend reachability failures;
+3. keep configuration fingerprinting/package-change timeline and the planned SQLite migration as separate subsequent slices;
+4. do not publish a new public alpha unless the owner explicitly authorizes release promotion;
+5. keep the current exact M2 managed-deployment approval/staged candidate reproducible until a later reviewed build replaces it.
 
 Publishing a new public HostSleuth release remains a separate owner-controlled action and must not occur without explicit approval.
