@@ -58,6 +58,7 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		return d
 	}
 	d.Checks = append(d.Checks, Check{Name: "tcp", Status: "fail", Evidence: err.Error()})
+	d.Checks = append(d.Checks, firewallCheck(ctx, port))
 
 	local := false
 	for _, ip := range ips {
