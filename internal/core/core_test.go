@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -140,6 +142,17 @@ func TestRouteCheckDetectsKernelUnreachable(t *testing.T) {
 	check := routeCheck(context.Background(), "203.0.113.10")
 	if check.Status != "fail" {
 		t.Fatalf("expected fail, got %#v", check)
+	}
+}
+
+func TestResolveCommandFallsBackToExecutableCandidate(t *testing.T) {
+	candidate := filepath.Join(t.TempDir(), "tool")
+	if err := os.WriteFile(candidate, []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	got := resolveCommand("hostsleuth-command-that-should-not-exist", candidate)
+	if got != candidate {
+		t.Fatalf("expected %q, got %q", candidate, got)
 	}
 }
 
