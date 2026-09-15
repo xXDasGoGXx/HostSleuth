@@ -3,6 +3,7 @@ package core
 import (
 	"net"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -11,6 +12,7 @@ const dockerEvidenceCandidateLimit = 4
 type dockerPortBinding struct {
 	Container     string
 	State         string
+	Networks      string
 	HostIP        string
 	HostPort      string
 	ContainerPort string
@@ -90,6 +92,7 @@ func dockerPortBindings(containers []ContainerInfo) []dockerPortBinding {
 			}
 			binding.Container = container.Name
 			binding.State = state
+			binding.Networks = strings.TrimSpace(container.Networks)
 			bindings = append(bindings, binding)
 		}
 	}
@@ -184,18 +187,22 @@ func formatDockerBindings(bindings []dockerPortBinding) string {
 		if state == "" {
 			state = "state unknown"
 		}
+		context := state
+		if binding.Networks != "" {
+			context += "; networks=" + binding.Networks
+		}
 		if binding.Published {
 			host := binding.HostIP
 			if strings.Contains(host, ":") {
 				host = "[" + host + "]"
 			}
-			parts = append(parts, binding.Container+" ("+state+") "+host+":"+binding.HostPort+"->"+binding.ContainerPort+"/"+binding.Protocol)
+			parts = append(parts, binding.Container+" ("+context+") "+host+":"+binding.HostPort+"->"+binding.ContainerPort+"/"+binding.Protocol)
 		} else {
-			parts = append(parts, binding.Container+" ("+state+") "+binding.ContainerPort+"/"+binding.Protocol+" internal-only")
+			parts = append(parts, binding.Container+" ("+context+") "+binding.ContainerPort+"/"+binding.Protocol+" internal-only")
 		}
 	}
 	if len(bindings) > limit {
-		parts = append(parts, "+"+itoa(len(bindings)-limit)+" more")
+		parts = append(parts, "+"+strconv.Itoa(len(bindings)-limit)+" more")
 	}
 	return strings.Join(parts, " | ")
 }
