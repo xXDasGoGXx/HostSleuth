@@ -16,7 +16,19 @@
 - [x] Add release automation for static Linux `amd64`/`arm64` binaries with checksums, tag creation, and release version stamping.
 - [x] Verify the hardened M1 code is green in GitHub Actions: run `34936129425` passed format, vet, tests, and build.
 - [x] Publish `v0.1.0-alpha.1` and validate its published amd64 artifact on Debian without a system Go installation, including checksum, version, snapshot, diagnosis, and `/releases/latest/download/...` URL.
-- [ ] Exercise the privileged systemd installation/enable path on an approved host with administrative execution available; verify reboot persistence and uninstall behavior.
+- [x] Stage HostSleuth as the first HomeCommander Managed Administrative Deployment UAT target on `openmediavault`.
+  - staged binary: `/srv/homecommander-deployments/hostsleuth/hostsleuth`
+  - binary SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`
+  - staged unit: `/srv/homecommander-deployments/hostsleuth/hostsleuth.service`
+  - unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`
+  - no root approval exists yet; this is intentionally owner-controlled.
+- [ ] Merge the systemd-owned state-directory fix after PR #1 validation is green.
+  - branch: `uat/systemd-state-directory`
+  - unit now uses `StateDirectory=hostsleuth` and `StateDirectoryMode=0700` so first-time managed install does not depend on a separate privileged `install -d` step.
+  - PR #1 CI run: `34987407246`.
+- [ ] Owner/root approves the exact staged HostSleuth deployment with `homecommander-approve-deployment`.
+  - Do not add a generic root shell, unrestricted sudo, arbitrary privileged writes, or HostSleuth-specific HomeCommander privilege code.
+- [ ] Exercise the privileged systemd installation/enable path through HomeCommander Managed Administrative Deployment; verify restart/reboot persistence and uninstall/reinstall behavior.
 - [ ] Validate Docker inventory in the final service privilege model.
 
 ## Planned immediately after M1
