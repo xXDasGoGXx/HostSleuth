@@ -1,6 +1,6 @@
 # HostSleuth — TO-DO
 
-## Active milestone — M1: Single-host deployable MVP
+## Completed milestone — M1: Single-host deployable MVP
 
 - [x] Define versioned snapshot and event schemas (`schema_version: 1`).
 - [x] Collect host identity, OS, kernel, uptime, CPU count, memory, filesystems/capacity, interfaces, addresses, routes, listeners, systemd service state, and Docker state when available/readable.
@@ -12,98 +12,93 @@
 - [x] Add tests for diffing, diagnostics, schema, and storage behavior.
 - [x] Add GitHub Actions CI definition (`gofmt`, `go vet`, `go test`, build).
 - [x] Add systemd unit and release/source install + uninstall scripts.
-- [x] Exercise the core runtime on a real Debian 13 host: snapshots, events, diagnostics, web dashboard/API, filesystem inventory, native build, and cross-builds.
-- [x] Add release automation for static Linux `amd64`/`arm64` binaries with checksums, tag creation, and release version stamping.
-- [x] Verify the hardened M1 code is green in GitHub Actions: run `34936129425` passed format, vet, tests, and build.
-- [x] Publish `v0.1.0-alpha.1` and validate its published amd64 artifact on Debian without a system Go installation, including checksum, version, snapshot, diagnosis, and `/releases/latest/download/...` URL.
+- [x] Exercise the core runtime on a real Debian 13 host.
+- [x] Add release automation for static Linux `amd64`/`arm64` binaries with checksums and version stamping.
+- [x] Publish and validate `v0.1.0-alpha.1` on Debian without system Go installed.
 - [x] Merge the systemd-owned state-directory fix.
-  - PR #1 CI run `34987407246` passed.
-  - merged to `main` at `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`.
+  - PR #1 CI `34987407246` passed.
+  - merged at `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`.
   - unit uses `StateDirectory=hostsleuth` and `StateDirectoryMode=0700`.
-- [x] Stage HostSleuth as the first HomeCommander Managed Administrative Deployment UAT target on `openmediavault`.
-  - original staged release binary: `/srv/homecommander-deployments/hostsleuth/hostsleuth`
-  - original binary SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`
-  - staged unit: `/srv/homecommander-deployments/hostsleuth/hostsleuth.service`
-  - unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`
-- [x] Owner/root approved the exact initial HostSleuth artifacts through `homecommander-approve-deployment`.
-  - approval remains exact-hash/fixed-destination and does not add a generic root shell, unrestricted sudo, arbitrary privileged writes, or HostSleuth-specific HomeCommander privilege code.
-- [x] Exercise privileged install and lifecycle through HomeCommander Managed Administrative Deployment.
-  - exact-hash install passed;
-  - enable/start passed;
-  - restart passed and returned to active/running;
-  - stop/disable passed;
-  - enable/start again passed;
-  - exact uninstall passed;
-  - reinstall passed;
-  - final state restored to active/running and enabled.
-- [x] Verify systemd-owned state directory creation.
-  - `/var/lib/hostsleuth` is `root:root 0700`.
-  - state directory remains after managed uninstall as intended.
-- [x] Validate Docker inventory in the final system-service privilege model.
-  - service snapshot observed 21 Docker containers.
-  - dashboard returned HTTP 200.
-- [x] Validate installed CLI diagnosis after managed restart.
+- [x] Use HostSleuth as the first real HomeCommander Managed Administrative Deployment UAT consumer.
+  - exact-hash first install passed;
+  - enable/start/status/restart passed;
+  - stop/disable and re-enable/re-start passed;
+  - exact uninstall/reinstall passed;
+  - root-only state directory persisted;
+  - audit trail captured privileged actions.
+- [x] Validate Docker inventory under the final system-service privilege model.
+  - 21 containers observed.
+- [x] Validate installed CLI diagnosis.
   - `diagnose 127.0.0.1:22` returned reachable/high confidence.
-- [x] Add read-only `status` to the root-owned HomeCommander approval and verify `deployment_status`.
-  - approval contains install/uninstall/enable/disable/start/stop/status/restart.
-  - executable and unit both matched their approved SHA-256 exactly.
-  - `recordedInstalled=true`.
-  - service loaded, enabled, active, and running.
-- [x] Perform one owner-authorized reboot of `openmediavault` and verify HostSleuth reboot persistence.
-  - real reboot confirmed by ~635-second uptime at first post-reboot check;
+- [x] Validate real reboot persistence on `openmediavault`.
   - HomeCommander recovered;
-  - approved installed hashes still matched;
-  - HostSleuth returned loaded + enabled + active/running with PID 1360;
-  - dashboard returned HTTP 200;
-  - `/var/lib/hostsleuth` remained `root:root 0700`;
-  - Docker inventory remained available with 21 containers;
-  - SSH diagnosis remained reachable/high confidence.
-- [x] Fix Docker uptime-only flight-recorder event churn discovered during post-reboot validation.
-  - 99 of the latest 100 API events were container-change records caused primarily by `Up N minutes -> Up N+1 minutes` raw Docker status text.
-  - PR #2 normalizes semantic state only for diffing while keeping full raw status in snapshots/UI.
-  - uptime-only and restart-timer-only changes are ignored; health/exit/restart/paused/dead/removal transitions remain meaningful.
-  - regression tests cover uptime churn, restart timer churn, health transitions, and exits.
-  - CI run `34991719610` passed format, vet, tests, and build.
-  - merged to `main` at `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`.
-- [x] Build and stage the merged Docker-event fix as a non-release managed-update candidate.
-  - no public release was created;
-  - source commit: `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`;
-  - version: `0.1.0-dev+d702804`;
-  - candidate SHA-256: `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`;
-  - staged path: `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate`;
-  - original `v0.1.0-alpha.1` staged binary remains untouched for recovery/reference;
-  - systemd unit bytes/hash are unchanged.
-- [ ] Owner/root re-approves the new `hostsleuth.candidate` exact hash with the unchanged unit and normal default actions.
-- [ ] Exercise a real HomeCommander managed update to candidate `0.1.0-dev+d702804`.
-  - managed `install` should update the recorded deployment only after verifying the current installed files still match their prior state;
-  - managed restart after install;
-  - verify `deployment_status` pins/observes candidate SHA `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1` and unchanged unit SHA.
-- [ ] Validate the Docker event-noise fix under the real root system-service model.
-  - verify dashboard/API and 21-container Docker inventory remain healthy;
-  - observe at least two normal 60-second capture intervals;
-  - confirm uptime progression no longer creates repeated container-change events;
-  - do not erase existing history merely to make validation easier.
-- [ ] Close M1 after the managed update + live event-noise validation are green.
+  - HostSleuth hashes remained valid;
+  - service returned loaded, enabled, active/running;
+  - dashboard HTTP 200;
+  - Docker inventory remained available;
+  - state directory remained `root:root 0700`.
+- [x] Fix Docker uptime-only event churn found by reboot/Docker UAT.
+  - pre-fix 99/100 recent events were container events caused primarily by raw `Up N minutes` progression;
+  - PR #2 normalizes semantic container state only for diffing;
+  - raw status remains in snapshot/UI;
+  - real health/exit/restart/paused/dead/removal transitions remain meaningful;
+  - CI `34991719610` passed;
+  - merged at `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`.
+- [x] Build and stage the merged event fix as the first real managed-update candidate.
+  - version `0.1.0-dev+d702804`;
+  - candidate SHA `1014a482ea00812bbf0ae816e55494caa31e49d7bfde6bb867dd0cca132da4e1`;
+  - staged at `/srv/homecommander-deployments/hostsleuth/hostsleuth.candidate`;
+  - unchanged unit SHA `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`.
+- [x] Owner/root re-approved the new exact candidate hash with the unchanged unit/default actions.
+- [x] Exercise a real HomeCommander managed update.
+  - managed install replaced the old recorded executable only after prior-state verification;
+  - managed restart changed PID `1360 -> 31172`;
+  - final `deployment_status` shows candidate executable hash and unchanged unit hash both matching approval;
+  - service remains enabled, active, running;
+  - installed version `0.1.0-dev+d702804`.
+- [x] Validate the Docker event-noise fix under the real root system-service model.
+  - dashboard HTTP 200;
+  - Docker inventory still 21 containers;
+  - first fresh 60-second interval: zero new container events; only expected listener reappearance after restart;
+  - second fresh 60-second interval: zero new container events; two real systemd service-state changes were still recorded;
+  - historical pre-fix events were not erased.
+- [x] Close M1 and the first real HomeCommander Managed Administrative Deployment UAT.
 
-## Shared-infrastructure finding recorded in HomeCommander
+## Active milestone — M2: Deeper deterministic diagnosis
 
-- Generic HomeCommander Normal-mode staging initially created `/srv/homecommander-deployments/hostsleuth` as `0700` and the staged unit as `0600`.
-- The intentionally capability-stripped root broker relies on the `homecommander` group for staging access, so those worker-private modes caused the first install attempt to fail closed with permission denied.
-- UAT corrected only staging permissions to `0750` for the deployment directory and `0640` for the unit; hashes did not change.
-- This belongs in HomeCommander shared-infrastructure hardening/documentation, not as HostSleuth privileged code.
+Start with evidence that helps explain why a service/port is unreachable without turning HostSleuth into an automatic repair tool.
 
-## Planned immediately after M1
+- [ ] Add route-path evidence to diagnosis.
+- [ ] Add firewall evidence with safe bounded reads of the host's active firewall state.
+- [ ] Add bounded systemd/journal failure evidence for relevant units.
+- [ ] Add Docker port/bind/network correlation.
+- [ ] Define deterministic evidence ordering and confidence behavior when evidence is unavailable.
+- [ ] Add regression tests for reachable, locally blocked, service-failed, and container-port mismatch cases.
+- [ ] Validate M2 behavior on a real Debian 13 host without mutating firewall/service state merely for tests.
+
+## Planned after/alongside M2
 
 - [ ] SQLite storage backend and migration path from JSON/JSONL.
 - [ ] Configuration fingerprinting for selected `/etc` files without storing secrets by default.
 - [ ] Package-change timeline from dpkg/apt logs.
-- [ ] Improved systemd failure evidence using bounded journal excerpts.
-- [ ] Docker port/bind/network correlation.
-- [ ] Route and firewall evidence in diagnosis.
 - [ ] Reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager.
 - [ ] TLS/certificate diagnostics.
 - [ ] `.deb` package and signed release artifacts.
 - [ ] Multi-host architecture research without compromising local-first operation.
+
+## Release / distribution boundary
+
+- [ ] When explicitly authorized by the owner, prepare the next public alpha release containing the final M1 fixes.
+  - Do not publish automatically.
+  - Current published release remains `v0.1.0-alpha.1` and predates the Docker semantic-event fix.
+  - Current live validated build is `0.1.0-dev+d702804` from commit `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`.
+
+## Shared-infrastructure finding recorded in HomeCommander
+
+- Generic HomeCommander Normal-mode staging initially created the HostSleuth deployment directory as `0700` and staged unit as `0600`.
+- The intentionally capability-stripped broker relies on the `homecommander` group for staging access, so first install failed closed before promotion.
+- UAT corrected only staging permissions to directory `0750` and unit `0640`; artifact bytes/hashes did not change.
+- This belongs in HomeCommander shared-infrastructure hardening, not HostSleuth privileged code.
 
 ## Security / safety backlog
 
@@ -115,10 +110,10 @@
 
 ## Future ideas — do not derail current milestone
 
-- [ ] Dependency graph: DNS → route/firewall → proxy → app → database/storage.
+- [ ] Dependency graph: DNS -> route/firewall -> proxy -> app -> database/storage.
 - [ ] Exposure map showing Internet/LAN/VPN-visible listeners.
 - [ ] Baseline-vs-incident comparison UI.
-- [ ] Safe repair plans: preview → snapshot → user approval → apply → verify → rollback.
+- [ ] Safe repair plans: preview -> snapshot -> user approval -> apply -> verify -> rollback.
 - [ ] Self-updating `ARCHITECTURE.md` / recovery documentation generated from observed state.
 - [ ] Pluggable diagnosis rules.
 - [ ] Optional local LLM explanation layer that cannot alter underlying deterministic evidence.
