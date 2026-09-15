@@ -43,7 +43,7 @@ Status: **complete**
 
 ### M1 — Single-host deployable MVP
 
-Status: **release candidate validated; managed administrative deployment UAT staged; owner root approval is the current boundary**
+Status: **managed installation UAT passed; only real reboot-persistence validation remains before M1 closure**
 
 Implemented:
 
@@ -72,38 +72,83 @@ Implemented:
 
 HomeCommander is live on `openmediavault` with the reviewed exact-hash Managed Administrative Deployment capability. HostSleuth is the first real UAT consumer.
 
-Verified before staging:
+### Packaging fix discovered before install
 
-- HomeCommander gateway healthy on `openmediavault`;
-- Normal-mode read/write policy unchanged;
-- `/srv/homecommander-deployments` initially empty;
-- no `hostsleuth` managed-deployment approval exists yet;
-- `/usr/local/bin/hostsleuth` is not managed/installed through this path yet;
-- `/var/lib/hostsleuth` does not yet exist.
-
-Staged UAT artifacts:
-
-- `/srv/homecommander-deployments/hostsleuth/hostsleuth`
-  - source: published `v0.1.0-alpha.1` Linux amd64 release;
-  - SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`;
-  - checksum matches the published release handoff exactly.
-- `/srv/homecommander-deployments/hostsleuth/hostsleuth.service`
-  - SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`.
-
-A first-install integration issue was caught before root approval: the original `scripts/install.sh` created `/var/lib/hostsleuth`, but managed deployment intentionally promotes only the exact approved binary and systemd unit. The unit has therefore been adjusted to use:
+The original `scripts/install.sh` created `/var/lib/hostsleuth`, while managed deployment intentionally promotes only the exact approved binary and systemd unit. HostSleuth PR #1 therefore added:
 
 - `StateDirectory=hostsleuth`
 - `StateDirectoryMode=0700`
 
-This lets systemd create and manage `/var/lib/hostsleuth` without broadening HomeCommander privileged capabilities. The change is isolated in branch `uat/systemd-state-directory`, commit `bb7552a43130072fb47cef30c8eed2a6e8ecb013`, PR #1. CI run `34987407246` was started for the PR.
+This keeps HostSleuth self-contained and lets systemd create `/var/lib/hostsleuth` without broadening HomeCommander privilege.
 
-`systemd-analyze verify` accepts the staged unit; its only warning is the expected absence of `/usr/local/bin/hostsleuth` before managed installation.
+Validation/promotion:
 
-Current owner boundary: the staged artifacts must be approved out-of-band by root using `homecommander-approve-deployment`. HomeCommander must not self-approve them.
+- PR #1: `Make systemd create HostSleuth state directory`;
+- CI run `34987407246`: success;
+- merged to `main` at `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`.
+
+### Approved UAT artifacts
+
+Staged and owner-approved artifacts:
+
+- `/srv/homecommander-deployments/hostsleuth/hostsleuth`
+  - published `v0.1.0-alpha.1` Linux amd64 release;
+  - SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`.
+- `/srv/homecommander-deployments/hostsleuth/hostsleuth.service`
+  - SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`.
+
+The root-owned approval pins the exact artifacts, destinations, `hostsleuth.service`, and approved lifecycle actions. HostSleuth gained no sudo/root mechanism of its own.
+
+The initial staging directory/file modes produced by generic HomeCommander Normal-mode file creation were too restrictive for the intentionally capability-stripped broker (`0700` deployment directory and `0600` unit). UAT corrected only the unprivileged staging permissions to `0750` for the deployment directory and `0640` for the unit; hashes were unchanged. This is recorded as a HomeCommander shared-infrastructure follow-up, not HostSleuth privilege code.
+
+### Managed deployment results
+
+Confirmed through HomeCommander `deployment_action`:
+
+- exact-hash `install` succeeded;
+- binary installed at `/usr/local/bin/hostsleuth`, mode `0755`, expected SHA-256;
+- unit installed at `/etc/systemd/system/hostsleuth.service`, mode `0644`, expected SHA-256;
+- `enable` succeeded;
+- `start` succeeded;
+- service became active/running and enabled;
+- managed `restart` succeeded and produced a new main PID while remaining active/running;
+- `stop` succeeded;
+- `disable` succeeded;
+- re-`enable` and re-`start` succeeded;
+- exact managed `uninstall` removed only `/usr/local/bin/hostsleuth` and `/etc/systemd/system/hostsleuth.service`;
+- `/var/lib/hostsleuth` remained present after uninstall as intended;
+- exact managed reinstall succeeded;
+- HostSleuth was re-enabled and re-started successfully.
+
+Final runtime state after reinstall:
+
+- service: active/running;
+- unit: enabled;
+- dashboard `http://127.0.0.1:8787/`: HTTP 200;
+- binary version: `v0.1.0-alpha.1`;
+- snapshot `schema_version`: 1;
+- Docker containers observed under the actual root system-service privilege model: **21**;
+- services observed: 219;
+- listeners observed: 328;
+- `diagnose 127.0.0.1:22`: reachable / high confidence.
+
+Systemd-created state directory:
+
+- `/var/lib/hostsleuth`;
+- owner/group: `root:root`;
+- mode: `0700`.
+
+This closes the previous Docker-inventory uncertainty: Docker collection works under the current system-service privilege model.
+
+### Remaining UAT boundary
+
+The current owner approval was created without the optional read-only `status` action, so HomeCommander `deployment_status` correctly refuses that one operation. Lifecycle/install/uninstall operations are approved and have already passed. Re-approving the same hashes with `status` included will close that shared-control-plane check.
+
+The only HostSleuth M1 runtime item still requiring real-world proof is **reboot persistence**. HomeCommander intentionally does not expose arbitrary reboot/root execution; the owner must perform a normal authorized reboot, after which HomeCommander can verify HostSleuth returns active/running/enabled and the dashboard/API remain healthy.
 
 ## Real Debian 13 validation
 
-Test host: `openmediavault`, Debian GNU/Linux 13 (trixie), x86_64. Testing was performed through HomeCommander in Normal mode.
+Test host: `openmediavault`, Debian GNU/Linux 13 (trixie), x86_64.
 
 A temporary Go 1.24.13 toolchain under `/tmp` was used for source-level validation only; Go was **not** installed persistently/system-wide on the host.
 
@@ -115,36 +160,30 @@ Confirmed working:
 - static cross-builds for Linux `amd64` and `arm64`;
 - release version stamping;
 - snapshot collection;
-- filesystem inventory: 117 mounts observed; `/` identified as ext4 on `/dev/nvme0n1p1` with capacity data;
-- systemd inventory: 219 services observed;
-- listener inventory: 329 listeners at baseline;
-- `diagnose 127.0.0.1:22` returned reachable/high confidence;
-- `diagnose 127.0.0.1:65530` returned no local listener/high confidence;
+- filesystem inventory;
+- systemd service inventory;
+- listener inventory;
+- deterministic reachable/unreachable diagnosis;
 - dashboard and `/api/snapshot`, `/api/events`, `/api/diagnose` endpoints;
-- periodic flight-recorder behavior: starting the web listener emitted `listener appeared: tcp 127.0.0.1:8787`; stopping it and taking the next snapshot emitted `listener disappeared: tcp 127.0.0.1:8787`;
+- periodic flight-recorder listener change events;
 - schema persistence and empty event-list behavior (`[]`, not JSON `null`);
 - install/source-install/uninstall shell syntax;
-- systemd unit syntax. `systemd-analyze verify` only warned that `/usr/local/bin/hostsleuth` was absent on the non-installed test machine.
+- systemd unit syntax;
+- real managed root-level install/lifecycle/uninstall/reinstall through HomeCommander.
 
 ## GitHub CI and release validation
 
-- Initial CI failed only `gofmt`; that was corrected and preserved in commit `e8185ae4e36ba0b9d0ec621369524762c54057d5`.
+- Initial CI failed only `gofmt`; corrected in commit `e8185ae4e36ba0b9d0ec621369524762c54057d5`.
 - Hardened M1 code commit: `69fe6c0add132e28915672f161062f60c0765635`.
-- GitHub Actions CI run **34936129425** passed every step: format, vet, tests, and build.
+- GitHub Actions CI run `34936129425`: success.
 - Release automation commit: `a97932caaccf9c0e8c6d095592dc4cb049648664`.
 - Release branch: `release/v0.1.0-alpha.1`.
-- Release workflow run **34936275773** passed tests, built both architectures, and successfully published the tag/release.
-- Published release: **`v0.1.0-alpha.1`**.
+- Release workflow run `34936275773`: success.
+- Published release: `v0.1.0-alpha.1`.
 - Published assets: `hostsleuth-linux-amd64`, `hostsleuth-linux-arm64`, `SHA256SUMS`.
 - Published amd64 SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`.
-- The published amd64 binary was downloaded onto the Debian 13 host using the exact release URL. `sha256sum -c` passed.
-- The same host confirmed `go` is not installed system-wide, yet the downloaded binary ran successfully, reported `v0.1.0-alpha.1`, captured a real snapshot, and diagnosed SSH correctly.
-- The default installer-style `/releases/latest/download/hostsleuth-linux-amd64` URL was also tested and returned the same correct version and SHA-256.
-
-## Important validation limitation
-
-- The previous HomeCommander limitation around first-time privileged installation is now solved by the shared Managed Administrative Deployment mechanism. The current remaining boundary is the deliberate owner/root approval of the exact staged HostSleuth artifacts.
-- HomeCommander blocks direct Docker commands and the prior test process was unprivileged, so the earlier observed `containers=0` does **not** prove that the host has no containers. Docker collection still needs validation once HostSleuth is running under the final system service privilege model.
+- Published amd64 artifact was validated on Debian without system Go installed.
+- `/releases/latest/download/hostsleuth-linux-amd64` returned the same correct version/hash.
 
 ## Important current limitations
 
@@ -158,16 +197,14 @@ Confirmed working:
 Repository: `xXDasGoGXx/HostSleuth`
 Default branch: `main`
 First published release: `v0.1.0-alpha.1`
-Active UAT branch: `uat/systemd-state-directory`
-Active UAT PR: #1
+State-directory fix merged at: `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`
 
 Keep this file and `TO-DO.md` synchronized with meaningful progress.
 
-## Next actions
+## Exact next actions
 
-1. Let PR #1 CI complete and merge the systemd-owned state-directory fix only if validation is green.
-2. Owner/root approves the exact staged `hostsleuth` deployment; no generic sudo/root bypass.
-3. Use HomeCommander `deployment_action`/`deployment_status` for install, enable/start, restart, stop/disable, uninstall/reinstall and managed update behavior as appropriate.
-4. Verify service runtime, `/var/lib/hostsleuth` creation/mode, dashboard/API, reboot persistence, and Docker inventory under the actual service privilege model.
-5. Close M1 only after privileged installation/reboot/uninstall/reinstall UAT is complete.
-6. Then begin the next diagnosis milestone with route/firewall evidence and bounded systemd/journal failure evidence.
+1. Re-approve the same HostSleuth hashes with the read-only `status` action included so `deployment_status` can be validated.
+2. Perform one owner-authorized reboot of `openmediavault`.
+3. After reboot, verify through HomeCommander that HostSleuth is loaded, enabled, active/running; dashboard/API are healthy; Docker inventory still works; and state persists.
+4. Close M1.
+5. Begin the next diagnosis milestone with route/firewall evidence and bounded systemd/journal failure evidence.
