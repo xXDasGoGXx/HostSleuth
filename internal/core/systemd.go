@@ -12,7 +12,7 @@ import (
 
 const (
 	systemdFailureCandidateLimit = 3
-	systemdJournalOutputLimit     = 8 * 1024
+	systemdJournalOutputLimit    = 8 * 1024
 )
 
 var (
