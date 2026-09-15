@@ -16,20 +16,49 @@
 - [x] Add release automation for static Linux `amd64`/`arm64` binaries with checksums, tag creation, and release version stamping.
 - [x] Verify the hardened M1 code is green in GitHub Actions: run `34936129425` passed format, vet, tests, and build.
 - [x] Publish `v0.1.0-alpha.1` and validate its published amd64 artifact on Debian without a system Go installation, including checksum, version, snapshot, diagnosis, and `/releases/latest/download/...` URL.
+- [x] Merge the systemd-owned state-directory fix.
+  - PR #1 CI run `34987407246` passed.
+  - merged to `main` at `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`.
+  - unit uses `StateDirectory=hostsleuth` and `StateDirectoryMode=0700`.
 - [x] Stage HostSleuth as the first HomeCommander Managed Administrative Deployment UAT target on `openmediavault`.
   - staged binary: `/srv/homecommander-deployments/hostsleuth/hostsleuth`
   - binary SHA-256: `8fe9e0caf991e4a3413a98b7b1ca75063cfd748a86bcb2f6fb953edba9008c90`
   - staged unit: `/srv/homecommander-deployments/hostsleuth/hostsleuth.service`
   - unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`
-  - no root approval exists yet; this is intentionally owner-controlled.
-- [ ] Merge the systemd-owned state-directory fix after PR #1 validation is green.
-  - branch: `uat/systemd-state-directory`
-  - unit now uses `StateDirectory=hostsleuth` and `StateDirectoryMode=0700` so first-time managed install does not depend on a separate privileged `install -d` step.
-  - PR #1 CI run: `34987407246`.
-- [ ] Owner/root approves the exact staged HostSleuth deployment with `homecommander-approve-deployment`.
-  - Do not add a generic root shell, unrestricted sudo, arbitrary privileged writes, or HostSleuth-specific HomeCommander privilege code.
-- [ ] Exercise the privileged systemd installation/enable path through HomeCommander Managed Administrative Deployment; verify restart/reboot persistence and uninstall/reinstall behavior.
-- [ ] Validate Docker inventory in the final service privilege model.
+- [x] Owner/root approved the exact staged HostSleuth artifacts through `homecommander-approve-deployment`.
+  - approval remains exact-hash/fixed-destination and does not add a generic root shell, unrestricted sudo, arbitrary privileged writes, or HostSleuth-specific HomeCommander privilege code.
+  - current approval omitted the read-only `status` action; add it in a re-approval before closing the shared-control-plane UAT.
+- [x] Exercise privileged install and lifecycle through HomeCommander Managed Administrative Deployment.
+  - exact-hash install passed;
+  - enable/start passed;
+  - restart passed and returned to active/running;
+  - stop/disable passed;
+  - enable/start again passed;
+  - exact uninstall passed;
+  - reinstall passed;
+  - final state restored to active/running and enabled.
+- [x] Verify systemd-owned state directory creation.
+  - `/var/lib/hostsleuth` is `root:root 0700`.
+  - state directory remains after managed uninstall as intended.
+- [x] Validate Docker inventory in the final system-service privilege model.
+  - final service snapshot observed 21 Docker containers.
+  - dashboard returned HTTP 200; schema version 1; 219 services and 328 listeners observed.
+- [x] Validate installed CLI diagnosis after managed restart.
+  - `diagnose 127.0.0.1:22` returned reachable/high confidence.
+- [ ] Add read-only `status` to the root-owned HomeCommander approval and verify `deployment_status`.
+- [ ] Perform one owner-authorized reboot of `openmediavault` and verify HostSleuth reboot persistence.
+  - after reboot verify enabled + active/running;
+  - verify dashboard/API HTTP health;
+  - verify Docker inventory remains available;
+  - verify recorded state persists.
+- [ ] Close M1 after the reboot/status checks are green.
+
+## Shared-infrastructure finding recorded in HomeCommander
+
+- Generic HomeCommander Normal-mode staging initially created `/srv/homecommander-deployments/hostsleuth` as `0700` and the staged unit as `0600`.
+- The intentionally capability-stripped root broker relies on the `homecommander` group for staging access, so those worker-private modes caused the first install attempt to fail closed with permission denied.
+- UAT corrected only staging permissions to `0750` for the deployment directory and `0640` for the unit; hashes did not change.
+- This belongs in HomeCommander shared-infrastructure hardening/documentation, not as HostSleuth privileged code.
 
 ## Planned immediately after M1
 
