@@ -9,6 +9,21 @@ import (
 
 const dockerEvidenceCandidateLimit = 4
 
+type dockerPortRelation string
+
+const (
+	dockerPortUnavailable        dockerPortRelation = "unavailable"
+	dockerPortPublishedTarget    dockerPortRelation = "published-target"
+	dockerPortPublishedOtherBind dockerPortRelation = "published-other-bind"
+	dockerPortInternalOnly       dockerPortRelation = "internal-only"
+	dockerPortNoMatchingExposure dockerPortRelation = "no-match"
+)
+
+type dockerPortAssessment struct {
+	Check    Check
+	Relation dockerPortRelation
+}
+
 type dockerPortBinding struct {
 	Container     string
 	State         string
@@ -22,8 +37,15 @@ type dockerPortBinding struct {
 }
 
 func dockerPortCheck(snap Snapshot, port string, resolvedIPs []string) Check {
+	return assessDockerPort(snap, port, resolvedIPs).Check
+}
+
+func assessDockerPort(snap Snapshot, port string, resolvedIPs []string) dockerPortAssessment {
 	if len(snap.Containers) == 0 {
-		return Check{Name: "docker-port", Status: "unknown", Evidence: "snapshot contains no Docker inventory; Docker may be absent or inaccessible"}
+		return dockerPortAssessment{
+			Relation: dockerPortUnavailable,
+			Check:    Check{Name: "docker-port", Status: "unknown", Evidence: "snapshot contains no Docker inventory; Docker may be absent or inaccessible"},
+		}
 	}
 
 	bindings := dockerPortBindings(snap.Containers)
@@ -49,31 +71,43 @@ func dockerPortCheck(snap Snapshot, port string, resolvedIPs []string) Check {
 			}
 		}
 		if len(direct) > 0 {
-			return Check{
-				Name:     "docker-port",
-				Status:   "fail",
-				Evidence: boundedEvidence("Docker publishes the requested host port but TCP still failed: "+formatDockerBindings(direct), 1024),
+			return dockerPortAssessment{
+				Relation: dockerPortPublishedTarget,
+				Check: Check{
+					Name:     "docker-port",
+					Status:   "fail",
+					Evidence: boundedEvidence("Docker publishes the requested host port but TCP still failed: "+formatDockerBindings(direct), 1024),
+				},
 			}
 		}
-		return Check{
-			Name:     "docker-port",
-			Status:   "fail",
-			Evidence: boundedEvidence("Docker publishes TCP/"+port+" only on different host address(es): "+formatDockerBindings(published), 1024),
+		return dockerPortAssessment{
+			Relation: dockerPortPublishedOtherBind,
+			Check: Check{
+				Name:     "docker-port",
+				Status:   "fail",
+				Evidence: boundedEvidence("Docker publishes TCP/"+port+" only on different host address(es): "+formatDockerBindings(published), 1024),
+			},
 		}
 	}
 
 	if len(internalOnly) > 0 {
-		return Check{
-			Name:     "docker-port",
-			Status:   "unknown",
-			Evidence: boundedEvidence("Docker container port TCP/"+port+" is exposed internally but not published on the host: "+formatDockerBindings(internalOnly), 1024),
+		return dockerPortAssessment{
+			Relation: dockerPortInternalOnly,
+			Check: Check{
+				Name:     "docker-port",
+				Status:   "unknown",
+				Evidence: boundedEvidence("Docker container port TCP/"+port+" is exposed internally but not published on the host: "+formatDockerBindings(internalOnly), 1024),
+			},
 		}
 	}
 
-	return Check{
-		Name:     "docker-port",
-		Status:   "pass",
-		Evidence: "Docker inventory contains no TCP publication or internal exposure matching port " + port,
+	return dockerPortAssessment{
+		Relation: dockerPortNoMatchingExposure,
+		Check: Check{
+			Name:     "docker-port",
+			Status:   "pass",
+			Evidence: "Docker inventory contains no TCP publication or internal exposure matching port " + port,
+		},
 	}
 }
 
