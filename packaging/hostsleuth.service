@@ -1,0 +1,20 @@
+[Unit]
+Description=HostSleuth Linux flight recorder and diagnostics
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/hostsleuth serve --state-dir /var/lib/hostsleuth --listen 127.0.0.1:8787 --interval 60s
+Restart=on-failure
+RestartSec=5s
+User=root
+Group=root
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/hostsleuth
+
+[Install]
+WantedBy=multi-user.target
