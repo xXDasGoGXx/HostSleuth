@@ -23,7 +23,8 @@ var tcpConnect = func(ctx context.Context, address string) error {
 	if err != nil {
 		return err
 	}
-	return conn.Close()
+	_ = conn.Close()
+	return nil
 }
 
 func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
