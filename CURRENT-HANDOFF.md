@@ -9,7 +9,7 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 1. **Remember meaningful host changes.**
 2. **Explain why a host/service/port is or is not reachable using deterministic evidence.**
 
-The product definition lives in `PRODUCT.md`.
+The product definition and normal user-facing overview live in `README.md`.
 
 ## Current milestone state
 
@@ -95,6 +95,15 @@ The live snapshot contained zero failed systemd services, so journal excerpts we
 
 These are backlog items, not reasons to expand the product immediately.
 
+## Branch hygiene
+
+`main` is the only authoritative development state.
+
+- Old M1/M2 feature branches are historical leftovers after merged work.
+- `m3/npm-proxy-awareness` and `m3/tls-diagnostics` contain unmerged experimental work and are **not part of the product**.
+- Do not merge, continue, or treat those M3 branches as active unless a future real-world need explicitly justifies reviving them.
+- `m3/generic-nginx-awareness` contains no work ahead of `main`.
+
 ## Next task
 
 **Use the current build as the product.**
@@ -114,7 +123,7 @@ Repository: `xXDasGoGXx/HostSleuth`
 
 Read in this order when resuming:
 
-1. `PRODUCT.md`
+1. `README.md`
 2. `CURRENT-HANDOFF.md`
 3. `TO-DO.md`
 
