@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -143,12 +145,91 @@ func TestRouteCheckDetectsKernelUnreachable(t *testing.T) {
 	}
 }
 
+func TestResolveCommandFallsBackToExecutableCandidate(t *testing.T) {
+	candidate := filepath.Join(t.TempDir(), "tool")
+	if err := os.WriteFile(candidate, []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	got := resolveCommand("hostsleuth-command-that-should-not-exist", candidate)
+	if got != candidate {
+		t.Fatalf("expected %q, got %q", candidate, got)
+	}
+}
+
+func TestFirewallCheckEmptyRuleset(t *testing.T) {
+	old := nftRulesetLookup
+	nftRulesetLookup = func(context.Context) (boundedCommandResult, error) {
+		return boundedCommandResult{}, nil
+	}
+	defer func() { nftRulesetLookup = old }()
+
+	check := firewallCheck(context.Background(), "22")
+	if check.Status != "pass" || check.Evidence != "nftables ruleset is empty" {
+		t.Fatalf("unexpected firewall check: %#v", check)
+	}
+}
+
+func TestFirewallCheckTreatsRestrictedReadAsUnknown(t *testing.T) {
+	old := nftRulesetLookup
+	nftRulesetLookup = func(context.Context) (boundedCommandResult, error) {
+		return boundedCommandResult{Output: "netlink: Error: cache initialization failed: Operation not permitted\n"}, errors.New("exit status 1")
+	}
+	defer func() { nftRulesetLookup = old }()
+
+	check := firewallCheck(context.Background(), "22")
+	if check.Status != "unknown" || !strings.Contains(check.Evidence, "Operation not permitted") {
+		t.Fatalf("unexpected firewall check: %#v", check)
+	}
+}
+
+func TestFirewallCheckSurfacesCandidateEvidence(t *testing.T) {
+	old := nftRulesetLookup
+	nftRulesetLookup = func(context.Context) (boundedCommandResult, error) {
+		return boundedCommandResult{Output: `table inet filter {
+	chain input {
+		type filter hook input priority filter; policy drop;
+		tcp dport { 22, 443 } accept
+		tcp dport 8080 reject
+	}
+}`}, nil
+	}
+	defer func() { nftRulesetLookup = old }()
+
+	check := firewallCheck(context.Background(), "8080")
+	if check.Status != "unknown" {
+		t.Fatalf("expected conservative unknown status, got %#v", check)
+	}
+	if !strings.Contains(check.Evidence, "policy drop") || !strings.Contains(check.Evidence, "tcp dport 8080 reject") {
+		t.Fatalf("expected base policy and matching port candidate, got %q", check.Evidence)
+	}
+}
+
+func TestFirewallCheckMarksTruncatedScan(t *testing.T) {
+	old := nftRulesetLookup
+	nftRulesetLookup = func(context.Context) (boundedCommandResult, error) {
+		return boundedCommandResult{Output: "table inet filter { chain input { type filter hook input priority filter; policy accept; } }", Truncated: true}, nil
+	}
+	defer func() { nftRulesetLookup = old }()
+
+	check := firewallCheck(context.Background(), "443")
+	if !strings.Contains(check.Evidence, "truncated at 64 KiB") {
+		t.Fatalf("expected truncation warning, got %q", check.Evidence)
+	}
+}
+
 func TestDiagnoseIncludesRouteEvidence(t *testing.T) {
-	old := routeLookup
+	oldRoute := routeLookup
+	oldFirewall := nftRulesetLookup
 	routeLookup = func(context.Context, string) (string, error) {
 		return "local 127.0.0.1 dev lo src 127.0.0.1\n", nil
 	}
-	defer func() { routeLookup = old }()
+	nftRulesetLookup = func(context.Context) (boundedCommandResult, error) {
+		return boundedCommandResult{}, nil
+	}
+	defer func() {
+		routeLookup = oldRoute
+		nftRulesetLookup = oldFirewall
+	}()
 
 	d := Diagnose(context.Background(), "127.0.0.1:0", Snapshot{})
 	for _, check := range d.Checks {
@@ -160,6 +241,32 @@ func TestDiagnoseIncludesRouteEvidence(t *testing.T) {
 		}
 	}
 	t.Fatal("expected route check in diagnosis")
+}
+
+func TestDiagnoseIncludesFirewallEvidenceOnTCPFailure(t *testing.T) {
+	oldRoute := routeLookup
+	oldFirewall := nftRulesetLookup
+	routeLookup = func(context.Context, string) (string, error) {
+		return "local 127.0.0.1 dev lo src 127.0.0.1\n", nil
+	}
+	nftRulesetLookup = func(context.Context) (boundedCommandResult, error) {
+		return boundedCommandResult{Output: "table inet filter { chain input { type filter hook input priority filter; policy drop; tcp dport 65534 reject; } }"}, nil
+	}
+	defer func() {
+		routeLookup = oldRoute
+		nftRulesetLookup = oldFirewall
+	}()
+
+	d := Diagnose(context.Background(), "127.0.0.1:65534", Snapshot{})
+	for _, check := range d.Checks {
+		if check.Name == "firewall" {
+			if check.Status != "unknown" || !strings.Contains(check.Evidence, "candidate evidence") {
+				t.Fatalf("unexpected firewall check: %#v", check)
+			}
+			return
+		}
+	}
+	t.Fatal("expected firewall check after TCP failure")
 }
 
 func TestStorePersistsSchemaAndReturnsEmptyEvents(t *testing.T) {
