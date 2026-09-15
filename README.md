@@ -4,8 +4,6 @@
 
 HostSleuth is intentionally not a full monitoring platform. It records meaningful Linux state changes and performs deterministic, evidence-backed `host:port` diagnosis without requiring a cloud account, AI model, external database, or API key.
 
-The full product boundary is defined in [`PRODUCT.md`](PRODUCT.md).
-
 ## What it does
 
 ### Remember meaningful changes
@@ -85,7 +83,7 @@ Then open `http://127.0.0.1:8787` on the same machine.
 
 ## Install a release with systemd
 
-Release installation does **not** require Go on the target host.
+Release installation does **not** require Go on the target host. Run the installer from a HostSleuth repository checkout so it can install the included systemd unit:
 
 ```bash
 sudo ./scripts/install.sh
@@ -115,12 +113,16 @@ M0 repository foundation, M1 deployable single-host MVP, and M2 deeper determini
 
 The next phase is deliberately boring: **use the current build on real troubleshooting cases and improve the product where actual use exposes confusion or missing evidence.** New large subsystems are not the default next step.
 
+## Security and privacy
+
+HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, and container metadata. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+
 ## Project files
 
-- `PRODUCT.md` — what HostSleuth is and is not.
-- `CURRENT-HANDOFF.md` — current live/project state and the next task.
+- `README.md` — product definition, usage, and current scope.
+- `CURRENT-HANDOFF.md` — concise current project state and next task.
 - `TO-DO.md` — short active backlog.
-- `docs/history/DEVELOPMENT-HISTORY.md` — milestone/validation history.
+- `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 
 ## License
 

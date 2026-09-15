@@ -1,0 +1,14 @@
+# Local build outputs
+/hostsleuth
+/dist/
+
+# Test and coverage artifacts
+*.test
+*.out
+coverage.out
+
+# Editor and OS metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

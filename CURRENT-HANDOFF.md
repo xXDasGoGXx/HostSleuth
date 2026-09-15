@@ -20,24 +20,11 @@ The product definition and normal user-facing overview live in `README.md`.
 
 Detailed milestone history is archived in `docs/history/DEVELOPMENT-HISTORY.md`.
 
-## Current live deployment
+## Current validated deployment state
 
-Host: `openmediavault`
+The current M2 build has been validated on Debian 13 as a managed systemd service with the local dashboard available on loopback. Validation included Docker and systemd inventory, route and nftables evidence, listener/bind correlation, and normal event recording.
 
-Installed HostSleuth:
-
-- version: `0.1.0-dev+3352a7e`
-- executable SHA-256: `5d595d9db476f9cc030d052df53f6139057fdc6f74f6e440e9f833e5cee201aa`
-- systemd unit SHA-256: `416e374c1289ca6ef020b9baa056c2213ea24c350a56c26eb511ebcbcc72ee47`
-- service: loaded, enabled, active/running
-- validated PID after M2 update: `443538`
-- dashboard: HTTP 200 on `127.0.0.1:8787`
-- state directory: `/var/lib/hostsleuth`
-- Docker inventory at validation: 21 containers, all with network names
-- systemd inventory at validation: 219 services
-- failed services at validation: 0
-
-HomeCommander is only the owner-approved administrative transport used to install/restart the live service. It is not part of HostSleuth itself.
+Environment-specific hostnames, addresses, process IDs, inventory counts, and local deployment hashes are intentionally omitted from this public repository handoff.
 
 ## What works now
 
@@ -70,19 +57,19 @@ Evidence precedence is deliberate: successful TCP is definitive; strong local bi
 
 ## Real M2 validation
 
-The current installed build was validated on Debian 13 without manufacturing destructive failures.
+The current product code was validated on Debian 13 without manufacturing destructive failures.
 
-Confirmed examples:
+Confirmed classes of behavior include:
 
-- `127.0.0.1:22` -> reachable / high confidence.
-- closed local port -> no listener / high confidence.
-- `127.0.0.1:8789` -> Chaptarr is published on `192.168.2.181:8789`, not loopback.
-- `127.0.0.1:8192` -> FlareSolverr exposes `8192/tcp` internally but does not publish it on the host.
-- `192.168.2.181:8789` -> reachable / high confidence.
-- root-context route lookup and nftables evidence work.
+- reachable local services -> reachable / high confidence;
+- closed local ports -> no listener / high confidence;
+- listeners bound to a different local address are not treated as evidence for loopback;
+- container-internal ports are distinguished from host-published ports;
+- published host ports are diagnosed correctly on the address where they are actually bound;
+- root-context route lookup and nftables evidence work;
 - dashboard/API and change recording remain healthy.
 
-The live snapshot contained zero failed systemd services, so journal excerpts were not forced by intentionally breaking a service. That path remains covered by tests.
+The validation host had no failed systemd services at the time, so journal excerpts were not forced by intentionally breaking a service. That path remains covered by tests.
 
 ## Current limitations
 
