@@ -16,7 +16,7 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     -o /out/hostsleuth ./cmd/hostsleuth
 
 FROM alpine:3.24
-RUN apk add --no-cache ca-certificates docker-cli iproute2
+RUN apk add --no-cache ca-certificates docker-cli iproute2 procps-ng
 
 COPY --from=build /out/hostsleuth /usr/local/bin/hostsleuth
 
