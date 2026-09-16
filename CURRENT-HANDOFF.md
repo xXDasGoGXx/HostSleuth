@@ -26,27 +26,38 @@ Completed milestones:
 - M3.4 — Public Container Distribution;
 - M4 — package-change timeline;
 - M5 — configuration fingerprinting;
-- M6 — Certificate Story / TLS Detective.
+- M6 — Certificate Story / TLS Detective;
+- stable v0.3.0 publication.
 
 Published stable release:
 
-`v0.2.0`
+`v0.3.0`
+
+Release source commit:
+
+`6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`
 
 Published Docker tags:
 
-- `mjmalleo/hostsleuth:0.2.0`
+- `mjmalleo/hostsleuth:0.3.0`
 - `mjmalleo/hostsleuth:latest`
 
-Both public tags were verified anonymously as a multi-platform OCI index for:
+Anonymous registry verification confirmed both tags resolve to the same multi-platform OCI index:
+
+`sha256:127b388fbf794841b22d06b281fe89dc1500188fdb4215eec023b392aa98c05d`
+
+Platforms:
 
 - `linux/amd64`
 - `linux/arm64`
 
-Verified v0.2.0/latest index digest:
+Release workflow run `35138865223` completed successfully. GitHub release `v0.3.0` targets the exact accepted source commit and contains:
 
-`sha256:6892362d3f5fc6d30ae6bde7235ee976f169f1be8d42d181c55f53cf98600c91`
+- `hostsleuth-linux-amd64`;
+- `hostsleuth-linux-arm64`;
+- `SHA256SUMS`.
 
-M5 and M6 are merged/source capabilities for the next approved release and are **not** claimed to be present in the already-published v0.2.0 artifacts.
+Downloaded release assets passed `sha256sum -c SHA256SUMS`. A bounded real-consumer check on the OMV Debian host executed the downloaded amd64 binary from `/tmp`; `hostsleuth version` reported `v0.3.0 (6e6b45ca5e4a)`. No live HostSleuth service was stopped, restarted, reconfigured, or upgraded during publication/acceptance.
 
 ## M5 — configuration fingerprinting
 
@@ -66,7 +77,7 @@ Configuration appeared/disappeared/content-changed records reuse the existing Ch
 
 M6 extends the existing Diagnose flow without creating a separate certificate-management product.
 
-For a reachable TLS endpoint HostSleuth now records bounded read-only evidence for:
+For a reachable TLS endpoint HostSleuth records bounded read-only evidence for:
 
 - TLS handshake result, negotiated protocol, and cipher suite;
 - served certificate subject, SANs, issuer, serial, valid-from, valid-until, remaining lifetime, and SHA-256 fingerprint;
@@ -85,14 +96,6 @@ On native Linux, when a local endpoint actually negotiates TLS, HostSleuth also 
 A stale-served-certificate conclusion is intentionally conservative. HostSleuth only states that the certificate on disk is newer/different than the one being served when exactly one readable local Certbot lineage matches the requested host and its certificate differs while having deterministically newer validity evidence. A fingerprint difference by itself remains an `unknown` comparison rather than proof of staleness.
 
 M6 remains read-only. It does not renew certificates, reload/restart services, install certificates, manage ACME accounts, read private keys, or expose arbitrary commands.
-
-Validation:
-
-- focused TLS/Certbot/diagnosis tests added;
-- normal CI passed on the accepted M6 branch after the real-host test-boundary fix;
-- isolated native OMV acceptance built and tested the branch from `/tmp` without touching the live deployment;
-- real TLS acceptance against `github.com:443` returned TLS 1.3, hostname/trust passes, subject/issuer/SAN/serial/validity/lifetime evidence, and a 64-character SHA-256 certificate fingerprint;
-- the existing live HostSleuth service was not stopped, restarted, reconfigured, or upgraded.
 
 ## Live OMV / recovery boundary
 
@@ -117,24 +120,17 @@ The owner explicitly approved the following order. Stay in this order unless the
 
 ### 1. M6 — Certificate Story / TLS Detective — COMPLETE
 
-Read-only TLS/certificate troubleshooting is implemented and accepted as described above.
+Read-only TLS/certificate troubleshooting is implemented and accepted.
 
-### 2. Publish stable v0.3.0 — ACTIVE OWNER-APPROVAL BOUNDARY
+### 2. Publish stable v0.3.0 — COMPLETE
 
-The next action is **not** another feature. Before publication:
+Published and verified from exact accepted source commit `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`. Live OMV was intentionally not migrated.
 
-1. re-check exact current `main` SHA;
-2. re-check `.github/workflows/release.yml`;
-3. present the exact release state to the owner;
-4. **stop and obtain explicit publication approval**.
-
-After approval only, create `release/v0.3.0` from the exact accepted `main` so v0.3.0 contains M5 + M6, then verify native amd64/arm64 assets, `SHA256SUMS`, `mjmalleo/hostsleuth:0.3.0`, `latest`, both Docker platforms, anonymous registry access, and one bounded real-consumer acceptance.
-
-Do not automatically migrate live OMV because v0.3.0 exists.
-
-### 3. M7 — Service Story
+### 3. M7 — Service Story — NEXT, NOT STARTED
 
 Answer why a service will not start or why an endpoint disappeared by correlating systemd/journal, process/listener ownership, port collisions, containers, package/config changes, TLS, and listener history. Evidence story only; no service controls.
+
+Do not begin M7 until the owner explicitly tells HostSleuth work to continue into M7.
 
 ### 4. M8 — Incident Lens
 
@@ -173,7 +169,7 @@ The product should feel powerful because it connects deterministic evidence into
 
 ## Release/deployment boundary
 
-Do not create a new GitHub release/tag, Docker tag/image, `release/v0.3.0` branch, or change the live OMV deployment without explicit owner approval at the publication boundary.
+Stable v0.3.0 is published. Publication alone does not authorize changing the live OMV deployment, recovery repository pin, or beginning M7. Those remain separate owner-controlled actions.
 
 ## Repository reading order
 

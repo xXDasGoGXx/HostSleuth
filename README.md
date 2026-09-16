@@ -49,7 +49,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.2.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.3.0`.
 
 ### Docker Compose
 
@@ -65,7 +65,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.2.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.3.0 docker compose up -d
 ```
 
 ### Docker run
@@ -210,7 +210,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.2.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.3.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -267,13 +267,13 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, and M6 Certificate Story / TLS Detective are complete on `main` after M6 merge.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, and M6 Certificate Story / TLS Detective are complete.
 
-Stable `v0.2.0` remains the current published native/Docker release and predates M5 and M6. No newer public release is implied by this documentation.
+Stable `v0.3.0` is the current published native/Docker release. It contains the M5 configuration-fingerprint and M6 TLS/certificate capabilities and was published from accepted source commit `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`.
 
-The next approved step is the **v0.3.0 publication boundary**. v0.3.0 is intended to contain M5 + M6, but publication must stop for explicit owner approval after re-checking the exact accepted `main` SHA and release workflow. Do not create the release branch/tag/images or migrate live OMV merely because M6 is complete.
+The next approved milestone is **M7 — Service Story**, but it has not started. Continue into M7 only when the owner explicitly requests it. Publication of v0.3.0 did not authorize a live OMV upgrade; the known-good production/recovery deployment remains intentionally pinned separately.
 
-After an approved v0.3.0 publication, continue in the locked order through Service Story, Incident Lens, HostSleuth Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle.
+After M7, continue in the locked order through Incident Lens, HostSleuth Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
