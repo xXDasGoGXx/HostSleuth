@@ -49,7 +49,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.1.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.2.0`.
 
 ### Docker Compose
 
@@ -65,7 +65,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.1.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.2.0 docker compose up -d
 ```
 
 ### Docker run
@@ -198,7 +198,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.1.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.2.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -255,11 +255,11 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, and M4 package-change timeline are complete on `main`.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, and M4 package-change timeline are complete.
 
-Stable `v0.1.0` remains the currently published native/Docker release and predates M4. M4 is present in source on `main`; no newer public release is implied by this documentation.
+Stable `v0.2.0` is the current published native/Docker release. It includes M4 package-change history for native Debian/Ubuntu installations. The default Docker deployment intentionally does not mount host package logs, so that evidence remains unavailable there by default.
 
-See `TO-DO.md` for the current roadmap.
+M5 configuration fingerprinting is the active development milestone. See `TO-DO.md` for the bounded scope.
 
 ## Security and privacy
 
