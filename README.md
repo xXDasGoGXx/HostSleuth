@@ -124,6 +124,7 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - native Certbot lineage/renewal evidence is unavailable in the default Docker deployment because host `/etc/letsencrypt` and systemd state are not mounted;
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - remote/served TLS certificate evidence remains available because it comes from the diagnosed endpoint itself;
+- Incident Lens can still show whichever retained event categories the Docker deployment actually records, without pretending unavailable native evidence exists;
 - native installation remains the recommended choice when full host visibility matters.
 
 The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when its bind path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
@@ -196,6 +197,20 @@ Nearby retained changes are context, not proof of causation. If local permission
 
 Service Story does not start, stop, restart, reload, enable, disable, or otherwise modify a service.
 
+### Incident Lens
+
+M8 adds a read-only Incident Lens inside the existing Changes workflow. Anchor the lens on a recorded change or an exact time and HostSleuth shows all retained changes in a bounded +/- 15 minute window.
+
+Incident Lens:
+
+- preserves existing event categories instead of creating a second history store;
+- orders events deterministically and caps the result at 100 events;
+- labels temporal proximity as context, never proof of causation;
+- optionally runs the existing Diagnose/TLS engine for a supplied endpoint;
+- labels that endpoint evidence with its current capture time so it is not confused with historical state that HostSleuth never recorded.
+
+Incident Lens does not create a time-series database, reconstruct historical packets/TLS sessions, alert on uptime, infer causes, or modify the host.
+
 ![HostSleuth Diagnose view](docs/images/hostsleuth-diagnose.png)
 
 _Real public-safe Diagnose view captured from the supported Docker Compose deployment during M3 acceptance._
@@ -218,6 +233,12 @@ Build a native systemd service story, optionally with its expected endpoint:
 
 ```bash
 hostsleuth service -target 127.0.0.1:443 nginx.service
+```
+
+Inspect a bounded incident window, optionally with a fresh endpoint check:
+
+```bash
+hostsleuth incident --at 2026-09-16T20:00:00Z --target example.com:443
 ```
 
 Show recent events:
@@ -292,11 +313,11 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, and M7 Service Story are complete in source.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, and M8 Incident Lens are complete in source.
 
-Stable `v0.3.0` remains the current published native/Docker release. It contains M5 configuration fingerprinting and M6 TLS/certificate capabilities; M7 is newer source capability and is **not** claimed to be present in the published v0.3.0 artifacts.
+Stable `v0.3.0` remains the current published native/Docker release. It contains M5 configuration fingerprinting and M6 TLS/certificate capabilities; M7 and M8 are newer source capabilities and are **not** claimed to be present in the published v0.3.0 artifacts.
 
-The next roadmap milestone is **M8 — Incident Lens**. Continue in the locked order through Incident Lens, HostSleuth Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle. Consumer-product research may inform those future milestones but does not reorder or silently broaden them.
+The next roadmap milestone is **M9 — HostSleuth Workbench**. Continue in the locked order through Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle. Consumer-product research may refine those future milestones but does not reorder or silently broaden them.
 
 Publication of v0.3.0 did not authorize a live OMV upgrade; the known-good production/recovery deployment remains intentionally pinned separately.
 
@@ -304,7 +325,7 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardr
 
 ## Security and privacy
 
-HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, certificate metadata/fingerprints, bounded service runtime properties, and sanitized journal evidence. It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, and M7 does not expose service control. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, certificate metadata/fingerprints, bounded service runtime properties, sanitized journal evidence, and retained incident-window context. It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, M7 does not expose service control, and M8 does not infer causal relationships from nearby timestamps. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
 
 ## Project files
 
@@ -313,6 +334,7 @@ HostSleuth can collect hostnames, IP addresses, mount paths, service names, list
 - `TO-DO.md` — active checklist and product decisions.
 - `docs/ROADMAP.md` — owner-approved ordered product roadmap.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
+- `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
 
