@@ -118,6 +118,7 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 
 - systemd service/journal evidence is reported as unavailable;
 - host filesystem inventory is reported as unavailable;
+- host `apt` / `dpkg` package-history evidence is unavailable in the default Docker deployment because host package logs are not mounted;
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - native installation remains the recommended choice when full host visibility matters.
 
@@ -145,9 +146,10 @@ HostSleuth periodically captures useful local state including:
 - interfaces and routes;
 - listening sockets;
 - systemd services in native mode;
-- Docker containers, published ports, state, and network names when Docker is readable.
+- Docker containers, published ports, state, and network names when Docker is readable;
+- bounded Debian/Ubuntu package install, update, and removal history from local `dpkg` logs, with `apt` history as a fallback, in native mode.
 
-It compares snapshots and records meaningful service/container/listener changes in a local event timeline. Known noisy changes such as Docker uptime progression are suppressed.
+It compares snapshots and records meaningful service/container/listener/package changes in one local event timeline. Known noisy changes such as Docker uptime progression are suppressed. Package history is baselined when upgrading from an older snapshot schema so existing package-log history is not falsely replayed as new changes.
 
 ### Diagnose `host:port`
 
@@ -249,19 +251,19 @@ HostSleuth is intentionally:
 - deterministic before explanatory;
 - loopback-only by default for the Web UI.
 
-HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, or reconfigure the host.
+HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, or reconfigure the host.
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, and M3.4 Public Container Distribution are complete.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, and M4 package-change timeline are complete on `main`.
 
-Stable `v0.1.0` is published as native Linux amd64/arm64 release assets and as the public multi-platform Docker image `mjmalleo/hostsleuth:0.1.0` / `latest`.
+Stable `v0.1.0` remains the currently published native/Docker release and predates M4. M4 is present in source on `main`; no newer public release is implied by this documentation.
 
-M4 package-change history is the active application milestone. See `TO-DO.md` for the current roadmap.
+See `TO-DO.md` for the current roadmap.
 
 ## Security and privacy
 
-HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, and container metadata. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, and package names/versions. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
 
 ## Project files
 

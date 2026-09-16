@@ -19,6 +19,9 @@ func DiffSnapshots(oldSnap, newSnap Snapshot) []Event {
 	events = append(events, diffNamedStates(at, "service", serviceMap(oldSnap.Services), serviceMap(newSnap.Services))...)
 	events = append(events, diffNamedStates(at, "container", containerMap(oldSnap.Containers), containerMap(newSnap.Containers))...)
 	events = append(events, diffSet(at, "listener", listenerSet(oldSnap.Listeners), listenerSet(newSnap.Listeners))...)
+	if oldSnap.SchemaVersion >= snapshotSchemaVersion {
+		events = append(events, diffPackageChanges(oldSnap.PackageChanges, newSnap.PackageChanges)...)
+	}
 	return events
 }
 
@@ -71,6 +74,31 @@ func diffSet(at time.Time, category string, oldSet, newSet map[string]bool) []Ev
 		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Summary < out[j].Summary })
+	return out
+}
+
+func diffPackageChanges(oldChanges, newChanges []PackageChange) []Event {
+	seen := make(map[string]bool, len(oldChanges))
+	for _, change := range oldChanges {
+		seen[packageChangeKey(change)] = true
+	}
+	var out []Event
+	for _, change := range newChanges {
+		if seen[packageChangeKey(change)] {
+			continue
+		}
+		at := change.At
+		if at.IsZero() {
+			at = time.Now().UTC()
+		}
+		out = append(out, Event{At: at, Category: "package", Severity: "info", Summary: packageChangeSummary(change)})
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].At.Equal(out[j].At) {
+			return out[i].Summary < out[j].Summary
+		}
+		return out[i].At.Before(out[j].At)
+	})
 	return out
 }
 
