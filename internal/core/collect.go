@@ -108,6 +108,7 @@ func collectInterfaces() []InterfaceInfo {
 		for _, a := range addrs {
 			entry.Addresses = append(entry.Addresses, a.String())
 		}
+		sort.Strings(entry.Addresses)
 		out = append(out, entry)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
