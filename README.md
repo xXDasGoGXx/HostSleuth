@@ -120,7 +120,9 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - host filesystem inventory is reported as unavailable;
 - host `apt` / `dpkg` package-history evidence is unavailable in the default Docker deployment because host package logs are not mounted;
 - host configuration-fingerprint evidence is unavailable in the default Docker deployment because those host configuration files are not mounted;
+- native Certbot lineage/renewal evidence is unavailable in the default Docker deployment because host `/etc/letsencrypt` and systemd state are not mounted;
 - firewall evidence may be unavailable without elevated network-administration privileges;
+- remote/served TLS certificate evidence remains available because it comes from the diagnosed endpoint itself;
 - native installation remains the recommended choice when full host visibility matters.
 
 The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when its bind path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
@@ -165,9 +167,15 @@ Enter a target such as `192.168.1.20:443` or `example.com:443`. HostSleuth can c
 - target-aware local TCP listener evidence;
 - Docker port publication, bind address, and network context;
 - bounded nftables candidate evidence when available;
-- bounded failed-systemd candidate evidence in native mode.
+- bounded failed-systemd candidate evidence in native mode;
+- TLS handshake result, negotiated protocol, and cipher suite when the endpoint speaks TLS;
+- served certificate subject, SANs, issuer, serial, validity window, remaining lifetime, and SHA-256 fingerprint;
+- certificate hostname match/mismatch and bounded trust-chain verification;
+- on native Linux for local TLS endpoints, bounded read-only Certbot lineage, renewal, timer/service, and local-vs-served certificate evidence when available.
 
-The Web UI presents the answer first and keeps the underlying evidence available for inspection. Successful TCP is definitive, stronger local bind/listener evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
+The Web UI presents the answer first and keeps the underlying evidence available for inspection. Successful TCP remains definitive transport evidence; TLS validation is reported separately so a reachable endpoint can still be explained as having a handshake, expiry, hostname, trust, or stale-served-certificate problem. Stronger local bind/listener evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
+
+HostSleuth only calls a local certificate "newer/different than the one this endpoint is serving" when a unique readable Certbot lineage matches the requested host and deterministic validity/fingerprint evidence supports that statement. A fingerprint difference alone is not treated as proof of staleness.
 
 ![HostSleuth Diagnose view](docs/images/hostsleuth-diagnose.png)
 
@@ -255,21 +263,23 @@ HostSleuth is intentionally:
 - deterministic before explanatory;
 - loopback-only by default for the Web UI.
 
-HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, or reconfigure the host.
+HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reload services, manage ACME accounts, handle private keys, or reconfigure the host.
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, and M5 configuration fingerprinting are complete on `main`.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, and M6 Certificate Story / TLS Detective are complete on `main` after M6 merge.
 
-Stable `v0.2.0` remains the current published native/Docker release and predates M5. M5 is present in source on `main`; no newer public release is implied by this documentation.
+Stable `v0.2.0` remains the current published native/Docker release and predates M5 and M6. No newer public release is implied by this documentation.
 
-The next active milestone is **M6 — Certificate Story / TLS Detective**. It adds bounded, read-only TLS/certificate diagnosis, native Certbot discovery, certificate fingerprints, and local-certificate-vs-served-certificate comparison. After M6 acceptance, the approved plan is to publish **v0.3.0** containing M5 + M6, then continue in order through Service Story, Incident Lens, HostSleuth Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle.
+The next approved step is the **v0.3.0 publication boundary**. v0.3.0 is intended to contain M5 + M6, but publication must stop for explicit owner approval after re-checking the exact accepted `main` SHA and release workflow. Do not create the release branch/tag/images or migrate live OMV merely because M6 is complete.
+
+After an approved v0.3.0 publication, continue in the locked order through Service Story, Incident Lens, HostSleuth Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
 ## Security and privacy
 
-HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths, and configuration fingerprints. It does not store configuration file contents as part of M5 fingerprinting. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, and certificate metadata/fingerprints. It does not store configuration file contents as part of M5 fingerprinting and M6 does not read private keys. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
 
 ## Project files
 
