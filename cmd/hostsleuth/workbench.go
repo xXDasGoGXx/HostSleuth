@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -74,6 +75,18 @@ func runWorkbench(args []string) {
 	fmt.Println(string(b))
 }
 
+func workbenchRequestAllowed(r *http.Request) bool {
+	if r == nil {
+		return false
+	}
+	host, _, err := net.SplitHostPort(strings.TrimSpace(r.RemoteAddr))
+	if err != nil {
+		host = strings.TrimSpace(r.RemoteAddr)
+	}
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return ip != nil && ip.IsLoopback()
+}
+
 func registerWorkbenchAPI(mux *http.ServeMux) {
 	write := func(w http.ResponseWriter, value any, err error) {
 		if err != nil {
@@ -83,24 +96,46 @@ func registerWorkbenchAPI(mux *http.ServeMux) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(value)
 	}
+	guard := func(w http.ResponseWriter, r *http.Request) bool {
+		if workbenchRequestAllowed(r) {
+			return true
+		}
+		http.Error(w, "Workbench Web/API operations are loopback-only; use the local UI, an SSH tunnel, or the HostSleuth CLI", http.StatusForbidden)
+		return false
+	}
 
 	mux.HandleFunc("/api/workbench/file", func(w http.ResponseWriter, r *http.Request) {
+		if !guard(w, r) {
+			return
+		}
 		value, err := core.InspectFile(r.Context(), r.URL.Query().Get("path"), r.URL.Query().Get("expected"))
 		write(w, value, err)
 	})
 	mux.HandleFunc("/api/workbench/compare", func(w http.ResponseWriter, r *http.Request) {
+		if !guard(w, r) {
+			return
+		}
 		value, err := core.CompareFiles(r.Context(), r.URL.Query().Get("left"), r.URL.Query().Get("right"))
 		write(w, value, err)
 	})
 	mux.HandleFunc("/api/workbench/dns", func(w http.ResponseWriter, r *http.Request) {
+		if !guard(w, r) {
+			return
+		}
 		value, err := core.InspectDNS(r.Context(), r.URL.Query().Get("name"))
 		write(w, value, err)
 	})
 	mux.HandleFunc("/api/workbench/http", func(w http.ResponseWriter, r *http.Request) {
+		if !guard(w, r) {
+			return
+		}
 		value, err := core.InspectHTTP(r.Context(), r.URL.Query().Get("url"))
 		write(w, value, err)
 	})
 	mux.HandleFunc("/api/workbench/cert", func(w http.ResponseWriter, r *http.Request) {
+		if !guard(w, r) {
+			return
+		}
 		path := r.URL.Query().Get("path")
 		target := strings.TrimSpace(r.URL.Query().Get("target"))
 		if target == "" {
