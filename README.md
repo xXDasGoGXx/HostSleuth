@@ -119,6 +119,7 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - systemd service/journal evidence is reported as unavailable;
 - host filesystem inventory is reported as unavailable;
 - host `apt` / `dpkg` package-history evidence is unavailable in the default Docker deployment because host package logs are not mounted;
+- host configuration-fingerprint evidence is unavailable in the default Docker deployment because those host configuration files are not mounted;
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - native installation remains the recommended choice when full host visibility matters.
 
@@ -147,9 +148,12 @@ HostSleuth periodically captures useful local state including:
 - listening sockets;
 - systemd services in native mode;
 - Docker containers, published ports, state, and network names when Docker is readable;
-- bounded Debian/Ubuntu package install, update, and removal history from local `dpkg` logs, with `apt` history as a fallback, in native mode.
+- bounded Debian/Ubuntu package install, update, and removal history from local `dpkg` logs, with `apt` history as a fallback, in native mode;
+- SHA-256 fingerprints for a small explicit set of high-value configuration files in native mode, storing path/state/fingerprint/size rather than file contents.
 
-It compares snapshots and records meaningful service/container/listener/package changes in one local event timeline. Known noisy changes such as Docker uptime progression are suppressed. Package history is baselined when upgrading from an older snapshot schema so existing package-log history is not falsely replayed as new changes.
+It compares snapshots and records meaningful service/container/listener/package/configuration changes in one local event timeline. Known noisy changes such as Docker uptime progression are suppressed. Package history and configuration fingerprints are baselined across their schema upgrades so existing evidence is not falsely replayed as new changes.
+
+Configuration fingerprinting currently covers `/etc/hosts`, `/etc/fstab`, `/etc/ssh/sshd_config`, `/etc/docker/daemon.json`, and `/etc/nftables.conf`. Missing or unreadable files remain truthful and quiet, and HostSleuth does not recursively crawl `/etc`.
 
 ### Diagnose `host:port`
 
@@ -251,19 +255,19 @@ HostSleuth is intentionally:
 - deterministic before explanatory;
 - loopback-only by default for the Web UI.
 
-HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, or reconfigure the host.
+HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, or reconfigure the host.
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, and M4 package-change timeline are complete.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, and M5 configuration fingerprinting are complete on `main`.
 
-Stable `v0.2.0` is the current published native/Docker release. It includes M4 package-change history for native Debian/Ubuntu installations. The default Docker deployment intentionally does not mount host package logs, so that evidence remains unavailable there by default.
+Stable `v0.2.0` remains the current published native/Docker release and predates M5. M5 is present in source on `main`; no newer public release is implied by this documentation.
 
-M5 configuration fingerprinting is the active development milestone. See `TO-DO.md` for the bounded scope.
+The next capability is deliberately unselected. See `TO-DO.md` for the candidate list.
 
 ## Security and privacy
 
-HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, and package names/versions. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths, and configuration fingerprints. It does not store configuration file contents as part of M5 fingerprinting. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
 
 ## Project files
 
