@@ -284,9 +284,108 @@ A public-safe Diagnose-view screenshot captured from the running supported Compo
 
 No container image was published and no known-good live HostSleuth deployment was changed during acceptance.
 
+## M3.4 — Public Container Distribution and stable v0.1.0
+
+M3.4 turned the already-supported Docker deployment into a public, versioned distribution path without adding a new HostSleuth backend capability.
+
+### Distribution foundation — PR #20
+
+PR #20 changed the normal Compose path from source-build to published-image consumption while preserving a developer image override, direct `docker run` documentation, the loopback-only public default, and the existing reduced-privilege Docker model.
+
+The release workflow was extended so one stable `release/vX.Y.Z` run:
+
+- tests the release source;
+- builds native Linux amd64/arm64 binaries and checksums;
+- creates the GitHub release/tag;
+- logs in to Docker Hub using only the repository secret `DOCKERHUB_TOKEN`;
+- publishes `linux/amd64` and `linux/arm64` under the numeric Docker tag and `latest`.
+
+Prerelease branches may create GitHub prereleases but do not publish Docker tags or move `latest`.
+
+A separate release-event Docker workflow was rejected because the GitHub release is created with `GITHUB_TOKEN`, whose generated events generally do not trigger a second workflow. Keeping publication in one release workflow avoided an unnecessary chaining credential.
+
+Final PR #20 CI run 105 passed formatting, vet, tests, JavaScript syntax, native build, Compose validation, amd64/arm64 image builds, image-consumption runtime smoke, API checks, Web UI, self-diagnosis, and teardown.
+
+### Evidence-first Host Story UI — PR #21
+
+Before stable release, one bounded UI pass was accepted to make HostSleuth's existing evidence immediately useful without widening product scope.
+
+The accepted UI added:
+
+- a plain-language Host Story on Overview;
+- a listener Reachability Surface classified as loopback, wildcard, or specific-address;
+- one-click listener-to-Diagnose flow;
+- an ordered diagnosis evidence path while retaining raw evidence;
+- recent host changes shown only as non-causal context;
+- fuller presentation of existing route/listener/container/interface/filesystem evidence;
+- compact change-category summary.
+
+No new collectors, APIs, storage, agents, SNMP, graphs, alerts, remediation, AI, or multi-host architecture were added. Final UI CI run 110 passed after tightening wording so a listening socket is treated as bind evidence rather than proof of end-to-end reachability.
+
+### Stable publication
+
+Owner approval was obtained before the publication trigger.
+
+`release/v0.1.0` was created from exact commit:
+
+`bf52c51fdded40a73684171a7feb078557b9f0d5`
+
+Release workflow run `35124357891` completed successfully.
+
+Published GitHub release:
+
+`v0.1.0`
+
+Release assets:
+
+- `hostsleuth-linux-amd64`;
+- `hostsleuth-linux-arm64`;
+- `SHA256SUMS`.
+
+Published Docker tags:
+
+- `mjmalleo/hostsleuth:0.1.0`;
+- `mjmalleo/hostsleuth:latest`.
+
+Anonymous registry validation confirmed both tags were publicly retrievable and resolved to the same OCI image index containing linux/amd64 and linux/arm64 manifests.
+
+### Public consumer smoke
+
+A one-off ephemeral GitHub Actions workflow tested the real public image rather than a locally built substitute.
+
+Run `35124853545` passed:
+
+- anonymous pull of both public tags;
+- startup of `mjmalleo/hostsleuth:0.1.0` with the supported Docker runtime/security settings;
+- `/api/about` returning `v0.1.0`;
+- `/api/snapshot` returning Docker mode;
+- Web UI load;
+- self-diagnosis returning `target is reachable`;
+- cleanup of the temporary container and volume.
+
+The validation workflow was removed after the one acceptance run so it did not become permanent project machinery.
+
+### OMV recovery and live deployment migration
+
+After public-image acceptance, `xXDasGoGXx/OMV-Docker-Rebuild` PR #2 replaced the HostSleuth remote Git build with the pinned image `mjmalleo/hostsleuth:0.1.0`. The existing `192.168.2.181:8787` bind, persistent state path, host network/PID/UTS namespaces, read-only root, dropped capabilities, `no-new-privileges`, tmpfs, host OS-release mount, and read-only Docker socket were preserved.
+
+The owner then redeployed the live Arcane project from the pinned public image.
+
+Post-redeploy live verification on the OMV host confirmed:
+
+- `/api/about` returned `v0.1.0`;
+- `/api/snapshot` returned Docker mode and live host evidence;
+- the Web UI loaded;
+- diagnosis of `192.168.2.181:8787` returned `target is reachable` with high confidence.
+
+At that acceptance moment, the live snapshot reported 328 listeners and 22 Docker containers. Those numbers are historical observations, not expected fixed counts.
+
+M3.4 is complete. The v0.1.0 UI/release path is closed unless real use exposes a concrete defect. M4 package-change timeline is the next active milestone.
+
 ## Historical source references
 
 - First published alpha: `v0.1.0-alpha.1`
+- Stable v0.1.0 release source: `bf52c51fdded40a73684171a7feb078557b9f0d5`
 - systemd state-directory fix: `20c1793af4076f3e7fa8ea9d5cc23268fb55c6e9`
 - Docker semantic-event fix: `d7028044fcb0fa3396b37c621a33fd5c4c1f2c5e`
 - M2 route evidence: `82ffe4cd81e92b8176a8f09f5e3dc2e857057475`
