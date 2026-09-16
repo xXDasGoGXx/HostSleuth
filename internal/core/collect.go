@@ -55,6 +55,7 @@ func Collect(ctx context.Context) Snapshot {
 		s.Services = collectServices(ctx)
 	}
 	s.Containers = collectContainers(ctx)
+	s.PackageChanges = collectPackageChanges()
 	return s
 }
 
