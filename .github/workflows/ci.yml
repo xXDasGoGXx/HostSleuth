@@ -46,3 +46,55 @@ jobs:
             --build-arg VERSION=0.1.0-ci \
             --output type=oci,dest=/tmp/hostsleuth-image.tar \
             .
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start supported Compose deployment
+        env:
+          HOSTSLEUTH_VERSION: 0.1.0-ci
+        run: docker compose up -d --build
+      - name: Wait for HostSleuth API
+        run: |
+          set -eu
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8787/api/snapshot > /tmp/hostsleuth-snapshot.json; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs hostsleuth
+          exit 1
+      - name: Verify Docker-mode snapshot
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          snapshot = json.loads(Path('/tmp/hostsleuth-snapshot.json').read_text())
+          assert snapshot.get('mode') == 'docker', snapshot
+          assert snapshot.get('host', {}).get('hostname'), snapshot
+          assert snapshot.get('interfaces') is not None, snapshot
+          assert not snapshot.get('services'), snapshot
+          assert not snapshot.get('filesystems'), snapshot
+          PY
+      - name: Verify Web UI and self-diagnosis
+        run: |
+          set -eu
+          curl -fsS http://127.0.0.1:8787/ | grep -q 'HostSleuth'
+          curl -fsS 'http://127.0.0.1:8787/api/diagnose?target=127.0.0.1:8787' > /tmp/hostsleuth-diagnosis.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          diagnosis = json.loads(Path('/tmp/hostsleuth-diagnosis.json').read_text())
+          assert diagnosis.get('conclusion') == 'target is reachable', diagnosis
+          assert diagnosis.get('confidence') == 'high', diagnosis
+          PY
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs hostsleuth
+      - name: Stop Compose deployment
+        if: always()
+        run: docker compose down -v --remove-orphans

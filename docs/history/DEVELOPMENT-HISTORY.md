@@ -272,6 +272,18 @@ Merged at:
 
 M3 Product Experience is complete. Future capability work returns to the collective product-decision list rather than continuing automatically.
 
+## M3 acceptance closeout
+
+M3 was accepted in two complementary environments without replacing the known-good live native service.
+
+Native acceptance on a real Debian 13 host used a temporary side-by-side build, alternate loopback port, and isolated state directory. The source test suite and build passed; `/api/about`, `/api/snapshot`, the modern Web UI, and a real reachable/high-confidence diagnosis all worked. No native M3 product blocker was found.
+
+Docker acceptance used the actual supported `compose.yaml` on an authorized ephemeral Linux Docker runner rather than bypassing the managed OMV host's Docker-command policy. The runtime smoke test confirmed that HostSleuth builds and starts, reports Docker deployment mode truthfully, serves the Web UI, diagnoses its own endpoint as reachable with high confidence, and tears down cleanly. Linux amd64 and arm64 image builds also remained green.
+
+A public-safe Diagnose-view screenshot captured from the running supported Compose deployment is stored at `docs/images/hostsleuth-diagnose.png` and shown in the README.
+
+No container image was published and no known-good live HostSleuth deployment was changed during acceptance.
+
 ## Historical source references
 
 - First published alpha: `v0.1.0-alpha.1`

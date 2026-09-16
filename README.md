@@ -95,6 +95,10 @@ Enter a target such as `192.168.1.20:443` or `example.com:443`. HostSleuth can c
 
 The Web UI presents the answer first and keeps the underlying evidence available for inspection. Successful TCP is definitive, stronger local bind/listener evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
 
+![HostSleuth Diagnose view](docs/images/hostsleuth-diagnose.png)
+
+_Real public-safe Diagnose view captured from the supported Docker Compose deployment during M3 acceptance._
+
 ## CLI basics
 
 Capture a snapshot:
@@ -177,11 +181,9 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, and the full M3 Product Experience sequence are complete.
 
-M3 delivered the modern Web UI, usability/first-run polish, and one supported Docker Compose deployment validated by CI for Linux amd64 and arm64. The merged M3 native experience has also been exercised successfully on a real Debian 13 host using a side-by-side temporary build so the existing known-good service did not need to be replaced.
+M3 delivered the modern Web UI, usability/first-run polish, and one supported Docker Compose deployment. The native M3 experience was exercised successfully on a real Debian 13 host using a side-by-side temporary build so the existing known-good service did not need to be replaced. The supported Compose deployment was then runtime-smoke-tested on an authorized ephemeral Linux Docker host: HostSleuth started successfully, reported Docker mode truthfully, served the Web UI, diagnosed its own endpoint as reachable with high confidence, and shut down cleanly after the test. Linux amd64 and arm64 image builds remain covered by CI.
 
-Remaining acceptance polish is deliberately small: commit a public-safe real UI screenshot and perform a real Docker Compose smoke test in an environment where Docker execution is authorized. The current management gateway blocks Docker commands, and that control should not be bypassed.
-
-After those items are completed or deliberately accepted as externally limited, the next narrowly scoped capability is M4 package-change history. See `TO-DO.md` for the current roadmap.
+M3 acceptance is complete. The next narrowly scoped capability is M4 package-change history. See `TO-DO.md` for the current roadmap.
 
 ## Security and privacy
 
