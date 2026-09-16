@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"log"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -28,7 +28,7 @@ func runRebootStory(args []string) {
 	}
 	story := core.BuildRebootStory(ctx, snap, events)
 	b, _ := json.MarshalIndent(story, "", "  ")
-	log.Print(string(b))
+	fmt.Println(string(b))
 }
 
 func registerRebootStoryAPI(mux *http.ServeMux, store core.Store) {
