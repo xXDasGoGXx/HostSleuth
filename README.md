@@ -43,7 +43,7 @@ A new install starts by taking a baseline snapshot. An empty change timeline is 
 
 ## Docker — convenient, reduced host visibility
 
-The supported public image is intended to be:
+The supported public image is:
 
 ```text
 mjmalleo/hostsleuth
@@ -53,7 +53,7 @@ mjmalleo/hostsleuth
 
 ### Docker Compose
 
-The repository includes one supported `compose.yaml` for Linux Docker hosts. Once the public image is available:
+The repository includes one supported `compose.yaml` for Linux Docker hosts:
 
 ```bash
 git clone https://github.com/xXDasGoGXx/HostSleuth.git
@@ -62,7 +62,7 @@ docker compose pull
 docker compose up -d
 ```
 
-To pin an explicit stable version instead of `latest`:
+To pin the current stable release instead of `latest`:
 
 ```bash
 HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.1.0 docker compose up -d
@@ -196,7 +196,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.1.0-alpha.1 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.1.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -253,11 +253,11 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, and the full M3 Product Experience sequence are complete.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, and M3.4 Public Container Distribution are complete.
 
-M3 delivered the modern Web UI, usability/first-run polish, and one supported Docker deployment. M3.4 is the deliberately small public-container-distribution milestone: it does not add HostSleuth functionality, and exists only to make the existing container deployment easy to pull, run, version, test, and update.
+Stable `v0.1.0` is published as native Linux amd64/arm64 release assets and as the public multi-platform Docker image `mjmalleo/hostsleuth:0.1.0` / `latest`.
 
-M4 package-change history remains the next application-feature milestone after M3.4. See `TO-DO.md` for the current roadmap.
+M4 package-change history is the active application milestone. See `TO-DO.md` for the current roadmap.
 
 ## Security and privacy
 
