@@ -53,6 +53,27 @@ docker compose up -d --build
 
 The Web UI remains on `127.0.0.1:8787`, so use the same local browser or SSH-tunnel workflow described above.
 
+### Optional direct LAN access
+
+Loopback-only remains the safe default. If you deliberately want HostSleuth reachable directly from a trusted LAN, override the Compose service command and bind it to one specific host LAN address rather than every interface:
+
+```yaml
+services:
+  hostsleuth:
+    command:
+      - serve
+      - --state-dir
+      - /var/lib/hostsleuth
+      - --listen
+      - 192.168.1.50:8787
+      - --interval
+      - 60s
+```
+
+Replace `192.168.1.50` with the Linux host address you want HostSleuth to use, redeploy the Compose project, and open `http://192.168.1.50:8787` from a routed device that is allowed to reach that address.
+
+HostSleuth does not currently provide Web UI authentication. Direct LAN access can expose hostnames, IP addresses, listeners, container metadata, and other infrastructure details to any device that can reach the bound address. Prefer a specific trusted LAN address over `0.0.0.0`, and keep routing/firewall policy appropriately restricted. SSH tunneling remains the recommended remote-access default.
+
 The Docker deployment intentionally does **not** use `privileged: true`. It drops all Linux capabilities, uses a read-only container filesystem, and shares only the host namespaces/mounts needed for the evidence it can collect honestly.
 
 Docker mode can observe host networking/listeners and Docker container metadata, but container isolation prevents safe, reliable access to everything the native service can see. In Docker mode:
