@@ -12,30 +12,29 @@ This file is intentionally short. Completed milestone history belongs in `docs/h
 - [x] Route, nftables, systemd/journal candidate, Docker bind/network, and evidence-precedence diagnosis work.
 - [x] Public-repository cleanup and documentation sanitization.
 - [x] M3.1 — modern responsive Web UI with readable diagnosis, changes, and host views.
+- [x] M3.2 — usability, first-run clarity, build/version visibility, and simplified installation guidance.
 
 ## M3 — Product Experience
 
 The sequence stays fixed: M3.1 Web UI -> M3.2 Usability -> M3.3 Docker release. Finish the active section before starting the next one.
 
-### M3.2 — Usability — implementation complete, pending merge
+### M3.3 — Docker release — active
 
-- [x] Review and simplify user-facing wording.
-- [x] Make first-run state obvious and non-confusing.
-- [x] Make version/build information easy to find.
-- [x] Add concise README usage examples; capture a real UI screenshot later from an accepted deployed build rather than using a mockup.
-- [x] Simplify installation documentation around the recommended deployment paths.
+Implemented on `m3/docker-release`:
 
-### M3.3 — Docker release — after M3.2 merge
-
-- [ ] Create an official Dockerfile.
-- [ ] Provide one recommended `compose.yaml` rather than many deployment variants.
-- [ ] Persist HostSleuth state cleanly.
-- [ ] Support amd64 and arm64 builds.
-- [ ] Preserve host-aware collection rather than accidentally diagnosing only the HostSleuth container.
-- [ ] Use the minimum host access necessary; do not default to unrestricted privileged mode.
-- [ ] Keep the same HostSleuth UI and product behavior where technically possible.
-- [ ] Add CI image-build validation.
-- [ ] Do not publish a container image until explicitly approved.
+- [x] Create an official Dockerfile.
+- [x] Provide one recommended `compose.yaml` rather than many deployment variants.
+- [x] Persist HostSleuth state in one named volume.
+- [x] Preserve host-aware network/listener collection instead of diagnosing only the HostSleuth container.
+- [x] Mark systemd and host-filesystem evidence unavailable when Docker isolation prevents truthful collection.
+- [x] Use host network/PID/UTS namespaces without unrestricted privileged mode.
+- [x] Drop all Linux capabilities, enable `no-new-privileges`, and use a read-only container filesystem.
+- [x] Keep the same HostSleuth Web UI and deterministic diagnosis model.
+- [x] Add CI definitions for amd64 and arm64 image builds plus Compose validation.
+- [x] Document the Docker socket security boundary.
+- [ ] Validate normal Go/Web CI plus both Docker architecture builds on the final PR head.
+- [ ] Merge only after validation is green.
+- [x] Do not publish a container image; publication remains explicit owner approval only.
 
 ## Collective review — deferred product decisions
 
