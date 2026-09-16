@@ -177,9 +177,11 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, and the full M3 Product Experience sequence are complete.
 
-M3 delivered the modern Web UI, usability/first-run polish, and one supported Docker Compose deployment validated by CI for Linux amd64 and arm64. Native Linux remains the recommended full-visibility deployment; Docker is the convenient reduced-visibility alternative.
+M3 delivered the modern Web UI, usability/first-run polish, and one supported Docker Compose deployment validated by CI for Linux amd64 and arm64. The merged M3 native experience has also been exercised successfully on a real Debian 13 host using a side-by-side temporary build so the existing known-good service did not need to be replaced.
 
-The next step is a collective review of the deferred product decisions rather than automatically adding another feature. See `TO-DO.md` for that decision list.
+Remaining acceptance polish is deliberately small: commit a public-safe real UI screenshot and perform a real Docker Compose smoke test in an environment where Docker execution is authorized. The current management gateway blocks Docker commands, and that control should not be bypassed.
+
+After those items are completed or deliberately accepted as externally limited, the next narrowly scoped capability is M4 package-change history. See `TO-DO.md` for the current roadmap.
 
 ## Security and privacy
 
@@ -189,7 +191,7 @@ HostSleuth can collect hostnames, IP addresses, mount paths, service names, list
 
 - `README.md` — product definition, usage, and current scope.
 - `CURRENT-HANDOFF.md` — current project state and next task.
-- `TO-DO.md` — active decision list and deferred product ideas.
+- `TO-DO.md` — active roadmap and product decisions.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 
 ## License
