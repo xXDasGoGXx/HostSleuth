@@ -19,8 +19,11 @@ func DiffSnapshots(oldSnap, newSnap Snapshot) []Event {
 	events = append(events, diffNamedStates(at, "service", serviceMap(oldSnap.Services), serviceMap(newSnap.Services))...)
 	events = append(events, diffNamedStates(at, "container", containerMap(oldSnap.Containers), containerMap(newSnap.Containers))...)
 	events = append(events, diffSet(at, "listener", listenerSet(oldSnap.Listeners), listenerSet(newSnap.Listeners))...)
-	if oldSnap.SchemaVersion >= snapshotSchemaVersion {
+	if oldSnap.SchemaVersion >= packageHistorySchemaVersion {
 		events = append(events, diffPackageChanges(oldSnap.PackageChanges, newSnap.PackageChanges)...)
+	}
+	if oldSnap.SchemaVersion >= configFingerprintSchemaVersion {
+		events = append(events, diffConfigFingerprints(at, oldSnap.ConfigFingerprints, newSnap.ConfigFingerprints)...)
 	}
 	return events
 }
@@ -100,6 +103,56 @@ func diffPackageChanges(oldChanges, newChanges []PackageChange) []Event {
 		return out[i].At.Before(out[j].At)
 	})
 	return out
+}
+
+func diffConfigFingerprints(at time.Time, oldValues, newValues []ConfigFingerprint) []Event {
+	oldMap := configFingerprintMap(oldValues)
+	newMap := configFingerprintMap(newValues)
+	paths := make([]string, 0, len(oldMap)+len(newMap))
+	seen := map[string]bool{}
+	for path := range oldMap {
+		paths = append(paths, path)
+		seen[path] = true
+	}
+	for path := range newMap {
+		if !seen[path] {
+			paths = append(paths, path)
+		}
+	}
+	sort.Strings(paths)
+
+	var out []Event
+	for _, path := range paths {
+		oldValue, oldOK := oldMap[path]
+		newValue, newOK := newMap[path]
+		if !oldOK {
+			oldValue = ConfigFingerprint{Path: path, State: "missing"}
+		}
+		if !newOK {
+			newValue = ConfigFingerprint{Path: path, State: "missing"}
+		}
+		if oldValue.State == "unreadable" || newValue.State == "unreadable" {
+			continue
+		}
+
+		switch {
+		case oldValue.State != "present" && newValue.State == "present":
+			out = append(out, Event{At: at, Category: "configuration", Severity: "info", Summary: "configuration appeared: " + path})
+		case oldValue.State == "present" && newValue.State != "present":
+			out = append(out, Event{At: at, Category: "configuration", Severity: "warning", Summary: "configuration disappeared: " + path})
+		case oldValue.State == "present" && newValue.State == "present" && oldValue.Fingerprint != newValue.Fingerprint:
+			out = append(out, Event{At: at, Category: "configuration", Severity: "info", Summary: "configuration changed: " + path})
+		}
+	}
+	return out
+}
+
+func configFingerprintMap(in []ConfigFingerprint) map[string]ConfigFingerprint {
+	m := make(map[string]ConfigFingerprint, len(in))
+	for _, value := range in {
+		m[value.Path] = value
+	}
+	return m
 }
 
 func serviceMap(in []ServiceInfo) map[string]string {

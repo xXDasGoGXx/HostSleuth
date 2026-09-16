@@ -2,20 +2,25 @@ package core
 
 import "time"
 
-const snapshotSchemaVersion = 2
+const (
+	packageHistorySchemaVersion    = 2
+	configFingerprintSchemaVersion = 3
+	snapshotSchemaVersion          = configFingerprintSchemaVersion
+)
 
 type Snapshot struct {
-	SchemaVersion  int              `json:"schema_version"`
-	CapturedAt     time.Time        `json:"captured_at"`
-	Mode           string           `json:"mode,omitempty"`
-	Host           HostInfo         `json:"host"`
-	Interfaces     []InterfaceInfo  `json:"interfaces,omitempty"`
-	Filesystems    []FilesystemInfo `json:"filesystems,omitempty"`
-	Routes         []string         `json:"routes,omitempty"`
-	Listeners      []Listener       `json:"listeners,omitempty"`
-	Services       []ServiceInfo    `json:"services,omitempty"`
-	Containers     []ContainerInfo  `json:"containers,omitempty"`
-	PackageChanges []PackageChange  `json:"package_changes,omitempty"`
+	SchemaVersion      int                 `json:"schema_version"`
+	CapturedAt         time.Time           `json:"captured_at"`
+	Mode               string              `json:"mode,omitempty"`
+	Host               HostInfo            `json:"host"`
+	Interfaces         []InterfaceInfo     `json:"interfaces,omitempty"`
+	Filesystems        []FilesystemInfo    `json:"filesystems,omitempty"`
+	Routes             []string            `json:"routes,omitempty"`
+	Listeners          []Listener          `json:"listeners,omitempty"`
+	Services           []ServiceInfo       `json:"services,omitempty"`
+	Containers         []ContainerInfo     `json:"containers,omitempty"`
+	PackageChanges     []PackageChange     `json:"package_changes,omitempty"`
+	ConfigFingerprints []ConfigFingerprint `json:"config_fingerprints,omitempty"`
 }
 
 type HostInfo struct {
@@ -71,6 +76,13 @@ type PackageChange struct {
 	Architecture string    `json:"architecture,omitempty"`
 	FromVersion  string    `json:"from_version,omitempty"`
 	ToVersion    string    `json:"to_version,omitempty"`
+}
+
+type ConfigFingerprint struct {
+	Path        string `json:"path"`
+	State       string `json:"state"`
+	Fingerprint string `json:"fingerprint,omitempty"`
+	SizeBytes   int64  `json:"size_bytes,omitempty"`
 }
 
 type Event struct {

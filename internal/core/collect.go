@@ -53,6 +53,7 @@ func Collect(ctx context.Context) Snapshot {
 	s.Listeners = collectListeners(ctx)
 	if mode != dockerDeploymentMode {
 		s.Services = collectServices(ctx)
+		s.ConfigFingerprints = collectConfigFingerprints()
 	}
 	s.Containers = collectContainers(ctx)
 	s.PackageChanges = collectPackageChanges()
