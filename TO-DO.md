@@ -16,52 +16,52 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Publish stable v0.3.0 from accepted source `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1` with native amd64/arm64 assets, checksums, and public multi-platform Docker tags.
 - [x] M7 — read-only Service Story with systemd/journal/listener/endpoint/change correlation.
 - [x] M7 real-host regression: hidden listener PID remains unknown and cannot become a false collision claim.
-- [x] M8 — read-only Incident Lens.
-- [x] M8 explicit event/time anchor with bounded +/- 15 minute retained-event window.
-- [x] M8 package/configuration/service/container/listener and other retained event categories shown without causal claims.
-- [x] M8 optional current endpoint Diagnose/TLS evidence kept explicitly separate from historical event context.
-- [x] M8 Changes-integrated Web UI, CLI `incident`, and `/api/incident-lens`.
-- [x] M8 focused tests and isolated real OMV CLI/API/UI acceptance.
+- [x] M8 — read-only Incident Lens with event/time/diagnosis anchors and bounded +/- 15 minute context.
+- [x] M9 — read-only HostSleuth Workbench.
+- [x] M9 file SHA-256/SHA-512 plus expected-checksum verification and path metadata.
+- [x] M9 file-to-file fingerprint comparison.
+- [x] M9 common DNS record inspection through the host system resolver.
+- [x] M9 direct HTTP HEAD and bounded redirect-chain inspection.
+- [x] M9 public PEM certificate inspection and exact local-file-vs-served certificate comparison.
+- [x] M9 dedicated CLI/API/Web UI with no arbitrary command box, file editor, custom HTTP headers/credentials, or hidden shell hooks.
+- [x] M9 Workbench Web/API operations restricted to loopback clients; local CLI and SSH-tunnel workflows remain available.
+- [x] M9 focused tests, full validation, isolated real OMV CLI acceptance, and isolated API/UI smoke.
+- [x] CI now syntax-checks every UI fragment plus the exact concatenated served JavaScript and includes a Docker Workbench smoke path.
 
-Stable `v0.3.0` remains the current published release. M7 and M8 are newer source capabilities and are not claimed to be included in v0.3.0. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
+Stable `v0.3.0` remains the current published release. M7, M8, and M9 are newer source capabilities and are not claimed to be included in v0.3.0. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
 
-## Next — 5. M9 HostSleuth Workbench
+## Active — 6. M10 Reboot Story
 
-M9 is the next approved milestone. Keep it a deliberately small set of read-only troubleshooting tools, not a miscellaneous utilities page or browser shell.
+M10 is the next approved milestone. Keep it evidence-first and read-only.
 
-Initial approved candidate set:
-
-- [ ] SHA-256 / SHA-512 calculation for a selected local file without storing contents.
-- [ ] Expected-checksum verification.
-- [ ] Compare two files by fingerprint.
-- [ ] Path owner/group/permissions/mtime/size/hash inspection.
-- [ ] DNS inspection for common records with deterministic evidence.
-- [ ] HTTP HEAD / redirect-chain inspection.
-- [ ] PEM certificate inspection.
-- [ ] Local certificate file fingerprint vs certificate actually served by an endpoint.
-- [ ] Use consumer/product research to refine the strongest workflows without silently adding unrelated tools.
-- [ ] No arbitrary command box, file editor, generic server controls, or hidden shell hooks.
+- [ ] Capture current boot time and bounded previous boot/shutdown evidence where available.
+- [ ] Distinguish orderly vs abnormal shutdown only when direct evidence supports it.
+- [ ] Correlate package/kernel/configuration changes near reboot without claiming cause from timing alone.
+- [ ] Surface services failed after boot.
+- [ ] Surface listeners that existed before but did not return only when retained evidence supports that statement.
+- [ ] Include container state changes relevant to boot recovery.
+- [ ] Attach current service/listener/certificate context for missing endpoints only where evidence connects honestly.
+- [ ] Do not invent a reboot cause.
+- [ ] Reuse Incident Lens/event primitives instead of creating a second history store.
 - [ ] Focused tests, normal CI, and bounded real-host acceptance.
 
 ## Consumer/product research — separate backlog, not active scope
 
-Research what users currently assemble from monitoring tools, admin consoles, certificate clients, TLS scanners, scripts, and one-off websites. Preserve differentiated opportunities without changing the ordered roadmap.
+Continue studying what users currently assemble from CLI tools, admin consoles, monitoring products, DNS/HTTP/TLS websites, package tools, log viewers, scripts, and other one-off troubleshooting utilities. Preserve differentiated opportunities without changing the ordered roadmap.
 
-Promising later themes include:
+The research backlog is intentionally broader than certificate management. Promising themes include:
 
-- protocol-aware TLS/STARTTLS inspection for mail and other non-HTTPS services;
-- certificate source -> destination -> actually-served fingerprint verification;
-- certificate rollout consistency across several local consumers/endpoints;
 - expected-endpoint contracts tying service/listener/protocol/certificate expectations to retained changes;
-- tightly bounded certificate deployment recipes with preview, audit, reload, and postcondition verification.
+- protocol-aware TLS/STARTTLS inspection for mail and other non-HTTPS services;
+- certificate source -> destination -> actually-served fingerprint verification and rollout consistency;
+- DNS path/delegation or resolver-comparison workflows when they answer a concrete troubleshooting question;
+- HTTP/reverse-proxy evidence that explains redirect, host-header, or upstream mismatches without becoming a proxy manager;
+- permissions/ownership/deployment-path evidence that explains why a service cannot consume a file it is expected to use;
+- tightly bounded safe-action recipes with preview, audit, postcondition verification, and no arbitrary shell.
 
 Any write/action feature remains reserved for M11 security/design review or another explicitly approved later milestone.
 
 ## Then — exact approved order
-
-### 6. M10 — Reboot Story
-
-Boot/shutdown evidence plus what failed to return after reboot. Never invent reboot cause.
 
 ### 7. M11 — Optional Safe Actions
 
