@@ -29,7 +29,7 @@ func TestServiceStoryFailedServiceDetectsPortCollision(t *testing.T) {
 	)
 
 	snap := Snapshot{
-		Services: []ServiceInfo{{Name: "demo.service", Load: "loaded", Active: "failed", Sub: "failed"}},
+		Services:  []ServiceInfo{{Name: "demo.service", Load: "loaded", Active: "failed", Sub: "failed"}},
 		Listeners: []Listener{{Protocol: "tcp", Address: "0.0.0.0:2525", Process: `users:(("other",pid=999,fd=3))`}},
 	}
 	story := ServiceStoryFor(context.Background(), "demo", "127.0.0.1:2525", snap, nil)
@@ -68,7 +68,7 @@ func TestServiceStoryActiveServiceOwnsExpectedReachablePort(t *testing.T) {
 	})
 
 	snap := Snapshot{
-		Services: []ServiceInfo{{Name: "demo.service", Load: "loaded", Active: "active", Sub: "running"}},
+		Services:  []ServiceInfo{{Name: "demo.service", Load: "loaded", Active: "active", Sub: "running"}},
 		Listeners: []Listener{{Protocol: "tcp", Address: "127.0.0.1:8443", Process: `users:(("demo",pid=123,fd=3))`}},
 	}
 	story := ServiceStoryFor(context.Background(), "demo.service", "127.0.0.1:8443", snap, nil)
