@@ -3,9 +3,9 @@ package core
 import "time"
 
 const (
-	packageHistorySchemaVersion     = 2
+	packageHistorySchemaVersion    = 2
 	configFingerprintSchemaVersion = 3
-	snapshotSchemaVersion           = rebootStorySchemaVersion
+	snapshotSchemaVersion          = rebootStorySchemaVersion
 )
 
 type Snapshot struct {
