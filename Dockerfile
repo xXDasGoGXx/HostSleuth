@@ -5,7 +5,8 @@ WORKDIR /src
 
 COPY go.mod ./
 RUN go mod download
-COPY . .
+COPY cmd ./cmd
+COPY internal ./internal
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -15,7 +16,7 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     -o /out/hostsleuth ./cmd/hostsleuth
 
 FROM alpine:3.24
-RUN apk add --no-cache ca-certificates docker-cli iproute2 nftables
+RUN apk add --no-cache ca-certificates docker-cli iproute2
 
 COPY --from=build /out/hostsleuth /usr/local/bin/hostsleuth
 
