@@ -1,0 +1,63 @@
+name: Public image smoke
+
+on:
+  push:
+    branches:
+      - 'validate/v0.1.0-public-image'
+
+permissions:
+  contents: read
+
+jobs:
+  public-image-smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Pull public tags
+        run: |
+          set -eux
+          docker pull mjmalleo/hostsleuth:0.1.0
+          docker pull mjmalleo/hostsleuth:latest
+
+      - name: Start public image with supported runtime settings
+        run: |
+          set -eux
+          docker volume create hostsleuth-public-smoke
+          docker run -d \
+            --name hostsleuth-public-smoke \
+            --network host \
+            --pid host \
+            --uts host \
+            --read-only \
+            --cap-drop ALL \
+            --security-opt no-new-privileges:true \
+            --tmpfs /tmp:rw,noexec,nosuid,size=16m \
+            -v hostsleuth-public-smoke:/var/lib/hostsleuth \
+            -v /etc/os-release:/host/etc/os-release:ro \
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            mjmalleo/hostsleuth:0.1.0
+
+      - name: Wait for API
+        run: |
+          set -eu
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8787/api/about >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs hostsleuth-public-smoke
+          exit 1
+
+      - name: Verify public image behavior
+        run: |
+          set -eux
+          curl -fsS http://127.0.0.1:8787/api/about | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("version") == "v0.1.0", d'
+          curl -fsS http://127.0.0.1:8787/api/snapshot | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("mode") == "docker", d'
+          curl -fsS http://127.0.0.1:8787/ | grep -q HostSleuth
+          curl -fsS 'http://127.0.0.1:8787/api/diagnose?target=127.0.0.1:8787' | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("conclusion") == "target is reachable", d'
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f hostsleuth-public-smoke >/dev/null 2>&1 || true
+          docker volume rm hostsleuth-public-smoke >/dev/null 2>&1 || true
