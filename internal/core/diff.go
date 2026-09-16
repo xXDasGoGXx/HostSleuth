@@ -13,6 +13,13 @@ func DiffSnapshots(oldSnap, newSnap Snapshot) []Event {
 		at = time.Now().UTC()
 	}
 	var events []Event
+	if oldSnap.SchemaVersion >= rebootStorySchemaVersion && oldSnap.Host.BootID != "" && newSnap.Host.BootID != "" && oldSnap.Host.BootID != newSnap.Host.BootID {
+		summary := "host reboot detected: kernel boot identity changed"
+		if !newSnap.Host.BootStartedAt.IsZero() {
+			summary = "host reboot detected: current boot started " + newSnap.Host.BootStartedAt.UTC().Format(time.RFC3339)
+		}
+		events = append(events, Event{At: at, Category: "system", Severity: "warning", Summary: summary})
+	}
 	if oldSnap.Host.Kernel != "" && newSnap.Host.Kernel != oldSnap.Host.Kernel {
 		events = append(events, Event{At: at, Category: "system", Severity: "info", Summary: fmt.Sprintf("kernel changed: %s -> %s", oldSnap.Host.Kernel, newSnap.Host.Kernel)})
 	}
