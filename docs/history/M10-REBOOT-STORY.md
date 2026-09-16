@@ -78,7 +78,7 @@ Closeout validation covers:
 - isolated real-OMV snapshot validation with schema 4, live boot ID, exact boot start, systemd services, and listeners;
 - direct previous/current boot journal probes on the real OMV account confirming the permission boundary above.
 
-Real-host acceptance used temporary state/build paths only. The production HostSleuth deployment, production state, Compose definition, Docker tag, and recovery repository were not changed.
+Real-host acceptance used temporary state/build paths only. M10 work did not change the production HostSleuth deployment, production state, live Compose definition, Docker image selection, or recovery repository.
 
 ## Publication and live-deployment boundary
 
@@ -93,11 +93,9 @@ Published Docker tags remain:
 
 M7, M8, M9, and M10 are newer source work and are not claimed to be included in v0.3.0.
 
-Live OMV remains intentionally pinned to:
+A final read-only closeout check of the live endpoint at `192.168.2.181:8787` reported application version `v0.3.0`. The unprivileged acceptance account could not read the live Compose file, so M10 does not claim an independently verified live image tag. The separate `xXDasGoGXx/OMV-Docker-Rebuild` repository still documents its disaster-recovery HostSleuth definition as pinned to `mjmalleo/hostsleuth:0.1.0`.
 
-`mjmalleo/hostsleuth:0.1.0`
-
-The live Compose deployment, persistent state, and `xXDasGoGXx/OMV-Docker-Rebuild` recovery pin remain unchanged.
+That live/recovery divergence was only recorded, not reconciled. M10 did not deploy, repin, publish, or otherwise alter either system.
 
 ## Security/product boundary
 
