@@ -9,154 +9,167 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 1. **Remember meaningful host changes.**
 2. **Explain why a host/service/port is or is not reachable using deterministic evidence.**
 
-The product definition and user-facing overview live in `README.md`. The active roadmap lives in `TO-DO.md`.
+HostSleuth is not a generic monitoring platform. The product stays evidence-first, read-only, local-first, and deliberately small.
 
-## Milestone state
+## Current authoritative state
 
-- **M0 — Repository foundation:** complete.
-- **M1 — Single-host deployable MVP:** complete.
-- **M2 — Deeper deterministic diagnosis:** complete.
-- **M3 — Product Experience:** complete and accepted.
-- **M3.4 — Public Container Distribution:** active on branch `m3.4/public-container-distribution` / PR #20.
-- **M4 — Package-change timeline:** remains the next application-feature milestone after M3.4.
+Repository: `xXDasGoGXx/HostSleuth`
 
-M3.4 does not add HostSleuth functionality. Its only purpose is to make the existing supported Docker deployment easy for normal users to pull, run, version, and update.
+Current accepted `main`:
 
-## Authoritative repository state before M3.4
+`3aa3cfbbb557d81d3b57dfb07ca43f2cdd2634a8`
 
-M3.4 started from `main` at:
+This includes:
 
-`2ab8189b37f45712dca3832d81e96a990764be18`
+- completed M0, M1, M2, and M3;
+- M3.4 public-container-distribution foundation from PR #20;
+- the accepted Host Story evidence-first Web UI from PR #21.
 
-The only verified published GitHub release at M3.4 start was `v0.1.0-alpha.1`, which predates completed M3 and is not the stable M3 container release.
+No stable `v0.1.0` GitHub release/tag or Docker Hub image has been published yet.
 
-## Existing container foundation
+## M3.4 — Public Container Distribution
 
-Before M3.4, HostSleuth already had a multi-stage static Go/Alpine image, TARGETOS/TARGETARCH support, linux/amd64 and linux/arm64 CI builds, runtime Compose smoke testing, persistent state, host network/PID/UTS namespaces, narrow host mounts, a read-only root filesystem, all Linux capabilities dropped, `no-new-privileges`, and truthful reduced Docker visibility.
+M3.4 adds no new HostSleuth backend capability. Its purpose is to make the existing supported Docker deployment easy for normal users to pull, run, version, and update.
 
-M3.4 must not weaken those boundaries to gain additional visibility.
+The accepted implementation now on `main` includes:
 
-## M3.4 implementation currently on branch
-
-The active branch now contains:
-
-- `compose.yaml` changed from local `build:` to `image:` consumption;
+- `compose.yaml` using a published-image default rather than a local build;
 - confirmed public image name `mjmalleo/hostsleuth`;
-- `HOSTSLEUTH_IMAGE` override so explicit stable tags and local developer builds remain easy;
-- README pull/Compose usage;
-- README direct `docker run` usage matching the supported Compose security/runtime settings;
-- explicit developer source-build instructions;
-- the existing `.github/workflows/release.yml` extended to publish the Docker image in the same release workflow;
-- plain stable `vX.Y.Z` versions publish Docker tags `<X.Y.Z>` and `latest`;
-- prerelease version branches may create prerelease GitHub releases but do not publish Docker tags;
-- linux/amd64 + linux/arm64 multi-platform Docker publication;
-- Docker Hub authentication via GitHub Actions `DOCKERHUB_TOKEN` secret only;
-- fixed Docker Hub namespace `mjmalleo` in the release workflow;
-- OCI metadata for title, source, revision, version, and MIT license;
-- release reruns refuse to continue if an existing release tag points at a different commit;
-- CI smoke builds a local image first, then makes Compose consume that image without `--build`;
-- CI checks `/api/about`, `/api/snapshot`, Web UI, and self-diagnosis from the image-consumption path.
+- `HOSTSLEUTH_IMAGE` override for pinned stable tags and local developer builds;
+- documented Compose pull/update workflow;
+- documented direct `docker run` workflow;
+- preserved local source-build workflow;
+- existing Docker security model unchanged: host network/PID/UTS, read-only root, all capabilities dropped, `no-new-privileges`, narrow host mounts, persistent state, read-only Docker socket;
+- public Web UI default remains `127.0.0.1:8787`;
+- optional LAN binding remains explicit and should use one specific trusted host address rather than `0.0.0.0`;
+- stable Docker publication integrated directly into `.github/workflows/release.yml`;
+- plain stable `vX.Y.Z` releases publish Docker tags `<X.Y.Z>` and `latest`;
+- prerelease versions may create GitHub prereleases but do not publish Docker tags;
+- Docker publication targets `linux/amd64` and `linux/arm64`;
+- Docker Hub authentication uses GitHub Actions secret `DOCKERHUB_TOKEN` only;
+- OCI image metadata is attached for source, revision, version, title, and MIT license.
 
-A separate `release: published` Docker workflow was deliberately removed after confirming GitHub's `GITHUB_TOKEN` recursion rule: the existing release workflow creates GitHub Releases with `github.token`, and events produced by that token do not generally trigger another workflow. Keeping Docker publication inside the same release workflow avoids adding another GitHub credential solely to chain workflows.
+A separate `release: published` Docker workflow was intentionally removed because the GitHub Release is created by the release workflow using `GITHUB_TOKEN`; GitHub suppresses most follow-on workflow events created by that token. Keeping native release and Docker publication in one workflow avoids a fragile chained release path.
 
-No Docker Hub repository, Docker Hub image/tag, stable GitHub release, or stable release Git tag has been created by M3.4 work so far.
+## Accepted Host Story UI
 
-## Validation result so far
+PR #21 replaced the clean-but-sparse M3 presentation with one bounded evidence-first UI pass. This is the v0.1.0 UI direction and is now frozen unless a concrete defect appears.
 
-GitHub Actions CI run 98 passed on the confirmed-namespace implementation head before the final release-pipeline integration changes:
+The accepted UI uses only evidence HostSleuth already collected:
 
-- formatting passed;
-- `go vet` passed;
-- Go tests passed;
-- Web UI JavaScript syntax passed;
-- native Go build passed;
-- Compose validation passed;
-- linux/amd64 image build passed;
-- linux/arm64 image build passed;
-- image-consumption Docker smoke passed;
-- `/api/about`, `/api/snapshot`, Web UI, and self-diagnosis passed;
-- clean teardown passed.
+- Overview tells a plain-language Host Story instead of leading with generic counters;
+- Reachability Surface shows listeners by bind scope: loopback, wildcard, or specific-address;
+- listener rows can pre-fill the existing deterministic Diagnose workflow;
+- listening sockets are explicitly treated as bind evidence, not proof of remote reachability;
+- Diagnose shows an ordered evidence path while retaining the exact raw checks/evidence;
+- recent host changes beside diagnosis are clearly labeled as context, never claimed causality;
+- Host exposes routes, listeners, Docker image/status/ports/networks, interfaces, filesystems, and host facts already present in the snapshot;
+- Changes includes a compact category summary while leaving the existing timeline authoritative.
 
-The final PR head must remain green after the release-pipeline/documentation changes before merge.
+No new collectors, APIs, storage, agents, SNMP, resource-graph dashboarding, alerts, remediation, AI, or multi-host architecture were added.
 
-## Version recommendation
+See `docs/design/HOST-STORY-UI.md` for the accepted design boundary.
 
-The recommended first stable version is **v0.1.0**.
+## Validation completed
 
-This continues the already-established `v0.1.0-alpha.1` line after completed M1/M2/M3 instead of implying a new feature generation with `v0.2.0`.
+M3.4 distribution PR #20 final CI run 105 passed before merge:
 
-Do not create the stable release branch/tag/release until the owner explicitly approves publication.
+- formatting;
+- `go vet`;
+- Go tests;
+- Web JavaScript syntax;
+- native build;
+- Compose validation;
+- linux/amd64 image build;
+- linux/arm64 image build;
+- image-consumption Docker smoke;
+- `/api/about`;
+- `/api/snapshot`;
+- Web UI;
+- self-diagnosis;
+- clean teardown.
 
-## Docker Hub repository
+Host Story UI PR #21 final CI run 110 also passed after the evidence-accuracy wording fix, including the Docker runtime smoke and both image architectures.
 
-Confirmed repository/name:
+## Version
+
+Recommended first stable release: **v0.1.0**.
+
+This continues the already-established `v0.1.0-alpha.1` line after completed M1/M2/M3 rather than implying a new minor feature generation with `v0.2.0`.
+
+## Docker Hub target
+
+Confirmed public image:
 
 `mjmalleo/hostsleuth`
 
-Keep that exact namespace in Compose, README examples, and the release workflow.
+Expected first stable tags:
+
+- `mjmalleo/hostsleuth:0.1.0`
+- `mjmalleo/hostsleuth:latest`
 
 ## One-time owner-controlled setup still required
 
-Before the first public image can be published:
+Before first publication:
 
 1. Create the public Docker Hub repository `hostsleuth` under namespace `mjmalleo`.
-2. Generate a Docker Hub access token with only the permissions needed to push this repository.
-3. Add that token to GitHub Actions as repository secret `DOCKERHUB_TOKEN`.
+2. Generate a Docker Hub access token with only the permissions needed to push the repository.
+3. Add that token to GitHub repository Actions secrets as `DOCKERHUB_TOKEN`.
 
 Never paste the token into chat or commit it to Git.
 
 ## Publication boundary
 
-Do not perform any of these actions without explicit owner approval at that point:
+Do not perform these actions until the owner explicitly approves publication at that point:
 
-- create the Docker Hub repository;
-- create/push a public Docker image or Docker Hub tag;
-- create `release/v0.1.0` or another public release branch intended to publish;
-- create a stable GitHub release or release Git tag;
-- publish any package or artifact beyond the already-public repository branch/PR work;
+- create `release/v0.1.0`;
+- create the stable GitHub release/tag;
+- push Docker Hub image/tag content;
 - change the known-good live OMV deployment.
 
-## Exact remaining M3.4 sequence
+Creating the Docker Hub repository and GitHub secret is setup; creating `release/v0.1.0` is the publication trigger.
 
-1. Confirm the final PR head is green.
+## Exact remaining endgame
+
+1. Finish this release-prep documentation sync and merge it to `main`.
 2. Complete the one-time Docker Hub repository/token/GitHub secret setup.
-3. Merge PR #20 to `main` after final validation.
-4. Re-check `main` and the release workflow after merge.
-5. Stop and obtain explicit owner approval to publish `v0.1.0`.
-6. After approval, create `release/v0.1.0` from the exact accepted `main` commit. The release workflow will test, build native amd64/arm64 binaries and checksums, create the GitHub release/tag, then build and push Docker linux/amd64 + linux/arm64 images as `mjmalleo/hostsleuth:0.1.0` and `mjmalleo/hostsleuth:latest`.
-7. Verify the real Docker Hub tags/manifest and pull both tags as a normal user would.
-8. Start the published image and re-check `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
-9. Only after public-image validation, update the separate OMV disaster-recovery repository and, with owner approval, convert the live OMV/Arcane deployment from GitHub source-build to image-pull use.
-10. Record M3.4 completion in handoff/history and then begin M4.
+3. Re-check the exact final `main` SHA and release workflow.
+4. Present that exact release state and obtain owner approval to publish `v0.1.0`.
+5. Create `release/v0.1.0` from the exact accepted `main` commit.
+6. Let the single release workflow test, build native amd64/arm64 binaries/checksums, create the GitHub release/tag, and publish Docker linux/amd64 + linux/arm64 images.
+7. Verify the Docker Hub manifest and both `0.1.0` / `latest` tags.
+8. Pull and run the public image exactly as a normal user would; re-check `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
+9. Only after public-image validation, update `xXDasGoGXx/OMV-Docker-Rebuild` and, with owner approval, convert the live OMV/Arcane HostSleuth deployment from GitHub source-build to image-pull use.
+10. Record M3.4 completion in handoff/history.
+11. Begin M4 package-change timeline. Do not reopen UI exploration unless real use exposes a concrete problem.
 
-## Product-direction rule
+## Known OMV deployment context
 
-HostSleuth stays easy to deploy, easy to understand, and intentionally small. M3.4 must not introduce Watchtower behavior, automatic updating, Kubernetes, Swarm, privileged mode, broad host mounts/capabilities, authentication redesign, remediation, M4 package work, or unrelated product features.
+Current known-good HostSleuth deployment is on OMV host `192.168.2.181`, managed through Arcane, with trusted-LAN UI binding `192.168.2.181:8787`, persistent state under `/srv/docker/volumes/hostsleuth/data`, and Compose under `/srv/docker/volumes/compose/hostsleuth/compose.yaml`.
 
-## Supported deployment paths
+Do not change that live deployment before the real public image is validated.
 
-### Native Linux — recommended
+## Next application capability — M4
 
-Native Linux provides the fullest visibility into systemd, host filesystems, network/listener state, and Docker inventory while keeping the Web UI loopback-only by default.
+M4 remains the package-change timeline:
 
-### Docker — convenient, reduced visibility
+- bounded Debian/Ubuntu `apt` / `dpkg` history first;
+- install/update/remove changes added to the existing event timeline;
+- read-only and local-first;
+- unsupported platforms remain truthful and quiet;
+- no package management, update actions, alerting, repository management, or settings expansion.
 
-The Docker deployment uses host network/PID/UTS namespaces, persistent state, a narrow host OS-release mount, and Docker socket access for inventory. It intentionally reports unavailable evidence as unavailable instead of escalating privileges.
+## Repository reading order
 
-The public default remains `127.0.0.1:8787`. Optional trusted-LAN binding should use one specific host address rather than `0.0.0.0`.
-
-## Repository source of truth
-
-Repository: `xXDasGoGXx/HostSleuth`
-
-Read in this order when resuming:
+When resuming, read:
 
 1. `README.md`
 2. `CURRENT-HANDOFF.md`
 3. `TO-DO.md`
-4. `.github/workflows/ci.yml`
-5. `.github/workflows/release.yml`
-6. `Dockerfile`
-7. `compose.yaml`
+4. `docs/design/HOST-STORY-UI.md`
+5. `.github/workflows/ci.yml`
+6. `.github/workflows/release.yml`
+7. `Dockerfile`
+8. `compose.yaml`
 
-Use `docs/history/DEVELOPMENT-HISTORY.md` for completed historical details.
+Use `docs/history/DEVELOPMENT-HISTORY.md` for completed historical detail.
