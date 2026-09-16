@@ -15,7 +15,7 @@ Keep it evidence-first, local-first, single-host first, and deliberately small. 
 
 Repository: `xXDasGoGXx/HostSleuth`
 
-Always re-check current `main` before starting code, a release, or a deployment rather than relying on a self-referential SHA in this file.
+Always re-check current `main`, the active milestone branch, and any open milestone PR before consequential writes.
 
 Completed milestones:
 
@@ -31,6 +31,28 @@ Completed milestones:
 - M7 — Service Story;
 - M8 — Incident Lens;
 - M9 — HostSleuth Workbench.
+
+Completed `main` checkpoint before M10:
+
+`5745f9f0ed675e05e219b7a1c9147d25c049bc98`
+
+Active milestone:
+
+**M10 — Reboot Story — IN PROGRESS**
+
+Canonical development branch:
+
+`m10-reboot-story`
+
+Canonical draft checkpoint PR:
+
+`#34 — M10: Reboot Story (WIP checkpoint)`
+
+Durable WIP handoff:
+
+`docs/history/M10-REBOOT-STORY-WIP.md`
+
+The WIP handoff is authoritative for what is implemented, what has been validated, what remains, and the publication/deployment boundary. Continue from the existing M10 branch; do not reimplement M10 from scratch.
 
 Published stable release:
 
@@ -54,7 +76,7 @@ Platforms:
 - `linux/amd64`
 - `linux/arm64`
 
-M7, M8, and M9 are newer source capabilities and are **not** claimed to be present in the already-published v0.3.0 artifacts.
+M7, M8, M9, and the active M10 WIP are newer source capabilities and are **not** claimed to be present in the already-published v0.3.0 artifacts.
 
 ## M7 — Service Story
 
@@ -104,33 +126,26 @@ Therefore:
 - certificate inspection refuses a private-key PEM block encountered before a public certificate;
 - file hashing reads only a user-selected readable regular file and returns metadata/fingerprints, not file contents.
 
-### M9 validation
-
-Focused tests cover file hashing/checksum verification, file comparison, deterministic bounded DNS output, HEAD/redirect behavior, public-certificate/private-key boundaries, exact local-file-vs-served certificate matching, and loopback-only Web/API access.
-
-Full branch validation includes:
-
-- `gofmt`;
-- `go test ./...`;
-- `go vet ./...`;
-- native build;
-- syntax validation of base, Service Story, Incident Lens, and Workbench JavaScript;
-- syntax validation of the exact concatenated JavaScript served to consumers.
-
-Isolated real-OMV acceptance under `/tmp/hostsleuth-m9-accept` confirmed:
-
-- selected-file SHA-256 verification against the host's independent `sha256sum` result;
-- SHA-512 output;
-- exact file-to-file fingerprint match;
-- real DNS A/AAAA evidence;
-- real HTTPS HEAD/status evidence;
-- public certificate inspection;
-- exact local-public-cert vs isolated served-certificate fingerprint match using a temporary self-signed TLS listener;
-- isolated Workbench API/UI smoke on loopback.
-
-Validation found two implementation/test issues before closeout: a host umask made one test's assumed permission mode incorrect, and the first API wrapper used Go multiple-return values incorrectly. Both were fixed before acceptance. CI was also strengthened so future UI fragments cannot bypass syntax validation merely because they are concatenated at runtime.
-
 Full detail: `docs/history/M9-WORKBENCH.md`.
+
+## M10 — Reboot Story — active WIP
+
+Goal: explain boot/shutdown evidence and what failed to come back after a reboot without inventing a reboot cause. Reuse retained events and Incident Lens primitives, keep evidence bounded, and remain read-only.
+
+Already committed on the M10 branch:
+
+- snapshot schema version 4;
+- kernel boot ID evidence when available;
+- exact boot start from `/proc/stat` `btime` when available;
+- deterministic reboot detection only when known boot IDs differ;
+- no inference from human-readable uptime alone;
+- initial Reboot Story core and focused tests;
+- initial Reboot Story Web UI assets;
+- no reboot/shutdown/restart/service-control action.
+
+Real OMV isolated checks already confirmed Go tests/build and real boot identity/start capture. Journal boot history was unavailable to the unprivileged acceptance account; that is an evidence boundary and must remain explicit `unknown`/unavailable, not a fabricated conclusion.
+
+Still required before M10 closeout: finish CLI/API/runtime/UI wiring, bounded journal/recovery correlation, full validation/CI, isolated real-host acceptance, final milestone docs, and a clean merge of draft PR #34. See `docs/history/M10-REBOOT-STORY-WIP.md` for the exact resume checklist.
 
 ## Live OMV / recovery boundary
 
@@ -155,29 +170,19 @@ The owner explicitly approved continuing in this order without deviation. Consum
 
 ### 1. M6 — Certificate Story / TLS Detective — COMPLETE
 
-Read-only TLS/certificate troubleshooting is implemented and accepted.
-
 ### 2. Publish stable v0.3.0 — COMPLETE
-
-Published and verified from exact accepted source commit `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`. Live OMV was intentionally not migrated.
 
 ### 3. M7 — Service Story — COMPLETE
 
-Read-only systemd/runtime/journal/listener/endpoint/change correlation is implemented and accepted.
-
 ### 4. M8 — Incident Lens — COMPLETE
-
-Bounded, non-causal incident-window correlation is implemented and accepted.
 
 ### 5. M9 — HostSleuth Workbench — COMPLETE
 
-Bounded file-integrity, DNS, HTTP, and public-certificate troubleshooting tools are implemented and accepted. Workbench Web/API operations are loopback-only; no browser shell or generic utility launcher was added.
+### 6. M10 — Reboot Story — ACTIVE / WIP
 
-### 6. M10 — Reboot Story — NEXT / ACTIVE
+Continue only from `m10-reboot-story` / draft PR #34. Finish validation and acceptance before merging. Do not publish a release from this WIP state.
 
-Explain boot/shutdown evidence and what failed to come back after a reboot without inventing reboot cause. Reuse the event/Incident Lens model, keep evidence bounded, and remain read-only.
-
-### 7. M11 — Optional Safe Actions
+### 7. M11 — Optional Safe Actions — NOT STARTED
 
 This is the first planned milestone that may cross HostSleuth's read-only boundary and therefore requires an explicit design/security review before implementation. Candidate actions must be narrow, disabled by default, previewed, confirmed, audited, and postcondition-verified. No arbitrary command execution.
 
@@ -195,15 +200,7 @@ Current research is intentionally separate from implementation scope. The detail
 
 The desired product direction is broader than certificates: find recurring troubleshooting workflows where users currently assemble several commands, admin screens, logs, and websites, then use HostSleuth's deterministic correlation/verification model when it can genuinely make the workflow better.
 
-Promising areas include:
-
-- expected-endpoint contracts;
-- DNS resolver/delegation/split-view discrepancies;
-- HTTP redirect/reverse-proxy/upstream mismatches;
-- file permissions/ownership/deployment-path problems;
-- STARTTLS-aware mail/service inspection;
-- certificate source/destination/served verification and rollout consistency;
-- later tightly bounded safe-action recipes with observable postcondition verification.
+Promising areas include endpoint-path reasoning, DNS resolver/delegation/split-view discrepancies, HTTP/reverse-proxy/upstream mismatches, port/bind ownership, file permissions/ownership/deployment paths, container disappearance/dependencies, mail/STARTTLS protocol evidence, boot/recovery workflows, expected-state contracts, and certificate delivery/rollout verification.
 
 Research must not turn HostSleuth into an uptime dashboard, generic certificate/ACME manager, generic control panel, web shell, or multi-host orchestration system.
 
@@ -222,21 +219,19 @@ Do not drift into:
 
 The product should feel powerful because it connects deterministic evidence into answers people actually need.
 
-## Repository reading order
+## Repository reading order when resuming M10
 
-When resuming, read:
-
-1. `README.md`
-2. `CURRENT-HANDOFF.md`
+1. `CURRENT-HANDOFF.md`
+2. `docs/history/M10-REBOOT-STORY-WIP.md`
 3. `TO-DO.md`
 4. `docs/ROADMAP.md`
 5. `docs/history/DEVELOPMENT-HISTORY.md`
-6. `docs/history/M7-SERVICE-STORY.md`
-7. `docs/history/M8-INCIDENT-LENS.md`
-8. `docs/history/M9-WORKBENCH.md`
-9. `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
-10. `docs/design/HOST-STORY-UI.md`
-11. `.github/workflows/ci.yml`
-12. `.github/workflows/release.yml`
-13. `Dockerfile`
-14. `compose.yaml`
+6. `docs/history/M9-WORKBENCH.md`
+7. `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
+8. `docs/design/HOST-STORY-UI.md`
+9. `.github/workflows/ci.yml`
+10. `.github/workflows/release.yml`
+11. `Dockerfile`
+12. `compose.yaml`
+
+Before writing, re-check `main`, `m10-reboot-story`, and draft PR #34 so concurrent work cannot be overwritten.
