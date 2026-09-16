@@ -1,12 +1,12 @@
-# HostSleuth — Host Story UI exploration
+# HostSleuth — Host Story UI
 
-Status: isolated prototype on `explore/host-story-ui`.
+Status: accepted through PR #21 for the v0.1.0 product experience.
 
-This is a product-experience exploration, not a new HostSleuth subsystem and not part of M3.4 container publication unless it is deliberately accepted later.
+This is a bounded product-experience improvement, not a new HostSleuth subsystem and not a change in product scope.
 
 ## Problem
 
-The accepted M3 UI is clean and usable, but the Overview primarily presents counts and lists. It does not immediately communicate why HostSleuth is different from a generic host monitor.
+The accepted M3 UI was clean and usable, but the Overview primarily presented counts and lists. It did not immediately communicate why HostSleuth is different from a generic host monitor.
 
 HostSleuth's two jobs remain:
 
@@ -17,30 +17,30 @@ The UI should make those jobs obvious without becoming a metrics dashboard.
 
 ## Presentation research
 
-Useful patterns from mature tools:
+Useful patterns from mature tools informed the presentation only:
 
 - Cockpit: make a server discoverable and understandable at a glance rather than requiring command recall.
 - Uptime Kuma: keep the primary workflow immediately obvious and visually approachable.
 - Netdata: bring related troubleshooting evidence into one view instead of making users jump between disconnected tools.
 
-HostSleuth should borrow those presentation principles, not their feature sets or architecture.
+HostSleuth borrows those presentation principles, not their feature sets or architecture.
 
-## Prototype principles
+## Accepted principles
 
 - Evidence over decorative charts.
 - Answer questions, do not merely display counters.
 - Keep the same Overview / Diagnose / Changes / Host navigation.
-- Do not add alerting, remediation, AI explanation, multi-host management, agents, SNMP, time-series metrics, or configuration frameworks in this exploration.
+- Do not add alerting, remediation, AI explanation, multi-host management, agents, SNMP, time-series metrics, or configuration frameworks as part of this UI work.
 - Do not infer causality from nearby events. Recent changes shown beside a diagnosis are explicitly labeled as context only.
 - Do not treat a listening socket as proof of end-to-end reachability; routing and firewall state still matter.
 - Continue to report unavailable Docker-mode evidence honestly.
 - Keep the interface useful on a phone and on a large desktop display.
 
-## What the prototype changes
+## Accepted experience
 
 ### Overview becomes a Host Story
 
-The top of the UI summarizes what HostSleuth can currently prove about the machine rather than showing four generic counters.
+The top of the UI summarizes what HostSleuth can currently prove about the machine rather than leading with four generic counters.
 
 It surfaces:
 
@@ -78,7 +78,7 @@ The latest retained host changes are shown as nearby context and are explicitly 
 
 ### Host evidence is less hidden
 
-The Host view now exposes data HostSleuth already collects but the M3 interface underuses:
+The Host view exposes data HostSleuth already collected but the M3 interface underused:
 
 - routes;
 - full listener surface;
@@ -93,7 +93,7 @@ The existing event timeline remains authoritative. A small category count summar
 
 ## Non-goals
 
-This exploration does not add:
+This UI direction does not add:
 
 - resource graphs;
 - polling dashboards;
@@ -105,11 +105,11 @@ This exploration does not add:
 - backend collectors;
 - new settings.
 
-Those would require separate product decisions if ever pursued.
+Those require separate product decisions if ever pursued.
 
-## Acceptance question
+## Acceptance result
 
-The prototype succeeds if a new user can open HostSleuth and quickly answer:
+The UI is accepted because it makes it easier for a user to answer:
 
 - What machine am I looking at?
 - Where is this host listening, and on what scope?
@@ -118,4 +118,6 @@ The prototype succeeds if a new user can open HostSleuth and quickly answer:
 - Where do I click to investigate a host:port problem?
 - What evidence led HostSleuth to its diagnosis?
 
-without mistaking HostSleuth for a generic monitoring product.
+without turning HostSleuth into a generic monitoring product.
+
+The v0.1.0 UI is frozen after PR #21 and CI run 110 unless real use exposes a concrete defect.
