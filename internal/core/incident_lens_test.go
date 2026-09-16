@@ -49,8 +49,8 @@ func TestIncidentLensDoesNotClaimNearbyEventsCausedIncident(t *testing.T) {
 	if !strings.Contains(strings.ToLower(lens.ContextNote), "does not prove causation") {
 		t.Fatalf("missing non-causal boundary: %#v", lens)
 	}
-	if lens.CurrentEndpoint != nil {
-		t.Fatalf("endpoint evidence must be absent without target: %#v", lens)
+	if lens.CurrentEndpoint != nil || lens.EndpointCaptured != nil {
+		t.Fatalf("endpoint evidence and timestamp must be absent without target: %#v", lens)
 	}
 }
 
@@ -72,7 +72,7 @@ func TestIncidentLensTargetEvidenceIsCurrentAndSeparate(t *testing.T) {
 	if lens.CurrentEndpoint == nil || lens.CurrentEndpoint.Conclusion != "target is reachable" {
 		t.Fatalf("expected current endpoint evidence: %#v", lens)
 	}
-	if lens.EndpointCaptured.IsZero() || !lens.EndpointCaptured.After(anchor) {
+	if lens.EndpointCaptured == nil || lens.EndpointCaptured.IsZero() || !lens.EndpointCaptured.After(anchor) {
 		t.Fatalf("current endpoint timestamp must remain separate from historical anchor: %#v", lens)
 	}
 }
