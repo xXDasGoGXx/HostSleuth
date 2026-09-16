@@ -105,7 +105,10 @@ func TestDiffSnapshotsEmitsOnlyNewPackageChanges(t *testing.T) {
 	first := PackageChange{At: firstAt, Action: "update", Name: "docker-ce-cli", Architecture: "amd64", FromVersion: "1", ToVersion: "2"}
 	second := PackageChange{At: secondAt, Action: "install", Name: "demo", Architecture: "amd64", ToVersion: "3"}
 
-	events := DiffSnapshots(Snapshot{PackageChanges: []PackageChange{first}}, Snapshot{CapturedAt: secondAt.Add(time.Minute), PackageChanges: []PackageChange{first, second}})
+	events := DiffSnapshots(
+		Snapshot{SchemaVersion: snapshotSchemaVersion, PackageChanges: []PackageChange{first}},
+		Snapshot{SchemaVersion: snapshotSchemaVersion, CapturedAt: secondAt.Add(time.Minute), PackageChanges: []PackageChange{first, second}},
+	)
 	if len(events) != 1 {
 		t.Fatalf("expected one package event, got %#v", events)
 	}
@@ -117,6 +120,26 @@ func TestDiffSnapshotsEmitsOnlyNewPackageChanges(t *testing.T) {
 	}
 	if events[0].Summary != "package installed: demo:amd64 3" {
 		t.Fatalf("unexpected event summary: %q", events[0].Summary)
+	}
+}
+
+func TestDiffSnapshotsBaselinesPackageHistoryAcrossSchemaUpgrade(t *testing.T) {
+	change := PackageChange{
+		At:           time.Date(2026, 9, 15, 17, 0, 36, 0, time.UTC),
+		Action:       "update",
+		Name:         "docker-ce",
+		Architecture: "amd64",
+		FromVersion:  "1",
+		ToVersion:    "2",
+	}
+	events := DiffSnapshots(
+		Snapshot{SchemaVersion: 1},
+		Snapshot{SchemaVersion: snapshotSchemaVersion, CapturedAt: change.At.Add(time.Minute), PackageChanges: []PackageChange{change}},
+	)
+	for _, event := range events {
+		if event.Category == "package" {
+			t.Fatalf("expected first schema-2 capture to baseline package history, got %#v", events)
+		}
 	}
 }
 
