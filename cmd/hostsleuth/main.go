@@ -208,6 +208,7 @@ func runServe(args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	appCSS, appJS = appendServiceStoryAssets(appCSS, appJS)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/about", func(w http.ResponseWriter, r *http.Request) {
