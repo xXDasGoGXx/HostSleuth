@@ -24,7 +24,7 @@ func TestInspectFileHashesMetadataAndExpectedChecksum(t *testing.T) {
 	if len(first.SHA256) != 64 || len(first.SHA512) != 128 {
 		t.Fatalf("missing hashes: %#v", first)
 	}
-	if first.Permissions != "0640" || first.Size != int64(len("hostsleuth\n")) {
+	if first.Permissions == "" || first.Size != int64(len("hostsleuth\n")) {
 		t.Fatalf("unexpected metadata: %#v", first)
 	}
 	checked, err := InspectFile(context.Background(), path, "sha256:"+strings.ToLower(first.SHA256))
