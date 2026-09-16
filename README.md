@@ -124,7 +124,7 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - native Certbot lineage/renewal evidence is unavailable in the default Docker deployment because host `/etc/letsencrypt` and systemd state are not mounted;
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - remote/served TLS certificate evidence remains available because it comes from the diagnosed endpoint itself;
-- Incident Lens and Reboot Story can still use whichever retained evidence the Docker deployment actually records, without pretending unavailable native systemd/journal evidence exists;
+- Incident Lens and Reboot Story can still show whichever retained event categories the Docker deployment actually records, without pretending unavailable native evidence exists;
 - native installation remains the recommended choice when full host visibility matters.
 
 The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when its bind path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
@@ -162,17 +162,55 @@ Configuration fingerprinting currently covers `/etc/hosts`, `/etc/fstab`, `/etc/
 
 ### Diagnose `host:port`
 
-Enter a target such as `192.168.1.20:443` or `example.com:443`. HostSleuth can combine DNS, route, TCP, listener, Docker, firewall, systemd, TLS, certificate, and native Certbot evidence when each source is available. Stronger direct evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
+Enter a target such as `192.168.1.20:443` or `example.com:443`. HostSleuth can combine:
+
+- DNS resolution;
+- kernel route evidence;
+- TCP connectivity;
+- target-aware local TCP listener evidence;
+- Docker port publication, bind address, and network context;
+- bounded nftables candidate evidence when available;
+- bounded failed-systemd candidate evidence in native mode;
+- TLS handshake result, negotiated protocol, and cipher suite when the endpoint speaks TLS;
+- served certificate subject, SANs, issuer, serial, validity window, remaining lifetime, and SHA-256 fingerprint;
+- certificate hostname match/mismatch and bounded trust-chain verification;
+- on native Linux for local TLS endpoints, bounded read-only Certbot lineage, renewal, timer/service, and local-vs-served certificate evidence when available.
+
+The Web UI presents the answer first and keeps the underlying evidence available for inspection. Successful TCP remains definitive transport evidence; TLS validation is reported separately so a reachable endpoint can still be explained as having a handshake, expiry, hostname, trust, or stale-served-certificate problem. Stronger local bind/listener evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
+
+HostSleuth only calls a local certificate "newer/different than the one this endpoint is serving" when a unique readable Certbot lineage matches the requested host and deterministic validity/fingerprint evidence supports that statement. A fingerprint difference alone is not treated as proof of staleness.
 
 ### Service Story — native Linux
 
-M7 adds a read-only service story inside the existing Diagnose workflow. It can correlate bounded systemd runtime/journal evidence, service process/listener ownership, expected-port evidence, related container publications, current endpoint diagnosis, and retained nearby changes. Nearby retained changes are context, not proof of causation, and hidden ownership remains `unknown`.
+M7 adds a read-only service story inside the existing Diagnose workflow. Select a systemd unit and optionally the `host:port` you expect it to provide. HostSleuth can correlate:
+
+- bounded systemd runtime/result evidence;
+- bounded, sanitized current-boot journal evidence;
+- the service main PID and cgroup process membership;
+- listener ownership when local permissions expose listener PIDs;
+- deterministic expected-port collisions only when competing PID evidence is actually visible;
+- expected-port presence when ownership is hidden;
+- related container host-port publication context;
+- the existing endpoint Diagnose/TLS/certificate story;
+- retained service/listener changes plus bounded nearby package/configuration/container context.
+
+Nearby retained changes are context, not proof of causation. If local permissions hide a journal or listener owner, HostSleuth reports `unknown` rather than inventing an answer.
 
 Service Story does not start, stop, restart, reload, enable, disable, or otherwise modify a service.
 
 ### Incident Lens
 
-M8 adds a read-only Incident Lens inside the existing Changes workflow. Anchor the lens on a recorded change or an exact time and HostSleuth shows retained changes in a bounded +/- 15 minute window. Current endpoint evidence is kept separate from historical context, and temporal proximity is never presented as proof of causation.
+M8 adds a read-only Incident Lens inside the existing Changes workflow. Anchor the lens on a recorded change or an exact time and HostSleuth shows all retained changes in a bounded +/- 15 minute window.
+
+Incident Lens:
+
+- preserves existing event categories instead of creating a second history store;
+- orders events deterministically and caps the result at 100 events;
+- labels temporal proximity as context, never proof of causation;
+- optionally runs the existing Diagnose/TLS engine for a supplied endpoint;
+- labels that endpoint evidence with its current capture time so it is not confused with historical state that HostSleuth never recorded.
+
+Incident Lens does not create a time-series database, reconstruct historical packets/TLS sessions, alert on uptime, infer causes, or modify the host.
 
 ### Reboot Story
 
@@ -288,7 +326,13 @@ The named `hostsleuth-data` volume is retained unless you explicitly remove it.
 
 ## Product boundaries
 
-HostSleuth is intentionally local-first, single-host first, read-only, deterministic before explanatory, and loopback-only by default for the Web UI.
+HostSleuth is intentionally:
+
+- local-first;
+- single-host first;
+- read-only;
+- deterministic before explanatory;
+- loopback-only by default for the Web UI.
 
 HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reload services, reboot/shut down the host, manage ACME accounts, handle private keys, or reconfigure the host.
 
