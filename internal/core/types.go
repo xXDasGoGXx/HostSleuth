@@ -3,16 +3,17 @@ package core
 import "time"
 
 type Snapshot struct {
-	SchemaVersion int              `json:"schema_version"`
-	CapturedAt    time.Time        `json:"captured_at"`
-	Mode          string           `json:"mode,omitempty"`
-	Host          HostInfo         `json:"host"`
-	Interfaces    []InterfaceInfo  `json:"interfaces,omitempty"`
-	Filesystems   []FilesystemInfo `json:"filesystems,omitempty"`
-	Routes        []string         `json:"routes,omitempty"`
-	Listeners     []Listener       `json:"listeners,omitempty"`
-	Services      []ServiceInfo    `json:"services,omitempty"`
-	Containers    []ContainerInfo  `json:"containers,omitempty"`
+	SchemaVersion  int              `json:"schema_version"`
+	CapturedAt     time.Time        `json:"captured_at"`
+	Mode           string           `json:"mode,omitempty"`
+	Host           HostInfo         `json:"host"`
+	Interfaces     []InterfaceInfo  `json:"interfaces,omitempty"`
+	Filesystems    []FilesystemInfo `json:"filesystems,omitempty"`
+	Routes         []string         `json:"routes,omitempty"`
+	Listeners      []Listener       `json:"listeners,omitempty"`
+	Services       []ServiceInfo    `json:"services,omitempty"`
+	Containers     []ContainerInfo  `json:"containers,omitempty"`
+	PackageChanges []PackageChange  `json:"package_changes,omitempty"`
 }
 
 type HostInfo struct {
@@ -59,6 +60,15 @@ type ContainerInfo struct {
 	Status   string `json:"status"`
 	Ports    string `json:"ports,omitempty"`
 	Networks string `json:"networks,omitempty"`
+}
+
+type PackageChange struct {
+	At           time.Time `json:"at"`
+	Action       string    `json:"action"`
+	Name         string    `json:"name"`
+	Architecture string    `json:"architecture,omitempty"`
+	FromVersion  string    `json:"from_version,omitempty"`
+	ToVersion    string    `json:"to_version,omitempty"`
 }
 
 type Event struct {
