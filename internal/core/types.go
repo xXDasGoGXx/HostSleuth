@@ -5,6 +5,7 @@ import "time"
 type Snapshot struct {
 	SchemaVersion int              `json:"schema_version"`
 	CapturedAt    time.Time        `json:"captured_at"`
+	Mode          string           `json:"mode,omitempty"`
 	Host          HostInfo         `json:"host"`
 	Interfaces    []InterfaceInfo  `json:"interfaces,omitempty"`
 	Filesystems   []FilesystemInfo `json:"filesystems,omitempty"`
