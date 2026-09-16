@@ -15,6 +15,10 @@ Keep it evidence-first, read-only, local-first, single-host first, and deliberat
 
 Repository: `xXDasGoGXx/HostSleuth`
 
+Current `main` release source:
+
+`365753ff513ff155d832df7119892090b903569d`
+
 Completed milestones:
 
 - M0 — repository foundation;
@@ -24,14 +28,59 @@ Completed milestones:
 - M3.4 — Public Container Distribution;
 - M4 — package-change timeline.
 
-Published stable release remains `v0.1.0`, sourced from commit `bf52c51fdded40a73684171a7feb078557b9f0d5`.
+Published stable release:
 
-Published Docker tags remain:
+`v0.2.0`
 
-- `mjmalleo/hostsleuth:0.1.0`
+Published Docker tags:
+
+- `mjmalleo/hostsleuth:0.2.0`
 - `mjmalleo/hostsleuth:latest`
 
-M4 is merged source capability and is **not** claimed to be present in the already-published `v0.1.0` artifacts. Creating a newer release/tag/image remains a separate owner-controlled publication decision.
+Both public Docker tags resolved anonymously to OCI index digest:
+
+`sha256:6892362d3f5fc6d30ae6bde7235ee976f169f1be8d42d181c55f53cf98600c91`
+
+Platforms advertised by the public index:
+
+- `linux/amd64`
+- `linux/arm64`
+
+## v0.2.0 publication closeout
+
+Owner approval was obtained before publication.
+
+Release branch:
+
+`release/v0.2.0`
+
+Release source commit:
+
+`365753ff513ff155d832df7119892090b903569d`
+
+Release workflow run:
+
+`35128525862`
+
+The release workflow completed successfully through:
+
+- version validation;
+- Go tests;
+- native linux/amd64 and linux/arm64 release builds;
+- `SHA256SUMS` generation;
+- public GitHub `v0.2.0` release/tag creation;
+- Docker Hub login;
+- public multi-platform Docker push for `0.2.0` and `latest`.
+
+GitHub `v0.2.0` release assets:
+
+- `hostsleuth-linux-amd64`;
+- `hostsleuth-linux-arm64`;
+- `SHA256SUMS`.
+
+Anonymous Docker Registry verification confirmed both `0.2.0` and `latest` are public, expose linux/amd64 and linux/arm64, and point to the same image index digest.
+
+A separate runtime re-smoke of the published image was not forced after publication because the normal CI path had already passed Docker runtime smoke on the exact release source, the release workflow itself completed the final public push, and the available OMV administration path intentionally blocks raw Docker execution. Do not weaken those controls merely to repeat a test already covered by CI.
 
 ## M4 — package-change timeline
 
@@ -50,53 +99,17 @@ Delivered behavior:
 - unsupported or unavailable logs remain quiet;
 - collection is read-only.
 
-Explicitly not added:
-
-- package install/update/remove actions;
-- update buttons;
-- repository management;
-- package alerts;
-- a package dashboard;
-- a settings framework.
-
 ### Docker boundary
 
 The supported Docker deployment remains intentionally reduced-visibility. It does not mount host `apt` / `dpkg` logs, so host package-history evidence is unavailable there by default. M4 did not widen Docker host mounts merely to expose package logs.
 
-Native installation remains the full-evidence path.
+Native installation remains the full-evidence path for package history.
 
-## M4 validation
+## Existing live OMV deployment
 
-PR #24: `M4: add package-change timeline evidence`.
+The known-good live HostSleuth remains managed through Arcane on OMV host `192.168.2.181` using pinned image:
 
-Final code-head CI run `35127119772` passed:
-
-- formatting;
-- `go vet`;
-- Go tests, including apt/dpkg parsing and schema-upgrade baseline regression;
-- Web JavaScript syntax;
-- native build;
-- Compose validation;
-- linux/amd64 image build;
-- linux/arm64 image build;
-- Docker runtime smoke, API, Web UI, self-diagnosis, and teardown.
-
-Real-host acceptance was performed on the actual OMV Debian environment from exact code head `e12686b07f7725840c6fb58f00060b8831faf820` using a temporary user-space Go toolchain and isolated state.
-
-Acceptance confirmed:
-
-- real `/var/log/dpkg.log` history parsed successfully;
-- retained history was bounded at 200 package records;
-- a real Docker CE version update was parsed with correct old/new versions;
-- schema-1 -> schema-2 first capture emitted **zero** historical package events;
-- one synthetic install appended only to a copied dpkg log produced exactly one `package` event;
-- the real `/var/log/dpkg.log` SHA-256 was unchanged before and after acceptance;
-- no real package was installed, removed, or upgraded;
-- the live HostSleuth deployment was not replaced for M4 acceptance.
-
-## Existing v0.1.0 deployment state
-
-The known-good live HostSleuth remains managed through Arcane on OMV host `192.168.2.181` using pinned image `mjmalleo/hostsleuth:0.1.0`.
+`mjmalleo/hostsleuth:0.1.0`
 
 Deployment-specific state:
 
@@ -105,7 +118,9 @@ Deployment-specific state:
 - Compose path: `/srv/docker/volumes/compose/hostsleuth/compose.yaml`;
 - trusted-LAN binding: `192.168.2.181:8787`.
 
-`xXDasGoGXx/OMV-Docker-Rebuild` also pins the same v0.1.0 image. M4 did not change this production deployment or recovery definition because no newer public image has been approved/published.
+`xXDasGoGXx/OMV-Docker-Rebuild` also remains pinned to the same v0.1.0 image so recovery matches the actual live deployment.
+
+Do not upgrade the live OMV deployment merely to chase the new version number. M4's user-visible package-history capability is native-only under the current least-privilege Docker boundary.
 
 ## Accepted UI boundary
 
@@ -113,11 +128,22 @@ The Host Story UI from PR #21 remains accepted. Package events use the existing 
 
 Do not reopen broad UI exploration unless real use exposes a concrete defect.
 
-## What is next
+## Active milestone — M5: configuration fingerprinting
 
-M4 is closed after PR #24 merge. **Do not automatically activate another capability.** The candidate list remains in `TO-DO.md`; choose one deliberately when work resumes.
+M5 has one job: make **“what changed?”** more useful by recording that important configuration files changed, without storing their contents or secrets by default.
 
-Do not create a new GitHub release/tag or Docker tag/image without explicit owner approval.
+Initial bounded scope:
+
+- native Linux first;
+- fingerprint a small, explicit set of high-value configuration files that HostSleuth can safely read;
+- record path plus non-secret metadata/fingerprint only;
+- emit configuration-change events into the existing Changes timeline;
+- baseline existing fingerprints on first M5-aware capture so upgrades do not create a fake backlog;
+- missing/unreadable files remain truthful and quiet;
+- preserve read-only behavior;
+- no configuration editor, diff viewer, secret storage, remediation, watcher daemon, broad recursive `/etc` crawl, or settings framework.
+
+M5 should be one bounded branch/PR with focused tests and one real-host acceptance pass, then merge and close if no concrete defect appears.
 
 ## Repository reading order
 

@@ -13,26 +13,35 @@ This file stays intentionally short. Completed milestone history belongs in `doc
 - [x] M3 acceptance — native and Docker runtime validation.
 - [x] M3.4 — public container distribution and stable `v0.1.0` publication.
 - [x] M4 — bounded native Debian/Ubuntu package-change timeline.
-- [x] Parse recent `dpkg` install/update/remove history with `apt` history fallback.
-- [x] Feed package changes into the existing Changes timeline as `category=package` events.
-- [x] Preserve package timestamps, architecture, and old/new versions.
-- [x] Bound package-log reads and retained history.
-- [x] Baseline existing package history across the schema-1 -> schema-2 upgrade instead of replaying it as new events.
-- [x] Keep unsupported/unavailable package logs quiet and collection read-only.
-- [x] Keep default Docker host mounts unchanged; package history remains native-mode evidence by default.
-- [x] Focused apt/dpkg parser, event, fallback, and schema-upgrade tests.
-- [x] Final M4 CI passed: tests/vet/build, JS syntax, Compose, amd64, arm64, Docker smoke.
-- [x] Real OMV Debian acceptance passed with actual dpkg history plus one copied-log synthetic event; real package log remained unchanged.
+- [x] Publish stable `v0.2.0` from M4-complete `main`.
+- [x] Publish native linux/amd64 and linux/arm64 v0.2.0 assets plus `SHA256SUMS`.
+- [x] Publish public multi-platform `mjmalleo/hostsleuth:0.2.0` and move `latest` to the same image.
+- [x] Verify anonymous Docker Registry access, linux/amd64 + linux/arm64 manifests, and matching `0.2.0` / `latest` index digest.
 
-M4 is closed after PR #24 merge. Do not create a newer release/tag/image without explicit owner approval.
+Stable `v0.2.0` is the current published release. The live OMV/Arcane deployment remains intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`; do not upgrade it merely to chase the release number because M4 package-history evidence remains unavailable in the default Docker deployment.
 
-## Next capability — deliberately unselected
+## Active milestone — M5: configuration fingerprinting
 
-Do **not** start another capability automatically. Choose one deliberately when development resumes.
+M5 has one job: record that important configuration files changed without storing their contents or secrets by default.
 
-Candidates that fit HostSleuth's two core jobs:
+- [ ] Inspect existing snapshot/diff/event flow and real host configuration candidates before coding.
+- [ ] Choose a deliberately small native-Linux default set of high-value configuration files.
+- [ ] Record path plus deterministic fingerprint and minimal non-secret metadata only.
+- [ ] Keep file contents out of snapshots/events by default.
+- [ ] Emit configuration changes into the existing Changes timeline rather than creating a new dashboard.
+- [ ] Baseline fingerprints on the first M5-aware snapshot so existing files do not create a false backlog.
+- [ ] Keep missing/unreadable files quiet and truthful.
+- [ ] Preserve read-only behavior.
+- [ ] Do not recursively crawl `/etc`.
+- [ ] Do not add a configuration editor, diff viewer, secret storage, remediation, watcher daemon, alerts, or settings framework.
+- [ ] Add focused fingerprint/baseline/event tests.
+- [ ] Run normal CI.
+- [ ] Perform one real-host acceptance pass, then merge and close M5 if no concrete defect appears.
 
-- Configuration fingerprinting that records change evidence without storing configuration secrets by default.
+## After M5 — one capability at a time
+
+These remain candidates only; none becomes active automatically:
+
 - Bounded TLS/certificate diagnosis for common host:port failures: handshake, hostname, expiry, and trust evidence.
 - General redaction rules and threat-model documentation before exporting or sharing richer diagnostic data.
 
