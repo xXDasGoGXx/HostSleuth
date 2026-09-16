@@ -209,7 +209,68 @@ Merged at:
 
 `bed52bba90370eac53ae29137bc36bfbcf62d216`
 
-M3.1 is complete. M3.2 focuses on usability rather than adding product capability.
+## M3.2 — Usability
+
+PR #13 polished the product without adding another diagnostic subsystem.
+
+Added or improved:
+
+- simpler user-facing wording;
+- clear first-run/baseline behavior;
+- friendly diagnosis titles while retaining exact deterministic conclusions and evidence;
+- version plus VCS build revision visibility when available;
+- newest-first event display and correct newest-five Overview behavior;
+- recommended native/systemd install path at the top of the README;
+- safe SSH-tunnel guidance for remote access to the loopback-only Web UI;
+- JavaScript syntax validation in CI.
+
+PR #13 passed formatting, `go vet`, tests, JavaScript syntax, and build before merge.
+
+Merged at:
+
+`d250019902d676f67d44b74cc122db3f40ad7e67`
+
+## M3.3 — Supported Docker deployment
+
+PR #14 added one Docker deployment path without turning HostSleuth into a multi-mode configuration product.
+
+Added:
+
+- multi-stage `Dockerfile`;
+- one recommended `compose.yaml`;
+- persistent `hostsleuth-data` volume;
+- Linux host network/PID/UTS namespace sharing for truthful host network/listener/hostname evidence;
+- narrow read-only host OS-release mount;
+- Docker socket access for container inventory;
+- all Linux capabilities dropped;
+- `no-new-privileges` and read-only container root filesystem;
+- explicit Docker deployment mode in snapshots;
+- deliberate omission of host filesystem/systemd inventory when Docker isolation prevents truthful collection;
+- systemd diagnostic evidence reported as `unknown` in Docker mode rather than a false clean result;
+- Web UI and CLI labels for reduced Docker visibility;
+- focused Docker-mode tests;
+- CI validation for Compose plus Linux amd64 and arm64 container image builds.
+
+Security documentation explicitly records that Docker socket access remains a powerful host capability even when its bind path is read-only.
+
+Final PR #14 validation passed:
+
+- Go formatting;
+- `go vet`;
+- Go tests;
+- Web UI JavaScript syntax;
+- native Go build;
+- Compose configuration;
+- Linux arm64 image build;
+- Linux amd64 image build.
+
+No image was published and the known-good native deployment was not replaced.
+
+Merged at:
+
+`ccaad3ef1df16e65887d1f19da44a118a6d0bb2a`
+
+M3 Product Experience is complete. Future capability work returns to the collective product-decision list rather than continuing automatically.
 
 ## Historical source references
 
@@ -222,5 +283,7 @@ M3.1 is complete. M3.2 focuses on usability rather than adding product capabilit
 - M2 Docker correlation: `bc939ae0c6339b355bd33916629a93f4a07803c9`
 - M2 evidence policy: `3352a7e8407eae855f4a88550cfaaf867f86ddf1`
 - M3.1 Web UI: `bed52bba90370eac53ae29137bc36bfbcf62d216`
+- M3.2 usability: `d250019902d676f67d44b74cc122db3f40ad7e67`
+- M3.3 Docker deployment: `ccaad3ef1df16e65887d1f19da44a118a6d0bb2a`
 
 Future milestone history belongs here rather than in `CURRENT-HANDOFF.md` or `TO-DO.md`.
