@@ -17,9 +17,30 @@ This file stays intentionally short. Completed milestone history belongs in `doc
 
 M3 acceptance is complete. Do not reopen M3 unless real use exposes a concrete regression.
 
-## Next capability — M4: package-change timeline
+## Active milestone — M3.4: public container distribution
 
-Keep M4 deliberately narrow. Its only job is to make **“what changed?”** more useful.
+M3.4 adds no new HostSleuth functionality. It only turns the existing Docker support into a polished public distribution path.
+
+- [x] Inspect current `main`, Dockerfile, Compose, CI, release workflow, handoff, TODO, release history, and recent development history.
+- [x] Create focused branch `m3.4/public-container-distribution` from current `main`.
+- [x] Keep the existing Docker security model and loopback-only default unchanged.
+- [x] Make the normal Compose path consume a published image while preserving an explicit local source-build path for developers.
+- [x] Add a direct `docker run` example matching the supported Compose security/runtime settings.
+- [x] Add release-gated Docker Hub publication for linux/amd64 + linux/arm64.
+- [x] Make `latest` move only for plain stable `vX.Y.Z` releases.
+- [x] Keep Docker Hub credentials out of Git; workflow uses `DOCKERHUB_TOKEN` secret and `DOCKERHUB_NAMESPACE` variable only.
+- [x] Extend CI smoke testing so Compose starts from an already-built image and validates `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
+- [ ] Confirm the Docker Hub namespace/repository is `xxdasgogxx/hostsleuth` before merge/publication.
+- [ ] Run PR CI and fix only M3.4 regressions.
+- [ ] Create the Docker Hub repository and GitHub Actions secret/variable as one-time owner-controlled setup.
+- [ ] Test the actual published image by pulling/running it as a normal user would.
+- [ ] Update the separate OMV disaster-recovery repository to consume the published image only after the public image is validated.
+- [ ] Record M3.4 completion in handoff/history after validation.
+- [ ] Stop at the publication boundary and obtain explicit owner approval before creating a stable GitHub release/tag or publishing any Docker Hub image/tag.
+
+## Next application capability — M4: package-change timeline
+
+M4 begins only after M3.4 is complete. Keep it deliberately narrow. Its only job is to make **“what changed?”** more useful.
 
 - [ ] Read package install/update/remove history from supported local package-manager logs.
 - [ ] Start with a bounded Debian/Ubuntu `apt`/`dpkg` implementation; unsupported systems should remain truthful and quiet rather than requiring configuration.
