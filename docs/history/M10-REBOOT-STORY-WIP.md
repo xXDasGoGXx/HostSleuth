@@ -2,7 +2,7 @@
 
 Date: 2026-09-16
 
-Status: IN PROGRESS. This file is a durable handoff checkpoint, not milestone closeout and not release authorization.
+Status: SUPERSEDED HISTORICAL CHECKPOINT. M10 is complete in source. Use `docs/history/M10-REBOOT-STORY.md` for the final implementation and acceptance record. The remaining-work list below is preserved only as the original mid-milestone handoff and is no longer current.
 
 ## Starting point
 
@@ -57,6 +57,8 @@ Do not claim reboot cause unless explicit deterministic evidence exists.
 
 ## Work still remaining before M10 can be called complete
 
+Historical checkpoint list only; all applicable items were completed before M10 closeout. See `docs/history/M10-REBOOT-STORY.md`.
+
 - finish wiring the Reboot Story into CLI/API/runtime assets/UI navigation;
 - verify bounded journal/current-boot/previous-boot evidence behavior where permissions allow;
 - verify graceful `unknown` behavior where journal access is denied or history is unavailable;
@@ -88,17 +90,10 @@ Do not alter the live OMV Compose deployment, persistent state, or `xXDasGoGXx/O
 
 ## Roadmap boundary
 
-M10 is the active milestone. M11 — Optional Safe Actions — has **not** started.
+At this historical checkpoint M10 was active. M10 is now complete in source; M11 — Optional Safe Actions — has **not** started.
 
-Consumer-opportunity research remains a separate input and is intentionally broader than certificate/Certbot work. It must not silently expand or reorder M10.
+Consumer-opportunity research remains a separate input and is intentionally broader than certificate/Certbot work.
 
 ## Resume instructions
 
-A new chat should:
-
-1. re-check current `main` and `m10-reboot-story` before any write;
-2. read `CURRENT-HANDOFF.md`, `TO-DO.md`, `docs/ROADMAP.md`, this file, `docs/history/M9-WORKBENCH.md`, and `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`;
-3. inspect all M10 branch changes relative to `main` before editing;
-4. continue M10 from the existing branch rather than reimplementing it;
-5. keep M10 read-only and non-causal;
-6. do not publish/release/deploy or start M11 until M10 is accepted and the owner explicitly directs the next boundary.
+This file is no longer the resume source of truth. Use `CURRENT-HANDOFF.md`, `TO-DO.md`, `docs/ROADMAP.md`, and `docs/history/M10-REBOOT-STORY.md`.
