@@ -185,7 +185,31 @@ Cleanup commit:
 
 `8dda0368e2f1e8df46325713fe1dac68df0fc9f1`
 
-After that cleanup, executable source on `main` matches the validated M2 code at `3352a7e8407eae855f4a88550cfaaf867f86ddf1`; only current documentation/history differs. The M3 commits and branches remain available as historical/experimental work and are not active product state.
+Immediately after that cleanup, executable source on `main` matched the validated M2 code at `3352a7e8407eae855f4a88550cfaaf867f86ddf1`; only current documentation/history differed. The M3 experiment commits and branches remained available as historical work rather than active product state.
+
+## M3.1 — Product Web UI
+
+PR #11 replaced the original inline dashboard with a self-contained modern Web UI while deliberately leaving diagnostic semantics unchanged.
+
+Added:
+
+- responsive Overview / Diagnose / Changes / Host views;
+- human-readable diagnosis presentation backed by the existing deterministic checks and evidence;
+- recent-change timeline;
+- compact host, interface, and filesystem views;
+- loading, empty, and error states;
+- mobile-friendly layout;
+- embedded HTML/CSS/vanilla-JavaScript assets with no frontend framework or external runtime dependency.
+
+The existing `/api/snapshot`, `/api/events`, and `/api/diagnose` endpoints remained the source of truth.
+
+PR #11 passed formatting, `go vet`, tests, and build before merge.
+
+Merged at:
+
+`bed52bba90370eac53ae29137bc36bfbcf62d216`
+
+M3.1 is complete. M3.2 focuses on usability rather than adding product capability.
 
 ## Historical source references
 
@@ -197,5 +221,6 @@ After that cleanup, executable source on `main` matches the validated M2 code at
 - M2 systemd/journal evidence: `37c97227a829fc341f943d0b4731242ee2a39650`
 - M2 Docker correlation: `bc939ae0c6339b355bd33916629a93f4a07803c9`
 - M2 evidence policy: `3352a7e8407eae855f4a88550cfaaf867f86ddf1`
+- M3.1 Web UI: `bed52bba90370eac53ae29137bc36bfbcf62d216`
 
 Future milestone history belongs here rather than in `CURRENT-HANDOFF.md` or `TO-DO.md`.
