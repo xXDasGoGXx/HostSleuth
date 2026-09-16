@@ -380,7 +380,60 @@ Post-redeploy live verification on the OMV host confirmed:
 
 At that acceptance moment, the live snapshot reported 328 listeners and 22 Docker containers. Those numbers are historical observations, not expected fixed counts.
 
-M3.4 is complete. The v0.1.0 UI/release path is closed unless real use exposes a concrete defect. M4 package-change timeline is the next active milestone.
+M3.4 is complete. The v0.1.0 UI/release path is closed unless real use exposes a concrete defect.
+
+## M4 — Package-change timeline
+
+M4 made the existing Changes timeline more useful without creating a package-management subsystem or a second package UI.
+
+PR #24 added bounded package-history evidence to snapshots and reused the existing diff/event pipeline.
+
+Delivered behavior:
+
+- native Debian/Ubuntu package history is read from `dpkg` logs;
+- `apt` history is used as a fallback when usable dpkg history is unavailable;
+- current and recent rotated logs, including gzip rotations, are read with bounded input size;
+- at most 200 recent package records are retained in snapshot evidence;
+- package install, update, and remove records preserve name, architecture, versions, and original timestamp;
+- only records newly observed between package-aware snapshots become `category=package` timeline events;
+- unsupported or unavailable package logs remain quiet;
+- all collection is read-only.
+
+Snapshot schema version 2 marks package-history-aware snapshots. The first capture after upgrading from schema 1 baselines existing package-log history rather than replaying up to 200 old records as new events.
+
+The default Docker deployment was deliberately not widened with host package-log mounts. Package history therefore remains unavailable there by default, consistent with HostSleuth's reduced-visibility Docker boundary and least-privilege approach.
+
+No package install/update/remove actions, update buttons, repository management, package alerts, package dashboard, or settings framework were added.
+
+### M4 validation
+
+Final code-head CI run `35127119772` passed:
+
+- formatting;
+- `go vet`;
+- Go tests, including apt/dpkg parsing, gzip fallback, event generation, unavailable-log behavior, and schema-upgrade baseline regression;
+- Web JavaScript syntax;
+- native build;
+- Compose validation;
+- linux/amd64 image build;
+- linux/arm64 image build;
+- Docker runtime smoke, API/snapshot checks, Web UI, self-diagnosis, and teardown.
+
+Real-host acceptance ran on the actual OMV Debian environment from exact code head `e12686b07f7725840c6fb58f00060b8831faf820` using a temporary user-space Go 1.24.13 toolchain and isolated temporary state.
+
+Acceptance confirmed:
+
+- the branch test suite and build passed on the real host;
+- real `/var/log/dpkg.log` package history parsed successfully;
+- retained package history was bounded at 200 records;
+- a real Docker CE update from `5:29.8.0-1~debian.13~trixie` to `5:29.8.1-1~debian.13~trixie` was captured correctly;
+- a simulated schema-1 existing snapshot upgraded to schema 2 with zero historical package events;
+- one synthetic install appended only to a copied dpkg log produced exactly one `package` timeline event;
+- the real `/var/log/dpkg.log` SHA-256 remained unchanged before and after acceptance;
+- no real package was installed, updated, or removed;
+- the live HostSleuth production deployment was not replaced for M4 acceptance.
+
+M4 is complete after PR #24 merge. No new GitHub release/tag or Docker image is implied; stable `v0.1.0` remains the published release until the owner separately approves another publication.
 
 ## Historical source references
 
@@ -396,5 +449,6 @@ M3.4 is complete. The v0.1.0 UI/release path is closed unless real use exposes a
 - M3.1 Web UI: `bed52bba90370eac53ae29137bc36bfbcf62d216`
 - M3.2 usability: `d250019902d676f67d44b74cc122db3f40ad7e67`
 - M3.3 Docker deployment: `ccaad3ef1df16e65887d1f19da44a118a6d0bb2a`
+- M4 accepted code head before documentation closeout: `e12686b07f7725840c6fb58f00060b8831faf820`
 
 Future milestone history belongs here rather than in `CURRENT-HANDOFF.md` or `TO-DO.md`.
