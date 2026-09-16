@@ -1,6 +1,6 @@
 # Security Policy
 
-HostSleuth is early-stage software that inventories local system state. Treat its output as potentially sensitive because it can contain hostnames, IP addresses, mount paths, service names, listener addresses, and container metadata.
+HostSleuth is early-stage software that inventories local system state. Treat its output as potentially sensitive because it can contain hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, file metadata/fingerprints, DNS answers, HTTP endpoint metadata, and certificate metadata/fingerprints.
 
 ## Current security posture
 
@@ -11,6 +11,16 @@ HostSleuth is early-stage software that inventories local system state. Treat it
 - Automatic repair/remediation is intentionally out of scope for the current milestone.
 - The supported Docker Compose deployment does not use unrestricted privileged mode, drops all Linux capabilities, enables `no-new-privileges`, and uses a read-only container filesystem.
 - Docker mode deliberately reports systemd and host-filesystem evidence as unavailable instead of mounting broad host control surfaces to recreate native visibility.
+
+## Workbench boundary
+
+M9 Workbench adds bounded read-only helpers for file identity/checksums, file comparison, DNS inspection, HTTP HEAD/redirect inspection, and public certificate inspection/comparison.
+
+Those Web/API operations are intentionally accepted only from loopback clients. This prevents an unauthenticated LAN-visible HostSleuth instance from becoming a remote file-hash oracle or a server-side HTTP/DNS probe. Use the local browser workflow, an SSH tunnel, or the local `hostsleuth workbench ...` CLI.
+
+Workbench does not return file contents, edit files, accept arbitrary commands, accept HTTP credentials/cookies/custom headers, or expose a private-key viewer. Certificate inspection stops after the first public `CERTIFICATE` PEM block and refuses a private-key block encountered before a certificate.
+
+The generic file identity tool does read the bytes of a user-selected readable regular file in order to calculate SHA-256/SHA-512. It returns metadata and digests only; it does not retain or return file contents. Treat file paths and fingerprints as potentially sensitive evidence.
 
 ## Docker socket
 
@@ -26,4 +36,4 @@ Please open a GitHub security advisory for the repository when possible. Avoid p
 
 ## Supported versions
 
-Until the first stable release, only the newest development/release build is supported.
+Until release policy is revised, the newest published stable release and current development branch are the supported references.
