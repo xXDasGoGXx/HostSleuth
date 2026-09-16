@@ -7,11 +7,11 @@ HostSleuth stays a small, local-first Linux troubleshooting tool with two jobs:
 
 This roadmap is intentionally ordered. Complete one bounded milestone at a time. Do not skip ahead, broaden a milestone into a generic administration platform, or add unrelated monitoring features just because they are technically possible.
 
-## 1. M6 — Certificate Story / TLS Detective
+## 1. M6 — Certificate Story / TLS Detective — COMPLETE
 
 Goal: make TLS and certificate failures understandable from the same evidence-first HostSleuth workflow.
 
-Bounded scope:
+Implemented bounded scope:
 
 - diagnose TLS for a `host:port` target;
 - show certificate subject, SANs, issuer, serial, validity window, remaining lifetime, and SHA-256 fingerprint;
@@ -22,16 +22,18 @@ Bounded scope:
 - surface stale-served-certificate situations such as "certificate on disk renewed, service still presenting the previous certificate" only when evidence supports that conclusion;
 - integrate into existing Diagnose/Host Story patterns rather than creating a generic certificate-management dashboard.
 
-M6 remains read-only. No renewal button, service reload, certificate installation, ACME account management, or arbitrary command execution.
+M6 remains read-only. No renewal button, service reload, certificate installation, ACME account management, private-key handling, or arbitrary command execution was added.
 
-## 2. Publish stable v0.3.0
+## 2. Publish stable v0.3.0 — ACTIVE OWNER-APPROVAL BOUNDARY
 
 After M6 acceptance, publish one stable release containing M5 configuration fingerprinting plus M6 TLS/certificate diagnosis.
 
-Use the existing controlled release path:
+Before publication, re-check the exact accepted `main` SHA and release workflow, present the exact release state to the owner, and stop for explicit publication approval.
+
+After approval only, use the existing controlled release path:
 
 - exact accepted `main` SHA;
-- owner approval at the publication boundary;
+- `release/v0.3.0` created from that SHA;
 - native linux/amd64 and linux/arm64 binaries plus `SHA256SUMS`;
 - public `mjmalleo/hostsleuth:0.3.0` plus `latest`;
 - anonymous registry verification;
