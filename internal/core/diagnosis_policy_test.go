@@ -11,11 +11,15 @@ import (
 func TestDiagnosisPolicyReachableStopsBeforeSecondaryEvidence(t *testing.T) {
 	oldRoute := routeLookup
 	oldTCP := tcpConnect
+	oldTLS := tlsProbeLookup
 	oldFirewall := nftRulesetLookup
 	routeLookup = func(context.Context, string) (string, error) {
 		return "local 127.0.0.1 dev lo src 127.0.0.1\n", nil
 	}
 	tcpConnect = func(context.Context, string) error { return nil }
+	tlsProbeLookup = func(context.Context, string, string) *TLSEvidence {
+		return &TLSEvidence{HandshakeStatus: "unknown", HandshakeError: "TLS probe unavailable in reachability policy test"}
+	}
 	nftRulesetLookup = func(context.Context) (boundedCommandResult, error) {
 		t.Fatal("firewall evidence must not run after successful TCP")
 		return boundedCommandResult{}, nil
@@ -23,6 +27,7 @@ func TestDiagnosisPolicyReachableStopsBeforeSecondaryEvidence(t *testing.T) {
 	defer func() {
 		routeLookup = oldRoute
 		tcpConnect = oldTCP
+		tlsProbeLookup = oldTLS
 		nftRulesetLookup = oldFirewall
 	}()
 
