@@ -13,7 +13,7 @@ function installIncidentLensUI() {
     <section class="panel incident-lens-panel">
       <p class="eyebrow">INCIDENT LENS</p>
       <h2>What changed around the time this broke?</h2>
-      <p class="section-copy">Anchor a ±15 minute evidence window on an exact time or a recorded change. Nearby events are context only—not proof that they caused the incident.</p>
+      <p class="section-copy">Anchor a ±15 minute evidence window on an exact time, recorded change, or completed diagnosis. Nearby events are context only—not proof that they caused the incident.</p>
       <form id="incidentLensForm" class="diagnose-form">
         <div class="incident-fields">
           <div>
@@ -69,6 +69,14 @@ function installIncidentLensUI() {
   });
 }
 
+function openIncidentLensAt(value, target = "") {
+  installIncidentLensUI();
+  byId("incidentAnchor").value = incidentLocalValue(value);
+  byId("incidentTarget").value = target || "";
+  showView("changes");
+  byId("incidentLensForm").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function addIncidentAnchors(container, events, limit = null) {
   if (!container) return;
   const ordered = [...events].reverse();
@@ -81,12 +89,7 @@ function addIncidentAnchors(container, events, limit = null) {
     button.type = "button";
     button.className = "surface-action incident-event-anchor";
     button.textContent = "Inspect window";
-    button.addEventListener("click", () => {
-      installIncidentLensUI();
-      byId("incidentAnchor").value = incidentLocalValue(event.at);
-      showView("changes");
-      byId("incidentLensForm").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    button.addEventListener("click", () => openIncidentLensAt(event.at));
     row.append(button);
   });
 }
@@ -95,6 +98,22 @@ const renderEventsWithoutIncidentLens = renderEvents;
 renderEvents = function renderEventsWithIncidentLens(container, events, limit = null) {
   renderEventsWithoutIncidentLens(container, events, limit);
   addIncidentAnchors(container, events, limit);
+};
+
+const renderDiagnosisWithoutIncidentLens = renderDiagnosis;
+renderDiagnosis = function renderDiagnosisWithIncidentLens(diagnosis) {
+  renderDiagnosisWithoutIncidentLens(diagnosis);
+  const result = byId("diagnosisResult");
+  const heading = result?.querySelector(".diagnosis-heading");
+  if (!heading) return;
+  const previous = heading.querySelector(".incident-diagnosis-anchor");
+  if (previous) previous.remove();
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "surface-action incident-diagnosis-anchor";
+  button.textContent = "Inspect changes around this diagnosis";
+  button.addEventListener("click", () => openIncidentLensAt(diagnosis.started_at || new Date(), diagnosis.target || ""));
+  heading.append(button);
 };
 
 function renderIncidentLens(lens) {
