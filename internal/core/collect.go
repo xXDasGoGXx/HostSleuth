@@ -31,18 +31,21 @@ func osReleasePath() string {
 func Collect(ctx context.Context) Snapshot {
 	hostname, _ := os.Hostname()
 	mode := deploymentMode()
+	bootID, bootStartedAt := collectBootIdentity()
 	s := Snapshot{
 		SchemaVersion: snapshotSchemaVersion,
 		CapturedAt:    time.Now().UTC(),
 		Mode:          mode,
 		Host: HostInfo{
-			Hostname:     hostname,
-			OS:           readOSRelease(),
-			Kernel:       strings.TrimSpace(run(ctx, "uname", "-r")),
-			Architecture: runtime.GOARCH,
-			CPUCount:     runtime.NumCPU(),
-			MemoryTotal:  memoryTotal(),
-			Uptime:       strings.TrimSpace(run(ctx, "uptime", "-p")),
+			Hostname:      hostname,
+			OS:            readOSRelease(),
+			Kernel:        strings.TrimSpace(run(ctx, "uname", "-r")),
+			Architecture:  runtime.GOARCH,
+			CPUCount:      runtime.NumCPU(),
+			MemoryTotal:   memoryTotal(),
+			Uptime:        strings.TrimSpace(run(ctx, "uptime", "-p")),
+			BootID:        bootID,
+			BootStartedAt: bootStartedAt,
 		},
 	}
 	s.Interfaces = collectInterfaces()
