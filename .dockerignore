@@ -1,0 +1,10 @@
+.git
+.github
+hostsleuth
+coverage.out
+*.test
+*.prof
+*.log
+.DS_Store
+.vscode
+.idea
