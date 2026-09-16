@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"time"
 
 	"github.com/xXDasGoGXx/HostSleuth/internal/core"
@@ -35,7 +36,7 @@ func main() {
 	case "serve":
 		runServe(os.Args[2:])
 	case "version":
-		fmt.Println(version)
+		fmt.Println(versionDisplay())
 	default:
 		usage()
 		os.Exit(2)
@@ -45,6 +46,30 @@ func main() {
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
 	fmt.Println("usage: hostsleuth <snapshot|diagnose|events|serve|version> [options]")
+}
+
+func buildRevision() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return ""
+	}
+	for _, setting := range info.Settings {
+		if setting.Key != "vcs.revision" || setting.Value == "" {
+			continue
+		}
+		if len(setting.Value) > 12 {
+			return setting.Value[:12]
+		}
+		return setting.Value
+	}
+	return ""
+}
+
+func versionDisplay() string {
+	if revision := buildRevision(); revision != "" {
+		return fmt.Sprintf("%s (%s)", version, revision)
+	}
+	return version
 }
 
 func defaultStateDir() string {
@@ -161,7 +186,10 @@ func runServe(args []string) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/about", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]string{"version": version})
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"version":  version,
+			"revision": buildRevision(),
+		})
 	})
 	mux.HandleFunc("/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -214,6 +242,6 @@ func runServe(args []string) {
 		_, _ = w.Write(indexHTML)
 	})
 
-	log.Printf("HostSleuth %s listening on http://%s", version, *listen)
+	log.Printf("HostSleuth %s listening on http://%s", versionDisplay(), *listen)
 	log.Fatal(http.ListenAndServe(*listen, mux))
 }
