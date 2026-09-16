@@ -11,35 +11,26 @@ This file stays intentionally short. Completed milestone history belongs in `doc
 - [x] M3.2 — usability and installation clarity.
 - [x] M3.3 — supported Docker Compose deployment with amd64/arm64 CI validation.
 - [x] M3 acceptance — native and Docker runtime validation.
-- [x] M3.4 — public container distribution.
-- [x] Publish stable `v0.1.0` native Linux amd64/arm64 release assets and checksums.
-- [x] Publish public multi-platform `mjmalleo/hostsleuth:0.1.0` and `mjmalleo/hostsleuth:latest` images.
-- [x] Verify anonymous public Docker retrieval and amd64/arm64 manifests.
-- [x] Consumer-smoke the real published image on an ephemeral runner: API, snapshot, Web UI, diagnosis, teardown.
-- [x] Update `xXDasGoGXx/OMV-Docker-Rebuild` to pin `mjmalleo/hostsleuth:0.1.0`.
-- [x] Redeploy the live OMV/Arcane HostSleuth project from the pinned public image.
-- [x] Verify live OMV `/api/about`, `/api/snapshot`, Web UI, and reachable/high-confidence diagnosis after redeploy.
-- [x] Accept one bounded Host Story evidence-first UI pass for v0.1.0.
+- [x] M3.4 — public container distribution and stable `v0.1.0` publication.
+- [x] M4 — bounded native Debian/Ubuntu package-change timeline.
+- [x] Parse recent `dpkg` install/update/remove history with `apt` history fallback.
+- [x] Feed package changes into the existing Changes timeline as `category=package` events.
+- [x] Preserve package timestamps, architecture, and old/new versions.
+- [x] Bound package-log reads and retained history.
+- [x] Baseline existing package history across the schema-1 -> schema-2 upgrade instead of replaying it as new events.
+- [x] Keep unsupported/unavailable package logs quiet and collection read-only.
+- [x] Keep default Docker host mounts unchanged; package history remains native-mode evidence by default.
+- [x] Focused apt/dpkg parser, event, fallback, and schema-upgrade tests.
+- [x] Final M4 CI passed: tests/vet/build, JS syntax, Compose, amd64, arm64, Docker smoke.
+- [x] Real OMV Debian acceptance passed with actual dpkg history plus one copied-log synthetic event; real package log remained unchanged.
 
-The v0.1.0 UI and M3/M3.4 release path are closed unless real use exposes a concrete defect.
+M4 is closed after PR #24 merge. Do not create a newer release/tag/image without explicit owner approval.
 
-## Active milestone — M4: package-change timeline
+## Next capability — deliberately unselected
 
-M4 has one job: make **“what changed?”** more useful with package install/update/remove history.
+Do **not** start another capability automatically. Choose one deliberately when development resumes.
 
-- [ ] Inspect the existing event model, collectors, persistence, tests, and current Debian/Ubuntu package logs before coding.
-- [ ] Read bounded package install/update/remove history from supported local `apt` / `dpkg` logs.
-- [ ] Normalize package changes into the existing event timeline instead of creating a separate package dashboard.
-- [ ] Preserve read-only, local-first behavior.
-- [ ] Keep unsupported platforms truthful and quiet rather than requiring configuration.
-- [ ] Avoid package-management actions, update buttons, repository management, alerts, and new settings.
-- [ ] Add focused parser/event tests.
-- [ ] Run normal CI.
-- [ ] Perform one real-host M4 acceptance pass, then merge and close the milestone if no concrete defect appears.
-
-## After M4 — one capability at a time
-
-These fit HostSleuth's two core jobs, but none becomes active automatically:
+Candidates that fit HostSleuth's two core jobs:
 
 - Configuration fingerprinting that records change evidence without storing configuration secrets by default.
 - Bounded TLS/certificate diagnosis for common host:port failures: handshake, hostname, expiry, and trust evidence.
