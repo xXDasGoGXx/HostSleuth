@@ -9,127 +9,115 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 1. **Remember meaningful host changes.**
 2. **Explain why a host/service/port is or is not reachable using deterministic evidence.**
 
-HostSleuth is not a generic monitoring platform. Keep it evidence-first, read-only, local-first, and deliberately small.
+Keep it evidence-first, read-only, local-first, single-host first, and deliberately small. It is not a generic monitoring platform.
 
 ## Current authoritative state
 
 Repository: `xXDasGoGXx/HostSleuth`
 
-Stable release source commit:
+Completed milestones:
 
-`bf52c51fdded40a73684171a7feb078557b9f0d5`
+- M0 — repository foundation;
+- M1 — deployable single-host MVP;
+- M2 — deeper deterministic diagnosis;
+- M3 — Product Experience;
+- M3.4 — Public Container Distribution;
+- M4 — package-change timeline.
 
-Published stable release:
+Published stable release remains `v0.1.0`, sourced from commit `bf52c51fdded40a73684171a7feb078557b9f0d5`.
 
-`v0.1.0`
-
-Published Docker image:
+Published Docker tags remain:
 
 - `mjmalleo/hostsleuth:0.1.0`
 - `mjmalleo/hostsleuth:latest`
 
-M0, M1, M2, M3, and M3.4 are complete. M4 is now the active application milestone.
+M4 is merged source capability and is **not** claimed to be present in the already-published `v0.1.0` artifacts. Creating a newer release/tag/image remains a separate owner-controlled publication decision.
 
-## M3.4 closeout — Public Container Distribution
+## M4 — package-change timeline
 
-M3.4 is complete.
+M4 makes the existing **Changes** timeline more useful without creating a package-management subsystem.
 
-Delivered:
+Delivered behavior:
 
-- Compose consumes the published image by default while preserving a local developer build override;
-- direct `docker run` instructions match the supported security/runtime model;
-- stable release workflow publishes native Linux amd64/arm64 binaries and checksums;
-- stable release workflow publishes one multi-platform Docker image for linux/amd64 and linux/arm64;
-- plain stable releases publish both the numeric Docker tag and `latest`;
-- prerelease branches do not move Docker `latest`;
-- Docker Hub credentials remain only in GitHub Actions secret `DOCKERHUB_TOKEN`;
-- Docker security model remains unchanged: host network/PID/UTS, read-only root, all capabilities dropped, `no-new-privileges`, narrow host mounts, persistent state, read-only Docker socket;
-- public Web UI default remains `127.0.0.1:8787`;
-- optional LAN exposure remains an explicit specific-address override.
+- native Debian/Ubuntu collection reads local `dpkg` package history;
+- `apt` history is a fallback when usable dpkg history is unavailable;
+- current and recent rotated logs are read with bounded file sizes and bounded retained history;
+- install, update, and remove records preserve package name, architecture, versions, and original package timestamp;
+- package changes appear through the existing event pipeline as `category=package`;
+- only newly observed package records become events;
+- snapshot schema 2 establishes package-history awareness;
+- upgrading from a schema-1 snapshot baselines existing package history instead of replaying historical records as new events;
+- unsupported or unavailable logs remain quiet;
+- collection is read-only.
 
-## v0.1.0 publication and validation
+Explicitly not added:
 
-Release workflow run `35124357891` completed successfully from the exact stable source commit.
+- package install/update/remove actions;
+- update buttons;
+- repository management;
+- package alerts;
+- a package dashboard;
+- a settings framework.
 
-GitHub release `v0.1.0` contains:
+### Docker boundary
 
-- `hostsleuth-linux-amd64`;
-- `hostsleuth-linux-arm64`;
-- `SHA256SUMS`.
+The supported Docker deployment remains intentionally reduced-visibility. It does not mount host `apt` / `dpkg` logs, so host package-history evidence is unavailable there by default. M4 did not widen Docker host mounts merely to expose package logs.
 
-Docker registry validation confirmed anonymous public retrieval and one OCI image index containing:
+Native installation remains the full-evidence path.
 
-- `linux/amd64`;
-- `linux/arm64`.
+## M4 validation
 
-Both `mjmalleo/hostsleuth:0.1.0` and `mjmalleo/hostsleuth:latest` resolved to the same platform manifests at publication.
+PR #24: `M4: add package-change timeline evidence`.
 
-A one-off ephemeral GitHub runner then tested the public image exactly as a normal consumer would. Run `35124853545` passed:
+Final code-head CI run `35127119772` passed:
 
-- anonymous pull of `0.1.0` and `latest`;
-- startup with the supported Docker runtime/security settings;
-- `/api/about` reporting `v0.1.0`;
-- `/api/snapshot` reporting Docker mode;
-- Web UI load;
-- reachable/high-confidence self-diagnosis;
-- clean teardown.
+- formatting;
+- `go vet`;
+- Go tests, including apt/dpkg parsing and schema-upgrade baseline regression;
+- Web JavaScript syntax;
+- native build;
+- Compose validation;
+- linux/amd64 image build;
+- linux/arm64 image build;
+- Docker runtime smoke, API, Web UI, self-diagnosis, and teardown.
 
-The temporary validation workflow was removed afterward rather than becoming permanent project machinery.
+Real-host acceptance was performed on the actual OMV Debian environment from exact code head `e12686b07f7725840c6fb58f00060b8831faf820` using a temporary user-space Go toolchain and isolated state.
 
-## Live OMV deployment
+Acceptance confirmed:
 
-HostSleuth remains managed through Arcane on OMV host `192.168.2.181`.
+- real `/var/log/dpkg.log` history parsed successfully;
+- retained history was bounded at 200 package records;
+- a real Docker CE version update was parsed with correct old/new versions;
+- schema-1 -> schema-2 first capture emitted **zero** historical package events;
+- one synthetic install appended only to a copied dpkg log produced exactly one `package` event;
+- the real `/var/log/dpkg.log` SHA-256 was unchanged before and after acceptance;
+- no real package was installed, removed, or upgraded;
+- the live HostSleuth deployment was not replaced for M4 acceptance.
 
-Deployment-specific state remains:
+## Existing v0.1.0 deployment state
+
+The known-good live HostSleuth remains managed through Arcane on OMV host `192.168.2.181` using pinned image `mjmalleo/hostsleuth:0.1.0`.
+
+Deployment-specific state:
 
 - UI/API: `http://192.168.2.181:8787`;
 - persistent state: `/srv/docker/volumes/hostsleuth/data`;
 - Compose path: `/srv/docker/volumes/compose/hostsleuth/compose.yaml`;
 - trusted-LAN binding: `192.168.2.181:8787`.
 
-The owner redeployed the Arcane project from the published pinned image `mjmalleo/hostsleuth:0.1.0` after public consumer validation.
+`xXDasGoGXx/OMV-Docker-Rebuild` also pins the same v0.1.0 image. M4 did not change this production deployment or recovery definition because no newer public image has been approved/published.
 
-Post-redeploy live verification passed:
+## Accepted UI boundary
 
-- `/api/about` returned `v0.1.0`;
-- `/api/snapshot` returned Docker mode with live host evidence;
-- the Web UI loaded;
-- diagnosis of `192.168.2.181:8787` returned `target is reachable` with high confidence.
+The Host Story UI from PR #21 remains accepted. Package events use the existing generic Changes timeline/category summary; M4 required no new dashboard or UI redesign.
 
-At validation time the live snapshot exposed 328 listeners and 22 Docker containers. Those counts are observations from that moment, not product expectations.
+Do not reopen broad UI exploration unless real use exposes a concrete defect.
 
-The separate recovery repository `xXDasGoGXx/OMV-Docker-Rebuild` was also updated through PR #2 so its HostSleuth Compose definition pins `mjmalleo/hostsleuth:0.1.0` while preserving the existing LAN bind, state path, namespaces, mounts, and security settings.
+## What is next
 
-## Accepted Host Story UI
+M4 is closed after PR #24 merge. **Do not automatically activate another capability.** The candidate list remains in `TO-DO.md`; choose one deliberately when work resumes.
 
-PR #21 is the accepted v0.1.0 UI direction and is frozen unless real use exposes a concrete defect.
-
-It makes existing evidence more useful without expanding HostSleuth into a monitoring platform:
-
-- Overview presents a plain-language Host Story;
-- Reachability Surface exposes listeners by bind scope;
-- listener rows feed the deterministic Diagnose workflow;
-- Diagnose shows an evidence path while retaining raw checks/evidence;
-- recent host changes are context only, never claimed causality;
-- Host exposes routes, listeners, Docker image/status/ports/networks, interfaces, filesystems, and host facts already collected;
-- Changes includes a compact category summary while preserving the existing timeline.
-
-Do not reopen broad UI exploration unless real use exposes a concrete problem.
-
-## Active milestone — M4: package-change timeline
-
-M4 has one job: make **“what changed?”** more useful with package install/update/remove history.
-
-Initial scope:
-
-- Debian/Ubuntu first;
-- read existing local `apt` / `dpkg` logs;
-- normalize package install/update/remove changes into the existing event timeline;
-- keep collection read-only and local-first;
-- unsupported platforms remain truthful and quiet;
-- no package-management actions, update buttons, repository management, alerts, or new settings framework.
-
-M4 should be implemented as one bounded branch/PR, validated with focused tests plus one real-host acceptance pass, then merged and closed. Do not turn it into an open-ended package subsystem.
+Do not create a new GitHub release/tag or Docker tag/image without explicit owner approval.
 
 ## Repository reading order
 
@@ -138,8 +126,8 @@ When resuming, read:
 1. `README.md`
 2. `CURRENT-HANDOFF.md`
 3. `TO-DO.md`
-4. `docs/design/HOST-STORY-UI.md`
-5. `docs/history/DEVELOPMENT-HISTORY.md`
+4. `docs/history/DEVELOPMENT-HISTORY.md`
+5. `docs/design/HOST-STORY-UI.md`
 6. `.github/workflows/ci.yml`
 7. `.github/workflows/release.yml`
 8. `Dockerfile`
