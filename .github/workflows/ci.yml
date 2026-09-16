@@ -51,26 +51,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Start supported Compose deployment
+      - name: Build the image users will consume
+        run: docker build --build-arg VERSION=0.1.0-ci -t hostsleuth:ci .
+      - name: Start supported Compose deployment from image
         env:
-          HOSTSLEUTH_VERSION: 0.1.0-ci
-        run: docker compose up -d --build
+          HOSTSLEUTH_IMAGE: hostsleuth:ci
+        run: docker compose up -d
       - name: Wait for HostSleuth API
         run: |
           set -eu
           for attempt in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:8787/api/snapshot > /tmp/hostsleuth-snapshot.json; then
+            if curl -fsS http://127.0.0.1:8787/api/about > /tmp/hostsleuth-about.json && \
+               curl -fsS http://127.0.0.1:8787/api/snapshot > /tmp/hostsleuth-snapshot.json; then
               exit 0
             fi
             sleep 2
           done
           docker compose logs hostsleuth
           exit 1
-      - name: Verify Docker-mode snapshot
+      - name: Verify image version and Docker-mode snapshot
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
+
+          about = json.loads(Path('/tmp/hostsleuth-about.json').read_text())
+          assert about.get('version') == '0.1.0-ci', about
 
           snapshot = json.loads(Path('/tmp/hostsleuth-snapshot.json').read_text())
           assert snapshot.get('mode') == 'docker', snapshot
