@@ -12,19 +12,12 @@ This file stays intentionally short. Completed milestone history belongs in `doc
 - [x] M3.3 — supported Docker Compose deployment with amd64/arm64 CI validation.
 - [x] Collective product review after M3.
 - [x] Real-host native M3 acceptance on Debian 13 using a side-by-side build with isolated temporary state; the known-good installed service was not replaced.
+- [x] Runtime-smoke-test the supported Docker Compose deployment on an authorized ephemeral Linux Docker host: Docker mode, Web UI, self-diagnosis, and teardown all passed.
+- [x] Commit one real, public-safe Web UI screenshot to the README.
 
-## Current — finish M3 acceptance polish
-
-Do these before adding another diagnostic subsystem:
-
-- [x] Validate the merged M3 Web UI/API/diagnosis on a real supported Linux deployment.
-- [ ] Smoke-test the supported Docker Compose path on a real Linux Docker host without replacing the known-good native deployment. Current approved management policy blocks Docker commands; do not bypass that control.
-- [ ] Commit one real, sanitized Web UI screenshot to the README. A real Diagnose-view capture from the accepted Debian 13 build has been produced and checked for public-safe content; repository embedding remains pending.
-- [x] Fix only real native-acceptance problems found by those checks. No native M3 product blocker was found.
+M3 acceptance is complete. Do not reopen M3 unless real use exposes a concrete regression.
 
 ## Next capability — M4: package-change timeline
-
-Do not start M4 until the remaining M3 acceptance items above are deliberately resolved or explicitly accepted as external/policy-limited.
 
 Keep M4 deliberately narrow. Its only job is to make **“what changed?”** more useful.
 
