@@ -22,9 +22,9 @@ End-Date: 2026-09-03  13:02:21
 		t.Fatalf("expected 4 package changes, got %#v", changes)
 	}
 	assertPackageChange(t, changes[0], "install", "proxmox-headers-7.0.14-15-pve", "amd64", "", "7.0.14-15")
-	assertPackageChange(t, changes[1], "update", "docker-compose-plugin", "amd64", "5.5.0-1~debian.13~trixie", "5.5.1-1~debian.13~trixie")
-	assertPackageChange(t, changes[2], "update", "proxmox-kernel-7.0", "amd64", "7.0.14-14", "7.0.14-15")
-	assertPackageChange(t, changes[3], "remove", "proxmox-headers-7.0.14-14-pve", "amd64", "7.0.14-14", "")
+	assertPackageChange(t, changes[1], "remove", "proxmox-headers-7.0.14-14-pve", "amd64", "7.0.14-14", "")
+	assertPackageChange(t, changes[2], "update", "docker-compose-plugin", "amd64", "5.5.0-1~debian.13~trixie", "5.5.1-1~debian.13~trixie")
+	assertPackageChange(t, changes[3], "update", "proxmox-kernel-7.0", "amd64", "7.0.14-14", "7.0.14-15")
 }
 
 func TestParseDPKGLog(t *testing.T) {
