@@ -20,7 +20,7 @@ type IncidentLens struct {
 	Target           string     `json:"target,omitempty"`
 	Events           []Event    `json:"events"`
 	CurrentEndpoint  *Diagnosis `json:"current_endpoint,omitempty"`
-	EndpointCaptured time.Time  `json:"endpoint_captured_at,omitempty"`
+	EndpointCaptured *time.Time `json:"endpoint_captured_at,omitempty"`
 	Conclusion       string     `json:"conclusion"`
 	ContextNote      string     `json:"context_note"`
 }
@@ -44,7 +44,8 @@ func BuildIncidentLens(ctx context.Context, anchor time.Time, target string, sna
 	if lens.Target != "" {
 		diagnosis := Diagnose(ctx, lens.Target, snap)
 		lens.CurrentEndpoint = &diagnosis
-		lens.EndpointCaptured = diagnosis.StartedAt
+		captured := diagnosis.StartedAt
+		lens.EndpointCaptured = &captured
 	}
 
 	switch len(lens.Events) {
