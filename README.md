@@ -123,7 +123,7 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - native installation remains the recommended choice when full host visibility matters.
 
-The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when the socket path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
+The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when its bind path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
 
 ### Build the container from source
 
@@ -263,7 +263,9 @@ M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic
 
 Stable `v0.2.0` remains the current published native/Docker release and predates M5. M5 is present in source on `main`; no newer public release is implied by this documentation.
 
-The next capability is deliberately unselected. See `TO-DO.md` for the candidate list.
+The next active milestone is **M6 — Certificate Story / TLS Detective**. It adds bounded, read-only TLS/certificate diagnosis, native Certbot discovery, certificate fingerprints, and local-certificate-vs-served-certificate comparison. After M6 acceptance, the approved plan is to publish **v0.3.0** containing M5 + M6, then continue in order through Service Story, Incident Lens, HostSleuth Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle.
+
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
 ## Security and privacy
 
@@ -273,7 +275,8 @@ HostSleuth can collect hostnames, IP addresses, mount paths, service names, list
 
 - `README.md` — product definition, usage, and current scope.
 - `CURRENT-HANDOFF.md` — current project state and next task.
-- `TO-DO.md` — active roadmap and product decisions.
+- `TO-DO.md` — active checklist and product decisions.
+- `docs/ROADMAP.md` — owner-approved ordered product roadmap.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 
 ## License
