@@ -6,7 +6,7 @@ HostSleuth records meaningful Linux state changes and performs deterministic, ev
 
 ## Quick start — recommended native install
 
-HostSleuth currently works best as a native Linux service because it needs to observe the real host.
+Native Linux is the recommended deployment because it gives HostSleuth the fullest view of the machine.
 
 Requirements: Linux with systemd. Go is **not** required when installing a release.
 
@@ -41,16 +41,42 @@ Then open `http://127.0.0.1:8787` locally.
 
 A new install starts by taking a baseline snapshot. An empty change timeline is normal until HostSleuth observes a meaningful change.
 
+## Docker Compose — convenient, reduced host visibility
+
+The repository also includes one supported Docker Compose deployment for Linux Docker hosts.
+
+```bash
+git clone https://github.com/xXDasGoGXx/HostSleuth.git
+cd HostSleuth
+docker compose up -d --build
+```
+
+The Web UI remains on `127.0.0.1:8787`, so use the same local browser or SSH-tunnel workflow described above.
+
+The Docker deployment intentionally does **not** use `privileged: true`. It drops all Linux capabilities, uses a read-only container filesystem, and shares only the host namespaces/mounts needed for the evidence it can collect honestly.
+
+Docker mode can observe host networking/listeners and Docker container metadata, but container isolation prevents safe, reliable access to everything the native service can see. In Docker mode:
+
+- systemd service/journal evidence is reported as unavailable;
+- host filesystem inventory is reported as unavailable;
+- firewall evidence may be unavailable without elevated network-administration privileges;
+- native installation remains the recommended choice when full host visibility matters.
+
+The Compose file mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when the socket path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
+
+No container image is published automatically by this repository workflow. The Compose deployment builds HostSleuth locally from the checked-out source.
+
 ## What it does
 
 ### Remember meaningful changes
 
 HostSleuth periodically captures useful local state including:
 
-- host identity, OS, kernel, memory, and filesystems;
+- host identity, OS, kernel, and memory;
+- filesystems and capacity in native mode;
 - interfaces and routes;
 - listening sockets;
-- systemd services;
+- systemd services in native mode;
 - Docker containers, published ports, state, and network names when Docker is readable.
 
 It compares snapshots and records meaningful service/container/listener changes in a local event timeline. Known noisy changes such as Docker uptime progression are suppressed.
@@ -64,8 +90,8 @@ Enter a target such as `192.168.1.20:443` or `example.com:443`. HostSleuth can c
 - TCP connectivity;
 - target-aware local TCP listener evidence;
 - Docker port publication, bind address, and network context;
-- bounded nftables candidate evidence;
-- bounded failed-systemd candidate evidence.
+- bounded nftables candidate evidence when available;
+- bounded failed-systemd candidate evidence in native mode.
 
 The Web UI presents the answer first and keeps the underlying evidence available for inspection. Successful TCP is definitive, stronger local bind/listener evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
 
@@ -121,11 +147,19 @@ sudo ./scripts/install-source.sh
 
 ## Uninstall
 
-Remove the binary and service while preserving recorded HostSleuth state:
+Remove the native binary and service while preserving recorded HostSleuth state:
 
 ```bash
 sudo ./scripts/uninstall.sh
 ```
+
+For Docker Compose:
+
+```bash
+docker compose down
+```
+
+The named `hostsleuth-data` volume is retained unless you explicitly remove it.
 
 ## Product boundaries
 
@@ -141,9 +175,9 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, and M3.1 Web UI are complete.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3.1 Web UI, and M3.2 usability are complete.
 
-M3.2 is focused on usability: clearer wording, first-run behavior, version visibility, and simpler installation guidance. M3.3 will address an official Docker deployment without turning HostSleuth into a complicated multi-mode product.
+M3.3 is focused only on making the supported Docker deployment buildable, understandable, honest about reduced visibility, and validated on amd64 and arm64. It does not publish an image without explicit owner approval.
 
 Larger ideas remain deferred for collective product review rather than automatically becoming features. See `TO-DO.md` for the current sequence and decision list.
 
