@@ -2,6 +2,8 @@ package core
 
 import "time"
 
+const snapshotSchemaVersion = 2
+
 type Snapshot struct {
 	SchemaVersion  int              `json:"schema_version"`
 	CapturedAt     time.Time        `json:"captured_at"`
