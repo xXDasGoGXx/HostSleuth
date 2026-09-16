@@ -293,5 +293,8 @@ func listenerHostMatchesTarget(host string, resolvedIPs []string) bool {
 }
 
 func SnapshotSummary(s Snapshot) string {
+	if s.Mode == dockerDeploymentMode {
+		return fmt.Sprintf("%s | %s | mode=docker filesystems=unavailable services=unavailable listeners=%d containers=%d", s.Host.Hostname, s.Host.OS, len(s.Listeners), len(s.Containers))
+	}
 	return fmt.Sprintf("%s | %s | filesystems=%d services=%d listeners=%d containers=%d", s.Host.Hostname, s.Host.OS, len(s.Filesystems), len(s.Services), len(s.Listeners), len(s.Containers))
 }
