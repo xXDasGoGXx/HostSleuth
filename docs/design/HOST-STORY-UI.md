@@ -32,6 +32,7 @@ HostSleuth should borrow those presentation principles, not their feature sets o
 - Keep the same Overview / Diagnose / Changes / Host navigation.
 - Do not add alerting, remediation, AI explanation, multi-host management, agents, SNMP, time-series metrics, or configuration frameworks in this exploration.
 - Do not infer causality from nearby events. Recent changes shown beside a diagnosis are explicitly labeled as context only.
+- Do not treat a listening socket as proof of end-to-end reachability; routing and firewall state still matter.
 - Continue to report unavailable Docker-mode evidence honestly.
 - Keep the interface useful on a phone and on a large desktop display.
 
@@ -43,7 +44,7 @@ The top of the UI summarizes what HostSleuth can currently prove about the machi
 
 It surfaces:
 
-- listeners accepting traffic beyond loopback;
+- listeners bound beyond loopback;
 - failed native services when visible;
 - visible Docker containers and running count;
 - meaningful changes in the last 24 hours;
@@ -59,7 +60,7 @@ Each socket is classified as:
 - wildcard;
 - specific-address.
 
-Each visible listener can pre-fill the existing deterministic Diagnose workflow. Classification is descriptive only; it does not claim that a wildcard or non-loopback listener is unsafe.
+Each visible listener can pre-fill the existing deterministic Diagnose workflow. Classification is descriptive only; it does not claim that a wildcard or non-loopback listener is unsafe or remotely reachable.
 
 ### Diagnose becomes an evidence path
 
@@ -111,7 +112,7 @@ Those would require separate product decisions if ever pursued.
 The prototype succeeds if a new user can open HostSleuth and quickly answer:
 
 - What machine am I looking at?
-- What can currently be reached on it?
+- Where is this host listening, and on what scope?
 - Has anything meaningful changed recently?
 - Is there an obvious local condition worth inspecting?
 - Where do I click to investigate a host:port problem?
