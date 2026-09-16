@@ -28,11 +28,13 @@ M3.4 adds no new HostSleuth functionality. It only turns the existing Docker sup
 - [x] Add a direct `docker run` example matching the supported Compose security/runtime settings.
 - [x] Add release-gated Docker Hub publication for linux/amd64 + linux/arm64.
 - [x] Make `latest` move only for plain stable `vX.Y.Z` releases.
-- [x] Keep Docker Hub credentials out of Git; workflow uses `DOCKERHUB_TOKEN` secret and `DOCKERHUB_NAMESPACE` variable only.
+- [x] Require the GitHub release itself to be non-prerelease before Docker publication.
+- [x] Keep Docker Hub credentials out of Git; the workflow uses only the `DOCKERHUB_TOKEN` secret and the fixed public namespace `mjmalleo`.
 - [x] Extend CI smoke testing so Compose starts from an already-built image and validates `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
 - [x] Confirm Docker Hub namespace/repository as `mjmalleo/hostsleuth`.
-- [ ] Run PR CI and fix only M3.4 regressions.
-- [ ] Create the Docker Hub repository and GitHub Actions secret/variable as one-time owner-controlled setup.
+- [x] Run full PR CI: normal Go checks, Compose validation, amd64 image build, arm64 image build, and image-consumption smoke all passed on run 98 before the final publish-workflow hardening.
+- [ ] Confirm the final PR head remains green after the publish-workflow hardening/documentation updates.
+- [ ] Create the Docker Hub repository and GitHub Actions `DOCKERHUB_TOKEN` secret as one-time owner-controlled setup.
 - [ ] Test the actual published image by pulling/running it as a normal user would.
 - [ ] Update the separate OMV disaster-recovery repository to consume the published image only after the public image is validated.
 - [ ] Record M3.4 completion in handoff/history after validation.
