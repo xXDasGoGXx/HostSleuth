@@ -53,6 +53,7 @@ func Collect(ctx context.Context) Snapshot {
 	s.Listeners = collectListeners(ctx)
 	if mode != dockerDeploymentMode {
 		s.Services = collectServices(ctx)
+		s.ConfigFingerprints = collectConfigFingerprints()
 	}
 	s.Containers = collectContainers(ctx)
 	s.PackageChanges = collectPackageChanges()
@@ -107,7 +108,6 @@ func collectInterfaces() []InterfaceInfo {
 		for _, a := range addrs {
 			entry.Addresses = append(entry.Addresses, a.String())
 		}
-		sort.Strings(entry.Addresses)
 		out = append(out, entry)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
