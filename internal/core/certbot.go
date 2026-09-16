@@ -139,6 +139,9 @@ func certbotCheck(evidence *CertbotEvidence) Check {
 		parts = append(parts, "executable="+evidence.Executable)
 	}
 	parts = append(parts, fmt.Sprintf("%d renewal lineage(s) discovered", len(evidence.Lineages)))
+	if summary := certbotLineagesSummary(evidence.Lineages); summary != "" {
+		parts = append(parts, "lineages: "+summary)
+	}
 	if evidence.TimerState != "" {
 		parts = append(parts, "timer: "+evidence.TimerState)
 	}
@@ -155,6 +158,30 @@ func certbotCheck(evidence *CertbotEvidence) Check {
 		status = "unknown"
 	}
 	return Check{Name: "certbot", Status: status, Evidence: boundedEvidence(strings.Join(parts, "; "), 2048)}
+}
+
+func certbotLineagesSummary(lineages []CertbotLineageEvidence) string {
+	items := make([]string, 0, len(lineages))
+	for _, lineage := range lineages {
+		fields := []string{lineage.Name}
+		if lineage.RenewalConfig != "" {
+			fields = append(fields, "config="+lineage.RenewalConfig)
+		}
+		if lineage.RenewalState != "" {
+			fields = append(fields, lineage.RenewalState)
+		}
+		if lineage.Certificate != nil {
+			fields = append(fields, "valid_until="+lineage.Certificate.ValidUntil.Format(time.RFC3339))
+		}
+		if lineage.HostnameMatch {
+			fields = append(fields, "hostname-match")
+		}
+		if lineage.ServedComparison != "" {
+			fields = append(fields, lineage.ServedComparison)
+		}
+		items = append(items, strings.Join(fields, ", "))
+	}
+	return boundedEvidence(strings.Join(items, " | "), 1024)
 }
 
 func certificateComparisonCheck(evidence *CertbotEvidence) Check {
