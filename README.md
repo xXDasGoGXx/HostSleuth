@@ -41,17 +41,55 @@ Then open `http://127.0.0.1:8787` locally.
 
 A new install starts by taking a baseline snapshot. An empty change timeline is normal until HostSleuth observes a meaningful change.
 
-## Docker Compose — convenient, reduced host visibility
+## Docker — convenient, reduced host visibility
 
-The repository also includes one supported Docker Compose deployment for Linux Docker hosts.
+The supported public image is intended to be:
+
+```text
+xxdasgogxx/hostsleuth
+```
+
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.1.0`.
+
+### Docker Compose
+
+The repository includes one supported `compose.yaml` for Linux Docker hosts. Once the public image is available:
 
 ```bash
 git clone https://github.com/xXDasGoGXx/HostSleuth.git
 cd HostSleuth
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
-The Web UI remains on `127.0.0.1:8787`, so use the same local browser or SSH-tunnel workflow described above.
+To pin an explicit stable version instead of `latest`:
+
+```bash
+HOSTSLEUTH_IMAGE=xxdasgogxx/hostsleuth:0.1.0 docker compose up -d
+```
+
+### Docker run
+
+The equivalent direct `docker run` deployment is:
+
+```bash
+docker run -d \
+  --name hostsleuth \
+  --restart unless-stopped \
+  --network host \
+  --pid host \
+  --uts host \
+  --read-only \
+  --cap-drop ALL \
+  --security-opt no-new-privileges:true \
+  --tmpfs /tmp:rw,noexec,nosuid,size=16m \
+  -v hostsleuth-data:/var/lib/hostsleuth \
+  -v /etc/os-release:/host/etc/os-release:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  xxdasgogxx/hostsleuth:latest
+```
+
+The Web UI remains on `127.0.0.1:8787`, so use the same local browser or SSH-tunnel workflow described above. Because HostSleuth uses host networking, Docker does not publish a separate port mapping.
 
 ### Optional direct LAN access
 
@@ -83,9 +121,18 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - native installation remains the recommended choice when full host visibility matters.
 
-The Compose file mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when the socket path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
+The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when the socket path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
 
-No container image is published automatically by this repository workflow. The Compose deployment builds HostSleuth locally from the checked-out source.
+### Build the container from source
+
+Developers can still build the image locally rather than consuming the public image:
+
+```bash
+git clone https://github.com/xXDasGoGXx/HostSleuth.git
+cd HostSleuth
+docker build -t hostsleuth:dev .
+HOSTSLEUTH_IMAGE=hostsleuth:dev docker compose up -d
+```
 
 ## What it does
 
@@ -184,6 +231,12 @@ For Docker Compose:
 docker compose down
 ```
 
+For direct Docker:
+
+```bash
+docker rm -f hostsleuth
+```
+
 The named `hostsleuth-data` volume is retained unless you explicitly remove it.
 
 ## Product boundaries
@@ -202,9 +255,9 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, and the full M3 Product Experience sequence are complete.
 
-M3 delivered the modern Web UI, usability/first-run polish, and one supported Docker Compose deployment. The native M3 experience was exercised successfully on a real Debian 13 host using a side-by-side temporary build so the existing known-good service did not need to be replaced. The supported Compose deployment was then runtime-smoke-tested on an authorized ephemeral Linux Docker host: HostSleuth started successfully, reported Docker mode truthfully, served the Web UI, diagnosed its own endpoint as reachable with high confidence, and shut down cleanly after the test. Linux amd64 and arm64 image builds remain covered by CI.
+M3 delivered the modern Web UI, usability/first-run polish, and one supported Docker deployment. M3.4 is the deliberately small public-container-distribution milestone: it does not add HostSleuth functionality, and exists only to make the existing container deployment easy to pull, run, version, test, and update.
 
-M3 acceptance is complete. The next narrowly scoped capability is M4 package-change history. See `TO-DO.md` for the current roadmap.
+M4 package-change history remains the next application-feature milestone after M3.4. See `TO-DO.md` for the current roadmap.
 
 ## Security and privacy
 
