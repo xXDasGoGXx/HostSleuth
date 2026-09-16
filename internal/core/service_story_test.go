@@ -99,6 +99,42 @@ func TestServiceStoryContextUsesDirectAnchorAndNearbyChanges(t *testing.T) {
 	}
 }
 
+func TestServiceStoryDoesNotInventPortCollisionWhenListenerPIDIsHidden(t *testing.T) {
+	withServiceStoryMocks(t,
+		boundedCommandResult{Output: "LoadState=loaded\nActiveState=active\nSubState=running\nUnitFileState=enabled\nResult=success\nMainPID=123\nControlGroup=/system.slice/demo.service\nExecMainCode=0\nExecMainStatus=0\n"},
+		boundedCommandResult{},
+	)
+	oldRoute := routeLookup
+	oldTCP := tcpConnect
+	oldTLS := tlsProbeLookup
+	routeLookup = func(context.Context, string) (string, error) { return "local 127.0.0.1 dev lo src 127.0.0.1\n", nil }
+	tcpConnect = func(context.Context, string) error { return nil }
+	tlsProbeLookup = func(context.Context, string, string) *TLSEvidence { return nil }
+	t.Cleanup(func() {
+		routeLookup = oldRoute
+		tcpConnect = oldTCP
+		tlsProbeLookup = oldTLS
+	})
+
+	snap := Snapshot{
+		Services:  []ServiceInfo{{Name: "demo.service", Load: "loaded", Active: "active", Sub: "running"}},
+		Listeners: []Listener{{Protocol: "tcp", Address: "0.0.0.0:2222"}},
+	}
+	story := ServiceStoryFor(context.Background(), "demo.service", "127.0.0.1:2222", snap, nil)
+	if story.Conclusion != "service is active and the expected endpoint is reachable" {
+		t.Fatalf("hidden listener PID must not become a collision: %#v", story)
+	}
+	for _, check := range story.Checks {
+		if check.Name == "service-port" {
+			if check.Status != "unknown" || !strings.Contains(check.Evidence, "ownership is unavailable") {
+				t.Fatalf("unexpected ownership check: %#v", check)
+			}
+			return
+		}
+	}
+	t.Fatal("expected port ownership evidence")
+}
+
 func TestServiceStoryDockerModeStaysTruthfullyUnavailable(t *testing.T) {
 	story := ServiceStoryFor(context.Background(), "demo.service", "", Snapshot{Mode: dockerDeploymentMode}, nil)
 	if story.Conclusion != "service story is unavailable in Docker deployment mode" || len(story.Checks) != 1 || story.Checks[0].Status != "unknown" {
