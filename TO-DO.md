@@ -28,22 +28,45 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M9 focused tests, full validation, isolated real OMV CLI acceptance, and isolated API/UI smoke.
 - [x] CI now syntax-checks every UI fragment plus the exact concatenated served JavaScript and includes a Docker Workbench smoke path.
 
-Stable `v0.3.0` remains the current published release. M7, M8, and M9 are newer source capabilities and are not claimed to be included in v0.3.0. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
+Stable `v0.3.0` remains the current published release. M7, M8, M9, and active M10 WIP are newer source capabilities and are not claimed to be included in v0.3.0. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
 
 ## Active — 6. M10 Reboot Story
 
-M10 is the next approved milestone. Keep it evidence-first and read-only.
+Canonical branch: `m10-reboot-story`
 
-- [ ] Capture current boot time and bounded previous boot/shutdown evidence where available.
+Draft checkpoint PR: `#34 — M10: Reboot Story (WIP checkpoint)`
+
+Durable resume document: `docs/history/M10-REBOOT-STORY-WIP.md`
+
+Completed in WIP so far:
+
+- [x] Advance snapshot schema to v4 for explicit boot identity evidence.
+- [x] Capture Linux kernel boot ID when available.
+- [x] Capture exact boot start from `/proc/stat` `btime` when available.
+- [x] Detect reboot only when old/new known boot IDs differ; never infer reboot from uptime text alone.
+- [x] Add initial Reboot Story core and focused tests.
+- [x] Add initial Reboot Story Web UI assets.
+- [x] Real-OMV isolated check: Go tests/build pass and real boot ID/start evidence is captured.
+- [x] Preserve denied/unavailable journal access as an explicit evidence boundary rather than inventing a cause.
+
+Still required before M10 completion:
+
+- [ ] Finish CLI/API/runtime asset/UI wiring.
+- [ ] Capture bounded previous/current boot journal evidence where permissions allow.
 - [ ] Distinguish orderly vs abnormal shutdown only when direct evidence supports it.
 - [ ] Correlate package/kernel/configuration changes near reboot without claiming cause from timing alone.
 - [ ] Surface services failed after boot.
 - [ ] Surface listeners that existed before but did not return only when retained evidence supports that statement.
 - [ ] Include container state changes relevant to boot recovery.
 - [ ] Attach current service/listener/certificate context for missing endpoints only where evidence connects honestly.
-- [ ] Do not invent a reboot cause.
+- [ ] Verify no first-schema-upgrade false reboot when the older snapshot lacks a boot ID.
 - [ ] Reuse Incident Lens/event primitives instead of creating a second history store.
-- [ ] Focused tests, normal CI, and bounded real-host acceptance.
+- [ ] Run focused tests plus full `go test ./...`, `go vet ./...`, formatting, JavaScript syntax, native build, Docker smoke, amd64 and arm64 image builds.
+- [ ] Perform bounded isolated real-host acceptance without touching live HostSleuth.
+- [ ] Finalize README / CURRENT-HANDOFF / TO-DO / ROADMAP / M10 history after acceptance.
+- [ ] Move PR #34 out of draft and merge only when CI and acceptance are clean.
+
+Do **not** publish a new release/Docker tag, change `latest`, deploy M10 to live OMV, change `OMV-Docker-Rebuild`, or start M11 from this WIP checkpoint.
 
 ## Consumer/product research — separate backlog, not active scope
 
@@ -51,12 +74,14 @@ Continue studying what users currently assemble from CLI tools, admin consoles, 
 
 The research backlog is intentionally broader than certificate management. Promising themes include:
 
-- expected-endpoint contracts tying service/listener/protocol/certificate expectations to retained changes;
+- endpoint-path and expected-state contracts;
+- DNS resolver/delegation/split-view evidence;
+- HTTP/reverse-proxy/upstream mismatch evidence;
+- port/listener/bind ownership;
+- file permissions/ownership/deployment-path problems;
+- container disappearance/dependency evidence;
 - protocol-aware TLS/STARTTLS inspection for mail and other non-HTTPS services;
 - certificate source -> destination -> actually-served fingerprint verification and rollout consistency;
-- DNS path/delegation or resolver-comparison workflows when they answer a concrete troubleshooting question;
-- HTTP/reverse-proxy evidence that explains redirect, host-header, or upstream mismatches without becoming a proxy manager;
-- permissions/ownership/deployment-path evidence that explains why a service cannot consume a file it is expected to use;
 - tightly bounded safe-action recipes with preview, audit, postcondition verification, and no arbitrary shell.
 
 Any write/action feature remains reserved for M11 security/design review or another explicitly approved later milestone.
