@@ -352,8 +352,8 @@ function renderAttention({ dockerMode, failedServices, exposedListeners, recentC
   }
 
   if (exposedListeners > 0) {
-    text(byId("attentionTitle"), `${exposedListeners} listening ${exposedListeners === 1 ? "socket accepts" : "sockets accept"} traffic beyond loopback`);
-    text(byId("attentionDetail"), "That is not inherently a problem. HostSleuth exposes the surface so you can diagnose any endpoint directly.");
+    text(byId("attentionTitle"), `${exposedListeners} listening ${exposedListeners === 1 ? "socket is" : "sockets are"} bound beyond loopback`);
+    text(byId("attentionDetail"), "That is not proof of remote reachability. Routing and firewall state still matter; diagnose any endpoint to test the path.");
     return;
   }
 
