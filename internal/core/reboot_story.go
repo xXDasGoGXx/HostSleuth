@@ -108,6 +108,9 @@ func collectPreviousBootEvidence(ctx context.Context) BootJournalEvidence {
 	if errors.Is(err, exec.ErrNotFound) {
 		return BootJournalEvidence{Status: "unknown", Assessment: baseAssessment, Evidence: "journalctl command is unavailable"}
 	}
+	if journalPermissionUnavailable(journal) {
+		return BootJournalEvidence{Status: "unknown", Assessment: baseAssessment, Evidence: "previous-boot journal is unavailable: " + boundedEvidence(journal, 384)}
+	}
 	if err != nil && journal == "" {
 		return BootJournalEvidence{Status: "unknown", Assessment: baseAssessment, Evidence: "previous-boot journal is unavailable: " + boundedEvidence(err.Error(), 384)}
 	}
@@ -137,6 +140,9 @@ func collectCurrentBootEvidence(ctx context.Context) BootJournalEvidence {
 	if errors.Is(err, exec.ErrNotFound) {
 		return BootJournalEvidence{Status: "unknown", Assessment: assessment, Evidence: "journalctl command is unavailable"}
 	}
+	if journalPermissionUnavailable(journal) {
+		return BootJournalEvidence{Status: "unknown", Assessment: assessment, Evidence: "current-boot journal is unavailable: " + boundedEvidence(journal, 384)}
+	}
 	if err != nil && journal == "" {
 		return BootJournalEvidence{Status: "unknown", Assessment: assessment, Evidence: "current-boot journal is unavailable: " + boundedEvidence(err.Error(), 384)}
 	}
@@ -148,6 +154,20 @@ func collectCurrentBootEvidence(ctx context.Context) BootJournalEvidence {
 		evidence += " [current-boot journal capture truncated at 16 KiB]"
 	}
 	return BootJournalEvidence{Status: "available", Assessment: assessment, Evidence: evidence}
+}
+
+func journalPermissionUnavailable(journal string) bool {
+	lower := strings.ToLower(strings.TrimSpace(journal))
+	for _, marker := range []string{
+		"no journal files were opened due to insufficient permissions",
+		"failed to open journal: permission denied",
+		"failed to open system journal: permission denied",
+	} {
+		if strings.Contains(lower, marker) {
+			return true
+		}
+	}
+	return false
 }
 
 func currentFailedServices(services []ServiceInfo) []ServiceInfo {
