@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -70,7 +71,7 @@ func runWorkbench(args []string) {
 		log.Fatal(err)
 	}
 	b, _ := json.MarshalIndent(result, "", "  ")
-	log.Print(string(b))
+	fmt.Println(string(b))
 }
 
 func registerWorkbenchAPI(mux *http.ServeMux) {
