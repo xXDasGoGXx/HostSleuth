@@ -31,6 +31,8 @@ func main() {
 		runSnapshot(os.Args[2:])
 	case "diagnose":
 		runDiagnose(os.Args[2:])
+	case "service":
+		runServiceStory(os.Args[2:])
 	case "events":
 		runEvents(os.Args[2:])
 	case "serve":
@@ -45,7 +47,7 @@ func main() {
 
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
-	fmt.Println("usage: hostsleuth <snapshot|diagnose|events|serve|version> [options]")
+	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|events|serve|version> [options]")
 }
 
 func buildRevision() string {
@@ -121,6 +123,30 @@ func runDiagnose(args []string) {
 	}
 	d := core.Diagnose(ctx, fs.Arg(0), snap)
 	b, _ := json.MarshalIndent(d, "", "  ")
+	fmt.Println(string(b))
+}
+
+func runServiceStory(args []string) {
+	fs := flag.NewFlagSet("service", flag.ExitOnError)
+	state := fs.String("state-dir", defaultStateDir(), "state directory")
+	target := fs.String("target", "", "optional expected endpoint in host:port form")
+	_ = fs.Parse(args)
+	if fs.NArg() != 1 {
+		log.Fatal("service requires one systemd unit name")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+	defer cancel()
+	store := core.Store{Dir: *state}
+	snap, err := store.LoadSnapshot()
+	if err != nil {
+		snap = core.Collect(ctx)
+	}
+	events, err := store.ReadEvents(200)
+	if err != nil {
+		events = nil
+	}
+	story := core.ServiceStoryFor(ctx, fs.Arg(0), *target, snap, events)
+	b, _ := json.MarshalIndent(story, "", "  ")
 	fmt.Println(string(b))
 }
 
@@ -221,6 +247,23 @@ func runServe(args []string) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(core.Diagnose(r.Context(), target, s))
+	})
+	mux.HandleFunc("/api/service-story", func(w http.ResponseWriter, r *http.Request) {
+		service := r.URL.Query().Get("service")
+		if service == "" {
+			http.Error(w, "service is required", http.StatusBadRequest)
+			return
+		}
+		s, err := store.LoadSnapshot()
+		if err != nil {
+			s = core.Collect(r.Context())
+		}
+		events, err := store.ReadEvents(200)
+		if err != nil {
+			events = nil
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(core.ServiceStoryFor(r.Context(), service, r.URL.Query().Get("target"), s, events))
 	})
 	mux.HandleFunc("/assets/app.css", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/css; charset=utf-8")
