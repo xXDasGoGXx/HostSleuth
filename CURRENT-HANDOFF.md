@@ -62,7 +62,7 @@ M3.4 must not weaken those boundaries to gain additional visibility.
 The active branch now contains:
 
 - `compose.yaml` changed from local `build:` to `image:` consumption;
-- proposed public image name `xxdasgogxx/hostsleuth`;
+- confirmed public image name `mjmalleo/hostsleuth`;
 - `HOSTSLEUTH_IMAGE` override so explicit stable tags and local developer builds remain easy;
 - README pull/Compose usage;
 - README direct `docker run` usage matching the supported Compose security/runtime settings;
@@ -90,22 +90,22 @@ Reasoning:
 
 Do not create the tag/release until the owner explicitly approves publication.
 
-## Proposed Docker Hub repository
+## Docker Hub repository
 
-Proposed repository/name:
+Confirmed repository/name:
 
-`xxdasgogxx/hostsleuth`
+`mjmalleo/hostsleuth`
 
-This matches the GitHub owner naming convention and keeps the image name obvious. Confirm the actual Docker Hub namespace before merge/publication; Docker Hub administration is not available through the current connected tools.
+The Docker Hub personal namespace is `mjmalleo`. Keep that exact namespace in Compose, README examples, and GitHub Actions repository variable `DOCKERHUB_NAMESPACE`.
 
 ## One-time owner-controlled setup still required
 
 Before the first public image can be published:
 
-1. Create the public Docker Hub repository `hostsleuth` under the confirmed namespace.
+1. Create the public Docker Hub repository `hostsleuth` under namespace `mjmalleo`.
 2. Generate a Docker Hub access token with only the permissions needed to push this repository.
 3. Add that token to GitHub Actions as repository secret `DOCKERHUB_TOKEN`.
-4. Add the confirmed Docker Hub namespace as GitHub Actions repository variable `DOCKERHUB_NAMESPACE`.
+4. Add `mjmalleo` as GitHub Actions repository variable `DOCKERHUB_NAMESPACE`.
 
 Never paste the token into chat or commit it to Git.
 
@@ -130,7 +130,6 @@ Before M3.4 can be called complete:
 - linux/amd64 and linux/arm64 image builds must pass;
 - runtime image-consumption smoke must pass;
 - `/api/about`, `/api/snapshot`, Web UI, and diagnosis must pass;
-- Docker Hub namespace/repository must be confirmed;
 - after explicit publication approval, the actual public multi-arch image must be pulled and run in the same style documented for normal users;
 - only after that validation should the separate OMV disaster-recovery repository be updated to consume the published image.
 
