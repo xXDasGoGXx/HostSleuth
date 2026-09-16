@@ -159,6 +159,10 @@ func runServe(args []string) {
 	}
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/api/about", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"version": version})
+	})
 	mux.HandleFunc("/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		s, err := store.LoadSnapshot()
