@@ -30,7 +30,7 @@ M3.4 adds no new HostSleuth functionality. It only turns the existing Docker sup
 - [x] Make `latest` move only for plain stable `vX.Y.Z` releases.
 - [x] Keep Docker Hub credentials out of Git; workflow uses `DOCKERHUB_TOKEN` secret and `DOCKERHUB_NAMESPACE` variable only.
 - [x] Extend CI smoke testing so Compose starts from an already-built image and validates `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
-- [ ] Confirm the Docker Hub namespace/repository is `xxdasgogxx/hostsleuth` before merge/publication.
+- [x] Confirm Docker Hub namespace/repository as `mjmalleo/hostsleuth`.
 - [ ] Run PR CI and fix only M3.4 regressions.
 - [ ] Create the Docker Hub repository and GitHub Actions secret/variable as one-time owner-controlled setup.
 - [ ] Test the actual published image by pulling/running it as a normal user would.
