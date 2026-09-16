@@ -16,49 +16,55 @@ The product definition and normal user-facing overview live in `README.md`.
 - **M0 — Repository foundation:** complete.
 - **M1 — Single-host deployable MVP:** complete.
 - **M2 — Deeper deterministic diagnosis:** complete.
-- **M3 — Product Experience:** active.
-  - **M3.1 Web UI:** complete and merged in PR #11.
-  - **M3.2 Usability:** complete and merged in PR #13 (`d250019902d676f67d44b74cc122db3f40ad7e67`).
-  - **M3.3 Docker release:** active on `m3/docker-release`.
+- **M3 — Product Experience:** complete.
+  - **M3.1 Web UI:** merged in PR #11.
+  - **M3.2 Usability:** merged in PR #13 (`d250019902d676f67d44b74cc122db3f40ad7e67`).
+  - **M3.3 Docker release packaging:** merged in PR #14 (`ccaad3ef1df16e65887d1f19da44a118a6d0bb2a`).
 
-The exact checklist lives in `TO-DO.md` and is updated as work progresses.
+The active decision list lives in `TO-DO.md`.
 
 ## Product-direction rule
 
 HostSleuth should remain easy to deploy, easy to understand, and intentionally small. New capability is not automatically good capability.
 
-Ideas such as authentication, proxy/TLS awareness, SQLite, AI explanation, multi-host support, remediation, and other larger additions remain visible in the **collective review** section of `TO-DO.md`. They are deferred decisions, not permanent bans and not promised features.
+Authentication, proxy/TLS awareness, SQLite, AI explanation, multi-host support, remediation, and other larger ideas remain visible in the **collective review** section of `TO-DO.md`. They are deferred decisions, not permanent bans and not promised features.
 
 Promote one only when it solves a common real user problem without making installation, operation, or the UI meaningfully harder.
 
-## Native deployment
+## Supported deployment paths
 
-Native Linux remains the recommended HostSleuth deployment because it provides the fullest visibility into systemd and host filesystems while keeping the Web UI loopback-only by default.
+### Native Linux — recommended
 
-The M2 diagnostic core and native systemd deployment have been validated on Debian 13. M3.1/M3.2 changed presentation and usability without changing deterministic diagnosis semantics.
+Native Linux provides the fullest HostSleuth visibility into systemd, host filesystems, network/listener state, and Docker inventory while keeping the Web UI loopback-only by default.
 
-## M3.3 Docker design
+The diagnostic core and native systemd deployment have been validated on Debian 13. M3.1/M3.2 changed presentation and usability without changing deterministic diagnosis semantics.
 
-The Docker deployment is deliberately one supported Compose shape rather than a matrix of modes and switches.
+### Docker Compose — convenient, reduced visibility
 
-Implemented design:
+The repository now contains one supported `Dockerfile` and one recommended `compose.yaml`.
 
-- multi-stage Linux image build;
-- one `compose.yaml`;
-- persistent `hostsleuth-data` volume;
-- host network/PID/UTS namespaces so network/listener/hostname evidence describes the host rather than an isolated container;
-- host `/etc/os-release` mounted read-only for truthful OS identity;
-- Docker socket mounted for container inventory;
-- all Linux capabilities dropped;
-- `no-new-privileges` enabled;
-- read-only container root filesystem;
-- no unrestricted `privileged: true`;
-- same embedded HostSleuth Web UI;
-- CI definitions for Linux amd64 and arm64 image builds.
+The Docker deployment:
 
-Docker isolation prevents safe, reliable access to some native evidence. Docker-mode snapshots therefore mark the deployment mode explicitly and intentionally omit host filesystem and systemd inventory. Diagnosis reports systemd evidence as unavailable instead of manufacturing a clean result. Firewall evidence may also remain unavailable without elevated network-administration privileges.
+- persists state in the `hostsleuth-data` volume;
+- uses host network/PID/UTS namespaces for truthful host network/listener/hostname evidence;
+- reads host `/etc/os-release` through a narrow read-only mount;
+- uses the Docker socket for container inventory;
+- drops all Linux capabilities;
+- enables `no-new-privileges`;
+- uses a read-only container root filesystem;
+- does not use unrestricted `privileged: true`.
 
-This reduced visibility is intentional. Do not add broad host-root mounts, systemd control sockets, `CAP_NET_ADMIN`, or privileged mode merely to make Docker look identical to native HostSleuth.
+Docker-mode snapshots identify the deployment mode explicitly. Host filesystem and systemd inventory are intentionally unavailable rather than replaced with misleading container-local data. Systemd diagnostic evidence remains `unknown` in Docker mode. Firewall evidence may also be unavailable without elevated network-administration privileges.
+
+PR #14 validated:
+
+- normal Go formatting, vet, tests, and build;
+- embedded Web UI JavaScript syntax;
+- Compose configuration;
+- Linux amd64 Docker image build;
+- Linux arm64 Docker image build.
+
+No container image was published and the known-good native service was not replaced.
 
 ## Docker socket security boundary
 
@@ -74,41 +80,39 @@ Native HostSleuth captures host/OS/kernel state, filesystems, interfaces/routes,
 
 ### Deterministic diagnosis
 
-`diagnose host:port` continues to use the existing deterministic precedence rules. Optional evidence that is unavailable in Docker mode remains `unknown`; it is not converted into a false failure or false pass.
+`diagnose host:port` continues to use the existing deterministic precedence rules. Optional evidence that is unavailable stays `unknown`; it is not converted into a false failure or false pass.
 
 ### Web UI and usability
 
 The Web UI provides Overview / Diagnose / Changes / Host views, readable diagnosis evidence, first-run guidance, version/build information, newest-first changes, and explicit Docker reduced-visibility labels.
 
-## Active branch and scope
+## Current limitations
 
-Active branch: `m3/docker-release`
+- dashboard is loopback-only and has no authentication;
+- storage is JSON/JSONL;
+- reverse-proxy and TLS-specific diagnosis are not implemented;
+- configuration/package change tracking is not implemented;
+- HostSleuth is single-host first;
+- no automatic remediation;
+- Docker deployment has intentionally reduced systemd/filesystem/firewall visibility compared with native deployment.
 
-Current scope is **M3.3 only**:
-
-1. validate the Dockerfile and Compose definition;
-2. validate amd64 and arm64 image builds;
-3. validate normal Go/Web CI with Docker-mode tests;
-4. fix only Docker-release blockers discovered by that validation;
-5. merge after all checks are green.
-
-Do not publish a container image. Do not deploy this branch over the known-good native service. Both actions remain owner-controlled.
+These limitations remain collective product decisions; they do not automatically become the next work.
 
 ## Branch hygiene
 
-`main` remains the authoritative stable development state.
+`main` is the authoritative development state.
 
-- `m3/docker-release` is the only active feature branch for the current task.
-- `m3/usability` is historical after merged PR #13.
-- `m3/product-experience` is historical after merged PR #11.
+- `m3/docker-release`, `m3/usability`, and `m3/product-experience` are historical after merged PRs #14, #13, and #11.
 - Old M1/M2 feature branches are historical leftovers after merged work.
 - `m3/npm-proxy-awareness` and `m3/tls-diagnostics` contain historical experimental work and are not current product state.
 
 ## Next task
 
-**Open M3.3 for review and let CI validate native tests plus both Docker image architectures.**
+**Collectively review the deferred product decisions before choosing another capability milestone.**
 
-If validation is green, merge M3.3. After the M3 sequence, review deferred product decisions collectively before starting another capability milestone.
+Do not start one simply because it exists in the backlog. Prefer the smallest change that improves a real, common HostSleuth workflow.
+
+A real deployed Web UI screenshot remains useful documentation polish when an accepted deployed M3 build is available to capture.
 
 ## Repository source of truth
 
