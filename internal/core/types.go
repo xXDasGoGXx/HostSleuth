@@ -99,10 +99,59 @@ type Check struct {
 	Evidence string `json:"evidence"`
 }
 
+type CertificateEvidence struct {
+	Subject           string    `json:"subject"`
+	Issuer            string    `json:"issuer"`
+	Serial            string    `json:"serial"`
+	SANs              []string  `json:"sans,omitempty"`
+	ValidFrom         time.Time `json:"valid_from"`
+	ValidUntil        time.Time `json:"valid_until"`
+	DaysRemaining     int       `json:"days_remaining"`
+	SHA256Fingerprint string    `json:"sha256_fingerprint"`
+}
+
+type TLSEvidence struct {
+	ProbeConnected   bool                 `json:"probe_connected"`
+	HandshakeStatus  string               `json:"handshake_status"`
+	HandshakeError   string               `json:"handshake_error,omitempty"`
+	ServerName       string               `json:"server_name,omitempty"`
+	Protocol         string               `json:"protocol,omitempty"`
+	CipherSuite      string               `json:"cipher_suite,omitempty"`
+	HostnameStatus   string               `json:"hostname_status,omitempty"`
+	HostnameEvidence string               `json:"hostname_evidence,omitempty"`
+	TrustStatus      string               `json:"trust_status,omitempty"`
+	TrustEvidence    string               `json:"trust_evidence,omitempty"`
+	ChainSubjects    []string             `json:"chain_subjects,omitempty"`
+	Certificate      *CertificateEvidence `json:"certificate,omitempty"`
+}
+
+type CertbotLineageEvidence struct {
+	Name             string               `json:"name"`
+	RenewalConfig    string               `json:"renewal_config"`
+	CertificatePath  string               `json:"certificate_path,omitempty"`
+	FullchainPath    string               `json:"fullchain_path,omitempty"`
+	RenewalState     string               `json:"renewal_state,omitempty"`
+	Certificate      *CertificateEvidence `json:"certificate,omitempty"`
+	HostnameMatch    bool                 `json:"hostname_match"`
+	ServedComparison string               `json:"served_comparison,omitempty"`
+}
+
+type CertbotEvidence struct {
+	Status          string                   `json:"status"`
+	Executable      string                   `json:"executable,omitempty"`
+	TimerState      string                   `json:"timer_state,omitempty"`
+	ServiceState    string                   `json:"service_state,omitempty"`
+	Lineages        []CertbotLineageEvidence `json:"lineages,omitempty"`
+	Comparison      string                   `json:"comparison,omitempty"`
+	StaleServedCert bool                     `json:"stale_served_certificate,omitempty"`
+}
+
 type Diagnosis struct {
-	Target     string    `json:"target"`
-	StartedAt  time.Time `json:"started_at"`
-	Checks     []Check   `json:"checks"`
-	Conclusion string    `json:"conclusion"`
-	Confidence string    `json:"confidence"`
+	Target     string           `json:"target"`
+	StartedAt  time.Time        `json:"started_at"`
+	Checks     []Check          `json:"checks"`
+	Conclusion string           `json:"conclusion"`
+	Confidence string           `json:"confidence"`
+	TLS        *TLSEvidence     `json:"tls,omitempty"`
+	Certbot    *CertbotEvidence `json:"certbot,omitempty"`
 }
