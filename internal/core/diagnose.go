@@ -51,6 +51,7 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		return d
 	}
 	d.Checks = append(d.Checks, Check{Name: "dns", Status: "pass", Evidence: strings.Join(ips, ", ")})
+	local := resolvedTargetIsLocal(ips)
 
 	route := Check{Name: "route", Status: "unknown", Evidence: "no resolved IP was available for route lookup"}
 	if destinationIP := firstResolvedIP(ips); destinationIP != "" {
@@ -60,24 +61,40 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 
 	if err := tcpConnect(ctx, net.JoinHostPort(host, port)); err == nil {
 		d.Checks = append(d.Checks, Check{Name: "tcp", Status: "pass", Evidence: fmt.Sprintf("TCP/%s accepted a connection", port)})
-		d.Conclusion = "target is reachable"
-		d.Confidence = "high"
+		if local {
+			d.Checks = append(d.Checks, reachableLocalEvidenceChecks(snap, port, ips)...)
+		}
+
+		d.TLS = tlsProbeLookup(ctx, net.JoinHostPort(host, port), host)
+		if d.TLS != nil && d.TLS.ProbeConnected {
+			d.Checks = append(d.Checks, tlsCheck(d.TLS, port))
+		}
+		if d.TLS != nil && d.TLS.HandshakeStatus == "pass" {
+			d.Checks = append(d.Checks, tlsCertificateCheck(d.TLS))
+			d.Checks = append(d.Checks, tlsHostnameCheck(d.TLS))
+			d.Checks = append(d.Checks, tlsTrustCheck(d.TLS))
+		}
+
+		if local && snap.Mode != dockerDeploymentMode && d.TLS != nil && d.TLS.HandshakeStatus == "pass" {
+			var served *CertificateEvidence
+			if d.TLS != nil {
+				served = d.TLS.Certificate
+			}
+			d.Certbot = collectCertbotEvidence(ctx, host, served)
+			d.Checks = append(d.Checks, certbotCheck(d.Certbot))
+			if served != nil {
+				d.Checks = append(d.Checks, certificateComparisonCheck(d.Certbot))
+			}
+		}
+
+		d.Conclusion, d.Confidence = reachableOutcome(d, port)
 		return d
 	} else {
 		d.Checks = append(d.Checks, Check{Name: "tcp", Status: "fail", Evidence: err.Error()})
 	}
 
-	local := false
-	for _, ip := range ips {
-		parsed := net.ParseIP(ip)
-		if parsed != nil && (parsed.IsLoopback() || isLocalIP(parsed)) {
-			local = true
-			break
-		}
-	}
-
 	// Evidence precedence is deliberate:
-	// 1. successful TCP is definitive and already returned above;
+	// 1. successful TCP is definitive for transport reachability;
 	// 2. for local failures, exact listener/Docker binding evidence outranks
 	//    firewall and failed-unit candidates;
 	// 3. for remote failures, a kernel no-route result outranks firewall evidence;
@@ -88,6 +105,7 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 		if listener, ok := LocalListenerForTarget(snap, port, ips); ok {
 			d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "pass", Evidence: listener.Protocol + " " + listener.Address + " " + listener.Process})
 			d.Checks = append(d.Checks, docker.Check)
+			appendLocalCertbotWithoutServed(ctx, &d, snap, host, port)
 			d.Checks = append(d.Checks, firewallCheck(ctx, port))
 			d.Conclusion = "snapshot shows a listener on the requested local address but the current TCP connection failed; inspect firewall, network namespace, or snapshot freshness"
 			d.Confidence = "medium"
@@ -96,6 +114,7 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 
 		d.Checks = append(d.Checks, Check{Name: "local-listener", Status: "fail", Evidence: "no local listener found for TCP/" + port + " on the requested address"})
 		d.Checks = append(d.Checks, docker.Check)
+		appendLocalCertbotWithoutServed(ctx, &d, snap, host, port)
 		d.Checks = append(d.Checks, firewallCheck(ctx, port))
 		d.Checks = append(d.Checks, systemdFailureCheck(ctx, snap))
 		d.Conclusion, d.Confidence = localNoListenerOutcome(port, docker.Relation)
@@ -111,6 +130,85 @@ func Diagnose(ctx context.Context, target string, snap Snapshot) Diagnosis {
 	d.Checks = append(d.Checks, firewallCheck(ctx, port))
 	d.Conclusion = "remote TCP connection failed; inspect routing, firewall policy, and the destination service"
 	return d
+}
+
+func reachableOutcome(d Diagnosis, port string) (string, string) {
+	if d.Certbot != nil && d.Certbot.StaleServedCert {
+		return "the local certificate on disk is newer/different than the certificate this endpoint is serving", "high"
+	}
+	if d.TLS == nil || d.TLS.HandshakeStatus != "pass" {
+		if d.TLS != nil && d.TLS.ProbeConnected && d.TLS.HandshakeStatus == "fail" && likelyTLSPort(port) {
+			return "TCP connection succeeds, but TLS handshake failed", "high"
+		}
+		return "target is reachable", "high"
+	}
+	if problem := certificateValidityProblem(d.TLS.Certificate, time.Now().UTC()); problem != "" {
+		return "TCP and TLS are reachable, but " + problem, "high"
+	}
+	if d.TLS.HostnameStatus == "fail" {
+		return "TCP and TLS are reachable, but the served certificate does not match the requested host", "high"
+	}
+	if d.TLS.TrustStatus == "fail" {
+		return "TCP and TLS are reachable, but the served certificate chain is not trusted by this host", "high"
+	}
+	return "target is reachable", "high"
+}
+
+func appendLocalCertbotWithoutServed(ctx context.Context, d *Diagnosis, snap Snapshot, host, port string) {
+	if d == nil || snap.Mode == dockerDeploymentMode || !likelyTLSPort(port) {
+		return
+	}
+	d.Certbot = collectCertbotEvidence(ctx, host, nil)
+	d.Checks = append(d.Checks, certbotCheck(d.Certbot))
+}
+
+func reachableLocalEvidenceChecks(snap Snapshot, port string, resolvedIPs []string) []Check {
+	checks := make([]Check, 0, 2)
+	if listener, ok := LocalListenerForTarget(snap, port, resolvedIPs); ok {
+		checks = append(checks, Check{Name: "local-listener", Status: "pass", Evidence: listener.Protocol + " " + listener.Address + " " + listener.Process})
+	}
+
+	if len(snap.Containers) == 0 {
+		return checks
+	}
+	bindings := dockerPortBindings(snap.Containers)
+	direct := make([]dockerPortBinding, 0)
+	other := make([]dockerPortBinding, 0)
+	internalOnly := make([]dockerPortBinding, 0)
+	for _, binding := range bindings {
+		if binding.Protocol != "tcp" {
+			continue
+		}
+		if binding.Published && binding.HostPort == port {
+			if dockerBindingMatchesTarget(binding.HostIP, resolvedIPs) {
+				direct = append(direct, binding)
+			} else {
+				other = append(other, binding)
+			}
+		}
+		if !binding.Published && binding.ContainerPort == port {
+			internalOnly = append(internalOnly, binding)
+		}
+	}
+	switch {
+	case len(direct) > 0:
+		checks = append(checks, Check{Name: "docker-port", Status: "pass", Evidence: boundedEvidence("Docker publishes the requested local endpoint: "+formatDockerBindings(direct), 1024)})
+	case len(other) > 0:
+		checks = append(checks, Check{Name: "docker-port", Status: "unknown", Evidence: boundedEvidence("Docker publishes TCP/"+port+" only on different host address(es): "+formatDockerBindings(other), 1024)})
+	case len(internalOnly) > 0:
+		checks = append(checks, Check{Name: "docker-port", Status: "unknown", Evidence: boundedEvidence("Docker container port TCP/"+port+" is exposed internally but not published on the host: "+formatDockerBindings(internalOnly), 1024)})
+	}
+	return checks
+}
+
+func resolvedTargetIsLocal(ips []string) bool {
+	for _, ip := range ips {
+		parsed := net.ParseIP(ip)
+		if parsed != nil && (parsed.IsLoopback() || isLocalIP(parsed)) {
+			return true
+		}
+	}
+	return false
 }
 
 func localNoListenerOutcome(port string, relation dockerPortRelation) (string, string) {

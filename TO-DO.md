@@ -17,39 +17,29 @@ This file stays intentionally short. Completed milestone history belongs in `doc
 - [x] M5 — bounded native configuration fingerprinting.
 - [x] M5 schema-3 upgrade baseline preserves M4 package events.
 - [x] M5 CI and isolated real OMV Debian acceptance.
+- [x] M6 — bounded read-only Certificate Story / TLS Detective.
+- [x] M6 TLS evidence: handshake, subject/SANs/issuer/serial/validity/lifetime/SHA-256 fingerprint, hostname, trust/chain.
+- [x] M6 local listener/container correlation plus native read-only Certbot lineage/renewal/timer/service evidence.
+- [x] M6 local-vs-served certificate comparison with conservative stale-served detection.
+- [x] M6 focused tests, normal CI, and isolated real OMV native acceptance.
 
-Stable `v0.2.0` remains the current published release. M5 is merged on `main` but is not yet in a public release. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
+Stable `v0.2.0` remains the current published release. M5 and M6 are source capabilities intended for the next approved stable release; neither is claimed to be present in the existing v0.2.0 artifacts. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
 
-## Active — 1. M6 Certificate Story / TLS Detective
+## Active — 2. Publish stable v0.3.0
 
-One bounded read-only milestone.
-
-- [ ] Inspect current Diagnose/API/evidence structures before coding.
-- [ ] Add bounded TLS handshake evidence for `host:port`.
-- [ ] Record subject, SANs, issuer, serial, validity, days remaining, and SHA-256 certificate fingerprint.
-- [ ] Report hostname match and bounded trust/chain evidence truthfully.
-- [ ] Correlate local listener/process/container evidence when the target is local.
-- [ ] On native Linux, detect Certbot when present and show bounded read-only certificate/renewal/timer evidence.
-- [ ] Compare local certificate fingerprint with the certificate actually being served when both are available.
-- [ ] Detect stale-served-certificate situations only when deterministic evidence supports it.
-- [ ] Integrate with the accepted Diagnose/Host Story UI; do not build a generic certificate-management dashboard.
-- [ ] Keep M6 read-only: no renewal, reload, install, ACME account management, or arbitrary command execution.
-- [ ] Add focused TLS/certificate tests.
-- [ ] Run normal CI.
-- [ ] Perform one bounded real-host acceptance pass.
-- [ ] Merge and close M6 if no concrete defect appears.
-
-## Then — exact approved order
-
-### 2. Publish stable v0.3.0
+Do not publish automatically. This is an explicit owner approval boundary.
 
 - [ ] Include M5 + M6.
 - [ ] Re-check exact accepted `main` SHA and release workflow.
+- [ ] Present the exact release state to the owner.
 - [ ] Stop for explicit owner publication approval.
+- [ ] After approval, create `release/v0.3.0` from the exact accepted `main`.
 - [ ] Publish native amd64/arm64 binaries + `SHA256SUMS`.
 - [ ] Publish `mjmalleo/hostsleuth:0.3.0` and move `latest`.
 - [ ] Verify anonymous registry/platform manifests and one bounded consumer acceptance.
 - [ ] Do not change live OMV merely to chase version numbers.
+
+## Then — exact approved order
 
 ### 3. M7 — Service Story
 
