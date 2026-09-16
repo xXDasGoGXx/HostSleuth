@@ -32,7 +32,7 @@ func Collect(ctx context.Context) Snapshot {
 	hostname, _ := os.Hostname()
 	mode := deploymentMode()
 	s := Snapshot{
-		SchemaVersion: 1,
+		SchemaVersion: snapshotSchemaVersion,
 		CapturedAt:    time.Now().UTC(),
 		Mode:          mode,
 		Host: HostInfo{
