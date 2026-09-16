@@ -1,6 +1,6 @@
 # HostSleuth — TO-DO
 
-This file stays intentionally short. Completed milestone history belongs in `docs/history/DEVELOPMENT-HISTORY.md`.
+This file stays intentionally short. Completed milestone history belongs in `docs/history/DEVELOPMENT-HISTORY.md`. The ordered forward plan is in `docs/ROADMAP.md`.
 
 ## Completed
 
@@ -13,42 +13,79 @@ This file stays intentionally short. Completed milestone history belongs in `doc
 - [x] M3 acceptance — native and Docker runtime validation.
 - [x] M3.4 — public container distribution and stable `v0.1.0` publication.
 - [x] M4 — bounded native Debian/Ubuntu package-change timeline.
-- [x] Publish stable `v0.2.0` from M4-complete `main`.
-- [x] Publish native linux/amd64 and linux/arm64 v0.2.0 assets plus `SHA256SUMS`.
-- [x] Publish public multi-platform `mjmalleo/hostsleuth:0.2.0` and move `latest` to the same image.
-- [x] Verify anonymous Docker Registry access, linux/amd64 + linux/arm64 manifests, and matching `0.2.0` / `latest` index digest.
+- [x] Publish stable `v0.2.0` with native amd64/arm64 assets, checksums, and public multi-platform Docker tags.
 - [x] M5 — bounded native configuration fingerprinting.
-- [x] Fingerprint only the explicit high-value default set rather than recursively crawling `/etc`.
-- [x] Store path/state/SHA-256/size only; never store configuration contents in snapshots or events.
-- [x] Feed appeared/disappeared/content-changed configuration evidence into the existing Changes timeline.
-- [x] Baseline configuration fingerprints across schema 2 -> 3 while preserving M4 package events.
-- [x] Keep missing/unreadable files truthful and unreadable transitions quiet.
-- [x] Final M5 CI passed tests/vet/build, JS syntax, Compose, amd64/arm64 builds, and Docker runtime smoke.
-- [x] Real OMV Debian acceptance confirmed the five explicit candidates without privilege escalation or live deployment replacement.
+- [x] M5 schema-3 upgrade baseline preserves M4 package events.
+- [x] M5 CI and isolated real OMV Debian acceptance.
 
-Stable `v0.2.0` remains the current published release. M5 is merged in source on `main` and is not yet claimed to be in a published release. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
+Stable `v0.2.0` remains the current published release. M5 is merged on `main` but is not yet in a public release. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
 
-## Next capability — deliberately unselected
+## Active — 1. M6 Certificate Story / TLS Detective
 
-Do **not** start another capability automatically. Choose one deliberately when development resumes.
+One bounded read-only milestone.
 
-Candidates that fit HostSleuth's two core jobs:
+- [ ] Inspect current Diagnose/API/evidence structures before coding.
+- [ ] Add bounded TLS handshake evidence for `host:port`.
+- [ ] Record subject, SANs, issuer, serial, validity, days remaining, and SHA-256 certificate fingerprint.
+- [ ] Report hostname match and bounded trust/chain evidence truthfully.
+- [ ] Correlate local listener/process/container evidence when the target is local.
+- [ ] On native Linux, detect Certbot when present and show bounded read-only certificate/renewal/timer evidence.
+- [ ] Compare local certificate fingerprint with the certificate actually being served when both are available.
+- [ ] Detect stale-served-certificate situations only when deterministic evidence supports it.
+- [ ] Integrate with the accepted Diagnose/Host Story UI; do not build a generic certificate-management dashboard.
+- [ ] Keep M6 read-only: no renewal, reload, install, ACME account management, or arbitrary command execution.
+- [ ] Add focused TLS/certificate tests.
+- [ ] Run normal CI.
+- [ ] Perform one bounded real-host acceptance pass.
+- [ ] Merge and close M6 if no concrete defect appears.
 
-- Bounded TLS/certificate diagnosis for common host:port failures: handshake, hostname, expiry, and trust evidence.
-- General redaction rules and threat-model documentation before exporting or sharing richer diagnostic data.
+## Then — exact approved order
+
+### 2. Publish stable v0.3.0
+
+- [ ] Include M5 + M6.
+- [ ] Re-check exact accepted `main` SHA and release workflow.
+- [ ] Stop for explicit owner publication approval.
+- [ ] Publish native amd64/arm64 binaries + `SHA256SUMS`.
+- [ ] Publish `mjmalleo/hostsleuth:0.3.0` and move `latest`.
+- [ ] Verify anonymous registry/platform manifests and one bounded consumer acceptance.
+- [ ] Do not change live OMV merely to chase version numbers.
+
+### 3. M7 — Service Story
+
+Correlate systemd/journal, process/listener ownership, port collisions, containers, nearby package/config changes, TLS, and listener history to answer why a service will not start or an endpoint disappeared. No service controls.
+
+### 4. M8 — Incident Lens
+
+Bounded time-window context around a diagnosis/event/time. Nearby package/config/service/container/listener/TLS evidence is context, not proven causation.
+
+### 5. M9 — HostSleuth Workbench
+
+Small troubleshooting tools only: SHA-256/SHA-512, expected checksum verification, file fingerprint comparison, path metadata/hash, DNS, HTTP HEAD/redirect inspection, PEM inspection, and local-file-vs-served-certificate comparison. No web shell.
+
+### 6. M10 — Reboot Story
+
+Boot/shutdown evidence plus what failed to return after reboot. Never invent reboot cause.
+
+### 7. M11 — Optional Safe Actions
+
+Requires explicit security/design review before crossing the read-only boundary. First candidate: Certbot dry-run, explicit renewal, and tightly bounded associated service reload. Disabled by default, previewed, confirmed, audited, no arbitrary command field.
+
+### 8. Later — Redacted Evidence Bundle
+
+Only after redaction rules and threat-model work are mature enough for safe sharing/export.
 
 ## Demand-gated
 
-Only pursue these if real use proves the need:
+Only pursue if real use proves the need:
 
-- Authentication for direct non-loopback Web UI exposure. Loopback + SSH tunneling remains the simple default.
-- Reverse-proxy awareness for common proxies. Do not build a proxy-management layer.
-- `.deb` packaging and signed artifacts if installation becomes a real adoption problem.
-- Privilege separation if future collectors require enough elevated access to justify the complexity.
-- SQLite only if JSON/JSONL becomes a demonstrated operational limitation.
-- Baseline-vs-incident comparison only if the event timeline proves insufficient in real incidents.
-- Export/import support bundle only after redaction rules are strong enough to make sharing safe.
-- Refresh the README screenshot when a useful real public-image capture is naturally available; do not create a cosmetic workstream for it.
+- Authentication for direct non-loopback Web UI exposure.
+- Reverse-proxy awareness beyond evidence needed for the approved roadmap.
+- `.deb` packaging and signed artifacts.
+- Privilege separation if future collectors genuinely justify it.
+- SQLite if JSON/JSONL becomes a demonstrated limitation.
+- Broader baseline-vs-incident comparison beyond M8 if real use proves necessary.
+- README screenshot refresh when naturally useful; no cosmetic workstream.
 
 ## Not planned unless HostSleuth changes direction
 
@@ -56,9 +93,11 @@ Only pursue these if real use proves the need:
 - General dependency-graph platform.
 - Pluggable diagnosis-rule ecosystem.
 - AI explanation layer.
-- Automatic or guided repair/remediation workflow.
+- Automatic remediation.
 - Generic network-device/SNMP monitoring platform.
+- Arbitrary web terminal/command execution.
+- Generic server-control panel.
 
 ## Rule for new ideas
 
-An idea goes here first. It becomes active only when it clearly improves a common HostSleuth workflow without making installation, operation, or the UI meaningfully harder.
+An idea must strengthen one of HostSleuth's two core jobs and fit the approved order before it becomes active. Interesting is not enough; it must improve a common troubleshooting workflow without making installation, operation, security, or the UI meaningfully worse.
