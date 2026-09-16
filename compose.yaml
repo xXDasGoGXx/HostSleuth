@@ -1,9 +1,6 @@
 services:
   hostsleuth:
-    build:
-      context: .
-      args:
-        VERSION: ${HOSTSLEUTH_VERSION:-0.1.0-dev}
+    image: ${HOSTSLEUTH_IMAGE:-xxdasgogxx/hostsleuth:latest}
     container_name: hostsleuth
     restart: unless-stopped
     network_mode: host
