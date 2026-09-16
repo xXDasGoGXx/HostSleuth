@@ -32,7 +32,9 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 
 Full M10 implementation and acceptance record: `docs/history/M10-REBOOT-STORY.md`.
 
-Stable `v0.3.0` remains the current published release. M7, M8, M9, and M10 are newer source capabilities and are not claimed to be included in v0.3.0. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
+Stable `v0.3.0` remains the current published release. M7, M8, M9, and M10 are newer source capabilities and are not claimed to be included in v0.3.0.
+
+M10 did not change production or recovery configuration. A final read-only production check reported application version `v0.3.0`; the exact live image tag could not be read by the unprivileged acceptance account. The separate `OMV-Docker-Rebuild` repository still documents its HostSleuth recovery definition as pinned to `mjmalleo/hostsleuth:0.1.0`. Do not reconcile that divergence as part of M10.
 
 ## Next — M11 Optional Safe Actions — NOT STARTED
 
