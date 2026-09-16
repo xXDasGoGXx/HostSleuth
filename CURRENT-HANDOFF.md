@@ -18,8 +18,8 @@ The product definition and normal user-facing overview live in `README.md`.
 - **M2 — Deeper deterministic diagnosis:** complete.
 - **M3 — Product Experience:** active.
   - **M3.1 Web UI:** complete and merged in PR #11.
-  - **M3.2 Usability:** active.
-  - **M3.3 Docker release:** next, only after M3.2.
+  - **M3.2 Usability:** implementation complete on PR #13; pending final green CI/merge.
+  - **M3.3 Docker release:** next, only after M3.2 merge.
 
 The exact checklist lives in `TO-DO.md` and is updated as work progresses.
 
@@ -68,18 +68,22 @@ Evidence precedence is deliberate: successful TCP is definitive; strong local bi
 
 ### M3.1 Web UI
 
-The merged UI now provides:
+The merged UI provides responsive Overview / Diagnose / Changes / Host views, readable diagnosis presentation, a recent-change timeline, host/interface/filesystem views, and self-contained HTML/CSS/vanilla JavaScript embedded in the Go binary.
 
-- responsive Overview / Diagnose / Changes / Host views;
-- readable diagnosis presentation using the existing deterministic checks and evidence;
-- recent-change timeline;
-- compact host, interface, and filesystem overview;
-- loading, empty, and error states;
-- mobile-friendly layout;
-- self-contained HTML/CSS/vanilla JavaScript embedded in the Go binary;
-- no frontend framework or external runtime dependency.
+### M3.2 usability implementation
 
-PR #11 passed formatting, `go vet`, tests, and build before merge.
+PR #13 keeps product capability unchanged while improving use and onboarding:
+
+- simpler user-facing wording;
+- clear first-run / empty-history explanation;
+- friendly diagnosis titles while preserving the exact deterministic conclusion and evidence;
+- running version and VCS revision visible through CLI/Web UI when available;
+- newest changes shown first, including the newest five on the Overview;
+- recommended native/systemd install path moved to the top of the README;
+- safe SSH-tunnel instructions for remote access to the loopback-only UI;
+- CI now parses the embedded JavaScript in addition to Go formatting, vet, tests, and build.
+
+A real README UI screenshot is intentionally deferred until an accepted deployed build can be captured; no mock screenshot will be used just to satisfy documentation.
 
 ## Current limitations
 
@@ -96,15 +100,9 @@ These limitations stay visible for collective product review; they do not automa
 
 Active branch: `m3/usability`
 
-Current scope is **M3.2 only**:
+Open PR: `#13 — M3.2: simplify HostSleuth usability`
 
-1. simplify user-facing wording;
-2. make first-run state obvious;
-3. make version/build information easy to find;
-4. add concise README screenshots/examples after visual acceptance;
-5. simplify installation documentation around the recommended deployment paths.
-
-Do not start Docker packaging on this branch. When M3.2 is complete and merged, create the Docker release branch from the then-current `main`.
+Do not start Docker packaging on this branch. After PR #13 is green and merged, create the Docker release branch from the then-current `main`.
 
 ## Branch hygiene
 
@@ -117,9 +115,9 @@ Do not start Docker packaging on this branch. When M3.2 is complete and merged, 
 
 ## Next task
 
-**Complete M3.2 usability without expanding product capability.**
+**Merge M3.2 after final green CI, then begin M3.3 Docker packaging from current `main`.**
 
-After M3.2 is accepted and merged, move to M3.3 Docker packaging. After the M3 sequence, review the deferred product decisions collectively and decide what, if anything, truly belongs in the product.
+After the M3 sequence, review the deferred product decisions collectively and decide what, if anything, truly belongs in the product.
 
 ## Repository source of truth
 
