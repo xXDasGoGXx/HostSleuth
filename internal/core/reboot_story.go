@@ -23,21 +23,21 @@ type PreviousBootEvidence struct {
 }
 
 type RebootStory struct {
-	CapturedAt       time.Time             `json:"captured_at"`
-	Mode             string                `json:"mode,omitempty"`
-	BootID           string                `json:"boot_id,omitempty"`
-	BootStartedAt    time.Time             `json:"boot_started_at,omitempty"`
-	WindowStart      time.Time             `json:"window_start,omitempty"`
-	WindowEnd        time.Time             `json:"window_end,omitempty"`
-	PreviousBoot     PreviousBootEvidence  `json:"previous_boot"`
-	FailedServices   []ServiceInfo         `json:"failed_services,omitempty"`
-	ProblemEvents    []Event               `json:"problem_events,omitempty"`
-	RelatedEvents    []Event               `json:"related_events,omitempty"`
-	Checks           []Check               `json:"checks"`
-	Conclusion       string                `json:"conclusion"`
-	Confidence       string                `json:"confidence"`
-	CauseAssessment  string                `json:"cause_assessment"`
-	ContextNote      string                `json:"context_note"`
+	CapturedAt      time.Time            `json:"captured_at"`
+	Mode            string               `json:"mode,omitempty"`
+	BootID          string               `json:"boot_id,omitempty"`
+	BootStartedAt   time.Time            `json:"boot_started_at,omitempty"`
+	WindowStart     time.Time            `json:"window_start,omitempty"`
+	WindowEnd       time.Time            `json:"window_end,omitempty"`
+	PreviousBoot    PreviousBootEvidence `json:"previous_boot"`
+	FailedServices  []ServiceInfo        `json:"failed_services,omitempty"`
+	ProblemEvents   []Event              `json:"problem_events,omitempty"`
+	RelatedEvents   []Event              `json:"related_events,omitempty"`
+	Checks          []Check              `json:"checks"`
+	Conclusion      string               `json:"conclusion"`
+	Confidence      string               `json:"confidence"`
+	CauseAssessment string               `json:"cause_assessment"`
+	ContextNote     string               `json:"context_note"`
 }
 
 var previousBootJournalLookup = func(ctx context.Context) (boundedCommandResult, error) {
