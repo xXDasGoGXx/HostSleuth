@@ -14,32 +14,41 @@ This file stays intentionally short. Completed milestone history belongs in `doc
 - [x] Real-host native M3 acceptance on Debian 13 using a side-by-side build with isolated temporary state; the known-good installed service was not replaced.
 - [x] Runtime-smoke-test the supported Docker Compose deployment on an authorized ephemeral Linux Docker host: Docker mode, Web UI, self-diagnosis, and teardown all passed.
 - [x] Commit one real, public-safe Web UI screenshot to the README.
+- [x] M3.4 distribution foundation merged through PR #20.
+- [x] Final M3.4 PR CI run 105 passed after release-pipeline integration.
+- [x] One bounded Host Story evidence-first UI pass accepted and merged through PR #21.
+- [x] Final Host Story UI CI run 110 passed after evidence-accuracy review.
 
-M3 acceptance is complete. Do not reopen M3 unless real use exposes a concrete regression.
+M3 acceptance is complete. The v0.1.0 UI is frozen unless real use exposes a concrete defect.
 
 ## Active milestone — M3.4: public container distribution
 
-M3.4 adds no new HostSleuth functionality. It only turns the existing Docker support into a polished public distribution path.
+M3.4 adds no new HostSleuth backend functionality. It turns the existing Docker support into a polished public distribution path.
 
 - [x] Inspect current `main`, Dockerfile, Compose, CI, release workflow, handoff, TODO, release history, and recent development history.
-- [x] Create focused branch `m3.4/public-container-distribution` from current `main`.
 - [x] Keep the existing Docker security model and loopback-only default unchanged.
 - [x] Make the normal Compose path consume a published image while preserving an explicit local source-build path for developers.
 - [x] Add a direct `docker run` example matching the supported Compose security/runtime settings.
 - [x] Confirm Docker Hub namespace/repository as `mjmalleo/hostsleuth`.
-- [x] Keep Docker Hub credentials out of Git; the release workflow uses only the `DOCKERHUB_TOKEN` secret and fixed public namespace `mjmalleo`.
-- [x] Integrate stable Docker publication into the existing release workflow so it does not depend on a chained `release` event created by `GITHUB_TOKEN`.
-- [x] Publish Docker images only for plain stable `vX.Y.Z` release branches; prerelease versions create prerelease GitHub releases but do not publish Docker tags.
+- [x] Keep Docker Hub credentials out of Git; the release workflow uses only `DOCKERHUB_TOKEN` and fixed namespace `mjmalleo`.
+- [x] Integrate stable Docker publication into the existing release workflow rather than relying on a chained `release` event created by `GITHUB_TOKEN`.
+- [x] Publish Docker images only for plain stable `vX.Y.Z` release branches; prerelease versions may create prerelease GitHub releases but do not publish Docker tags.
 - [x] Publish stable Docker tags as `<X.Y.Z>` plus `latest` for linux/amd64 + linux/arm64.
 - [x] Add OCI image metadata for source, revision, version, title, and MIT license.
 - [x] Extend CI smoke testing so Compose starts from an already-built image and validates `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
-- [x] Run full PR CI: normal Go checks, Compose validation, amd64 image build, arm64 image build, and image-consumption smoke all passed on run 98 before the final release-pipeline integration changes.
-- [ ] Confirm the final PR head remains green after the release-pipeline/documentation changes.
-- [ ] Create the Docker Hub repository and GitHub Actions `DOCKERHUB_TOKEN` secret as one-time owner-controlled setup.
-- [ ] Merge PR #20 after final CI is green.
-- [ ] Stop at the publication boundary and obtain explicit owner approval before creating `release/v0.1.0`, the stable GitHub release/tag, or any Docker Hub image/tag.
-- [ ] Test the actual published image by pulling/running `mjmalleo/hostsleuth:latest` and `mjmalleo/hostsleuth:0.1.0` as a normal user would.
-- [ ] Update the separate OMV disaster-recovery repository and live OMV/Arcane deployment only after the public image is validated and the owner approves the deployment change.
+- [x] Merge M3.4 distribution foundation to `main`.
+- [x] Accept and merge the evidence-first Host Story UI intended for v0.1.0 without expanding product scope.
+- [ ] Merge the final release-prep documentation sync.
+- [ ] Create public Docker Hub repository `mjmalleo/hostsleuth` as one-time owner-controlled setup.
+- [ ] Create a least-privilege Docker Hub access token and add it to GitHub Actions secret `DOCKERHUB_TOKEN`.
+- [ ] Re-check exact final `main` SHA and release workflow after setup.
+- [ ] Stop at the publication boundary and obtain explicit owner approval before creating `release/v0.1.0`, the stable GitHub release/tag, or Docker Hub image/tag content.
+- [ ] Publish `v0.1.0` through the single release workflow.
+- [ ] Verify Docker Hub manifest includes linux/amd64 + linux/arm64 and that both `mjmalleo/hostsleuth:0.1.0` and `mjmalleo/hostsleuth:latest` resolve correctly.
+- [ ] Pull/run the actual public image as a normal user would and re-check `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
+- [ ] Update `xXDasGoGXx/OMV-Docker-Rebuild` only after the public image is validated.
+- [ ] Convert the live OMV/Arcane deployment from source-build to image-pull only after public-image validation and owner approval.
+- [ ] Replace or refresh the README product screenshot when a real public-image UI capture is available; do not fabricate one and do not delay publication solely for cosmetics.
 - [ ] Record M3.4 completion in handoff/history after validation.
 
 ## Next application capability — M4: package-change timeline
@@ -68,7 +77,6 @@ These fit one of HostSleuth's two core jobs, but none becomes active automatical
 - `.deb` packaging and signed artifacts if the existing installer is a real adoption problem.
 - Privilege separation if future collectors actually require enough elevated access to justify the complexity.
 - SQLite only if JSON/JSONL becomes a demonstrated operational limitation.
-- Exposure-map UI only if listener visibility is repeatedly hard to understand from the existing views.
 - Baseline-vs-incident comparison only if the event timeline proves insufficient in real incidents.
 - Export/import support bundle only after redaction rules are strong enough to make sharing safe.
 
@@ -81,6 +89,7 @@ These would add substantial architecture, UI, or safety complexity beyond the cu
 - Pluggable diagnosis-rule ecosystem.
 - AI explanation layer.
 - Automatic or guided repair/remediation workflow.
+- Generic network-device/SNMP monitoring platform.
 
 They can be reconsidered later, but they are not standing tasks.
 
