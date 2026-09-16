@@ -46,7 +46,7 @@ A new install starts by taking a baseline snapshot. An empty change timeline is 
 The supported public image is intended to be:
 
 ```text
-xxdasgogxx/hostsleuth
+mjmalleo/hostsleuth
 ```
 
 `latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.1.0`.
@@ -65,7 +65,7 @@ docker compose up -d
 To pin an explicit stable version instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=xxdasgogxx/hostsleuth:0.1.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.1.0 docker compose up -d
 ```
 
 ### Docker run
@@ -86,7 +86,7 @@ docker run -d \
   -v hostsleuth-data:/var/lib/hostsleuth \
   -v /etc/os-release:/host/etc/os-release:ro \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  xxdasgogxx/hostsleuth:latest
+  mjmalleo/hostsleuth:latest
 ```
 
 The Web UI remains on `127.0.0.1:8787`, so use the same local browser or SSH-tunnel workflow described above. Because HostSleuth uses host networking, Docker does not publish a separate port mapping.
