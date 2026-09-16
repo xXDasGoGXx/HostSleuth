@@ -74,7 +74,8 @@ function makeEmpty(message) {
 
 function renderEvents(container, events, limit = null) {
   container.replaceChildren();
-  const list = limit ? events.slice(0, limit) : events;
+  const ordered = [...events].reverse();
+  const list = limit ? ordered.slice(0, limit) : ordered;
   if (!list.length) {
     container.append(makeEmpty("No meaningful changes recorded yet. On a new install, this is expected—HostSleuth has a baseline and will add entries when something changes."));
     return;
