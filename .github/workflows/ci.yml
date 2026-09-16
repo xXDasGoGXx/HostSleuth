@@ -26,3 +26,23 @@ jobs:
         run: node --check cmd/hostsleuth/web/app.js
       - name: Build
         run: go build -trimpath -o hostsleuth ./cmd/hostsleuth
+
+  docker-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose
+        if: matrix.platform == 'linux/amd64'
+        run: docker compose config --quiet
+      - name: Create buildx builder
+        run: docker buildx create --use --name hostsleuth-ci
+      - name: Build image
+        run: |
+          docker buildx build \
+            --platform "${{ matrix.platform }}" \
+            --build-arg VERSION=0.1.0-ci \
+            --output type=oci,dest=/tmp/hostsleuth-image.tar \
+            .
