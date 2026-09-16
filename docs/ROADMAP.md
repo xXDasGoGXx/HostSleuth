@@ -25,48 +25,29 @@ Publication verification included native linux/amd64 and linux/arm64 binaries, `
 
 ## 3. M7 — Service Story — COMPLETE
 
-Goal: answer "why will this service not start / why did this endpoint disappear?" without becoming a service manager.
+Delivered bounded read-only systemd runtime/journal, process/listener ownership, expected-port collision, container-port, endpoint Diagnose/TLS, and retained-change correlation. M7 added no service controls. Real-host acceptance found and fixed a false collision inference when listener PID metadata was hidden.
+
+## 4. M8 — Incident Lens — COMPLETE
+
+Goal: answer "what changed around the time this broke?" without turning nearby timestamps into an invented cause.
 
 Delivered bounded read-only correlation:
 
-- systemd load/active/sub/unit-file/result/main-PID/cgroup/exit-status evidence;
-- bounded sanitized current-boot journal evidence;
-- cgroup/process to listener ownership where permissions expose the evidence;
-- deterministic port-collision claims only with positive competing PID evidence;
-- truthful `unknown` ownership when listener PIDs are hidden;
-- related container host-port publication context;
-- reuse of endpoint Diagnose/TLS/certificate evidence;
-- direct service/listener retained events plus package/configuration/container context within +/- 15 minutes of the newest direct event;
-- CLI, API, and Diagnose-integrated Web UI.
+- explicit incident anchor time;
+- fixed initial +/- 15 minute retained-event window;
+- all existing event categories preserved inside the window, including package, configuration, service, container, listener, and system events when present;
+- deterministic chronological ordering and a 100-event cap;
+- optional current endpoint Diagnose/TLS evidence for a supplied `host:port`;
+- current endpoint capture timestamp kept explicitly separate from the historical incident anchor;
+- Changes-integrated Web UI with **Inspect window** actions on retained timeline entries;
+- CLI `incident --at <RFC3339> [--target host:port]` and API `/api/incident-lens`;
+- explicit language that temporal proximity is context, not proof of causation.
 
-M7 added no start/stop/restart/reload controls. Real-host acceptance found and fixed a false port-collision inference caused by hidden listener PID metadata; regression coverage now protects that boundary.
+M8 reuses the existing JSONL event model and adds no time-series database, alerting layer, historical network reconstruction, service control, or remediation. Boot/reboot-cause analysis remains reserved for M10.
 
-## 4. M8 — Incident Lens — ACTIVE
+Real-host acceptance on isolated OMV state found and fixed one truthfulness defect before closeout: an absent endpoint probe initially serialized a zero capture timestamp. The timestamp is now optional and omitted when no endpoint was checked.
 
-Goal: answer "what changed around the time this broke?"
-
-Allow a diagnosis/event/time to anchor a bounded evidence window, initially around +/- 15 minutes, showing temporally nearby:
-
-- package events;
-- configuration events;
-- service changes;
-- container changes;
-- listener changes;
-- certificate/TLS context where evidence can be connected honestly;
-- boot/reboot context only when already available without pulling the dedicated Reboot Story forward.
-
-Requirements:
-
-- label temporal proximity as context, not proof of causation;
-- reuse the existing event model rather than building a time-series monitoring database;
-- preserve deterministic evidence ordering and `unknown` states;
-- integrate with current Host Story/Diagnose patterns rather than creating a generic monitoring dashboard;
-- remain read-only;
-- add focused tests, normal CI, and bounded real-host acceptance.
-
-M7 contains one deliberately narrow +/- 15 minute context helper anchored to a direct service/listener event. M8 should generalize the incident-window model cleanly rather than duplicating that logic.
-
-## 5. M9 — HostSleuth Workbench
+## 5. M9 — HostSleuth Workbench — ACTIVE
 
 Goal: provide a small set of practical troubleshooting tools that normally force an administrator into several shell commands or websites.
 
@@ -81,9 +62,11 @@ Candidates for the first bounded Workbench:
 - inspect a PEM certificate;
 - compare a certificate file fingerprint with the certificate a remote/local service is actually presenting.
 
-Consumer research can refine which of these solve the strongest real workflows, but M9 must not become a miscellaneous-tools junk drawer.
+Consumer research can refine which of these solve the strongest real workflows. In particular, read-only protocol-aware certificate inspection such as STARTTLS may be considered when M9 is designed, but only if it fits the Workbench's bounded troubleshooting purpose.
 
-Every tool must answer one concrete troubleshooting question. Do not add a web shell, arbitrary command box, file editor, or generic system-control panel.
+M9 must not become a miscellaneous-tools junk drawer. Every tool must answer one concrete troubleshooting question. Do not add a web shell, arbitrary command box, file editor, generic system-control panel, or write action.
+
+Validation requirements remain focused tests, normal CI, and bounded real-host acceptance.
 
 ## 6. M10 — Reboot Story
 
@@ -132,15 +115,17 @@ Do not build export/import before the redaction/threat-model work is strong enou
 
 Ongoing market/user-workflow research should compare HostSleuth against what people currently assemble from monitoring products, admin consoles, ACME clients, TLS scanners, scripts, and single-purpose websites.
 
-Promising differentiated questions to investigate include:
+The detailed current research artifact is `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`.
+
+Promising differentiated questions include:
 
 - can HostSleuth explain and verify the entire path from renewed certificate on disk to destination copy to the certificate actually being served?
-- should later TLS inspection understand STARTTLS protocols such as SMTP rather than assuming HTTPS-style direct TLS?
+- should later TLS inspection understand STARTTLS protocols such as SMTP rather than assuming immediate TLS?
 - can a bounded endpoint contract tie a service, port/bind, protocol/TLS expectation, certificate fingerprint, and recent host changes together?
-- can HostSleuth detect inconsistent certificate rollout across resolved endpoints without becoming a multi-host monitoring controller?
+- can HostSleuth detect inconsistent certificate rollout across several local consumers/endpoints without becoming a multi-host controller?
 - can optional safe actions use explicit schemas/recipes plus postcondition verification instead of generic scripts or command fields?
 
-Research findings must be recorded separately and then deliberately assigned to M9, M11, or a later approved milestone before implementation.
+Research findings must be deliberately assigned to M9, M11, or a later approved milestone before implementation.
 
 ## Guardrails that remain in force
 

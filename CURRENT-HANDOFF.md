@@ -28,7 +28,8 @@ Completed milestones:
 - M5 — configuration fingerprinting;
 - M6 — Certificate Story / TLS Detective;
 - stable v0.3.0 publication;
-- M7 — Service Story.
+- M7 — Service Story;
+- M8 — Incident Lens.
 
 Published stable release:
 
@@ -52,57 +53,52 @@ Platforms:
 - `linux/amd64`
 - `linux/arm64`
 
-M7 is newer source capability and is **not** claimed to be present in the already-published v0.3.0 artifacts.
+M7 and M8 are newer source capabilities and are **not** claimed to be present in the already-published v0.3.0 artifacts.
 
 ## M7 — Service Story
 
 M7 answers why a selected native systemd service is failed/inactive or why an expected endpoint disappeared without turning HostSleuth into a service manager.
 
-Delivered evidence:
+Delivered evidence includes bounded systemd runtime/result and sanitized current-boot journal evidence, cgroup/main-PID to listener ownership, deterministic positive-evidence-only port collision, container-port context, existing Diagnose/TLS reuse, and bounded nearby retained changes. Hidden listener ownership remains `unknown` rather than becoming a false collision.
 
-- bounded `systemctl show` properties for load/active/sub/unit-file/result/main-PID/cgroup/exit status;
-- bounded current-boot unit journal, passed through existing secret sanitization;
-- service cgroup PID membership;
-- listener ownership when local permissions expose listener PIDs;
-- deterministic expected-port collision only when a competing PID is positively visible;
-- expected-port presence with `unknown` ownership when listener PID metadata is hidden;
-- related container host-port publication context;
-- reuse of the existing endpoint Diagnose engine, including TLS/certificate evidence;
-- direct retained service/listener history plus package/configuration/container context within +/- 15 minutes of the newest direct event;
-- CLI `hostsleuth service ...`;
-- API `/api/service-story`;
-- Service Story UI embedded inside the existing Diagnose view, preserving the accepted four top-level tabs.
+M7 remains read-only. Full implementation and acceptance detail: `docs/history/M7-SERVICE-STORY.md`.
 
-M7 remains read-only. It adds no start/stop/restart/reload/enable/disable buttons and no arbitrary command field.
+## M8 — Incident Lens
 
-### M7 validation
+M8 answers **"what changed around the time this broke?"** with a bounded historical evidence window rather than a monitoring database.
 
-Focused and full branch validation passed:
+Delivered behavior:
 
-- formatting;
-- `go test ./...`;
-- `go vet ./...`;
-- native build;
-- existing Web JavaScript syntax;
-- M7 JavaScript syntax;
-- concatenated served JavaScript syntax.
+- explicit incident anchor time;
+- +/- 15 minute retained-event window;
+- all existing event categories preserved when present, including package, configuration, service, container, listener, and system events;
+- deterministic chronological ordering and a 100-event cap;
+- optional current endpoint Diagnose/TLS re-probe for a supplied `host:port`;
+- current endpoint evidence stamped separately so it is never presented as reconstructed historical state;
+- explicit language that temporal proximity does not prove causation;
+- CLI `hostsleuth incident --at <RFC3339> [--target host:port]`;
+- API `/api/incident-lens`;
+- Incident Lens embedded in the existing Changes view with **Inspect window** actions on retained events.
 
-Real-host acceptance ran on the actual OMV Debian host using an isolated `/tmp` state directory and branch binary.
+M8 adds no causal inference, alerting, time-series storage, historical packet/TLS reconstruction, service control, remediation, or reboot-cause analysis.
 
-The first SSH acceptance found a correctness defect: the host exposed TCP/22 but hid its listener PID from the unprivileged snapshot, and the first implementation interpreted missing ownership as a competing process. That was fixed so collision claims require positive competing PID evidence, and a regression test was added.
+### M8 validation
 
-Corrected acceptance for `ssh.service` + `127.0.0.1:22` confirmed:
+Focused tests cover window boundaries, deterministic equal-time ordering, bounded results, the non-causal wording boundary, and separation of current endpoint evidence from historical event context.
 
-- systemd runtime `loaded / active / running`;
-- cgroup/main-PID evidence available;
-- journal evidence unavailable because of local permissions, truthfully `unknown`;
-- TCP/22 present with hidden listener owner, truthfully `unknown` ownership;
-- endpoint reachable;
-- high-confidence conclusion that the service is active and expected endpoint reachable.
+Isolated acceptance on the actual OMV Debian host under `/tmp/hostsleuth-m8-accept` confirmed:
 
-An isolated Web/API smoke also passed. No live HostSleuth process, Compose file, persistent production state, or recovery definition was changed.
+- `go test ./...` passes;
+- native build passes;
+- relevant JavaScript syntax passes;
+- an isolated retained listener-change event is returned by the 15-minute incident window;
+- optional `127.0.0.1:22` current endpoint evidence reports reachable separately from the historical anchor;
+- an absent endpoint probe emits no endpoint capture timestamp;
+- isolated API/UI smoke serves the Incident Lens and returns the bounded window.
 
-Full implementation/acceptance detail: `docs/history/M7-SERVICE-STORY.md`.
+The first API smoke exposed a zero-time JSON timestamp when no endpoint was supplied. M8 changed that field to an optional timestamp and added regression coverage before closeout.
+
+Full detail: `docs/history/M8-INCIDENT-LENS.md`.
 
 ## Live OMV / recovery boundary
 
@@ -137,21 +133,23 @@ Published and verified from exact accepted source commit `6e6b45ca5e4a4c54897ad6
 
 Read-only systemd/runtime/journal/listener/endpoint/change correlation is implemented and accepted.
 
-### 4. M8 — Incident Lens — NEXT
+### 4. M8 — Incident Lens — COMPLETE
 
-Anchor a diagnosis/event/time to a bounded evidence window, initially +/- 15 minutes, and show nearby package/configuration/service/container/listener/TLS context. Temporal proximity is context, not proven causation. Reuse the event model rather than building a time-series monitoring database.
+Bounded, non-causal incident-window correlation is implemented and accepted.
 
-### 5. M9 — HostSleuth Workbench
+### 5. M9 — HostSleuth Workbench — NEXT
 
-Small practical troubleshooting tools only: SHA-256/SHA-512, expected checksum verification, file fingerprint comparison, path metadata/hash, DNS inspection, HTTP HEAD/redirects, PEM inspection, and local-file-vs-served-certificate comparison. No web shell or arbitrary command box.
+Keep M9 deliberately small and read-only. Candidate tools are SHA-256/SHA-512, expected-checksum verification, file-to-file fingerprint comparison, path metadata/hash, deterministic DNS inspection, HTTP HEAD/redirect inspection, PEM inspection, and local-file-vs-served certificate comparison.
+
+Consumer research may refine M9 toward the strongest real troubleshooting workflows, including possible read-only STARTTLS-aware certificate inspection, but do not turn M9 into a miscellaneous tools page, generic file manager, web shell, or admin panel.
 
 ### 6. M10 — Reboot Story
 
-Explain boot/shutdown evidence and what failed to come back using kernel/package/config/service/listener/container context without inventing a reboot cause.
+Explain boot/shutdown evidence and what failed to come back without inventing reboot cause.
 
 ### 7. M11 — Optional Safe Actions
 
-This is the first planned milestone that may cross HostSleuth's read-only boundary and therefore still requires explicit design/security review before implementation. Candidate actions must be narrow, disabled by default, previewed, confirmed, and audited. No arbitrary command execution.
+This is the first planned milestone that may cross HostSleuth's read-only boundary and therefore still requires explicit design/security review before implementation. Candidate actions must be narrow, disabled by default, previewed, confirmed, audited, and postcondition-verified. No arbitrary command execution.
 
 ### 8. Later — Redacted Evidence Bundle
 
@@ -159,15 +157,21 @@ Only after redaction rules and threat-model work are mature enough.
 
 ## Consumer/product research boundary
 
-Current research is intentionally separate from implementation scope. It may identify differentiated later opportunities such as certificate deployment verification, STARTTLS-aware certificate inspection, or tightly bounded deployment recipes, but those ideas must be assigned to an appropriate future milestone before implementation.
+Current research is intentionally separate from implementation scope. The detailed research artifact is:
 
-Research must not turn HostSleuth into:
+`docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
 
-- another uptime/metrics dashboard;
-- a generic ACME/certificate manager;
-- a generic control panel;
-- a web shell;
-- a multi-host orchestration system.
+The strongest differentiated direction currently identified is **correlation plus postcondition verification**, not another UI wrapper around commands users already have.
+
+Examples under later consideration:
+
+- certificate source -> destination -> actually-served fingerprint story;
+- STARTTLS-aware certificate inspection for mail protocols;
+- expected-endpoint contracts;
+- certificate rollout consistency across several local consumers/endpoints;
+- bounded certificate deployment recipes with preview, audit, known-service reload, and endpoint re-probe.
+
+Research must not turn HostSleuth into another uptime dashboard, generic ACME manager, generic control panel, web shell, or multi-host orchestration system. Any write action remains behind M11 or another explicit security/design gate.
 
 ## Product guardrails
 
@@ -194,8 +198,10 @@ When resuming, read:
 4. `docs/ROADMAP.md`
 5. `docs/history/DEVELOPMENT-HISTORY.md`
 6. `docs/history/M7-SERVICE-STORY.md`
-7. `docs/design/HOST-STORY-UI.md`
-8. `.github/workflows/ci.yml`
-9. `.github/workflows/release.yml`
-10. `Dockerfile`
-11. `compose.yaml`
+7. `docs/history/M8-INCIDENT-LENS.md`
+8. `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
+9. `docs/design/HOST-STORY-UI.md`
+10. `.github/workflows/ci.yml`
+11. `.github/workflows/release.yml`
+12. `Dockerfile`
+13. `compose.yaml`

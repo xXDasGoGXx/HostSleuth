@@ -33,6 +33,8 @@ func main() {
 		runDiagnose(os.Args[2:])
 	case "service":
 		runServiceStory(os.Args[2:])
+	case "incident":
+		runIncidentLens(os.Args[2:])
 	case "events":
 		runEvents(os.Args[2:])
 	case "serve":
@@ -47,7 +49,7 @@ func main() {
 
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
-	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|events|serve|version> [options]")
+	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|incident|events|serve|version> [options]")
 }
 
 func buildRevision() string {
@@ -150,6 +152,35 @@ func runServiceStory(args []string) {
 	fmt.Println(string(b))
 }
 
+func runIncidentLens(args []string) {
+	fs := flag.NewFlagSet("incident", flag.ExitOnError)
+	state := fs.String("state-dir", defaultStateDir(), "state directory")
+	at := fs.String("at", "", "incident anchor time in RFC3339 format")
+	target := fs.String("target", "", "optional endpoint to diagnose now in host:port form")
+	_ = fs.Parse(args)
+	if *at == "" {
+		log.Fatal("incident requires --at in RFC3339 format")
+	}
+	anchor, err := time.Parse(time.RFC3339, *at)
+	if err != nil {
+		log.Fatal("incident --at must be RFC3339: ", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+	defer cancel()
+	store := core.Store{Dir: *state}
+	snap, err := store.LoadSnapshot()
+	if err != nil {
+		snap = core.Collect(ctx)
+	}
+	events, err := store.ReadEvents(500)
+	if err != nil {
+		log.Fatal(err)
+	}
+	lens := core.BuildIncidentLens(ctx, anchor, *target, snap, events)
+	b, _ := json.MarshalIndent(lens, "", "  ")
+	fmt.Println(string(b))
+}
+
 func runEvents(args []string) {
 	fs := flag.NewFlagSet("events", flag.ExitOnError)
 	state := fs.String("state-dir", defaultStateDir(), "state directory")
@@ -209,6 +240,7 @@ func runServe(args []string) {
 		log.Fatal(err)
 	}
 	appCSS, appJS = appendServiceStoryAssets(appCSS, appJS)
+	appCSS, appJS = appendIncidentLensAssets(appCSS, appJS)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/about", func(w http.ResponseWriter, r *http.Request) {
@@ -265,6 +297,29 @@ func runServe(args []string) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(core.ServiceStoryFor(r.Context(), service, r.URL.Query().Get("target"), s, events))
+	})
+	mux.HandleFunc("/api/incident-lens", func(w http.ResponseWriter, r *http.Request) {
+		value := r.URL.Query().Get("at")
+		if value == "" {
+			http.Error(w, "at is required in RFC3339 format", http.StatusBadRequest)
+			return
+		}
+		anchor, err := time.Parse(time.RFC3339, value)
+		if err != nil {
+			http.Error(w, "at must be RFC3339", http.StatusBadRequest)
+			return
+		}
+		s, err := store.LoadSnapshot()
+		if err != nil {
+			s = core.Collect(r.Context())
+		}
+		events, err := store.ReadEvents(500)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(core.BuildIncidentLens(r.Context(), anchor, r.URL.Query().Get("target"), s, events))
 	})
 	mux.HandleFunc("/assets/app.css", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/css; charset=utf-8")
