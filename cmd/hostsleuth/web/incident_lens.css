@@ -1,0 +1,10 @@
+.incident-lens-panel { margin-top: 1rem; }
+.incident-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.9rem; }
+.incident-submit { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; margin-top: 0.9rem; }
+.incident-window-meta { margin: 0.4rem 0 1rem; }
+.incident-event-list { display: grid; gap: 0.65rem; }
+.incident-event { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem; background: var(--surface-soft); }
+.incident-event strong, .incident-event span { display: block; }
+.incident-event span { margin-top: 0.2rem; color: var(--muted); font-size: 0.86rem; }
+.incident-event-anchor { margin-left: auto; font-size: 0.78rem; }
+@media (max-width: 720px) { .incident-fields { grid-template-columns: 1fr; } }
