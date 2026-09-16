@@ -26,19 +26,21 @@ M3.4 adds no new HostSleuth functionality. It only turns the existing Docker sup
 - [x] Keep the existing Docker security model and loopback-only default unchanged.
 - [x] Make the normal Compose path consume a published image while preserving an explicit local source-build path for developers.
 - [x] Add a direct `docker run` example matching the supported Compose security/runtime settings.
-- [x] Add release-gated Docker Hub publication for linux/amd64 + linux/arm64.
-- [x] Make `latest` move only for plain stable `vX.Y.Z` releases.
-- [x] Require the GitHub release itself to be non-prerelease before Docker publication.
-- [x] Keep Docker Hub credentials out of Git; the workflow uses only the `DOCKERHUB_TOKEN` secret and the fixed public namespace `mjmalleo`.
-- [x] Extend CI smoke testing so Compose starts from an already-built image and validates `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
 - [x] Confirm Docker Hub namespace/repository as `mjmalleo/hostsleuth`.
-- [x] Run full PR CI: normal Go checks, Compose validation, amd64 image build, arm64 image build, and image-consumption smoke all passed on run 98 before the final publish-workflow hardening.
-- [ ] Confirm the final PR head remains green after the publish-workflow hardening/documentation updates.
+- [x] Keep Docker Hub credentials out of Git; the release workflow uses only the `DOCKERHUB_TOKEN` secret and fixed public namespace `mjmalleo`.
+- [x] Integrate stable Docker publication into the existing release workflow so it does not depend on a chained `release` event created by `GITHUB_TOKEN`.
+- [x] Publish Docker images only for plain stable `vX.Y.Z` release branches; prerelease versions create prerelease GitHub releases but do not publish Docker tags.
+- [x] Publish stable Docker tags as `<X.Y.Z>` plus `latest` for linux/amd64 + linux/arm64.
+- [x] Add OCI image metadata for source, revision, version, title, and MIT license.
+- [x] Extend CI smoke testing so Compose starts from an already-built image and validates `/api/about`, `/api/snapshot`, Web UI, and diagnosis.
+- [x] Run full PR CI: normal Go checks, Compose validation, amd64 image build, arm64 image build, and image-consumption smoke all passed on run 98 before the final release-pipeline integration changes.
+- [ ] Confirm the final PR head remains green after the release-pipeline/documentation changes.
 - [ ] Create the Docker Hub repository and GitHub Actions `DOCKERHUB_TOKEN` secret as one-time owner-controlled setup.
-- [ ] Test the actual published image by pulling/running it as a normal user would.
-- [ ] Update the separate OMV disaster-recovery repository to consume the published image only after the public image is validated.
+- [ ] Merge PR #20 after final CI is green.
+- [ ] Stop at the publication boundary and obtain explicit owner approval before creating `release/v0.1.0`, the stable GitHub release/tag, or any Docker Hub image/tag.
+- [ ] Test the actual published image by pulling/running `mjmalleo/hostsleuth:latest` and `mjmalleo/hostsleuth:0.1.0` as a normal user would.
+- [ ] Update the separate OMV disaster-recovery repository and live OMV/Arcane deployment only after the public image is validated and the owner approves the deployment change.
 - [ ] Record M3.4 completion in handoff/history after validation.
-- [ ] Stop at the publication boundary and obtain explicit owner approval before creating a stable GitHub release/tag or publishing any Docker Hub image/tag.
 
 ## Next application capability — M4: package-change timeline
 
