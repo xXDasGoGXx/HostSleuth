@@ -117,6 +117,7 @@ The Docker deployment intentionally does **not** use `privileged: true`. It drop
 Docker mode can observe host networking/listeners and Docker container metadata, but container isolation prevents safe, reliable access to everything the native service can see. In Docker mode:
 
 - systemd service/journal evidence is reported as unavailable;
+- M7 Service Story is therefore unavailable as a native systemd story rather than being simulated from incomplete Docker evidence;
 - host filesystem inventory is reported as unavailable;
 - host `apt` / `dpkg` package-history evidence is unavailable in the default Docker deployment because host package logs are not mounted;
 - host configuration-fingerprint evidence is unavailable in the default Docker deployment because those host configuration files are not mounted;
@@ -177,6 +178,24 @@ The Web UI presents the answer first and keeps the underlying evidence available
 
 HostSleuth only calls a local certificate "newer/different than the one this endpoint is serving" when a unique readable Certbot lineage matches the requested host and deterministic validity/fingerprint evidence supports that statement. A fingerprint difference alone is not treated as proof of staleness.
 
+### Service Story — native Linux
+
+M7 adds a read-only service story inside the existing Diagnose workflow. Select a systemd unit and optionally the `host:port` you expect it to provide. HostSleuth can correlate:
+
+- bounded systemd runtime/result evidence;
+- bounded, sanitized current-boot journal evidence;
+- the service main PID and cgroup process membership;
+- listener ownership when local permissions expose listener PIDs;
+- deterministic expected-port collisions only when competing PID evidence is actually visible;
+- expected-port presence when ownership is hidden;
+- related container host-port publication context;
+- the existing endpoint Diagnose/TLS/certificate story;
+- retained service/listener changes plus bounded nearby package/configuration/container context.
+
+Nearby retained changes are context, not proof of causation. If local permissions hide a journal or listener owner, HostSleuth reports `unknown` rather than inventing an answer.
+
+Service Story does not start, stop, restart, reload, enable, disable, or otherwise modify a service.
+
 ![HostSleuth Diagnose view](docs/images/hostsleuth-diagnose.png)
 
 _Real public-safe Diagnose view captured from the supported Docker Compose deployment during M3 acceptance._
@@ -193,6 +212,12 @@ Diagnose a target:
 
 ```bash
 hostsleuth diagnose example.com:443
+```
+
+Build a native systemd service story, optionally with its expected endpoint:
+
+```bash
+hostsleuth service -target 127.0.0.1:443 nginx.service
 ```
 
 Show recent events:
@@ -267,19 +292,19 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, and M6 Certificate Story / TLS Detective are complete.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, and M7 Service Story are complete in source.
 
-Stable `v0.3.0` is the current published native/Docker release. It contains the M5 configuration-fingerprint and M6 TLS/certificate capabilities and was published from accepted source commit `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`.
+Stable `v0.3.0` remains the current published native/Docker release. It contains M5 configuration fingerprinting and M6 TLS/certificate capabilities; M7 is newer source capability and is **not** claimed to be present in the published v0.3.0 artifacts.
 
-The next approved milestone is **M7 — Service Story**, but it has not started. Continue into M7 only when the owner explicitly requests it. Publication of v0.3.0 did not authorize a live OMV upgrade; the known-good production/recovery deployment remains intentionally pinned separately.
+The next roadmap milestone is **M8 — Incident Lens**. Continue in the locked order through Incident Lens, HostSleuth Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle. Consumer-product research may inform those future milestones but does not reorder or silently broaden them.
 
-After M7, continue in the locked order through Incident Lens, HostSleuth Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle.
+Publication of v0.3.0 did not authorize a live OMV upgrade; the known-good production/recovery deployment remains intentionally pinned separately.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
 ## Security and privacy
 
-HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, and certificate metadata/fingerprints. It does not store configuration file contents as part of M5 fingerprinting and M6 does not read private keys. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, certificate metadata/fingerprints, bounded service runtime properties, and sanitized journal evidence. It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, and M7 does not expose service control. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
 
 ## Project files
 
