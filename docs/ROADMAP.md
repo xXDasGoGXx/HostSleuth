@@ -24,25 +24,29 @@ Implemented bounded scope:
 
 M6 remains read-only. No renewal button, service reload, certificate installation, ACME account management, private-key handling, or arbitrary command execution was added.
 
-## 2. Publish stable v0.3.0 — ACTIVE OWNER-APPROVAL BOUNDARY
+## 2. Publish stable v0.3.0 — COMPLETE
 
-After M6 acceptance, publish one stable release containing M5 configuration fingerprinting plus M6 TLS/certificate diagnosis.
+Stable `v0.3.0` was published from accepted main commit:
 
-Before publication, re-check the exact accepted `main` SHA and release workflow, present the exact release state to the owner, and stop for explicit publication approval.
+`6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`
 
-After approval only, use the existing controlled release path:
+Publication used the existing controlled release path and was verified with:
 
-- exact accepted `main` SHA;
-- `release/v0.3.0` created from that SHA;
+- successful Release workflow run `35138865223`;
+- GitHub release/tag `v0.3.0` targeting the exact accepted commit;
 - native linux/amd64 and linux/arm64 binaries plus `SHA256SUMS`;
+- successful checksum verification of both downloaded binaries;
+- bounded real-consumer execution of the amd64 binary reporting `v0.3.0 (6e6b45ca5e4a)`;
 - public `mjmalleo/hostsleuth:0.3.0` plus `latest`;
-- anonymous registry verification;
-- one bounded consumer acceptance check;
-- no live OMV deployment change merely to chase a version number.
+- anonymous registry verification that both Docker tags resolve to OCI index `sha256:127b388fbf794841b22d06b281fe89dc1500188fdb4215eec023b392aa98c05d` with `linux/amd64` and `linux/arm64` manifests.
 
-## 3. M7 — Service Story
+The live OMV deployment was intentionally left unchanged and remains pinned to the known-good `0.1.0` deployment/recovery state.
+
+## 3. M7 — Service Story — NEXT, NOT STARTED
 
 Goal: answer "why will this service not start / why did this endpoint disappear?" without becoming a service manager.
+
+Begin M7 only when the owner explicitly tells HostSleuth work to continue into this milestone.
 
 Correlate existing evidence around a selected service/listener/container:
 
