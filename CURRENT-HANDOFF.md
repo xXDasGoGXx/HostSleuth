@@ -16,13 +16,18 @@ The product definition and normal user-facing overview live in `README.md`.
 - **M0 — Repository foundation:** complete.
 - **M1 — Single-host deployable MVP:** complete.
 - **M2 — Deeper deterministic diagnosis:** complete.
-- **Next phase:** product hardening through real use. Do not start another large subsystem until real usage exposes a concrete gap.
+- **M3 — Product Experience:** active.
+  - **M3.1 Web UI:** implementation complete on the active branch; pending product/UI review before merge.
+  - **M3.2 Usability:** next, only after M3.1 is accepted and merged.
+  - **M3.3 Docker release:** after M3.2.
+
+The exact M3 checklist is locked in `TO-DO.md`. Do not broaden M3 with unrelated collectors, storage changes, proxy/TLS work, AI, multi-host work, or remediation.
 
 Detailed milestone history is archived in `docs/history/DEVELOPMENT-HISTORY.md`.
 
 ## Current validated deployment state
 
-The current M2 build has been validated on Debian 13 as a managed systemd service with the local dashboard available on loopback. Validation included Docker and systemd inventory, route and nftables evidence, listener/bind correlation, and normal event recording.
+The current M2 product build has been validated on Debian 13 as a managed systemd service with the local dashboard available on loopback. Validation included Docker and systemd inventory, route and nftables evidence, listener/bind correlation, and normal event recording.
 
 Environment-specific hostnames, addresses, process IDs, inventory counts, and local deployment hashes are intentionally omitted from this public repository handoff.
 
@@ -80,29 +85,43 @@ The validation host had no failed systemd services at the time, so journal excer
 - HostSleuth is single-host first;
 - no automatic remediation.
 
-These are backlog items, not reasons to expand the product immediately.
+These are backlog items, not reasons to expand the active M3 scope.
+
+## Active branch and scope
+
+Active branch: `m3/product-experience`
+
+Open PR: `#11 — M3.1: modernize the HostSleuth web UI`
+
+Current M3.1 implementation:
+
+- modern responsive Overview / Diagnose / Changes / Host interface;
+- readable diagnosis presentation using the existing deterministic checks and evidence;
+- recent-change timeline;
+- compact host, interface, and filesystem overview;
+- loading, empty, and error states;
+- mobile-friendly layout;
+- self-contained HTML/CSS/vanilla-JavaScript assets embedded in the Go binary;
+- no frontend framework or external runtime dependency.
+
+Validation for PR #11 is green: formatting, `go vet`, tests, and build all pass. The current stable service has not been changed, and PR #11 has not been merged pending product/UI review.
+
+Do not begin Docker packaging on this branch. Once M3.1 is accepted and merged and M3.2 is complete, create the Docker release branch from the then-current `main`.
 
 ## Branch hygiene
 
-`main` is the only authoritative development state.
+`main` remains the authoritative stable development state.
 
+- `m3/product-experience` is the only active feature branch for the current task.
 - Old M1/M2 feature branches are historical leftovers after merged work.
 - `m3/npm-proxy-awareness` and `m3/tls-diagnostics` contain unmerged experimental work and are **not part of the product**.
-- Do not merge, continue, or treat those M3 branches as active unless a future real-world need explicitly justifies reviving them.
-- `m3/generic-nginx-awareness` contains no work ahead of `main`.
+- Do not merge, continue, or treat those experimental branches as active unless a future real-world need explicitly justifies reviving them.
 
 ## Next task
 
-**Use the current build as the product.**
+**Review and accept M3.1 Web UI before merge. Do not start M3.2 until that happens.**
 
-For the next development work:
-
-1. run HostSleuth during real troubleshooting;
-2. note where the dashboard, event timeline, or diagnosis output is confusing or insufficient;
-3. improve those concrete user-facing gaps first;
-4. add a new collector/subsystem only when a real case proves it is needed.
-
-Do not begin SQLite, reverse-proxy/TLS work, multi-host support, AI explanation, or repair automation just because they exist in the backlog.
+If M3.1 needs changes, keep them limited to the Web UI checklist in `TO-DO.md`.
 
 ## Repository source of truth
 

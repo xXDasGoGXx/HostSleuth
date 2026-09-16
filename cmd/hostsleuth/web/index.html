@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>HostSleuth</title>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#overview" aria-label="HostSleuth overview">
+        <span class="brand-mark">HS</span>
+        <span>
+          <strong>HostSleuth</strong>
+          <small>Linux troubleshooting, without the guesswork</small>
+        </span>
+      </a>
+      <div class="snapshot-state" id="snapshotState">
+        <span class="status-dot"></span>
+        <span>Loading host snapshot…</span>
+      </div>
+    </header>
+
+    <nav class="nav-tabs" aria-label="Primary navigation">
+      <button class="nav-tab active" data-view="overview">Overview</button>
+      <button class="nav-tab" data-view="diagnose">Diagnose</button>
+      <button class="nav-tab" data-view="changes">Changes</button>
+      <button class="nav-tab" data-view="host">Host</button>
+    </nav>
+
+    <main>
+      <section class="view active" id="view-overview" data-view-panel="overview">
+        <div class="hero panel">
+          <div>
+            <p class="eyebrow">CURRENT HOST</p>
+            <h1 id="hostName">Loading…</h1>
+            <p class="hero-copy" id="hostSummary">Reading the latest HostSleuth snapshot.</p>
+          </div>
+          <button class="primary-button" data-open-view="diagnose">Diagnose something</button>
+        </div>
+
+        <div class="metric-grid" aria-label="Host summary">
+          <article class="metric-card">
+            <span class="metric-label">Services</span>
+            <strong class="metric-value" id="serviceCount">—</strong>
+            <span class="metric-note" id="serviceNote">Loading</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Containers</span>
+            <strong class="metric-value" id="containerCount">—</strong>
+            <span class="metric-note" id="containerNote">Loading</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Listeners</span>
+            <strong class="metric-value" id="listenerCount">—</strong>
+            <span class="metric-note">Active sockets</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Recent changes</span>
+            <strong class="metric-value" id="changeCount">—</strong>
+            <span class="metric-note">Latest recorded events</span>
+          </article>
+        </div>
+
+        <section class="panel section-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">RECENT ACTIVITY</p>
+              <h2>What changed?</h2>
+            </div>
+            <button class="text-button" data-open-view="changes">View all changes</button>
+          </div>
+          <div id="overviewEvents" class="timeline">
+            <div class="empty-state">Loading recent changes…</div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="view-diagnose" data-view-panel="diagnose">
+        <section class="panel diagnose-panel">
+          <p class="eyebrow">DIAGNOSE</p>
+          <h1>What can’t you reach?</h1>
+          <p class="section-copy">Enter a host and port. HostSleuth will show what it can prove, what failed, and the evidence behind the result.</p>
+
+          <form id="diagnoseForm" class="diagnose-form">
+            <label for="diagnoseTarget">Host or IP with port</label>
+            <div class="input-row">
+              <input id="diagnoseTarget" name="target" autocomplete="off" spellcheck="false" placeholder="192.168.1.20:443" required>
+              <button class="primary-button" id="diagnoseButton" type="submit">Diagnose</button>
+            </div>
+            <p class="input-hint">Examples: <code>localhost:22</code> or <code>example.com:443</code></p>
+          </form>
+        </section>
+
+        <section class="panel diagnosis-result hidden" id="diagnosisResult" aria-live="polite">
+          <div class="diagnosis-heading">
+            <div>
+              <p class="eyebrow">RESULT</p>
+              <h2 id="diagnosisConclusion">Diagnosis complete</h2>
+              <p class="muted" id="diagnosisTarget"></p>
+            </div>
+            <span class="confidence-badge" id="diagnosisConfidence"></span>
+          </div>
+          <div id="diagnosisChecks" class="check-list"></div>
+        </section>
+
+        <section class="panel diagnosis-result hidden" id="diagnosisError" aria-live="polite">
+          <p class="eyebrow">DIAGNOSIS ERROR</p>
+          <h2>HostSleuth could not complete that request.</h2>
+          <p class="section-copy" id="diagnosisErrorText"></p>
+        </section>
+      </section>
+
+      <section class="view" id="view-changes" data-view-panel="changes">
+        <section class="panel section-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">TIMELINE</p>
+              <h1>Recent changes</h1>
+              <p class="section-copy">Meaningful changes HostSleuth recorded from successive host snapshots.</p>
+            </div>
+          </div>
+          <div id="allEvents" class="timeline">
+            <div class="empty-state">Loading recent changes…</div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="view-host" data-view-panel="host">
+        <section class="panel section-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">HOST</p>
+              <h1 id="hostDetailName">Host details</h1>
+              <p class="section-copy">A compact view of the machine HostSleuth is currently observing.</p>
+            </div>
+          </div>
+          <div class="detail-grid" id="hostFacts"></div>
+        </section>
+
+        <section class="panel section-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">NETWORK</p>
+              <h2>Interfaces</h2>
+            </div>
+          </div>
+          <div class="stack-list" id="interfaceList"></div>
+        </section>
+
+        <section class="panel section-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">STORAGE</p>
+              <h2>Filesystems</h2>
+            </div>
+          </div>
+          <div class="stack-list" id="filesystemList"></div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      HostSleuth · Local-first · Read-only · Deterministic
+    </footer>
+  </div>
+
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
