@@ -13,34 +13,15 @@ This file is intentionally short. Completed milestone history belongs in `docs/h
 - [x] Public-repository cleanup and documentation sanitization.
 - [x] M3.1 — modern responsive Web UI with readable diagnosis, changes, and host views.
 - [x] M3.2 — usability, first-run clarity, build/version visibility, and simplified installation guidance.
+- [x] M3.3 — supported Docker Compose deployment with explicit reduced visibility and amd64/arm64 CI validation.
 
-## M3 — Product Experience
+## Current — collective product review
 
-The sequence stays fixed: M3.1 Web UI -> M3.2 Usability -> M3.3 Docker release. Finish the active section before starting the next one.
+M3 is complete. Do not start another capability milestone automatically.
 
-### M3.3 — Docker release — active
-
-Implemented on `m3/docker-release`:
-
-- [x] Create an official Dockerfile.
-- [x] Provide one recommended `compose.yaml` rather than many deployment variants.
-- [x] Persist HostSleuth state in one named volume.
-- [x] Preserve host-aware network/listener collection instead of diagnosing only the HostSleuth container.
-- [x] Mark systemd and host-filesystem evidence unavailable when Docker isolation prevents truthful collection.
-- [x] Use host network/PID/UTS namespaces without unrestricted privileged mode.
-- [x] Drop all Linux capabilities, enable `no-new-privileges`, and use a read-only container filesystem.
-- [x] Keep the same HostSleuth Web UI and deterministic diagnosis model.
-- [x] Add CI definitions for amd64 and arm64 image builds plus Compose validation.
-- [x] Document the Docker socket security boundary.
-- [ ] Validate normal Go/Web CI plus both Docker architecture builds on the final PR head.
-- [ ] Merge only after validation is green.
-- [x] Do not publish a container image; publication remains explicit owner approval only.
+Review the deferred decisions below as a group and promote only the smallest item that clearly solves a common real HostSleuth user problem without making installation, operation, or the UI meaningfully harder.
 
 ## Collective review — deferred product decisions
-
-These are not rejected ideas and they are not automatically future features. Keep them visible and review them together after the current M3 work, or earlier only when a real blocker proves one is required.
-
-For each item, ask: **Does this solve a common HostSleuth user problem without making installation, operation, or the UI meaningfully harder?** If not, leave it out.
 
 - [ ] Capture one real Web UI screenshot for the README after an accepted deployed build is available.
 - [ ] Authentication before normal non-loopback dashboard exposure.
@@ -63,4 +44,4 @@ For each item, ask: **Does this solve a common HostSleuth user problem without m
 
 ## Rule for new ideas
 
-Add new ideas to the collective review list without interrupting the active milestone. An idea does not become active merely because it sounds useful.
+Add new ideas here without interrupting the current task. An idea does not become active merely because it sounds useful.
