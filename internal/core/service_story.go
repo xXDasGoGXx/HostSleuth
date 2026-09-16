@@ -142,7 +142,7 @@ func ServiceStoryFor(ctx context.Context, service, target string, snap Snapshot,
 
 	portListeners := listenersForTCPPort(snap.Listeners, port)
 	ownedOnPort := listenersOwnedByPIDs(portListeners, pids)
-	occupiedByOther := len(pids) > 0 && len(portListeners) > 0 && len(ownedOnPort) == 0
+	occupiedByOther := provablePortCollision(pids, portListeners, ownedOnPort)
 	missingExpected := len(portListeners) == 0
 	story.Checks = append(story.Checks, expectedPortOwnershipCheck(port, portListeners, ownedOnPort, len(pids) > 0))
 	story.Containers = containersForHostPort(snap.Containers, port)
@@ -339,7 +339,23 @@ func expectedPortOwnershipCheck(port string, all, owned []Listener, havePIDs boo
 	if len(owned) > 0 {
 		return Check{Name: "service-port", Status: "pass", Evidence: boundedEvidence("expected port is owned by the service: "+formatListeners(owned), 1536)}
 	}
+	if !listenersHaveProcessIDs(all) {
+		return Check{Name: "service-port", Status: "unknown", Evidence: boundedEvidence("TCP/"+port+" is listening, but listener process ownership is unavailable: "+formatListeners(all), 1536)}
+	}
 	return Check{Name: "service-port", Status: "fail", Evidence: boundedEvidence("expected TCP/"+port+" is occupied by another process: "+formatListeners(all), 1536)}
+}
+
+func listenersHaveProcessIDs(listeners []Listener) bool {
+	for _, listener := range listeners {
+		if len(listenerPIDs(listener)) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func provablePortCollision(pids map[int]bool, listeners, owned []Listener) bool {
+	return len(pids) > 0 && len(listeners) > 0 && len(owned) == 0 && listenersHaveProcessIDs(listeners)
 }
 
 func containersForHostPort(containers []ContainerInfo, port string) []ContainerInfo {
