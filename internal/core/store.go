@@ -32,9 +32,7 @@ func (s Store) LoadSnapshot() (Snapshot, error) {
 }
 
 func (s Store) SaveSnapshot(snap Snapshot) error {
-	if snap.SchemaVersion == 0 {
-		snap.SchemaVersion = 1
-	}
+	snap.SchemaVersion = snapshotSchemaVersion
 	if err := s.ensure(); err != nil {
 		return err
 	}
