@@ -208,3 +208,28 @@ func TestCurrentBootJournalUnavailableStaysUnknown(t *testing.T) {
 		t.Fatalf("unavailable current journal must remain unknown: %#v", got)
 	}
 }
+
+func TestJournalPermissionDiagnosticStaysUnknown(t *testing.T) {
+	oldPrevious := previousBootJournalLookup
+	oldCurrent := currentBootJournalLookup
+	diagnostic := "No journal files were opened due to insufficient permissions.\n"
+	previousBootJournalLookup = func(context.Context) (boundedCommandResult, error) {
+		return boundedCommandResult{Output: diagnostic}, nil
+	}
+	currentBootJournalLookup = func(context.Context) (boundedCommandResult, error) {
+		return boundedCommandResult{Output: diagnostic}, nil
+	}
+	t.Cleanup(func() {
+		previousBootJournalLookup = oldPrevious
+		currentBootJournalLookup = oldCurrent
+	})
+
+	previous := collectPreviousBootEvidence(context.Background())
+	if previous.Status != "unknown" || !strings.Contains(previous.Evidence, "insufficient permissions") {
+		t.Fatalf("permission-only previous journal output must stay unknown: %#v", previous)
+	}
+	current := collectCurrentBootEvidence(context.Background())
+	if current.Status != "unknown" || !strings.Contains(current.Evidence, "insufficient permissions") {
+		t.Fatalf("permission-only current journal output must stay unknown: %#v", current)
+	}
+}
