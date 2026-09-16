@@ -14,7 +14,7 @@
         <span class="brand-mark">HS</span>
         <span>
           <strong>HostSleuth</strong>
-          <small>Linux troubleshooting, without the guesswork</small>
+          <small>What changed. Why it is—or isn’t—reachable.</small>
         </span>
       </a>
       <div class="snapshot-state" id="snapshotState">
@@ -32,57 +32,90 @@
 
     <main>
       <section class="view active" id="view-overview" data-view-panel="overview">
-        <div class="hero panel">
-          <div>
-            <p class="eyebrow">CURRENT HOST</p>
+        <section class="hero panel hero-story">
+          <div class="hero-main">
+            <div class="hero-kicker-row">
+              <p class="eyebrow">HOST STORY</p>
+              <span class="mode-badge" id="deploymentBadge">Loading</span>
+            </div>
             <h1 id="hostName">Loading…</h1>
             <p class="hero-copy" id="hostSummary">Reading the latest HostSleuth snapshot.</p>
+            <p class="host-story-line" id="hostStoryLine">Building a plain-English view of this host.</p>
           </div>
-          <button class="primary-button" data-open-view="diagnose">Diagnose something</button>
-        </div>
-
-        <div class="metric-grid" aria-label="Host summary">
-          <article class="metric-card">
-            <span class="metric-label">Services</span>
-            <strong class="metric-value" id="serviceCount">—</strong>
-            <span class="metric-note" id="serviceNote">Loading</span>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">Containers</span>
-            <strong class="metric-value" id="containerCount">—</strong>
-            <span class="metric-note" id="containerNote">Loading</span>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">Listeners</span>
-            <strong class="metric-value" id="listenerCount">—</strong>
-            <span class="metric-note">Listening sockets</span>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">Recent changes</span>
-            <strong class="metric-value" id="changeCount">—</strong>
-            <span class="metric-note">Latest retained events</span>
-          </article>
-        </div>
-
-        <section class="panel section-panel">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">RECENT ACTIVITY</p>
-              <h2>What changed?</h2>
-            </div>
-            <button class="text-button" data-open-view="changes">View all changes</button>
-          </div>
-          <div id="overviewEvents" class="timeline">
-            <div class="empty-state">Loading recent changes…</div>
+          <div class="hero-actions">
+            <button class="primary-button" data-open-view="diagnose">Diagnose a target</button>
+            <button class="secondary-button" data-open-view="host">Inspect host evidence</button>
           </div>
         </section>
+
+        <section class="attention-strip panel" id="attentionStrip">
+          <div class="attention-icon" aria-hidden="true">◎</div>
+          <div>
+            <p class="eyebrow">WHAT DESERVES ATTENTION</p>
+            <strong id="attentionTitle">Reading current evidence…</strong>
+            <p id="attentionDetail">HostSleuth is checking the latest snapshot and recent changes.</p>
+          </div>
+        </section>
+
+        <div class="signal-grid" aria-label="Current host signals">
+          <article class="signal-card">
+            <span class="signal-label">Reachability surface</span>
+            <strong class="signal-value" id="exposedListenerCount">—</strong>
+            <span class="signal-note" id="exposedListenerNote">Listening beyond loopback</span>
+          </article>
+          <article class="signal-card">
+            <span class="signal-label">Failed services</span>
+            <strong class="signal-value" id="failedServiceCount">—</strong>
+            <span class="signal-note" id="failedServiceNote">Reading service state</span>
+          </article>
+          <article class="signal-card">
+            <span class="signal-label">Containers</span>
+            <strong class="signal-value" id="containerCount">—</strong>
+            <span class="signal-note" id="containerNote">Reading Docker state</span>
+          </article>
+          <article class="signal-card">
+            <span class="signal-label">Changes · 24h</span>
+            <strong class="signal-value" id="change24hCount">—</strong>
+            <span class="signal-note" id="change24hNote">Meaningful differences only</span>
+          </article>
+        </div>
+
+        <div class="overview-grid">
+          <section class="panel section-panel reachability-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">REACHABILITY SURFACE</p>
+                <h2>Where is this host listening?</h2>
+                <p class="section-copy">Listening sockets classified by bind scope. A bind is evidence, not proof of remote reachability; use any row as the starting point for a diagnosis.</p>
+              </div>
+              <button class="text-button" data-open-view="host">All host evidence</button>
+            </div>
+            <div id="overviewListeners" class="surface-list">
+              <div class="empty-state">Loading listening sockets…</div>
+            </div>
+          </section>
+
+          <section class="panel section-panel activity-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">RECENT ACTIVITY</p>
+                <h2>What changed?</h2>
+                <p class="section-copy">The latest meaningful differences, newest first.</p>
+              </div>
+              <button class="text-button" data-open-view="changes">Full timeline</button>
+            </div>
+            <div id="overviewEvents" class="timeline compact-timeline">
+              <div class="empty-state">Loading recent changes…</div>
+            </div>
+          </section>
+        </div>
       </section>
 
       <section class="view" id="view-diagnose" data-view-panel="diagnose">
         <section class="panel diagnose-panel">
-          <p class="eyebrow">DIAGNOSE</p>
+          <p class="eyebrow">DETERMINISTIC DIAGNOSIS</p>
           <h1>What can’t you reach?</h1>
-          <p class="section-copy">Enter a host and port. HostSleuth checks the path and shows the answer first, then the evidence behind it.</p>
+          <p class="section-copy">Give HostSleuth a host and port. It checks the path in order and shows the conclusion before the raw evidence.</p>
 
           <form id="diagnoseForm" class="diagnose-form">
             <label for="diagnoseTarget">Host or IP with port</label>
@@ -97,14 +130,27 @@
         <section class="panel diagnosis-result hidden" id="diagnosisResult" aria-live="polite">
           <div class="diagnosis-heading">
             <div>
-              <p class="eyebrow">RESULT</p>
+              <p class="eyebrow">ANSWER</p>
               <h2 id="diagnosisConclusion">Diagnosis complete</h2>
               <p class="muted" id="diagnosisTarget"></p>
               <p class="section-copy" id="diagnosisExplanation"></p>
             </div>
             <span class="confidence-badge" id="diagnosisConfidence"></span>
           </div>
-          <div id="diagnosisChecks" class="check-list"></div>
+
+          <div class="evidence-path" id="diagnosisPath" aria-label="Diagnosis evidence path"></div>
+
+          <div class="diagnosis-context-grid">
+            <div>
+              <p class="subsection-label">Evidence</p>
+              <div id="diagnosisChecks" class="check-list"></div>
+            </div>
+            <aside class="context-card">
+              <p class="subsection-label">Recent host context</p>
+              <p class="context-note">These changes are nearby context, not claimed causes.</p>
+              <div id="diagnosisRecentEvents" class="mini-event-list"></div>
+            </aside>
+          </div>
         </section>
 
         <section class="panel diagnosis-result hidden" id="diagnosisError" aria-live="polite">
@@ -118,11 +164,12 @@
         <section class="panel section-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">TIMELINE</p>
-              <h1>Recent changes</h1>
-              <p class="section-copy">HostSleuth records meaningful differences between snapshots and leaves routine noise out.</p>
+              <p class="eyebrow">HOST MEMORY</p>
+              <h1>What changed?</h1>
+              <p class="section-copy">Meaningful differences between snapshots, with routine churn suppressed.</p>
             </div>
           </div>
+          <div id="changeSummary" class="change-summary"></div>
           <div id="allEvents" class="timeline">
             <div class="empty-state">Loading recent changes…</div>
           </div>
@@ -133,22 +180,55 @@
         <section class="panel section-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">HOST</p>
+              <p class="eyebrow">HOST EVIDENCE</p>
               <h1 id="hostDetailName">Host details</h1>
-              <p class="section-copy">The machine HostSleuth is observing right now.</p>
+              <p class="section-copy">The machine HostSleuth is observing right now—not an abstract monitoring score.</p>
             </div>
           </div>
           <div class="detail-grid" id="hostFacts"></div>
         </section>
 
+        <div class="host-grid">
+          <section class="panel section-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">NETWORK</p>
+                <h2>Interfaces</h2>
+              </div>
+            </div>
+            <div class="stack-list" id="interfaceList"></div>
+          </section>
+
+          <section class="panel section-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">ROUTING</p>
+                <h2>Routes</h2>
+              </div>
+            </div>
+            <div class="stack-list" id="routeList"></div>
+          </section>
+        </div>
+
         <section class="panel section-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">NETWORK</p>
-              <h2>Interfaces</h2>
+              <p class="eyebrow">LISTENERS</p>
+              <h2>Reachability surface</h2>
+              <p class="section-copy">Every listening socket HostSleuth can currently observe.</p>
             </div>
           </div>
-          <div class="stack-list" id="interfaceList"></div>
+          <div class="surface-list full-surface" id="listenerList"></div>
+        </section>
+
+        <section class="panel section-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">CONTAINERS</p>
+              <h2>Docker evidence</h2>
+            </div>
+          </div>
+          <div class="stack-list" id="containerList"></div>
         </section>
 
         <section class="panel section-panel">
