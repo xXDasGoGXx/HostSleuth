@@ -15,12 +15,6 @@ Keep it evidence-first, local-first, single-host first, and deliberately small. 
 
 Repository: `xXDasGoGXx/HostSleuth`
 
-Important source anchors:
-
-- M5 code merge: `39cb2847ea66cd04ddb9cb0f7a3111f5e659456b`
-- M5 documentation closeout: `f688b3c8aedb3e4143c17b6dd5049a86f098ed20`
-- ordered roadmap file: `docs/ROADMAP.md`
-
 Always re-check current `main` before starting code or a release rather than relying on a self-referential SHA in this file.
 
 Completed milestones:
@@ -31,7 +25,8 @@ Completed milestones:
 - M3 — Product Experience;
 - M3.4 — Public Container Distribution;
 - M4 — package-change timeline;
-- M5 — configuration fingerprinting.
+- M5 — configuration fingerprinting;
+- M6 — Certificate Story / TLS Detective.
 
 Published stable release:
 
@@ -51,11 +46,9 @@ Verified v0.2.0/latest index digest:
 
 `sha256:6892362d3f5fc6d30ae6bde7235ee976f169f1be8d42d181c55f53cf98600c91`
 
-M5 is merged source capability and is **not** claimed to be present in the already-published v0.2.0 artifacts.
+M5 and M6 are merged/source capabilities for the next approved release and are **not** claimed to be present in the already-published v0.2.0 artifacts.
 
 ## M5 — configuration fingerprinting
-
-M5 extends **what changed?** without storing configuration contents.
 
 Native Linux fingerprints this deliberately small explicit set:
 
@@ -67,13 +60,39 @@ Native Linux fingerprints this deliberately small explicit set:
 
 Snapshots store only canonical path, state, SHA-256 fingerprint, and size for readable regular files. States are `present`, `missing`, or `unreadable`. File contents are not stored.
 
-Configuration appeared/disappeared/content-changed records reuse the existing Changes timeline as `category=configuration`. Unreadable transitions remain quiet rather than becoming false changes.
+Configuration appeared/disappeared/content-changed records reuse the existing Changes timeline as `category=configuration`. Snapshot schema 3 baselines existing configuration fingerprints across the schema 2 -> 3 upgrade while preserving M4 package-event behavior.
 
-Snapshot schema 3 baselines existing configuration fingerprints across the schema 2 -> 3 upgrade while preserving M4 package-event behavior.
+## M6 — Certificate Story / TLS Detective
 
-PR #26 CI run `35129730468` / #133 passed formatting, vet, focused tests, JS syntax, native build, Compose validation, amd64/arm64 builds, and Docker runtime smoke.
+M6 extends the existing Diagnose flow without creating a separate certificate-management product.
 
-Real OMV Debian acceptance confirmed the five explicit candidates using an isolated branch build/state. Four readable files produced 64-character SHA-256 fingerprints and size metadata; `/etc/docker/daemon.json` was truthfully reported `unreadable` without privilege escalation. The live deployment was not replaced.
+For a reachable TLS endpoint HostSleuth now records bounded read-only evidence for:
+
+- TLS handshake result, negotiated protocol, and cipher suite;
+- served certificate subject, SANs, issuer, serial, valid-from, valid-until, remaining lifetime, and SHA-256 fingerprint;
+- hostname match/mismatch;
+- trust-chain verification against the local host trust store plus bounded served-chain subjects;
+- positive local listener/process and Docker publication context when the target resolves locally.
+
+On native Linux, when a local endpoint actually negotiates TLS, HostSleuth also performs bounded read-only Certbot discovery:
+
+- Certbot executable detection;
+- up to 32 renewal lineage configurations;
+- certificate/fullchain paths and selected non-secret renewal metadata;
+- `certbot.timer` and `certbot.service` state through bounded `systemctl show` evidence;
+- readable lineage certificate metadata and SHA-256 fingerprint comparison with the served certificate.
+
+A stale-served-certificate conclusion is intentionally conservative. HostSleuth only states that the certificate on disk is newer/different than the one being served when exactly one readable local Certbot lineage matches the requested host and its certificate differs while having deterministically newer validity evidence. A fingerprint difference by itself remains an `unknown` comparison rather than proof of staleness.
+
+M6 remains read-only. It does not renew certificates, reload/restart services, install certificates, manage ACME accounts, read private keys, or expose arbitrary commands.
+
+Validation:
+
+- focused TLS/Certbot/diagnosis tests added;
+- normal CI passed on the accepted M6 branch after the real-host test-boundary fix;
+- isolated native OMV acceptance built and tested the branch from `/tmp` without touching the live deployment;
+- real TLS acceptance against `github.com:443` returned TLS 1.3, hostname/trust passes, subject/issuer/SAN/serial/validity/lifetime evidence, and a 64-character SHA-256 certificate fingerprint;
+- the existing live HostSleuth service was not stopped, restarted, reconfigured, or upgraded.
 
 ## Live OMV / recovery boundary
 
@@ -90,28 +109,28 @@ Deployment state:
 
 `xXDasGoGXx/OMV-Docker-Rebuild` intentionally remains pinned to `mjmalleo/hostsleuth:0.1.0` so recovery matches the actual live deployment.
 
-Do not change the live deployment or recovery definition merely to chase release numbers. M4/M5 evidence is native-only under the current least-privilege Docker boundary.
+Do not change the live deployment or recovery definition merely to chase release numbers. Docker mode intentionally keeps reduced host visibility and does not mount host Certbot/configuration material merely to expose native evidence.
 
 ## Ordered roadmap — owner approved
 
 The owner explicitly approved the following order. Stay in this order unless the owner deliberately changes it. Full detail is in `docs/ROADMAP.md`.
 
-### 1. M6 — Certificate Story / TLS Detective — ACTIVE NEXT
+### 1. M6 — Certificate Story / TLS Detective — COMPLETE
 
-Read-only TLS/certificate troubleshooting integrated into HostSleuth diagnosis:
+Read-only TLS/certificate troubleshooting is implemented and accepted as described above.
 
-- certificate subject/SANs/issuer/serial/validity/days remaining/SHA-256 fingerprint;
-- handshake, hostname match, bounded trust/chain evidence;
-- local listener/process/container correlation;
-- native Certbot discovery and read-only renewal/timer evidence when present;
-- local certificate vs actually served certificate fingerprint comparison;
-- evidence-backed detection of stale-served-certificate situations.
+### 2. Publish stable v0.3.0 — ACTIVE OWNER-APPROVAL BOUNDARY
 
-No renewal button or service reload in M6.
+The next action is **not** another feature. Before publication:
 
-### 2. Publish stable v0.3.0
+1. re-check exact current `main` SHA;
+2. re-check `.github/workflows/release.yml`;
+3. present the exact release state to the owner;
+4. **stop and obtain explicit publication approval**.
 
-After M6 acceptance, publish M5 + M6 together using the existing controlled release path. Stop at the publication boundary for explicit owner approval.
+After approval only, create `release/v0.3.0` from the exact accepted `main` so v0.3.0 contains M5 + M6, then verify native amd64/arm64 assets, `SHA256SUMS`, `mjmalleo/hostsleuth:0.3.0`, `latest`, both Docker platforms, anonymous registry access, and one bounded real-consumer acceptance.
+
+Do not automatically migrate live OMV because v0.3.0 exists.
 
 ### 3. M7 — Service Story
 
@@ -154,7 +173,7 @@ The product should feel powerful because it connects deterministic evidence into
 
 ## Release/deployment boundary
 
-Do not create a new GitHub release/tag, Docker tag/image, or change the live OMV deployment without explicit owner approval at the relevant boundary.
+Do not create a new GitHub release/tag, Docker tag/image, `release/v0.3.0` branch, or change the live OMV deployment without explicit owner approval at the publication boundary.
 
 ## Repository reading order
 
