@@ -69,13 +69,33 @@ The active branch now contains:
 - explicit developer source-build instructions;
 - `.github/workflows/docker-publish.yml` for release-gated Docker Hub publication;
 - stable-tag policy where only plain `vX.Y.Z` GitHub releases publish images;
+- an explicit check that the GitHub release is not marked prerelease before publication;
 - Docker image tags `<X.Y.Z>` and `latest` for stable releases;
 - linux/amd64 + linux/arm64 multi-platform publication;
-- Docker Hub authentication via GitHub Actions `DOCKERHUB_TOKEN` secret and `DOCKERHUB_NAMESPACE` variable only;
+- Docker Hub authentication via GitHub Actions `DOCKERHUB_TOKEN` secret only;
+- fixed Docker Hub namespace `mjmalleo` in the publication workflow so there is no redundant namespace variable to maintain;
 - CI smoke changed to build a local image first, then make Compose consume that image without `--build`;
 - CI checks `/api/about`, `/api/snapshot`, Web UI, and self-diagnosis from the image-consumption path.
 
 No Docker Hub repository, Docker Hub image/tag, GitHub release, or release Git tag has been created by M3.4 work so far.
+
+## Validation result so far
+
+GitHub Actions CI run 98 passed on the confirmed-namespace implementation head before the final publish-workflow hardening:
+
+- formatting passed;
+- `go vet` passed;
+- Go tests passed;
+- Web UI JavaScript syntax passed;
+- native Go build passed;
+- Compose validation passed;
+- linux/amd64 image build passed;
+- linux/arm64 image build passed;
+- image-consumption Docker smoke passed;
+- `/api/about`, `/api/snapshot`, Web UI, and self-diagnosis passed in the smoke path;
+- clean teardown passed.
+
+The final branch head must remain green after the publish-workflow hardening and documentation updates before merge.
 
 ## Version recommendation
 
@@ -96,7 +116,7 @@ Confirmed repository/name:
 
 `mjmalleo/hostsleuth`
 
-The Docker Hub personal namespace is `mjmalleo`. Keep that exact namespace in Compose, README examples, and GitHub Actions repository variable `DOCKERHUB_NAMESPACE`.
+The Docker Hub personal namespace is `mjmalleo`. Keep that exact namespace in Compose, README examples, and the Docker publication workflow.
 
 ## One-time owner-controlled setup still required
 
@@ -105,7 +125,6 @@ Before the first public image can be published:
 1. Create the public Docker Hub repository `hostsleuth` under namespace `mjmalleo`.
 2. Generate a Docker Hub access token with only the permissions needed to push this repository.
 3. Add that token to GitHub Actions as repository secret `DOCKERHUB_TOKEN`.
-4. Add `mjmalleo` as GitHub Actions repository variable `DOCKERHUB_NAMESPACE`.
 
 Never paste the token into chat or commit it to Git.
 
@@ -125,13 +144,14 @@ The release workflow already in the repository publishes native GitHub release b
 
 Before M3.4 can be called complete:
 
-- PR CI must pass normal Go checks;
-- Compose config must validate;
-- linux/amd64 and linux/arm64 image builds must pass;
-- runtime image-consumption smoke must pass;
-- `/api/about`, `/api/snapshot`, Web UI, and diagnosis must pass;
-- after explicit publication approval, the actual public multi-arch image must be pulled and run in the same style documented for normal users;
-- only after that validation should the separate OMV disaster-recovery repository be updated to consume the published image.
+- confirm the final PR head remains green after the final hardening/docs changes;
+- complete the one-time Docker Hub repository/token/GitHub secret setup;
+- after explicit publication approval, publish the first stable release and image;
+- verify the real Docker Hub multi-arch image and tags;
+- pull `mjmalleo/hostsleuth:latest` and `mjmalleo/hostsleuth:0.1.0` as a normal user would;
+- start the published image and re-check `/api/about`, `/api/snapshot`, Web UI, and diagnosis;
+- only after public-image validation should the separate OMV disaster-recovery repository and live OMV/Arcane deployment be considered for conversion from source-build to image-pull use;
+- record M3.4 completion in handoff/history after validation.
 
 ## Product-direction rule
 
