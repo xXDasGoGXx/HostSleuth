@@ -16,27 +16,127 @@ The product definition and user-facing overview live in `README.md`. The active 
 - **M0 — Repository foundation:** complete.
 - **M1 — Single-host deployable MVP:** complete.
 - **M2 — Deeper deterministic diagnosis:** complete.
-- **M3 — Product Experience:** complete.
-  - M3.1 Web UI — PR #11.
-  - M3.2 Usability — PR #13.
-  - M3.3 Docker release packaging — PR #14.
-- **Post-M3 collective product review:** complete and merged in PR #16.
-- **M3 acceptance:** complete.
-  - native side-by-side acceptance passed on a real Debian 13 host without replacing the known-good installed service;
-  - supported Docker Compose runtime smoke passed on an authorized ephemeral Linux Docker host;
-  - a real public-safe Diagnose-view screenshot is committed in `docs/images/hostsleuth-diagnose.png` and displayed in the README.
+- **M3 — Product Experience:** complete and accepted.
+- **M3.4 — Public Container Distribution:** active on branch `m3.4/public-container-distribution`.
+- **M4 — Package-change timeline:** remains the next application-feature milestone after M3.4.
+
+M3.4 does not add HostSleuth functionality. Its only purpose is to make the existing supported Docker deployment easy for normal users to pull, run, version, and update.
+
+## Authoritative repository state before M3.4
+
+M3.4 started from current `main` at:
+
+`2ab8189b37f45712dca3832d81e96a990764be18`
+
+That commit is the post-M3 documentation update that explains optional trusted-LAN binding while preserving loopback-only as the public default.
+
+The only verified published GitHub release at M3.4 start was:
+
+`v0.1.0-alpha.1`
+
+That release predates completed M3 and must not be treated as the stable M3 container release.
+
+## Existing container foundation
+
+Before M3.4, HostSleuth already had:
+
+- multi-stage Docker build;
+- static CGO-disabled binary;
+- TARGETOS/TARGETARCH support;
+- Alpine runtime;
+- Linux amd64 and arm64 CI image builds;
+- actual Docker Compose runtime smoke testing;
+- host network/PID/UTS namespace sharing;
+- persistent HostSleuth state;
+- narrow read-only `/etc/os-release` mount;
+- read-only Docker socket mount;
+- read-only root filesystem;
+- all Linux capabilities dropped;
+- `no-new-privileges`;
+- truthful reduced Docker visibility.
+
+M3.4 must not weaken those boundaries to gain additional visibility.
+
+## M3.4 implementation currently on branch
+
+The active branch now contains:
+
+- `compose.yaml` changed from local `build:` to `image:` consumption;
+- proposed public image name `xxdasgogxx/hostsleuth`;
+- `HOSTSLEUTH_IMAGE` override so explicit stable tags and local developer builds remain easy;
+- README pull/Compose usage;
+- README direct `docker run` usage matching the supported Compose security/runtime settings;
+- explicit developer source-build instructions;
+- `.github/workflows/docker-publish.yml` for release-gated Docker Hub publication;
+- stable-tag policy where only plain `vX.Y.Z` GitHub releases publish images;
+- Docker image tags `<X.Y.Z>` and `latest` for stable releases;
+- linux/amd64 + linux/arm64 multi-platform publication;
+- Docker Hub authentication via GitHub Actions `DOCKERHUB_TOKEN` secret and `DOCKERHUB_NAMESPACE` variable only;
+- CI smoke changed to build a local image first, then make Compose consume that image without `--build`;
+- CI checks `/api/about`, `/api/snapshot`, Web UI, and self-diagnosis from the image-consumption path.
+
+No Docker Hub repository, Docker Hub image/tag, GitHub release, or release Git tag has been created by M3.4 work so far.
+
+## Version recommendation
+
+The recommended first stable version is **v0.1.0**.
+
+Reasoning:
+
+- the project already established the `0.1.0` line with `v0.1.0-alpha.1`;
+- completed M1/M2/M3 now represent the matured form of that initial product line;
+- moving directly to `v0.2.0` would imply a new minor feature generation rather than stabilization of the existing 0.1 line;
+- `v0.1.0` provides the simplest SemVer transition from the existing alpha to the first stable release.
+
+Do not create the tag/release until the owner explicitly approves publication.
+
+## Proposed Docker Hub repository
+
+Proposed repository/name:
+
+`xxdasgogxx/hostsleuth`
+
+This matches the GitHub owner naming convention and keeps the image name obvious. Confirm the actual Docker Hub namespace before merge/publication; Docker Hub administration is not available through the current connected tools.
+
+## One-time owner-controlled setup still required
+
+Before the first public image can be published:
+
+1. Create the public Docker Hub repository `hostsleuth` under the confirmed namespace.
+2. Generate a Docker Hub access token with only the permissions needed to push this repository.
+3. Add that token to GitHub Actions as repository secret `DOCKERHUB_TOKEN`.
+4. Add the confirmed Docker Hub namespace as GitHub Actions repository variable `DOCKERHUB_NAMESPACE`.
+
+Never paste the token into chat or commit it to Git.
+
+## Publication boundary
+
+Do not perform any of these actions without explicit owner approval at that point:
+
+- create the Docker Hub repository;
+- create/push a public Docker image or Docker Hub tag;
+- create a stable GitHub release;
+- create/push the public release Git tag;
+- publish any package or artifact beyond the already-public repository branch/PR work.
+
+The release workflow already in the repository publishes native GitHub release binaries when a `release/v*` branch is pushed. Because that is a public publication action, do not create a stable release branch such as `release/v0.1.0` until approval is given.
+
+## Validation still required
+
+Before M3.4 can be called complete:
+
+- PR CI must pass normal Go checks;
+- Compose config must validate;
+- linux/amd64 and linux/arm64 image builds must pass;
+- runtime image-consumption smoke must pass;
+- `/api/about`, `/api/snapshot`, Web UI, and diagnosis must pass;
+- Docker Hub namespace/repository must be confirmed;
+- after explicit publication approval, the actual public multi-arch image must be pulled and run in the same style documented for normal users;
+- only after that validation should the separate OMV disaster-recovery repository be updated to consume the published image.
 
 ## Product-direction rule
 
-HostSleuth stays easy to deploy, easy to understand, and intentionally small. New capability is not automatically good capability.
-
-The post-M3 review split deferred ideas into three groups in `TO-DO.md`:
-
-1. capabilities that still fit HostSleuth's two core jobs;
-2. ideas that remain demand-gated until real users prove the need;
-3. architecture-heavy ideas that are not planned unless the product direction changes.
-
-Do not turn every interesting idea into a standing task.
+HostSleuth stays easy to deploy, easy to understand, and intentionally small. M3.4 must not introduce Watchtower behavior, automatic updating, Kubernetes, Swarm, privileged mode, broad host mounts/capabilities, authentication redesign, remediation, M4 package work, or unrelated product features.
 
 ## Supported deployment paths
 
@@ -44,88 +144,11 @@ Do not turn every interesting idea into a standing task.
 
 Native Linux provides the fullest visibility into systemd, host filesystems, network/listener state, and Docker inventory while keeping the Web UI loopback-only by default.
 
-### Docker Compose — convenient, reduced visibility
+### Docker — convenient, reduced visibility
 
-The repository includes one supported `Dockerfile` and one recommended `compose.yaml`. The Docker deployment uses host network/PID/UTS namespaces, a persistent `hostsleuth-data` volume, a narrow read-only host OS-release mount, and Docker socket access for container inventory. It drops Linux capabilities, enables `no-new-privileges`, uses a read-only root filesystem, and does not use unrestricted `privileged: true`.
+The Docker deployment uses host network/PID/UTS namespaces, persistent state, a narrow host OS-release mount, and Docker socket access for inventory. It intentionally reports unavailable evidence as unavailable instead of escalating privileges.
 
-Docker-mode snapshots explicitly identify reduced visibility. Host filesystem and systemd inventory are intentionally unavailable rather than replaced with misleading container-local data. Firewall evidence may also be unavailable without elevated network-administration privileges.
-
-The Docker socket remains a powerful host capability even when bind-mounted read-only; this risk is documented in `README.md` and `SECURITY.md`.
-
-The public HostSleuth Compose remains portable. Deployment-specific OMV/Arcane layout belongs in the separate `xXDasGoGXx/OMV-Docker-Rebuild` source of truth rather than being baked into this repository.
-
-## M3 acceptance result
-
-### Native
-
-The merged M3 build was validated side-by-side on a real Debian 13 host without stopping, replacing, or modifying the existing known-good HostSleuth service.
-
-Acceptance confirmed:
-
-- current source tests and build succeeded on the real host;
-- the temporary build used an alternate loopback port and separate temporary state;
-- `/api/about`, `/api/snapshot`, and the modern Overview / Diagnose / Changes / Host interface worked;
-- diagnosis of the temporary Web UI endpoint returned reachable / high-confidence with DNS, route, and TCP checks passing;
-- no native M3 product blocker was found.
-
-The temporary acceptance process was unprivileged, so Docker inventory was unavailable in that temporary snapshot. That was expected for the side-by-side method and does not describe the normal root-managed native installation.
-
-### Docker Compose
-
-The supported `compose.yaml` was then exercised on an authorized ephemeral Linux Docker host in CI rather than bypassing the managed OMV host's Docker-command policy.
-
-The runtime smoke test confirmed:
-
-- the actual supported Compose deployment builds and starts;
-- the HostSleuth API becomes ready;
-- `/api/snapshot` identifies Docker mode truthfully;
-- the Web UI responds;
-- HostSleuth diagnoses its own running endpoint as reachable with high confidence;
-- the Compose stack and test volume are torn down afterward.
-
-The existing Linux amd64 and arm64 image-build checks also remain green.
-
-## What works now
-
-### Change recorder
-
-Native HostSleuth captures host/OS/kernel state, filesystems, interfaces/routes, listeners, systemd services, and Docker inventory. Docker mode retains truthful host identity/network/listener/Docker evidence while clearly marking native-only evidence unavailable.
-
-### Deterministic diagnosis
-
-`diagnose host:port` uses deterministic precedence across DNS, route, TCP, local listeners, Docker publication/bind/network evidence, bounded nftables evidence, and bounded failed-systemd evidence where available. Unavailable evidence remains `unknown` rather than becoming a false pass/fail.
-
-### Web UI
-
-The Web UI provides Overview / Diagnose / Changes / Host views, readable diagnosis evidence, first-run guidance, version/build information, newest-first changes, and explicit Docker reduced-visibility labels. The interface has been exercised on a real supported Linux host and through the supported Docker Compose deployment.
-
-## Current task
-
-**M3 acceptance is complete. The next capability is M4 — package-change timeline.**
-
-Do not broaden M4. Its only job is to strengthen **“what changed?”** by adding bounded, read-only package install/update/remove history to the existing event timeline.
-
-Start with Debian/Ubuntu `apt`/`dpkg` logs. Unsupported systems should remain truthful and quiet. Do not add package management, update actions, alerts, repositories, or a new package settings surface.
-
-M4 must include focused tests and real-host validation before merge.
-
-## After M4
-
-The only currently product-aligned candidates are configuration fingerprinting, bounded TLS/certificate diagnosis, and stronger redaction/threat-model work. Even those are one-at-a-time decisions, not promises.
-
-## Not current product direction
-
-Multi-host controller/agent architecture, a general dependency graph, plugin ecosystem, AI explanation layer, and repair/remediation are not standing tasks. Reconsider them only if HostSleuth's product direction materially changes.
-
-## Branch hygiene
-
-`main` is the authoritative stable development state.
-
-- `acceptance/m3-finalize` contains only the final M3 acceptance/runtime-smoke/documentation closeout and becomes historical after PR #18 merges.
-- `acceptance/m3-real-host` is historical native-acceptance work.
-- `planning/product-review` is historical after merged PR #16.
-- `m3/docker-release`, `m3/usability`, and `m3/product-experience` are historical after merged PRs.
-- `m3/npm-proxy-awareness` and `m3/tls-diagnostics` remain historical experiments, not current product state.
+The public default remains `127.0.0.1:8787`. Optional trusted-LAN binding should use one specific host address rather than `0.0.0.0`.
 
 ## Repository source of truth
 
@@ -136,7 +159,10 @@ Read in this order when resuming:
 1. `README.md`
 2. `CURRENT-HANDOFF.md`
 3. `TO-DO.md`
+4. `.github/workflows/ci.yml`
+5. `.github/workflows/docker-publish.yml`
+6. `.github/workflows/release.yml`
+7. `Dockerfile`
+8. `compose.yaml`
 
-Use `docs/history/DEVELOPMENT-HISTORY.md` only for historical implementation/validation details.
-
-Public release promotion, container publication, and changes to a known-good live deployment remain owner-controlled and require explicit approval.
+Use `docs/history/DEVELOPMENT-HISTORY.md` for completed historical details.
