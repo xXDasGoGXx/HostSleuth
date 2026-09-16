@@ -175,11 +175,11 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3.1 Web UI, and M3.2 usability are complete.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, and the full M3 Product Experience sequence are complete.
 
-M3.3 is focused only on making the supported Docker deployment buildable, understandable, honest about reduced visibility, and validated on amd64 and arm64. It does not publish an image without explicit owner approval.
+M3 delivered the modern Web UI, usability/first-run polish, and one supported Docker Compose deployment validated by CI for Linux amd64 and arm64. Native Linux remains the recommended full-visibility deployment; Docker is the convenient reduced-visibility alternative.
 
-Larger ideas remain deferred for collective product review rather than automatically becoming features. See `TO-DO.md` for the current sequence and decision list.
+The next step is a collective review of the deferred product decisions rather than automatically adding another feature. See `TO-DO.md` for that decision list.
 
 ## Security and privacy
 
@@ -189,7 +189,7 @@ HostSleuth can collect hostnames, IP addresses, mount paths, service names, list
 
 - `README.md` — product definition, usage, and current scope.
 - `CURRENT-HANDOFF.md` — current project state and next task.
-- `TO-DO.md` — active milestone checklist and deferred product decisions.
+- `TO-DO.md` — active decision list and deferred product ideas.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 
 ## License
