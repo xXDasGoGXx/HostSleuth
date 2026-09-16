@@ -16,14 +16,15 @@ jobs:
         shell: bash
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
         run: |
           set -eu
-          if [[ "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+          if [[ "$RELEASE_PRERELEASE" == "false" && "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             echo "stable=true" >> "$GITHUB_OUTPUT"
             echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
           else
             echo "stable=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping Docker publication for non-stable release tag: $RELEASE_TAG"
+            echo "Skipping Docker publication for non-stable release: tag=$RELEASE_TAG prerelease=$RELEASE_PRERELEASE"
           fi
 
       - uses: actions/checkout@v4
@@ -41,7 +42,7 @@ jobs:
         if: steps.version.outputs.stable == 'true'
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_NAMESPACE }}
+          username: mjmalleo
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and publish stable multi-platform image
@@ -54,8 +55,8 @@ jobs:
           build-args: |
             VERSION=${{ github.event.release.tag_name }}
           tags: |
-            ${{ vars.DOCKERHUB_NAMESPACE }}/hostsleuth:${{ steps.version.outputs.version }}
-            ${{ vars.DOCKERHUB_NAMESPACE }}/hostsleuth:latest
+            mjmalleo/hostsleuth:${{ steps.version.outputs.version }}
+            mjmalleo/hostsleuth:latest
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
