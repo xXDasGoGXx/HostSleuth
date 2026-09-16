@@ -85,24 +85,30 @@ func registerWorkbenchAPI(mux *http.ServeMux) {
 	}
 
 	mux.HandleFunc("/api/workbench/file", func(w http.ResponseWriter, r *http.Request) {
-		write(w, core.InspectFile(r.Context(), r.URL.Query().Get("path"), r.URL.Query().Get("expected")))
+		value, err := core.InspectFile(r.Context(), r.URL.Query().Get("path"), r.URL.Query().Get("expected"))
+		write(w, value, err)
 	})
 	mux.HandleFunc("/api/workbench/compare", func(w http.ResponseWriter, r *http.Request) {
-		write(w, core.CompareFiles(r.Context(), r.URL.Query().Get("left"), r.URL.Query().Get("right")))
+		value, err := core.CompareFiles(r.Context(), r.URL.Query().Get("left"), r.URL.Query().Get("right"))
+		write(w, value, err)
 	})
 	mux.HandleFunc("/api/workbench/dns", func(w http.ResponseWriter, r *http.Request) {
-		write(w, core.InspectDNS(r.Context(), r.URL.Query().Get("name")))
+		value, err := core.InspectDNS(r.Context(), r.URL.Query().Get("name"))
+		write(w, value, err)
 	})
 	mux.HandleFunc("/api/workbench/http", func(w http.ResponseWriter, r *http.Request) {
-		write(w, core.InspectHTTP(r.Context(), r.URL.Query().Get("url")))
+		value, err := core.InspectHTTP(r.Context(), r.URL.Query().Get("url"))
+		write(w, value, err)
 	})
 	mux.HandleFunc("/api/workbench/cert", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Query().Get("path")
 		target := strings.TrimSpace(r.URL.Query().Get("target"))
 		if target == "" {
-			write(w, core.InspectCertificateFile(path))
+			value, err := core.InspectCertificateFile(path)
+			write(w, value, err)
 			return
 		}
-		write(w, core.CompareCertificateFileToServed(r.Context(), path, target))
+		value, err := core.CompareCertificateFileToServed(r.Context(), path, target)
+		write(w, value, err)
 	})
 }
