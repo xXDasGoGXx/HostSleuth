@@ -22,7 +22,7 @@ function byId(id) {
 }
 
 function text(el, value) {
-  el.textContent = value ?? "";
+  if (el) el.textContent = value ?? "";
 }
 
 function showView(name) {
@@ -74,12 +74,39 @@ function makeEmpty(message) {
   return el;
 }
 
+function isRecent(value, hours) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  return Date.now() - date.getTime() <= hours * 60 * 60 * 1000;
+}
+
+function listenerScope(address) {
+  const value = String(address || "").toLowerCase();
+  if (value.includes("127.0.0.1:") || value.includes("[::1]:") || value.startsWith("::1:")) {
+    return { key: "loopback", label: "Loopback" };
+  }
+  if (value.includes("0.0.0.0:") || value.includes("[::]:") || value.startsWith("*:") || value.startsWith(":::")) {
+    return { key: "wildcard", label: "Wildcard" };
+  }
+  return { key: "specific", label: "Specific" };
+}
+
+function listenerTarget(address) {
+  const value = String(address || "");
+  const portMatch = value.match(/:(\d+)$/);
+  if (!portMatch) return "";
+  const port = portMatch[1];
+  const scope = listenerScope(value).key;
+  if (scope === "wildcard" || scope === "loopback") return `127.0.0.1:${port}`;
+  return value;
+}
+
 function renderEvents(container, events, limit = null) {
   container.replaceChildren();
   const ordered = [...events].reverse();
   const list = limit ? ordered.slice(0, limit) : ordered;
   if (!list.length) {
-    container.append(makeEmpty("No meaningful changes recorded yet. On a new install, this is expected—HostSleuth has a baseline and will add entries when something changes."));
+    container.append(makeEmpty("No meaningful changes recorded yet. HostSleuth has a baseline and will add entries when something actually changes."));
     return;
   }
 
@@ -108,71 +135,81 @@ function renderEvents(container, events, limit = null) {
   });
 }
 
-function renderHost(snapshot) {
-  const host = snapshot.host || {};
-  const dockerMode = snapshot.mode === "docker";
-  const services = snapshot.services || [];
-  const containers = snapshot.containers || [];
-  const listeners = snapshot.listeners || [];
-  const failedServices = services.filter((service) => service.active === "failed").length;
-  const runningContainers = containers.filter((container) => String(container.status || "").toLowerCase().startsWith("up")).length;
+function renderChangeSummary(events) {
+  const container = byId("changeSummary");
+  container.replaceChildren();
+  if (!events.length) return;
 
-  text(byId("hostName"), host.hostname || "This host");
-  text(byId("hostDetailName"), host.hostname || "Host details");
-  const summaryParts = [host.os, host.kernel ? `kernel ${host.kernel}` : ""];
-  if (dockerMode) summaryParts.push("Docker deployment");
-  text(byId("hostSummary"), summaryParts.filter(Boolean).join(" · ") || "Host snapshot loaded.");
-  text(byId("serviceCount"), dockerMode ? "—" : services.length);
-  text(byId("containerCount"), containers.length);
-  text(byId("listenerCount"), listeners.length);
-  text(byId("changeCount"), state.events.length);
-
-  const serviceNote = byId("serviceNote");
-  serviceNote.classList.remove("good", "problem");
-  if (dockerMode) {
-    serviceNote.textContent = "Unavailable in Docker mode";
-  } else if (failedServices > 0) {
-    serviceNote.textContent = `${failedServices} failed`;
-    serviceNote.classList.add("problem");
-  } else {
-    serviceNote.textContent = "No failed services";
-    serviceNote.classList.add("good");
-  }
-
-  const containerNote = byId("containerNote");
-  containerNote.textContent = containers.length ? `${runningContainers} running` : "No containers found";
-
-  const snapshotState = byId("snapshotState");
-  snapshotState.classList.remove("bad");
-  snapshotState.classList.add("good");
-  snapshotState.lastElementChild.textContent = relativeSnapshotTime(snapshot.captured_at);
-
-  const facts = [
-    ["Deployment", dockerMode ? "Docker · reduced host visibility" : "Native Linux"],
-    ["Operating system", host.os || "—"],
-    ["Kernel", host.kernel || "—"],
-    ["Architecture", host.architecture || "—"],
-    ["CPU", host.cpu_count ? `${host.cpu_count} logical CPUs` : "—"],
-    ["Memory", host.memory_total || "—"],
-    ["Uptime", host.uptime || "—"],
-  ];
-  const hostFacts = byId("hostFacts");
-  hostFacts.replaceChildren();
-  facts.forEach(([label, value]) => {
-    const item = document.createElement("div");
-    item.className = "detail-item";
-    const key = document.createElement("span");
-    key.className = "detail-label";
-    key.textContent = label;
-    const val = document.createElement("div");
-    val.className = "detail-value";
-    val.textContent = value;
-    item.append(key, val);
-    hostFacts.append(item);
+  const counts = new Map();
+  events.forEach((event) => {
+    const key = event.category || "change";
+    counts.set(key, (counts.get(key) || 0) + 1);
   });
 
-  renderInterfaces(snapshot.interfaces || []);
-  renderFilesystems(snapshot.filesystems || [], dockerMode);
+  [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([category, count]) => {
+      const chip = document.createElement("span");
+      chip.className = "change-chip";
+      const strong = document.createElement("strong");
+      strong.textContent = count;
+      chip.append(strong, document.createTextNode(` ${category}`));
+      container.append(chip);
+    });
+}
+
+function renderListenerList(container, listeners, limit = null) {
+  container.replaceChildren();
+  const ordered = [...listeners].sort((a, b) => String(a.address || "").localeCompare(String(b.address || "")));
+  const list = limit ? ordered.slice(0, limit) : ordered;
+
+  if (!list.length) {
+    container.append(makeEmpty("No listening sockets are present in the current snapshot."));
+    return;
+  }
+
+  list.forEach((listener) => {
+    const scope = listenerScope(listener.address);
+    const item = document.createElement("article");
+    item.className = "surface-item";
+
+    const badge = document.createElement("span");
+    badge.className = `surface-scope ${scope.key}`;
+    badge.textContent = scope.label;
+
+    const main = document.createElement("div");
+    main.className = "surface-main";
+    const address = document.createElement("span");
+    address.className = "surface-address";
+    address.textContent = listener.address || "Unknown address";
+    const meta = document.createElement("span");
+    meta.className = "surface-meta";
+    meta.textContent = [listener.protocol, listener.process].filter(Boolean).join(" · ") || "Listener evidence";
+    main.append(address, meta);
+
+    const action = document.createElement("button");
+    action.className = "surface-action";
+    action.type = "button";
+    action.textContent = "Diagnose";
+    const target = listenerTarget(listener.address);
+    action.disabled = !target;
+    action.addEventListener("click", () => {
+      if (!target) return;
+      byId("diagnoseTarget").value = target;
+      showView("diagnose");
+      byId("diagnoseTarget").focus();
+    });
+
+    item.append(badge, main, action);
+    container.append(item);
+  });
+
+  if (limit && ordered.length > limit) {
+    const more = document.createElement("div");
+    more.className = "empty-state";
+    more.textContent = `${ordered.length - limit} more listening sockets are available under Host evidence.`;
+    container.append(more);
+  }
 }
 
 function renderInterfaces(interfaces) {
@@ -197,6 +234,57 @@ function renderInterfaces(interfaces) {
     const body = document.createElement("div");
     body.className = "stack-item-body";
     body.textContent = (item.addresses || []).join(" · ") || "No addresses reported";
+    row.append(head, body);
+    container.append(row);
+  });
+}
+
+function renderRoutes(routes) {
+  const container = byId("routeList");
+  container.replaceChildren();
+  if (!routes.length) {
+    container.append(makeEmpty("No route information is available."));
+    return;
+  }
+  routes.forEach((route, index) => {
+    const row = document.createElement("article");
+    row.className = "stack-item";
+    const head = document.createElement("div");
+    head.className = "stack-item-head";
+    const title = document.createElement("span");
+    title.className = "stack-item-title";
+    title.textContent = index === 0 ? "Routing table" : "Route";
+    head.append(title);
+    const body = document.createElement("div");
+    body.className = "stack-item-body";
+    body.textContent = route;
+    row.append(head, body);
+    container.append(row);
+  });
+}
+
+function renderContainers(containers) {
+  const container = byId("containerList");
+  container.replaceChildren();
+  if (!containers.length) {
+    container.append(makeEmpty("No Docker containers are visible in the current snapshot."));
+    return;
+  }
+  containers.forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "stack-item";
+    const head = document.createElement("div");
+    head.className = "stack-item-head";
+    const title = document.createElement("span");
+    title.className = "stack-item-title";
+    title.textContent = item.name || item.id || "Container";
+    const meta = document.createElement("span");
+    meta.className = "stack-item-meta";
+    meta.textContent = item.status || "unknown";
+    head.append(title, meta);
+    const body = document.createElement("div");
+    body.className = "stack-item-body";
+    body.textContent = [item.image, item.ports ? `ports ${item.ports}` : "", item.networks ? `networks ${item.networks}` : ""].filter(Boolean).join(" · ") || "Container evidence";
     row.append(head, body);
     container.append(row);
   });
@@ -238,6 +326,119 @@ function renderFilesystems(filesystems, dockerMode = false) {
   });
 }
 
+function renderAttention({ dockerMode, failedServices, exposedListeners, recentChanges }) {
+  const strip = byId("attentionStrip");
+  strip.classList.remove("problem", "caution");
+
+  if (!dockerMode && failedServices > 0) {
+    strip.classList.add("problem");
+    text(byId("attentionTitle"), `${failedServices} failed ${failedServices === 1 ? "service" : "services"} need attention`);
+    text(byId("attentionDetail"), "HostSleuth can use failed-service evidence during local reachability diagnosis.");
+    return;
+  }
+
+  if (recentChanges > 0 && exposedListeners > 0) {
+    strip.classList.add("caution");
+    text(byId("attentionTitle"), `${recentChanges} meaningful ${recentChanges === 1 ? "change" : "changes"} in 24h while ${exposedListeners} sockets listen beyond loopback`);
+    text(byId("attentionDetail"), "This is context, not an alarm. The timeline and reachability surface show exactly what HostSleuth observed.");
+    return;
+  }
+
+  if (recentChanges > 0) {
+    strip.classList.add("caution");
+    text(byId("attentionTitle"), `${recentChanges} meaningful ${recentChanges === 1 ? "change" : "changes"} recorded in the last 24 hours`);
+    text(byId("attentionDetail"), "Open Changes to see the newest differences first; routine Docker uptime churn is suppressed.");
+    return;
+  }
+
+  if (exposedListeners > 0) {
+    text(byId("attentionTitle"), `${exposedListeners} listening ${exposedListeners === 1 ? "socket accepts" : "sockets accept"} traffic beyond loopback`);
+    text(byId("attentionDetail"), "That is not inherently a problem. HostSleuth exposes the surface so you can diagnose any endpoint directly.");
+    return;
+  }
+
+  text(byId("attentionTitle"), "No obvious local issue stands out in the current evidence");
+  text(byId("attentionDetail"), "The latest snapshot has no failed native services, recent changes, or listeners beyond loopback that HostSleuth can currently see.");
+}
+
+function renderHost(snapshot) {
+  const host = snapshot.host || {};
+  const dockerMode = snapshot.mode === "docker";
+  const services = snapshot.services || [];
+  const containers = snapshot.containers || [];
+  const listeners = snapshot.listeners || [];
+  const interfaces = snapshot.interfaces || [];
+  const failedServices = services.filter((service) => service.active === "failed").length;
+  const runningContainers = containers.filter((container) => String(container.status || "").toLowerCase().startsWith("up")).length;
+  const exposedListeners = listeners.filter((listener) => listenerScope(listener.address).key !== "loopback").length;
+  const recentChanges = state.events.filter((event) => isRecent(event.at, 24)).length;
+
+  text(byId("hostName"), host.hostname || "This host");
+  text(byId("hostDetailName"), host.hostname || "Host details");
+  text(byId("deploymentBadge"), dockerMode ? "Docker view" : "Native view");
+
+  const summaryParts = [host.os, host.kernel ? `kernel ${host.kernel}` : ""];
+  text(byId("hostSummary"), summaryParts.filter(Boolean).join(" · ") || "Host snapshot loaded.");
+
+  const storyParts = [
+    `${listeners.length} ${listeners.length === 1 ? "listener" : "listeners"}`,
+    `${interfaces.length} ${interfaces.length === 1 ? "interface" : "interfaces"}`,
+    containers.length ? `${runningContainers}/${containers.length} containers running` : "no visible containers",
+    recentChanges ? `${recentChanges} meaningful changes in 24h` : "no meaningful changes in 24h",
+  ];
+  text(byId("hostStoryLine"), `Right now HostSleuth sees ${storyParts.join(" · ")}.`);
+
+  text(byId("exposedListenerCount"), exposedListeners);
+  text(byId("exposedListenerNote"), exposedListeners ? `${listeners.length - exposedListeners} loopback-only` : "Loopback-only surface");
+  text(byId("failedServiceCount"), dockerMode ? "—" : failedServices);
+  text(byId("failedServiceNote"), dockerMode ? "Unavailable in Docker mode" : failedServices ? `${failedServices} need attention` : "No failed services");
+  byId("failedServiceNote").className = `signal-note ${!dockerMode && failedServices ? "problem" : !dockerMode ? "good" : ""}`;
+  text(byId("containerCount"), containers.length);
+  text(byId("containerNote"), containers.length ? `${runningContainers} running` : "No containers found");
+  text(byId("change24hCount"), recentChanges);
+  text(byId("change24hNote"), recentChanges ? `${state.events.length} retained total` : "No recent meaningful changes");
+  byId("change24hNote").className = `signal-note ${recentChanges ? "warning" : "good"}`;
+
+  renderAttention({ dockerMode, failedServices, exposedListeners, recentChanges });
+
+  const snapshotState = byId("snapshotState");
+  snapshotState.classList.remove("bad");
+  snapshotState.classList.add("good");
+  snapshotState.lastElementChild.textContent = relativeSnapshotTime(snapshot.captured_at);
+
+  const facts = [
+    ["Deployment", dockerMode ? "Docker · reduced host visibility" : "Native Linux"],
+    ["Operating system", host.os || "—"],
+    ["Kernel", host.kernel || "—"],
+    ["Architecture", host.architecture || "—"],
+    ["CPU", host.cpu_count ? `${host.cpu_count} logical CPUs` : "—"],
+    ["Memory", host.memory_total || "—"],
+    ["Uptime", host.uptime || "—"],
+    ["Snapshot", formatTime(snapshot.captured_at)],
+  ];
+  const hostFacts = byId("hostFacts");
+  hostFacts.replaceChildren();
+  facts.forEach(([label, value]) => {
+    const item = document.createElement("div");
+    item.className = "detail-item";
+    const key = document.createElement("span");
+    key.className = "detail-label";
+    key.textContent = label;
+    const val = document.createElement("div");
+    val.className = "detail-value";
+    val.textContent = value;
+    item.append(key, val);
+    hostFacts.append(item);
+  });
+
+  renderListenerList(byId("overviewListeners"), listeners, 6);
+  renderListenerList(byId("listenerList"), listeners);
+  renderInterfaces(interfaces);
+  renderRoutes(snapshot.routes || []);
+  renderContainers(containers);
+  renderFilesystems(snapshot.filesystems || [], dockerMode);
+}
+
 function diagnosisTitle(diagnosis) {
   const conclusion = String(diagnosis.conclusion || "").toLowerCase();
   if (conclusion === "target is reachable") return "Connection succeeded";
@@ -251,6 +452,59 @@ function diagnosisTitle(diagnosis) {
   return "Diagnosis complete";
 }
 
+function stageStatus(checks, names) {
+  const relevant = checks.filter((check) => names.includes(check.name));
+  if (!relevant.length) return { key: "unknown", label: "not needed" };
+  if (relevant.some((check) => check.status === "fail")) return { key: "fail", label: "failed" };
+  if (relevant.some((check) => check.status === "pass")) return { key: "pass", label: "passed" };
+  return { key: "unknown", label: "unknown" };
+}
+
+function renderDiagnosisPath(diagnosis) {
+  const checks = diagnosis.checks || [];
+  const stages = [
+    ["Name", ["target", "port", "dns"]],
+    ["Route", ["route"]],
+    ["TCP", ["tcp"]],
+    ["Local bind", ["local-listener", "docker", "docker-port"]],
+    ["Candidates", ["firewall", "systemd", "systemd-failures"]],
+  ];
+
+  const container = byId("diagnosisPath");
+  container.replaceChildren();
+  stages.forEach(([label, names]) => {
+    const status = stageStatus(checks, names);
+    const stage = document.createElement("div");
+    stage.className = `path-stage ${status.key}`;
+    const name = document.createElement("span");
+    name.textContent = label;
+    const value = document.createElement("strong");
+    value.textContent = status.label;
+    stage.append(name, value);
+    container.append(stage);
+  });
+}
+
+function renderDiagnosisContext() {
+  const container = byId("diagnosisRecentEvents");
+  container.replaceChildren();
+  const events = [...state.events].reverse().slice(0, 3);
+  if (!events.length) {
+    container.append(makeEmpty("No meaningful host changes are currently retained."));
+    return;
+  }
+  events.forEach((event) => {
+    const item = document.createElement("div");
+    item.className = "mini-event";
+    const summary = document.createElement("strong");
+    summary.textContent = event.summary || "Recorded change";
+    const meta = document.createElement("span");
+    meta.textContent = `${event.category || "change"} · ${formatTime(event.at)}`;
+    item.append(summary, meta);
+    container.append(item);
+  });
+}
+
 function renderDiagnosis(diagnosis) {
   byId("diagnosisError").classList.add("hidden");
   const result = byId("diagnosisResult");
@@ -260,6 +514,8 @@ function renderDiagnosis(diagnosis) {
   text(byId("diagnosisTarget"), diagnosis.target || "");
   text(byId("diagnosisExplanation"), diagnosis.conclusion || "HostSleuth completed the requested checks.");
   text(byId("diagnosisConfidence"), `${diagnosis.confidence || "unknown"} confidence`);
+  renderDiagnosisPath(diagnosis);
+  renderDiagnosisContext();
 
   const list = byId("diagnosisChecks");
   list.replaceChildren();
@@ -300,7 +556,7 @@ async function loadAbout() {
     const revision = about.revision || "";
     text(byId("appVersion"), [version, revision ? `(${revision})` : ""].filter(Boolean).join(" "));
   } catch (_) {
-    // Build information is helpful but must never block the dashboard.
+    // Build information is useful but must never block the dashboard.
   }
 }
 
@@ -319,9 +575,11 @@ async function loadDashboard() {
     renderHost(state.snapshot);
     renderEvents(byId("overviewEvents"), state.events, 5);
     renderEvents(byId("allEvents"), state.events);
+    renderChangeSummary(state.events);
   } catch (error) {
     snapshotState.classList.add("bad");
     snapshotState.lastElementChild.textContent = "Could not load host snapshot";
+    byId("overviewListeners").replaceChildren(makeEmpty("HostSleuth could not load the reachability surface."));
     byId("overviewEvents").replaceChildren(makeEmpty("HostSleuth could not load recent changes."));
     byId("allEvents").replaceChildren(makeEmpty("HostSleuth could not load recent changes."));
   }
