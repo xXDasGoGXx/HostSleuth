@@ -35,6 +35,8 @@ func main() {
 		runServiceStory(os.Args[2:])
 	case "incident":
 		runIncidentLens(os.Args[2:])
+	case "workbench":
+		runWorkbench(os.Args[2:])
 	case "events":
 		runEvents(os.Args[2:])
 	case "serve":
@@ -49,7 +51,7 @@ func main() {
 
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
-	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|incident|events|serve|version> [options]")
+	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|incident|workbench|events|serve|version> [options]")
 }
 
 func buildRevision() string {
@@ -241,6 +243,7 @@ func runServe(args []string) {
 	}
 	appCSS, appJS = appendServiceStoryAssets(appCSS, appJS)
 	appCSS, appJS = appendIncidentLensAssets(appCSS, appJS)
+	appCSS, appJS = appendWorkbenchAssets(appCSS, appJS)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/about", func(w http.ResponseWriter, r *http.Request) {
@@ -321,6 +324,7 @@ func runServe(args []string) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(core.BuildIncidentLens(r.Context(), anchor, r.URL.Query().Get("target"), s, events))
 	})
+	registerWorkbenchAPI(mux)
 	mux.HandleFunc("/assets/app.css", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/css; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-cache")
