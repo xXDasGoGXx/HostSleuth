@@ -62,28 +62,35 @@ Validation includes focused tests, full test/vet/build/format checks, syntax val
 
 M9 intentionally spans file integrity, DNS, HTTP, and certificate identity. Certificate tooling is one Workbench workflow, not the product's sole enhancement direction.
 
-## 6. M10 — Reboot Story — ACTIVE
+## 6. M10 — Reboot Story — COMPLETE
 
-Goal: answer "why did this host reboot, and what failed to come back?" using bounded deterministic evidence.
+Goal: answer **"What happened around this reboot, and what failed to come back afterward?"** using bounded deterministic evidence without inventing a reboot cause.
 
-Initial scope:
+Delivered:
 
-- current boot time and bounded previous boot/shutdown evidence where available;
-- orderly vs abnormal shutdown indicators only when deterministically supported;
-- package/kernel/configuration changes around the reboot as context rather than invented cause;
-- services failed after boot;
-- listeners that existed before but did not return only when retained evidence supports that statement;
-- container state changes relevant to boot recovery;
-- current service/listener/certificate context for a missing endpoint only when the evidence can be connected honestly;
-- reuse of Incident Lens/event primitives rather than a second history database.
+- snapshot schema v4 with Linux kernel boot ID and exact `/proc/stat` `btime` when available;
+- reboot detection only when a previously known boot ID changes to another known boot ID;
+- no inference from human-readable uptime;
+- schema-upgrade protection so an older snapshot with no boot ID cannot create a false reboot event;
+- bounded previous-boot and current-boot journal evidence;
+- explicit `unknown` behavior when journal history is unavailable or permissions prevent access;
+- orderly-vs-abnormal shutdown classification only when direct bounded evidence supports it;
+- current failed-service evidence;
+- retained post-boot service/listener/container recovery correlation;
+- a recovery issue only when retained post-boot evidence and current snapshot state agree the problem remains;
+- nearby package/kernel/system/configuration changes as context, never timing-based proof of cause;
+- CLI, JSON API, and a dedicated Reboot Web UI tab;
+- reuse of the existing retained event/Incident Lens primitives rather than a second history store.
 
-Do not claim a reboot cause without direct evidence. M10 remains read-only.
+Real-host acceptance on OMV found that `journalctl` may return `No journal files were opened due to insufficient permissions.` as output. M10 now recognizes that diagnostic as unavailable evidence and reports `unknown`; no privilege expansion was added. Full source validation included tests, vet, formatting, JavaScript fragments plus exact served-script syntax, native build, Docker smoke, and linux/amd64 + linux/arm64 image builds.
 
-## 7. M11 — Optional Safe Actions
+M10 remains read-only. No reboot cause is claimed from temporal proximity. Full closeout detail is in `docs/history/M10-REBOOT-STORY.md`.
+
+## 7. M11 — Optional Safe Actions — NOT STARTED
 
 Goal: carefully test whether HostSleuth can offer a very small number of surgical administrative actions without becoming Webmin, Cockpit, or a browser shell.
 
-This milestone changes HostSleuth's current read-only boundary and therefore requires an explicit design/security review before implementation.
+This milestone changes HostSleuth's current read-only boundary and therefore requires an explicit design/security review **before implementation**. Do not start M11 automatically after M10; explicit owner direction is required.
 
 Certificate lifecycle remains one candidate because it is narrow and auditable, but it is not the only possible safe-action family. Consumer research should compare multiple real troubleshooting workflows before any action set is approved.
 

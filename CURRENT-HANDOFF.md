@@ -15,9 +15,7 @@ Keep it evidence-first, local-first, single-host first, and deliberately small. 
 
 Repository: `xXDasGoGXx/HostSleuth`
 
-Always re-check current `main` before starting code, a release, or a deployment rather than relying on a self-referential SHA in this file.
-
-Completed milestones:
+Completed source milestones:
 
 - M0 — repository foundation;
 - M1 — deployable single-host MVP;
@@ -27,12 +25,68 @@ Completed milestones:
 - M4 — package-change timeline;
 - M5 — configuration fingerprinting;
 - M6 — Certificate Story / TLS Detective;
-- stable v0.3.0 publication;
 - M7 — Service Story;
 - M8 — Incident Lens;
-- M9 — HostSleuth Workbench.
+- M9 — HostSleuth Workbench;
+- M10 — Reboot Story.
 
-Published stable release:
+M10 was developed on `m10-reboot-story` in PR #34. Its final implementation and acceptance record is:
+
+`docs/history/M10-REBOOT-STORY.md`
+
+The earlier `docs/history/M10-REBOOT-STORY-WIP.md` is historical only.
+
+No M11 implementation has started.
+
+## M10 — Reboot Story — complete in source
+
+M10 answers:
+
+**What happened around this reboot, and what failed to come back afterward?**
+
+Delivered behavior includes:
+
+- snapshot schema version 4;
+- Linux kernel boot ID capture when available;
+- exact boot-start capture from `/proc/stat` `btime` when available;
+- deterministic reboot detection only when a known boot ID changes to another known boot ID;
+- no reboot inference from human-readable uptime;
+- regression coverage proving an older snapshot with no boot ID does not emit a false reboot during schema upgrade;
+- bounded previous-boot and current-boot journal evidence;
+- explicit `unknown` behavior when journal history is unavailable or inaccessible;
+- orderly-vs-abnormal shutdown classification only when direct bounded evidence supports it;
+- current failed-service evidence;
+- retained post-boot service/listener/container problem correlation;
+- recovery issues only when retained post-boot evidence and current snapshot state agree the problem remains;
+- package/kernel/system/configuration context around boot without causal overclaiming;
+- CLI, JSON API, runtime Web asset, and Reboot-tab integration;
+- no reboot/shutdown/restart/reload/service-control/package/firewall/file-write/arbitrary-command action.
+
+M10 remains read-only and explicitly separates reboot detection from reboot explanation. Temporal proximity is context, not proof of cause.
+
+### M10 validation
+
+Validation included:
+
+- focused M10 tests;
+- full `go test ./...`;
+- `go vet ./...`;
+- `gofmt` cleanliness;
+- individual JavaScript syntax checks;
+- syntax validation of the exact concatenated served script;
+- native build;
+- Docker runtime smoke including Reboot Story API/UI wiring;
+- linux/amd64 image build;
+- linux/arm64 image build;
+- isolated real-OMV snapshot and journal acceptance.
+
+Real OMV acceptance confirmed schema 4, live boot ID, exact boot start, native service/listener evidence, and the real journal permission boundary. The unprivileged acceptance account receives `No journal files were opened due to insufficient permissions.` for previous/current boot journal reads. M10 now recognizes that diagnostic as unavailable evidence and reports `unknown`; no privilege expansion was added.
+
+Full details: `docs/history/M10-REBOOT-STORY.md`.
+
+## Published release boundary
+
+Stable public release remains:
 
 `v0.3.0`
 
@@ -40,12 +94,12 @@ Release source commit:
 
 `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`
 
-Published Docker tags:
+Published Docker tags remain:
 
 - `mjmalleo/hostsleuth:0.3.0`
 - `mjmalleo/hostsleuth:latest`
 
-Both resolve anonymously to the same multi-platform OCI index:
+Published multi-platform OCI index:
 
 `sha256:127b388fbf794841b22d06b281fe89dc1500188fdb4215eec023b392aa98c05d`
 
@@ -54,158 +108,41 @@ Platforms:
 - `linux/amd64`
 - `linux/arm64`
 
-M7, M8, and M9 are newer source capabilities and are **not** claimed to be present in the already-published v0.3.0 artifacts.
+M7, M8, M9, and M10 are newer source capabilities and are **not** claimed to be included in v0.3.0.
 
-## M7 — Service Story
-
-M7 answers why a selected native systemd service is failed/inactive or why an expected endpoint disappeared without turning HostSleuth into a service manager.
-
-Delivered evidence includes bounded systemd runtime/result and sanitized current-boot journal evidence, cgroup/main-PID to listener ownership, deterministic positive-evidence-only port collision, container-port context, existing Diagnose/TLS reuse, and bounded nearby retained changes. Hidden listener ownership remains `unknown` rather than becoming a false collision.
-
-Full implementation and acceptance detail: `docs/history/M7-SERVICE-STORY.md`.
-
-## M8 — Incident Lens
-
-M8 answers **"what changed around the time this broke?"** with a bounded historical evidence window rather than a monitoring database.
-
-It can anchor from an exact time, a retained event, or a completed diagnosis; uses a +/- 15 minute retained-event window; preserves all existing event categories; keeps any current endpoint Diagnose/TLS probe explicitly separate from the historical window; and labels temporal proximity as context rather than proof of causation.
-
-Full implementation and acceptance detail: `docs/history/M8-INCIDENT-LENS.md`.
-
-## M9 — HostSleuth Workbench
-
-M9 answers several small but common troubleshooting questions without exposing a browser shell or generic utility launcher.
-
-Delivered read-only workflows:
-
-- selected-file SHA-256 and SHA-512 plus size, mode/permissions, mtime, UID/GID, and owner/group when resolvable;
-- optional expected SHA-256/SHA-512 verification;
-- exact file-to-file comparison by SHA-256 fingerprint;
-- system-resolver DNS evidence for A/AAAA, distinct CNAME, MX, NS, TXT, and PTR;
-- HTTP/HTTPS HEAD status plus a bounded redirect chain and selected response metadata;
-- public PEM certificate metadata/fingerprint inspection;
-- exact public certificate file fingerprint vs direct-TLS served-certificate comparison;
-- CLI `hostsleuth workbench ...`, JSON APIs, and a dedicated Workbench Web UI tab.
-
-M9 is intentionally broader than certificates. Certificate identity is one Workbench workflow alongside file integrity, DNS, and HTTP troubleshooting.
-
-### M9 security boundary
-
-Workbench adds capabilities that should not be exposed to an unauthenticated remote browser merely because the general HostSleuth UI was intentionally bound to a LAN address.
-
-Therefore:
-
-- all `/api/workbench/*` operations accept loopback clients only;
-- the local UI and recommended SSH-tunnel workflow continue to work because requests arrive via loopback;
-- the CLI remains available locally;
-- no arbitrary command or hidden shell hook exists;
-- no file editor or file-content response exists;
-- HTTP inspection accepts no custom headers, cookies, request credentials, or request body;
-- certificate inspection refuses a private-key PEM block encountered before a public certificate;
-- file hashing reads only a user-selected readable regular file and returns metadata/fingerprints, not file contents.
-
-### M9 validation
-
-Focused tests cover file hashing/checksum verification, file comparison, deterministic bounded DNS output, HEAD/redirect behavior, public-certificate/private-key boundaries, exact local-file-vs-served certificate matching, and loopback-only Web/API access.
-
-Full branch validation includes:
-
-- `gofmt`;
-- `go test ./...`;
-- `go vet ./...`;
-- native build;
-- syntax validation of base, Service Story, Incident Lens, and Workbench JavaScript;
-- syntax validation of the exact concatenated JavaScript served to consumers.
-
-Isolated real-OMV acceptance under `/tmp/hostsleuth-m9-accept` confirmed:
-
-- selected-file SHA-256 verification against the host's independent `sha256sum` result;
-- SHA-512 output;
-- exact file-to-file fingerprint match;
-- real DNS A/AAAA evidence;
-- real HTTPS HEAD/status evidence;
-- public certificate inspection;
-- exact local-public-cert vs isolated served-certificate fingerprint match using a temporary self-signed TLS listener;
-- isolated Workbench API/UI smoke on loopback.
-
-Validation found two implementation/test issues before closeout: a host umask made one test's assumed permission mode incorrect, and the first API wrapper used Go multiple-return values incorrectly. Both were fixed before acceptance. CI was also strengthened so future UI fragments cannot bypass syntax validation merely because they are concatenated at runtime.
-
-Full detail: `docs/history/M9-WORKBENCH.md`.
+Do not publish a new release merely for version-number alignment.
 
 ## Live OMV / recovery boundary
 
-The known-good live HostSleuth remains managed through Arcane on OMV host `192.168.2.181` using:
+M10 did not change the production HostSleuth deployment, production state, Compose definition, Docker image selection, or recovery repository.
+
+A final read-only check of the live endpoint at `http://192.168.2.181:8787` reported application version `v0.3.0`. The unprivileged HomeCommander acceptance account could not read `/srv/docker/volumes/compose/hostsleuth/compose.yaml`, so the exact active image tag is not independently verified here.
+
+The separate `xXDasGoGXx/OMV-Docker-Rebuild` repository still documents its disaster-recovery HostSleuth definition as pinned to:
 
 `mjmalleo/hostsleuth:0.1.0`
 
-Deployment state:
+Do not reconcile, repin, redeploy, or otherwise change that live/recovery divergence as part of M10. Re-check both sources before any future production or recovery change.
 
-- UI/API: `http://192.168.2.181:8787`
-- persistent state: `/srv/docker/volumes/hostsleuth/data`
-- Compose path: `/srv/docker/volumes/compose/hostsleuth/compose.yaml`
-- trusted-LAN bind: `192.168.2.181:8787`
+## Next milestone boundary
 
-`xXDasGoGXx/OMV-Docker-Rebuild` intentionally remains pinned to `mjmalleo/hostsleuth:0.1.0` so recovery matches the actual live deployment.
+### M11 — Optional Safe Actions — NOT STARTED
 
-Do not change the live deployment or recovery definition merely to chase release numbers.
+M11 is the first planned milestone that may cross HostSleuth's read-only boundary. Before implementing it, perform an explicit security/design review.
 
-## Ordered roadmap — owner approved
+Any future action must be narrow, disabled by default, previewed, explicitly confirmed, audited, postcondition-verified, and free of arbitrary shell/command fields.
 
-The owner explicitly approved continuing in this order without deviation. Consumer/product research may refine later work, but it does not silently reorder or expand the active milestone.
-
-### 1. M6 — Certificate Story / TLS Detective — COMPLETE
-
-Read-only TLS/certificate troubleshooting is implemented and accepted.
-
-### 2. Publish stable v0.3.0 — COMPLETE
-
-Published and verified from exact accepted source commit `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`. Live OMV was intentionally not migrated.
-
-### 3. M7 — Service Story — COMPLETE
-
-Read-only systemd/runtime/journal/listener/endpoint/change correlation is implemented and accepted.
-
-### 4. M8 — Incident Lens — COMPLETE
-
-Bounded, non-causal incident-window correlation is implemented and accepted.
-
-### 5. M9 — HostSleuth Workbench — COMPLETE
-
-Bounded file-integrity, DNS, HTTP, and public-certificate troubleshooting tools are implemented and accepted. Workbench Web/API operations are loopback-only; no browser shell or generic utility launcher was added.
-
-### 6. M10 — Reboot Story — NEXT / ACTIVE
-
-Explain boot/shutdown evidence and what failed to come back after a reboot without inventing reboot cause. Reuse the event/Incident Lens model, keep evidence bounded, and remain read-only.
-
-### 7. M11 — Optional Safe Actions
-
-This is the first planned milestone that may cross HostSleuth's read-only boundary and therefore requires an explicit design/security review before implementation. Candidate actions must be narrow, disabled by default, previewed, confirmed, audited, and postcondition-verified. No arbitrary command execution.
-
-Certificate lifecycle is only one candidate family; consumer research should compare multiple real workflows before any safe-action set is approved.
-
-### 8. Later — Redacted Evidence Bundle
-
-Only after redaction rules and threat-model work are mature enough.
+Do not start M11 automatically after M10. It requires explicit owner direction.
 
 ## Consumer/product research boundary
 
-Current research is intentionally separate from implementation scope. The detailed research artifact is:
+Research remains separate from implementation scope. The detailed artifact is:
 
 `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
 
-The desired product direction is broader than certificates: find recurring troubleshooting workflows where users currently assemble several commands, admin screens, logs, and websites, then use HostSleuth's deterministic correlation/verification model when it can genuinely make the workflow better.
+Certificates/Certbot are one opportunity among many, not the product direction. Promising areas include endpoint-path reasoning, expected-state contracts, DNS resolver/delegation/split-view discrepancies, HTTP/reverse-proxy/upstream problems, port/listener ownership, file permissions/ownership/deployment paths, container disappearance/dependencies, mail/STARTTLS inspection, boot/recovery workflows, and certificate delivery/rollout verification.
 
-Promising areas include:
-
-- expected-endpoint contracts;
-- DNS resolver/delegation/split-view discrepancies;
-- HTTP redirect/reverse-proxy/upstream mismatches;
-- file permissions/ownership/deployment-path problems;
-- STARTTLS-aware mail/service inspection;
-- certificate source/destination/served verification and rollout consistency;
-- later tightly bounded safe-action recipes with observable postcondition verification.
-
-Research must not turn HostSleuth into an uptime dashboard, generic certificate/ACME manager, generic control panel, web shell, or multi-host orchestration system.
+A future feature should generally provide correlation, verification, and boundedness without turning HostSleuth into a generic administration platform.
 
 ## Product guardrails
 
@@ -220,23 +157,19 @@ Do not drift into:
 - automatic remediation;
 - broad privilege expansion merely to make features easier.
 
-The product should feel powerful because it connects deterministic evidence into answers people actually need.
+## Resume order for future work
 
-## Repository reading order
+Before consequential writes, re-check current `main`, open PRs, and the active milestone branch. Then read:
 
-When resuming, read:
+1. `CURRENT-HANDOFF.md`
+2. `TO-DO.md`
+3. `docs/ROADMAP.md`
+4. `docs/history/DEVELOPMENT-HISTORY.md`
+5. the most recent milestone history document
+6. `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
+7. `.github/workflows/ci.yml`
+8. `.github/workflows/release.yml`
+9. `Dockerfile`
+10. `compose.yaml`
 
-1. `README.md`
-2. `CURRENT-HANDOFF.md`
-3. `TO-DO.md`
-4. `docs/ROADMAP.md`
-5. `docs/history/DEVELOPMENT-HISTORY.md`
-6. `docs/history/M7-SERVICE-STORY.md`
-7. `docs/history/M8-INCIDENT-LENS.md`
-8. `docs/history/M9-WORKBENCH.md`
-9. `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
-10. `docs/design/HOST-STORY-UI.md`
-11. `.github/workflows/ci.yml`
-12. `.github/workflows/release.yml`
-13. `Dockerfile`
-14. `compose.yaml`
+For M10 implementation/acceptance history specifically, use `docs/history/M10-REBOOT-STORY.md`.

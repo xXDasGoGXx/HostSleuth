@@ -27,11 +27,13 @@ jobs:
           node --check cmd/hostsleuth/web/app.js
           node --check cmd/hostsleuth/web/service_story.js
           node --check cmd/hostsleuth/web/incident_lens.js
+          node --check cmd/hostsleuth/web/reboot_story.js
           node --check cmd/hostsleuth/web/workbench.js
           cat \
             cmd/hostsleuth/web/app.js \
             cmd/hostsleuth/web/service_story.js \
             cmd/hostsleuth/web/incident_lens.js \
+            cmd/hostsleuth/web/reboot_story.js \
             cmd/hostsleuth/web/workbench.js \
             > /tmp/hostsleuth-served-app.js
           node --check /tmp/hostsleuth-served-app.js
@@ -101,6 +103,8 @@ jobs:
           set -eu
           curl -fsS http://127.0.0.1:8787/ | grep -q 'HostSleuth'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'HOSTSLEUTH WORKBENCH'
+          curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'REBOOT STORY'
+          curl -fsS http://127.0.0.1:8787/api/reboot-story > /tmp/hostsleuth-reboot-story.json
           curl -fsS 'http://127.0.0.1:8787/api/diagnose?target=127.0.0.1:8787' > /tmp/hostsleuth-diagnosis.json
           curl -fsS --get --data-urlencode 'path=/host/etc/os-release' 'http://127.0.0.1:8787/api/workbench/file' > /tmp/hostsleuth-workbench-file.json
           python3 - <<'PY'
@@ -110,6 +114,11 @@ jobs:
           diagnosis = json.loads(Path('/tmp/hostsleuth-diagnosis.json').read_text())
           assert diagnosis.get('conclusion') == 'target is reachable', diagnosis
           assert diagnosis.get('confidence') == 'high', diagnosis
+
+          reboot_story = json.loads(Path('/tmp/hostsleuth-reboot-story.json').read_text())
+          assert reboot_story.get('boot_id'), reboot_story
+          assert reboot_story.get('boot_started_at'), reboot_story
+          assert reboot_story.get('cause_assessment'), reboot_story
 
           file_evidence = json.loads(Path('/tmp/hostsleuth-workbench-file.json').read_text())
           assert len(file_evidence.get('sha256', '')) == 64, file_evidence

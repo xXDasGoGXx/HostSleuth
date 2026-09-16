@@ -15,59 +15,60 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M6 — bounded read-only Certificate Story / TLS Detective.
 - [x] Publish stable v0.3.0 from accepted source `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1` with native amd64/arm64 assets, checksums, and public multi-platform Docker tags.
 - [x] M7 — read-only Service Story with systemd/journal/listener/endpoint/change correlation.
-- [x] M7 real-host regression: hidden listener PID remains unknown and cannot become a false collision claim.
 - [x] M8 — read-only Incident Lens with event/time/diagnosis anchors and bounded +/- 15 minute context.
-- [x] M9 — read-only HostSleuth Workbench.
-- [x] M9 file SHA-256/SHA-512 plus expected-checksum verification and path metadata.
-- [x] M9 file-to-file fingerprint comparison.
-- [x] M9 common DNS record inspection through the host system resolver.
-- [x] M9 direct HTTP HEAD and bounded redirect-chain inspection.
-- [x] M9 public PEM certificate inspection and exact local-file-vs-served certificate comparison.
-- [x] M9 dedicated CLI/API/Web UI with no arbitrary command box, file editor, custom HTTP headers/credentials, or hidden shell hooks.
-- [x] M9 Workbench Web/API operations restricted to loopback clients; local CLI and SSH-tunnel workflows remain available.
-- [x] M9 focused tests, full validation, isolated real OMV CLI acceptance, and isolated API/UI smoke.
-- [x] CI now syntax-checks every UI fragment plus the exact concatenated served JavaScript and includes a Docker Workbench smoke path.
+- [x] M9 — read-only HostSleuth Workbench for bounded file identity, DNS, HTTP, and public-certificate inspection.
+- [x] M10 — read-only Reboot Story.
+- [x] M10 schema v4 boot ID and exact `/proc/stat` `btime` evidence.
+- [x] M10 deterministic known-boot-ID change detection with no uptime inference.
+- [x] M10 schema-upgrade regression: an older snapshot without boot ID cannot become a false reboot event.
+- [x] M10 CLI, JSON API, runtime Web assets, and Reboot-tab integration.
+- [x] M10 bounded previous/current boot journal evidence with inaccessible/unavailable history reported as `unknown`.
+- [x] M10 orderly-vs-abnormal classification only when direct evidence supports it.
+- [x] M10 service/listener/container recovery evidence requiring retained post-boot evidence plus current-state agreement.
+- [x] M10 package/kernel/system/configuration context retained as non-causal context.
+- [x] M10 focused and full Go validation, vet, formatting, individual/exact-served JavaScript syntax, native build, Docker smoke, linux/amd64 build, and linux/arm64 build.
+- [x] M10 isolated real-OMV acceptance without changing the live HostSleuth deployment.
+- [x] M10 real-host regression: `No journal files were opened due to insufficient permissions.` is unavailable evidence and remains `unknown` without privilege expansion.
 
-Stable `v0.3.0` remains the current published release. M7, M8, and M9 are newer source capabilities and are not claimed to be included in v0.3.0. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
+Full M10 implementation and acceptance record: `docs/history/M10-REBOOT-STORY.md`.
 
-## Active — 6. M10 Reboot Story
+Stable `v0.3.0` remains the current published release. M7, M8, M9, and M10 are newer source capabilities and are not claimed to be included in v0.3.0.
 
-M10 is the next approved milestone. Keep it evidence-first and read-only.
+M10 did not change production or recovery configuration. A final read-only production check reported application version `v0.3.0`; the exact live image tag could not be read by the unprivileged acceptance account. The separate `OMV-Docker-Rebuild` repository still documents its HostSleuth recovery definition as pinned to `mjmalleo/hostsleuth:0.1.0`. Do not reconcile that divergence as part of M10.
 
-- [ ] Capture current boot time and bounded previous boot/shutdown evidence where available.
-- [ ] Distinguish orderly vs abnormal shutdown only when direct evidence supports it.
-- [ ] Correlate package/kernel/configuration changes near reboot without claiming cause from timing alone.
-- [ ] Surface services failed after boot.
-- [ ] Surface listeners that existed before but did not return only when retained evidence supports that statement.
-- [ ] Include container state changes relevant to boot recovery.
-- [ ] Attach current service/listener/certificate context for missing endpoints only where evidence connects honestly.
-- [ ] Do not invent a reboot cause.
-- [ ] Reuse Incident Lens/event primitives instead of creating a second history store.
-- [ ] Focused tests, normal CI, and bounded real-host acceptance.
+## Next — M11 Optional Safe Actions — NOT STARTED
+
+Do not begin implementation without explicit owner direction and an explicit security/design review. M11 is the first planned milestone that may cross HostSleuth's read-only boundary.
+
+Any approved action must be:
+
+- narrow and predefined;
+- disabled by default;
+- previewed;
+- explicitly confirmed;
+- audited;
+- postcondition-verified;
+- free of arbitrary shell/command fields.
+
+Certificates/Certbot are only one candidate family. Do not make certificates the product direction.
 
 ## Consumer/product research — separate backlog, not active scope
 
-Continue studying what users currently assemble from CLI tools, admin consoles, monitoring products, DNS/HTTP/TLS websites, package tools, log viewers, scripts, and other one-off troubleshooting utilities. Preserve differentiated opportunities without changing the ordered roadmap.
+Continue studying recurring troubleshooting workflows where HostSleuth can add correlation, verification, and boundedness without becoming a generic administration platform.
 
-The research backlog is intentionally broader than certificate management. Promising themes include:
+Promising themes include:
 
-- expected-endpoint contracts tying service/listener/protocol/certificate expectations to retained changes;
+- endpoint-path and expected-state contracts;
+- DNS resolver/delegation/split-view evidence;
+- HTTP/reverse-proxy/upstream mismatch evidence;
+- port/listener/bind ownership;
+- file permissions/ownership/deployment-path problems;
+- container disappearance/dependency evidence;
 - protocol-aware TLS/STARTTLS inspection for mail and other non-HTTPS services;
-- certificate source -> destination -> actually-served fingerprint verification and rollout consistency;
-- DNS path/delegation or resolver-comparison workflows when they answer a concrete troubleshooting question;
-- HTTP/reverse-proxy evidence that explains redirect, host-header, or upstream mismatches without becoming a proxy manager;
-- permissions/ownership/deployment-path evidence that explains why a service cannot consume a file it is expected to use;
-- tightly bounded safe-action recipes with preview, audit, postcondition verification, and no arbitrary shell.
+- boot/recovery workflows;
+- certificate source -> destination -> actually-served fingerprint verification and rollout consistency.
 
-Any write/action feature remains reserved for M11 security/design review or another explicitly approved later milestone.
-
-## Then — exact approved order
-
-### 7. M11 — Optional Safe Actions
-
-Requires explicit security/design review before crossing the read-only boundary. Actions must be disabled by default, previewed, confirmed, audited, and expose no arbitrary command field.
-
-### 8. Later — Redacted Evidence Bundle
+## Later — Redacted Evidence Bundle
 
 Only after redaction rules and threat-model work are mature enough for safe sharing/export.
 
@@ -80,7 +81,7 @@ Only pursue if real use proves the need:
 - `.deb` packaging and signed artifacts.
 - Privilege separation if future collectors genuinely justify it.
 - SQLite if JSON/JSONL becomes a demonstrated limitation.
-- Broader baseline-vs-incident comparison beyond M8 if real use proves necessary.
+- Broader baseline-vs-incident comparison if real use proves necessary.
 - README screenshot refresh when naturally useful; no cosmetic workstream.
 
 ## Not planned unless HostSleuth changes direction
