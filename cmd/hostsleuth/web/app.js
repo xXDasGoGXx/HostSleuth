@@ -11,8 +11,10 @@ const checkNames = {
   tcp: "TCP connection",
   "local-listener": "Local listener",
   docker: "Docker mapping",
+  "docker-port": "Docker mapping",
   firewall: "Firewall evidence",
   systemd: "Service evidence",
+  "systemd-failures": "Service evidence",
 };
 
 function byId(id) {
@@ -108,6 +110,7 @@ function renderEvents(container, events, limit = null) {
 
 function renderHost(snapshot) {
   const host = snapshot.host || {};
+  const dockerMode = snapshot.mode === "docker";
   const services = snapshot.services || [];
   const containers = snapshot.containers || [];
   const listeners = snapshot.listeners || [];
@@ -116,15 +119,19 @@ function renderHost(snapshot) {
 
   text(byId("hostName"), host.hostname || "This host");
   text(byId("hostDetailName"), host.hostname || "Host details");
-  text(byId("hostSummary"), [host.os, host.kernel ? `kernel ${host.kernel}` : ""].filter(Boolean).join(" · ") || "Host snapshot loaded.");
-  text(byId("serviceCount"), services.length);
+  const summaryParts = [host.os, host.kernel ? `kernel ${host.kernel}` : ""];
+  if (dockerMode) summaryParts.push("Docker deployment");
+  text(byId("hostSummary"), summaryParts.filter(Boolean).join(" · ") || "Host snapshot loaded.");
+  text(byId("serviceCount"), dockerMode ? "—" : services.length);
   text(byId("containerCount"), containers.length);
   text(byId("listenerCount"), listeners.length);
   text(byId("changeCount"), state.events.length);
 
   const serviceNote = byId("serviceNote");
   serviceNote.classList.remove("good", "problem");
-  if (failedServices > 0) {
+  if (dockerMode) {
+    serviceNote.textContent = "Unavailable in Docker mode";
+  } else if (failedServices > 0) {
     serviceNote.textContent = `${failedServices} failed`;
     serviceNote.classList.add("problem");
   } else {
@@ -141,6 +148,7 @@ function renderHost(snapshot) {
   snapshotState.lastElementChild.textContent = relativeSnapshotTime(snapshot.captured_at);
 
   const facts = [
+    ["Deployment", dockerMode ? "Docker · reduced host visibility" : "Native Linux"],
     ["Operating system", host.os || "—"],
     ["Kernel", host.kernel || "—"],
     ["Architecture", host.architecture || "—"],
@@ -164,7 +172,7 @@ function renderHost(snapshot) {
   });
 
   renderInterfaces(snapshot.interfaces || []);
-  renderFilesystems(snapshot.filesystems || []);
+  renderFilesystems(snapshot.filesystems || [], dockerMode);
 }
 
 function renderInterfaces(interfaces) {
@@ -194,11 +202,14 @@ function renderInterfaces(interfaces) {
   });
 }
 
-function renderFilesystems(filesystems) {
+function renderFilesystems(filesystems, dockerMode = false) {
   const container = byId("filesystemList");
   container.replaceChildren();
   if (!filesystems.length) {
-    container.append(makeEmpty("No filesystem information is available."));
+    const message = dockerMode
+      ? "Host filesystem inventory is unavailable in Docker mode. Native installation provides full filesystem visibility."
+      : "No filesystem information is available.";
+    container.append(makeEmpty(message));
     return;
   }
   filesystems.forEach((item) => {

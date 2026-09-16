@@ -29,6 +29,14 @@ var journalUnitLookup = func(ctx context.Context, unit string) (boundedCommandRe
 }
 
 func systemdFailureCheck(ctx context.Context, snap Snapshot) Check {
+	if snap.Mode == dockerDeploymentMode {
+		return Check{
+			Name:     "systemd-failures",
+			Status:   "unknown",
+			Evidence: "systemd runtime evidence is unavailable in Docker deployment mode",
+		}
+	}
+
 	failed := failedServices(snap)
 	if len(failed) == 0 {
 		return Check{Name: "systemd-failures", Status: "pass", Evidence: "snapshot contains no failed systemd services"}

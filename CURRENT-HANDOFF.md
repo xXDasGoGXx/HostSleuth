@@ -18,8 +18,8 @@ The product definition and normal user-facing overview live in `README.md`.
 - **M2 — Deeper deterministic diagnosis:** complete.
 - **M3 — Product Experience:** active.
   - **M3.1 Web UI:** complete and merged in PR #11.
-  - **M3.2 Usability:** implementation complete on PR #13; pending final green CI/merge.
-  - **M3.3 Docker release:** next, only after M3.2 merge.
+  - **M3.2 Usability:** complete and merged in PR #13 (`d250019902d676f67d44b74cc122db3f40ad7e67`).
+  - **M3.3 Docker release:** active on `m3/docker-release`.
 
 The exact checklist lives in `TO-DO.md` and is updated as work progresses.
 
@@ -31,93 +31,84 @@ Ideas such as authentication, proxy/TLS awareness, SQLite, AI explanation, multi
 
 Promote one only when it solves a common real user problem without making installation, operation, or the UI meaningfully harder.
 
-## Current validated deployment state
+## Native deployment
 
-The M2 diagnostic core has been validated on Debian 13 as a managed systemd service with the local dashboard available on loopback. Validation included Docker and systemd inventory, route and nftables evidence, listener/bind correlation, and normal event recording.
+Native Linux remains the recommended HostSleuth deployment because it provides the fullest visibility into systemd and host filesystems while keeping the Web UI loopback-only by default.
 
-Environment-specific hostnames, addresses, process IDs, inventory counts, and local deployment hashes are intentionally omitted from this public repository handoff.
+The M2 diagnostic core and native systemd deployment have been validated on Debian 13. M3.1/M3.2 changed presentation and usability without changing deterministic diagnosis semantics.
+
+## M3.3 Docker design
+
+The Docker deployment is deliberately one supported Compose shape rather than a matrix of modes and switches.
+
+Implemented design:
+
+- multi-stage Linux image build;
+- one `compose.yaml`;
+- persistent `hostsleuth-data` volume;
+- host network/PID/UTS namespaces so network/listener/hostname evidence describes the host rather than an isolated container;
+- host `/etc/os-release` mounted read-only for truthful OS identity;
+- Docker socket mounted for container inventory;
+- all Linux capabilities dropped;
+- `no-new-privileges` enabled;
+- read-only container root filesystem;
+- no unrestricted `privileged: true`;
+- same embedded HostSleuth Web UI;
+- CI definitions for Linux amd64 and arm64 image builds.
+
+Docker isolation prevents safe, reliable access to some native evidence. Docker-mode snapshots therefore mark the deployment mode explicitly and intentionally omit host filesystem and systemd inventory. Diagnosis reports systemd evidence as unavailable instead of manufacturing a clean result. Firewall evidence may also remain unavailable without elevated network-administration privileges.
+
+This reduced visibility is intentional. Do not add broad host-root mounts, systemd control sockets, `CAP_NET_ADMIN`, or privileged mode merely to make Docker look identical to native HostSleuth.
+
+## Docker socket security boundary
+
+The Compose deployment mounts `/var/run/docker.sock` for Docker inventory. This is a powerful host capability even when the socket path is mounted read-only; read-only bind mounting does not make Docker API access inherently read-only.
+
+HostSleuth uses Docker only for read-only inventory commands, but a compromised process with socket access could potentially control the Docker daemon. This risk is documented in both `README.md` and `SECURITY.md` rather than hidden behind deployment convenience.
 
 ## What works now
 
 ### Change recorder
 
-HostSleuth captures and compares:
-
-- host/OS/kernel state;
-- filesystems and capacity;
-- interfaces and routes;
-- listening sockets;
-- systemd services;
-- Docker containers, ports, state, and network names.
-
-It records meaningful service/container/listener events while suppressing Docker uptime-only churn.
+Native HostSleuth captures host/OS/kernel state, filesystems, interfaces/routes, listeners, systemd services, and Docker inventory. Docker mode retains truthful host identity/network/listener/Docker evidence while clearly marking native-only evidence unavailable.
 
 ### Deterministic diagnosis
 
-`diagnose host:port` can currently use:
+`diagnose host:port` continues to use the existing deterministic precedence rules. Optional evidence that is unavailable in Docker mode remains `unknown`; it is not converted into a false failure or false pass.
 
-- DNS resolution;
-- kernel route evidence;
-- TCP connectivity;
-- target-aware local TCP listener evidence;
-- Docker publication/bind/network evidence;
-- bounded nftables candidate evidence;
-- bounded failed-systemd candidate evidence.
+### Web UI and usability
 
-Evidence precedence is deliberate: successful TCP is definitive; strong local bind/listener evidence outranks weaker firewall/systemd candidates; unavailable optional evidence stays neutral.
-
-### M3.1 Web UI
-
-The merged UI provides responsive Overview / Diagnose / Changes / Host views, readable diagnosis presentation, a recent-change timeline, host/interface/filesystem views, and self-contained HTML/CSS/vanilla JavaScript embedded in the Go binary.
-
-### M3.2 usability implementation
-
-PR #13 keeps product capability unchanged while improving use and onboarding:
-
-- simpler user-facing wording;
-- clear first-run / empty-history explanation;
-- friendly diagnosis titles while preserving the exact deterministic conclusion and evidence;
-- running version and VCS revision visible through CLI/Web UI when available;
-- newest changes shown first, including the newest five on the Overview;
-- recommended native/systemd install path moved to the top of the README;
-- safe SSH-tunnel instructions for remote access to the loopback-only UI;
-- CI now parses the embedded JavaScript in addition to Go formatting, vet, tests, and build.
-
-A real README UI screenshot is intentionally deferred until an accepted deployed build can be captured; no mock screenshot will be used just to satisfy documentation.
-
-## Current limitations
-
-- dashboard is loopback-only and has no authentication;
-- storage is JSON/JSONL;
-- reverse-proxy and TLS-specific diagnosis are not implemented;
-- configuration/package change tracking is not implemented;
-- HostSleuth is single-host first;
-- no automatic remediation.
-
-These limitations stay visible for collective product review; they do not automatically become the next work.
+The Web UI provides Overview / Diagnose / Changes / Host views, readable diagnosis evidence, first-run guidance, version/build information, newest-first changes, and explicit Docker reduced-visibility labels.
 
 ## Active branch and scope
 
-Active branch: `m3/usability`
+Active branch: `m3/docker-release`
 
-Open PR: `#13 — M3.2: simplify HostSleuth usability`
+Current scope is **M3.3 only**:
 
-Do not start Docker packaging on this branch. After PR #13 is green and merged, create the Docker release branch from the then-current `main`.
+1. validate the Dockerfile and Compose definition;
+2. validate amd64 and arm64 image builds;
+3. validate normal Go/Web CI with Docker-mode tests;
+4. fix only Docker-release blockers discovered by that validation;
+5. merge after all checks are green.
+
+Do not publish a container image. Do not deploy this branch over the known-good native service. Both actions remain owner-controlled.
 
 ## Branch hygiene
 
 `main` remains the authoritative stable development state.
 
-- `m3/usability` is the only active feature branch for the current task.
+- `m3/docker-release` is the only active feature branch for the current task.
+- `m3/usability` is historical after merged PR #13.
 - `m3/product-experience` is historical after merged PR #11.
 - Old M1/M2 feature branches are historical leftovers after merged work.
 - `m3/npm-proxy-awareness` and `m3/tls-diagnostics` contain historical experimental work and are not current product state.
 
 ## Next task
 
-**Merge M3.2 after final green CI, then begin M3.3 Docker packaging from current `main`.**
+**Open M3.3 for review and let CI validate native tests plus both Docker image architectures.**
 
-After the M3 sequence, review the deferred product decisions collectively and decide what, if anything, truly belongs in the product.
+If validation is green, merge M3.3. After the M3 sequence, review deferred product decisions collectively before starting another capability milestone.
 
 ## Repository source of truth
 
