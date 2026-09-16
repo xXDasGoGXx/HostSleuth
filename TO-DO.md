@@ -11,30 +11,21 @@ This file is intentionally short. Completed milestone history belongs in `docs/h
 - [x] Docker uptime-noise fix.
 - [x] Route, nftables, systemd/journal candidate, Docker bind/network, and evidence-precedence diagnosis work.
 - [x] Public-repository cleanup and documentation sanitization.
+- [x] M3.1 — modern responsive Web UI with readable diagnosis, changes, and host views.
 
 ## M3 — Product Experience
 
-This sequence is intentionally fixed. Finish each section before starting the next one. Do not pull unrelated backlog work into M3.
+The sequence stays fixed: M3.1 Web UI -> M3.2 Usability -> M3.3 Docker release. Finish the active section before starting the next one.
 
-### M3.1 — Web UI — active
+### M3.2 — Usability — implementation complete, pending merge
 
-- [ ] Modern responsive interface.
-- [ ] Human-readable diagnosis results instead of raw JSON as the normal user experience.
-- [ ] Clean recent-change timeline.
-- [ ] Clear host overview.
-- [ ] Good loading, empty, and error states.
-- [ ] Mobile-friendly layout.
-- [ ] Keep the UI self-contained in the Go binary with no frontend framework or external runtime dependency.
+- [x] Review and simplify user-facing wording.
+- [x] Make first-run state obvious and non-confusing.
+- [x] Make version/build information easy to find.
+- [x] Add concise README usage examples; capture a real UI screenshot later from an accepted deployed build rather than using a mockup.
+- [x] Simplify installation documentation around the recommended deployment paths.
 
-### M3.2 — Usability — next
-
-- [ ] Review and simplify user-facing wording.
-- [ ] Make first-run state obvious and non-confusing.
-- [ ] Make version/build information easy to find.
-- [ ] Add concise screenshots/examples to the README once the M3.1 UI is stable.
-- [ ] Simplify installation documentation around the recommended deployment paths.
-
-### M3.3 — Docker release — after M3.2
+### M3.3 — Docker release — after M3.2 merge
 
 - [ ] Create an official Dockerfile.
 - [ ] Provide one recommended `compose.yaml` rather than many deployment variants.
@@ -46,20 +37,22 @@ This sequence is intentionally fixed. Finish each section before starting the ne
 - [ ] Add CI image-build validation.
 - [ ] Do not publish a container image until explicitly approved.
 
-## Backlog — only pull forward when justified
+## Collective review — deferred product decisions
 
+These are not rejected ideas and they are not automatically future features. Keep them visible and review them together after the current M3 work, or earlier only when a real blocker proves one is required.
+
+For each item, ask: **Does this solve a common HostSleuth user problem without making installation, operation, or the UI meaningfully harder?** If not, leave it out.
+
+- [ ] Capture one real Web UI screenshot for the README after an accepted deployed build is available.
 - [ ] Authentication before normal non-loopback dashboard exposure.
 - [ ] Reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager.
 - [ ] TLS/certificate diagnostics.
 - [ ] Configuration fingerprinting without storing secrets by default.
 - [ ] Package-change timeline from dpkg/apt logs.
-- [ ] SQLite storage if JSON/JSONL becomes a real operational limitation.
+- [ ] SQLite storage only if JSON/JSONL becomes a demonstrated operational limitation.
 - [ ] `.deb` package and signed release artifacts.
 - [ ] Privilege separation for collectors that require elevated reads.
 - [ ] General redaction rules and threat-model documentation.
-
-## Later / research
-
 - [ ] Exposure map for Internet/LAN/VPN-visible listeners.
 - [ ] Baseline-vs-incident comparison UI.
 - [ ] Dependency graph across DNS, network, proxy, app, and storage layers.
@@ -71,4 +64,4 @@ This sequence is intentionally fixed. Finish each section before starting the ne
 
 ## Rule for new ideas
 
-Add ideas here without interrupting the active task. A backlog item does not become active merely because it sounds useful.
+Add new ideas to the collective review list without interrupting the active milestone. An idea does not become active merely because it sounds useful.

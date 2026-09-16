@@ -55,12 +55,12 @@
           <article class="metric-card">
             <span class="metric-label">Listeners</span>
             <strong class="metric-value" id="listenerCount">—</strong>
-            <span class="metric-note">Active sockets</span>
+            <span class="metric-note">Listening sockets</span>
           </article>
           <article class="metric-card">
             <span class="metric-label">Recent changes</span>
             <strong class="metric-value" id="changeCount">—</strong>
-            <span class="metric-note">Latest recorded events</span>
+            <span class="metric-note">Latest retained events</span>
           </article>
         </div>
 
@@ -82,7 +82,7 @@
         <section class="panel diagnose-panel">
           <p class="eyebrow">DIAGNOSE</p>
           <h1>What can’t you reach?</h1>
-          <p class="section-copy">Enter a host and port. HostSleuth will show what it can prove, what failed, and the evidence behind the result.</p>
+          <p class="section-copy">Enter a host and port. HostSleuth checks the path and shows the answer first, then the evidence behind it.</p>
 
           <form id="diagnoseForm" class="diagnose-form">
             <label for="diagnoseTarget">Host or IP with port</label>
@@ -100,6 +100,7 @@
               <p class="eyebrow">RESULT</p>
               <h2 id="diagnosisConclusion">Diagnosis complete</h2>
               <p class="muted" id="diagnosisTarget"></p>
+              <p class="section-copy" id="diagnosisExplanation"></p>
             </div>
             <span class="confidence-badge" id="diagnosisConfidence"></span>
           </div>
@@ -119,7 +120,7 @@
             <div>
               <p class="eyebrow">TIMELINE</p>
               <h1>Recent changes</h1>
-              <p class="section-copy">Meaningful changes HostSleuth recorded from successive host snapshots.</p>
+              <p class="section-copy">HostSleuth records meaningful differences between snapshots and leaves routine noise out.</p>
             </div>
           </div>
           <div id="allEvents" class="timeline">
@@ -134,7 +135,7 @@
             <div>
               <p class="eyebrow">HOST</p>
               <h1 id="hostDetailName">Host details</h1>
-              <p class="section-copy">A compact view of the machine HostSleuth is currently observing.</p>
+              <p class="section-copy">The machine HostSleuth is observing right now.</p>
             </div>
           </div>
           <div class="detail-grid" id="hostFacts"></div>
@@ -163,7 +164,7 @@
     </main>
 
     <footer>
-      HostSleuth · Local-first · Read-only · Deterministic
+      HostSleuth <span id="appVersion"></span> · Local-first · Read-only · Deterministic
     </footer>
   </div>
 

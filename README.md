@@ -2,7 +2,44 @@
 
 **A small, local-first Linux flight recorder for two questions: what changed, and why can I not reach this host/service/port?**
 
-HostSleuth is intentionally not a full monitoring platform. It records meaningful Linux state changes and performs deterministic, evidence-backed `host:port` diagnosis without requiring a cloud account, AI model, external database, or API key.
+HostSleuth records meaningful Linux state changes and performs deterministic, evidence-backed `host:port` diagnosis. It does not require a cloud account, external database, API key, or AI model.
+
+## Quick start — recommended native install
+
+HostSleuth currently works best as a native Linux service because it needs to observe the real host.
+
+Requirements: Linux with systemd. Go is **not** required when installing a release.
+
+```bash
+git clone https://github.com/xXDasGoGXx/HostSleuth.git
+cd HostSleuth
+sudo ./scripts/install.sh
+```
+
+Check that it is running:
+
+```bash
+systemctl status hostsleuth --no-pager
+hostsleuth version
+```
+
+HostSleuth binds its Web UI to loopback by default for safety.
+
+If you are using HostSleuth on the same machine, open:
+
+```text
+http://127.0.0.1:8787
+```
+
+If HostSleuth is running on a remote server, use an SSH tunnel from your computer:
+
+```bash
+ssh -L 8787:127.0.0.1:8787 user@your-server
+```
+
+Then open `http://127.0.0.1:8787` locally.
+
+A new install starts by taking a baseline snapshot. An empty change timeline is normal until HostSleuth observes a meaningful change.
 
 ## What it does
 
@@ -20,7 +57,7 @@ It compares snapshots and records meaningful service/container/listener changes 
 
 ### Diagnose `host:port`
 
-HostSleuth can combine:
+Enter a target such as `192.168.1.20:443` or `example.com:443`. HostSleuth can combine:
 
 - DNS resolution;
 - kernel route evidence;
@@ -30,21 +67,41 @@ HostSleuth can combine:
 - bounded nftables candidate evidence;
 - bounded failed-systemd candidate evidence.
 
-The diagnosis engine has explicit evidence precedence: successful TCP is definitive, stronger local bind/listener evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
+The Web UI presents the answer first and keeps the underlying evidence available for inspection. Successful TCP is definitive, stronger local bind/listener evidence outranks weaker candidates, and unavailable optional evidence stays `unknown` rather than becoming a false failure.
 
-## Product boundaries
+## CLI basics
 
-The current product is:
+Capture a snapshot:
 
-- local-first;
-- single-host first;
-- read-only;
-- deterministic before explanatory;
-- loopback-only by default for the web UI.
+```bash
+hostsleuth snapshot
+```
 
-HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, or reconfigure the host.
+Diagnose a target:
 
-## Try it from source
+```bash
+hostsleuth diagnose example.com:443
+```
+
+Show recent events:
+
+```bash
+hostsleuth events
+```
+
+Show the installed version:
+
+```bash
+hostsleuth version
+```
+
+## Install a specific release
+
+```bash
+sudo HOSTSLEUTH_VERSION=v0.1.0-alpha.1 ./scripts/install.sh
+```
+
+## Build from source
 
 Requirements: Linux and Go 1.24+.
 
@@ -53,65 +110,42 @@ git clone https://github.com/xXDasGoGXx/HostSleuth.git
 cd HostSleuth
 go test ./...
 go build -o hostsleuth ./cmd/hostsleuth
-```
-
-Capture a snapshot:
-
-```bash
-./hostsleuth snapshot
-```
-
-Diagnose a target:
-
-```bash
-./hostsleuth diagnose example.com:443
-```
-
-Show recent events:
-
-```bash
-./hostsleuth events
-```
-
-Start the local dashboard:
-
-```bash
 ./hostsleuth serve
 ```
 
-Then open `http://127.0.0.1:8787` on the same machine.
-
-## Install a release with systemd
-
-Release installation does **not** require Go on the target host. Run the installer from a HostSleuth repository checkout so it can install the included systemd unit:
-
-```bash
-sudo ./scripts/install.sh
-```
-
-To install a specific release:
-
-```bash
-sudo HOSTSLEUTH_VERSION=v0.1.0-alpha.1 ./scripts/install.sh
-```
-
-Developers who intentionally want to build on the target host can use:
+Developers who intentionally want the installer to build on the target host can use:
 
 ```bash
 sudo ./scripts/install-source.sh
 ```
 
-Uninstall the binary/service while preserving recorded state:
+## Uninstall
+
+Remove the binary and service while preserving recorded HostSleuth state:
 
 ```bash
 sudo ./scripts/uninstall.sh
 ```
 
+## Product boundaries
+
+HostSleuth is intentionally:
+
+- local-first;
+- single-host first;
+- read-only;
+- deterministic before explanatory;
+- loopback-only by default for the Web UI.
+
+HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, or reconfigure the host.
+
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, and M2 deeper deterministic diagnosis are complete and have been validated on Debian 13.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, and M3.1 Web UI are complete.
 
-The next phase is deliberately boring: **use the current build on real troubleshooting cases and improve the product where actual use exposes confusion or missing evidence.** New large subsystems are not the default next step.
+M3.2 is focused on usability: clearer wording, first-run behavior, version visibility, and simpler installation guidance. M3.3 will address an official Docker deployment without turning HostSleuth into a complicated multi-mode product.
+
+Larger ideas remain deferred for collective product review rather than automatically becoming features. See `TO-DO.md` for the current sequence and decision list.
 
 ## Security and privacy
 
@@ -120,8 +154,8 @@ HostSleuth can collect hostnames, IP addresses, mount paths, service names, list
 ## Project files
 
 - `README.md` — product definition, usage, and current scope.
-- `CURRENT-HANDOFF.md` — concise current project state and next task.
-- `TO-DO.md` — short active backlog.
+- `CURRENT-HANDOFF.md` — current project state and next task.
+- `TO-DO.md` — active milestone checklist and deferred product decisions.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 
 ## License

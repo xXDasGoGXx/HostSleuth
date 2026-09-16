@@ -17,17 +17,23 @@ The product definition and normal user-facing overview live in `README.md`.
 - **M1 — Single-host deployable MVP:** complete.
 - **M2 — Deeper deterministic diagnosis:** complete.
 - **M3 — Product Experience:** active.
-  - **M3.1 Web UI:** implementation complete on the active branch; pending product/UI review before merge.
-  - **M3.2 Usability:** next, only after M3.1 is accepted and merged.
-  - **M3.3 Docker release:** after M3.2.
+  - **M3.1 Web UI:** complete and merged in PR #11.
+  - **M3.2 Usability:** implementation complete on PR #13; pending final green CI/merge.
+  - **M3.3 Docker release:** next, only after M3.2 merge.
 
-The exact M3 checklist is locked in `TO-DO.md`. Do not broaden M3 with unrelated collectors, storage changes, proxy/TLS work, AI, multi-host work, or remediation.
+The exact checklist lives in `TO-DO.md` and is updated as work progresses.
 
-Detailed milestone history is archived in `docs/history/DEVELOPMENT-HISTORY.md`.
+## Product-direction rule
+
+HostSleuth should remain easy to deploy, easy to understand, and intentionally small. New capability is not automatically good capability.
+
+Ideas such as authentication, proxy/TLS awareness, SQLite, AI explanation, multi-host support, remediation, and other larger additions remain visible in the **collective review** section of `TO-DO.md`. They are deferred decisions, not permanent bans and not promised features.
+
+Promote one only when it solves a common real user problem without making installation, operation, or the UI meaningfully harder.
 
 ## Current validated deployment state
 
-The current M2 product build has been validated on Debian 13 as a managed systemd service with the local dashboard available on loopback. Validation included Docker and systemd inventory, route and nftables evidence, listener/bind correlation, and normal event recording.
+The M2 diagnostic core has been validated on Debian 13 as a managed systemd service with the local dashboard available on loopback. Validation included Docker and systemd inventory, route and nftables evidence, listener/bind correlation, and normal event recording.
 
 Environment-specific hostnames, addresses, process IDs, inventory counts, and local deployment hashes are intentionally omitted from this public repository handoff.
 
@@ -60,68 +66,58 @@ It records meaningful service/container/listener events while suppressing Docker
 
 Evidence precedence is deliberate: successful TCP is definitive; strong local bind/listener evidence outranks weaker firewall/systemd candidates; unavailable optional evidence stays neutral.
 
-## Real M2 validation
+### M3.1 Web UI
 
-The current product code was validated on Debian 13 without manufacturing destructive failures.
+The merged UI provides responsive Overview / Diagnose / Changes / Host views, readable diagnosis presentation, a recent-change timeline, host/interface/filesystem views, and self-contained HTML/CSS/vanilla JavaScript embedded in the Go binary.
 
-Confirmed classes of behavior include:
+### M3.2 usability implementation
 
-- reachable local services -> reachable / high confidence;
-- closed local ports -> no listener / high confidence;
-- listeners bound to a different local address are not treated as evidence for loopback;
-- container-internal ports are distinguished from host-published ports;
-- published host ports are diagnosed correctly on the address where they are actually bound;
-- root-context route lookup and nftables evidence work;
-- dashboard/API and change recording remain healthy.
+PR #13 keeps product capability unchanged while improving use and onboarding:
 
-The validation host had no failed systemd services at the time, so journal excerpts were not forced by intentionally breaking a service. That path remains covered by tests.
+- simpler user-facing wording;
+- clear first-run / empty-history explanation;
+- friendly diagnosis titles while preserving the exact deterministic conclusion and evidence;
+- running version and VCS revision visible through CLI/Web UI when available;
+- newest changes shown first, including the newest five on the Overview;
+- recommended native/systemd install path moved to the top of the README;
+- safe SSH-tunnel instructions for remote access to the loopback-only UI;
+- CI now parses the embedded JavaScript in addition to Go formatting, vet, tests, and build.
+
+A real README UI screenshot is intentionally deferred until an accepted deployed build can be captured; no mock screenshot will be used just to satisfy documentation.
 
 ## Current limitations
 
 - dashboard is loopback-only and has no authentication;
-- storage is still JSON/JSONL;
+- storage is JSON/JSONL;
 - reverse-proxy and TLS-specific diagnosis are not implemented;
 - configuration/package change tracking is not implemented;
 - HostSleuth is single-host first;
 - no automatic remediation.
 
-These are backlog items, not reasons to expand the active M3 scope.
+These limitations stay visible for collective product review; they do not automatically become the next work.
 
 ## Active branch and scope
 
-Active branch: `m3/product-experience`
+Active branch: `m3/usability`
 
-Open PR: `#11 — M3.1: modernize the HostSleuth web UI`
+Open PR: `#13 — M3.2: simplify HostSleuth usability`
 
-Current M3.1 implementation:
-
-- modern responsive Overview / Diagnose / Changes / Host interface;
-- readable diagnosis presentation using the existing deterministic checks and evidence;
-- recent-change timeline;
-- compact host, interface, and filesystem overview;
-- loading, empty, and error states;
-- mobile-friendly layout;
-- self-contained HTML/CSS/vanilla-JavaScript assets embedded in the Go binary;
-- no frontend framework or external runtime dependency.
-
-Validation for PR #11 is green: formatting, `go vet`, tests, and build all pass. The current stable service has not been changed, and PR #11 has not been merged pending product/UI review.
-
-Do not begin Docker packaging on this branch. Once M3.1 is accepted and merged and M3.2 is complete, create the Docker release branch from the then-current `main`.
+Do not start Docker packaging on this branch. After PR #13 is green and merged, create the Docker release branch from the then-current `main`.
 
 ## Branch hygiene
 
 `main` remains the authoritative stable development state.
 
-- `m3/product-experience` is the only active feature branch for the current task.
+- `m3/usability` is the only active feature branch for the current task.
+- `m3/product-experience` is historical after merged PR #11.
 - Old M1/M2 feature branches are historical leftovers after merged work.
-- `m3/npm-proxy-awareness` and `m3/tls-diagnostics` contain unmerged experimental work and are **not part of the product**.
-- Do not merge, continue, or treat those experimental branches as active unless a future real-world need explicitly justifies reviving them.
+- `m3/npm-proxy-awareness` and `m3/tls-diagnostics` contain historical experimental work and are not current product state.
 
 ## Next task
 
-**Review and accept M3.1 Web UI before merge. Do not start M3.2 until that happens.**
+**Merge M3.2 after final green CI, then begin M3.3 Docker packaging from current `main`.**
 
-If M3.1 needs changes, keep them limited to the Web UI checklist in `TO-DO.md`.
+After the M3 sequence, review the deferred product decisions collectively and decide what, if anything, truly belongs in the product.
 
 ## Repository source of truth
 

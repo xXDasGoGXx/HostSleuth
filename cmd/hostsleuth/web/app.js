@@ -74,9 +74,10 @@ function makeEmpty(message) {
 
 function renderEvents(container, events, limit = null) {
   container.replaceChildren();
-  const list = limit ? events.slice(0, limit) : events;
+  const ordered = [...events].reverse();
+  const list = limit ? ordered.slice(0, limit) : ordered;
   if (!list.length) {
-    container.append(makeEmpty("No meaningful changes have been recorded yet."));
+    container.append(makeEmpty("No meaningful changes recorded yet. On a new install, this is expected—HostSleuth has a baseline and will add entries when something changes."));
     return;
   }
 
@@ -226,13 +227,27 @@ function renderFilesystems(filesystems) {
   });
 }
 
+function diagnosisTitle(diagnosis) {
+  const conclusion = String(diagnosis.conclusion || "").toLowerCase();
+  if (conclusion === "target is reachable") return "Connection succeeded";
+  if (conclusion === "name resolution failed") return "Name resolution failed";
+  if (conclusion === "invalid target") return "Enter a host and port";
+  if (conclusion === "invalid port") return "Port must be a number";
+  if (conclusion.includes("no process is listening") || conclusion.includes("no process appears to be listening")) return "Nothing is listening there";
+  if (conclusion.includes("kernel route lookup reports the destination unreachable")) return "No usable route to the target";
+  if (conclusion.includes("snapshot shows a listener")) return "A listener exists, but the connection failed";
+  if (conclusion.includes("remote tcp connection failed")) return "Connection failed";
+  return "Diagnosis complete";
+}
+
 function renderDiagnosis(diagnosis) {
   byId("diagnosisError").classList.add("hidden");
   const result = byId("diagnosisResult");
   result.classList.remove("hidden");
 
-  text(byId("diagnosisConclusion"), diagnosis.conclusion || "Diagnosis complete");
+  text(byId("diagnosisConclusion"), diagnosisTitle(diagnosis));
   text(byId("diagnosisTarget"), diagnosis.target || "");
+  text(byId("diagnosisExplanation"), diagnosis.conclusion || "HostSleuth completed the requested checks.");
   text(byId("diagnosisConfidence"), `${diagnosis.confidence || "unknown"} confidence`);
 
   const list = byId("diagnosisChecks");
@@ -263,6 +278,19 @@ function renderDiagnosis(diagnosis) {
     details.append(summary, evidence);
     list.append(details);
   });
+}
+
+async function loadAbout() {
+  try {
+    const response = await fetch("/api/about", { cache: "no-store" });
+    if (!response.ok) return;
+    const about = await response.json();
+    const version = about.version || "";
+    const revision = about.revision || "";
+    text(byId("appVersion"), [version, revision ? `(${revision})` : ""].filter(Boolean).join(" "));
+  } catch (_) {
+    // Build information is helpful but must never block the dashboard.
+  }
 }
 
 async function loadDashboard() {
@@ -332,4 +360,5 @@ if (["overview", "diagnose", "changes", "host"].includes(initialView)) {
   showView(initialView);
 }
 
+loadAbout();
 loadDashboard();
