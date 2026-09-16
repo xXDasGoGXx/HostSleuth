@@ -17,8 +17,8 @@ The product definition and normal user-facing overview live in `README.md`.
 - **M1 — Single-host deployable MVP:** complete.
 - **M2 — Deeper deterministic diagnosis:** complete.
 - **M3 — Product Experience:** active.
-  - **M3.1 Web UI:** active now.
-  - **M3.2 Usability:** next, only after M3.1.
+  - **M3.1 Web UI:** implementation complete on the active branch; pending product/UI review before merge.
+  - **M3.2 Usability:** next, only after M3.1 is accepted and merged.
   - **M3.3 Docker release:** after M3.2.
 
 The exact M3 checklist is locked in `TO-DO.md`. Do not broaden M3 with unrelated collectors, storage changes, proxy/TLS work, AI, multi-host work, or remediation.
@@ -91,17 +91,22 @@ These are backlog items, not reasons to expand the active M3 scope.
 
 Active branch: `m3/product-experience`
 
-M3.1 changes only the user experience around capabilities HostSleuth already has:
+Open PR: `#11 — M3.1: modernize the HostSleuth web UI`
 
-- modern responsive web interface;
-- readable diagnosis presentation;
+Current M3.1 implementation:
+
+- modern responsive Overview / Diagnose / Changes / Host interface;
+- readable diagnosis presentation using the existing deterministic checks and evidence;
 - recent-change timeline;
-- host overview;
-- loading/empty/error states;
+- compact host, interface, and filesystem overview;
+- loading, empty, and error states;
 - mobile-friendly layout;
-- self-contained assets embedded in the Go binary with no frontend framework.
+- self-contained HTML/CSS/vanilla-JavaScript assets embedded in the Go binary;
+- no frontend framework or external runtime dependency.
 
-Do not begin Docker packaging on this branch. Once M3.1 is merged and M3.2 is complete, create the Docker release branch from the then-current `main`.
+Validation for PR #11 is green: formatting, `go vet`, tests, and build all pass. The current stable service has not been changed, and PR #11 has not been merged pending product/UI review.
+
+Do not begin Docker packaging on this branch. Once M3.1 is accepted and merged and M3.2 is complete, create the Docker release branch from the then-current `main`.
 
 ## Branch hygiene
 
@@ -114,9 +119,9 @@ Do not begin Docker packaging on this branch. Once M3.1 is merged and M3.2 is co
 
 ## Next task
 
-**Complete M3.1 Web UI and nothing else.**
+**Review and accept M3.1 Web UI before merge. Do not start M3.2 until that happens.**
 
-Use the current APIs and deterministic diagnosis output. Improve presentation rather than adding diagnostic engines or backend subsystems.
+If M3.1 needs changes, keep them limited to the Web UI checklist in `TO-DO.md`.
 
 ## Repository source of truth
 
