@@ -49,11 +49,11 @@ type FileInspection struct {
 }
 
 type FileComparison struct {
-	Left        *FileInspection `json:"left"`
-	Right       *FileInspection `json:"right"`
-	SameSize    bool            `json:"same_size"`
-	SameSHA256  bool            `json:"same_sha256"`
-	Conclusion  string          `json:"conclusion"`
+	Left       *FileInspection `json:"left"`
+	Right      *FileInspection `json:"right"`
+	SameSize   bool            `json:"same_size"`
+	SameSHA256 bool            `json:"same_sha256"`
+	Conclusion string          `json:"conclusion"`
 }
 
 type DNSRecord struct {
@@ -84,13 +84,13 @@ type HTTPHop struct {
 }
 
 type HTTPInspection struct {
-	URL          string    `json:"url"`
-	Hops         []HTTPHop `json:"hops"`
-	FinalURL     string    `json:"final_url,omitempty"`
-	FinalStatus  int       `json:"final_status,omitempty"`
-	Redirected   bool      `json:"redirected"`
-	Truncated    bool      `json:"truncated,omitempty"`
-	Conclusion   string    `json:"conclusion"`
+	URL         string    `json:"url"`
+	Hops        []HTTPHop `json:"hops"`
+	FinalURL    string    `json:"final_url,omitempty"`
+	FinalStatus int       `json:"final_status,omitempty"`
+	Redirected  bool      `json:"redirected"`
+	Truncated   bool      `json:"truncated,omitempty"`
+	Conclusion  string    `json:"conclusion"`
 }
 
 type CertificateFileInspection struct {
