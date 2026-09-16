@@ -1,0 +1,25 @@
+services:
+  hostsleuth:
+    build:
+      context: .
+      args:
+        VERSION: ${HOSTSLEUTH_VERSION:-0.1.0-dev}
+    container_name: hostsleuth
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    uts: host
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    volumes:
+      - hostsleuth-data:/var/lib/hostsleuth
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  hostsleuth-data:
