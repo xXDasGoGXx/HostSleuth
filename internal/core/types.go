@@ -3,9 +3,9 @@ package core
 import "time"
 
 const (
-	packageHistorySchemaVersion    = 2
+	packageHistorySchemaVersion     = 2
 	configFingerprintSchemaVersion = 3
-	snapshotSchemaVersion          = configFingerprintSchemaVersion
+	snapshotSchemaVersion           = rebootStorySchemaVersion
 )
 
 type Snapshot struct {
@@ -24,13 +24,15 @@ type Snapshot struct {
 }
 
 type HostInfo struct {
-	Hostname     string `json:"hostname"`
-	OS           string `json:"os"`
-	Kernel       string `json:"kernel"`
-	Architecture string `json:"architecture"`
-	CPUCount     int    `json:"cpu_count"`
-	MemoryTotal  string `json:"memory_total,omitempty"`
-	Uptime       string `json:"uptime,omitempty"`
+	Hostname      string    `json:"hostname"`
+	OS            string    `json:"os"`
+	Kernel        string    `json:"kernel"`
+	Architecture  string    `json:"architecture"`
+	CPUCount      int       `json:"cpu_count"`
+	MemoryTotal   string    `json:"memory_total,omitempty"`
+	Uptime        string    `json:"uptime,omitempty"`
+	BootID        string    `json:"boot_id,omitempty"`
+	BootStartedAt time.Time `json:"boot_started_at,omitempty"`
 }
 
 type InterfaceInfo struct {
