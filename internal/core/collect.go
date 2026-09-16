@@ -15,11 +15,26 @@ import (
 	"time"
 )
 
+const dockerDeploymentMode = "docker"
+
+func deploymentMode() string {
+	return strings.ToLower(strings.TrimSpace(os.Getenv("HOSTSLEUTH_MODE")))
+}
+
+func osReleasePath() string {
+	if path := strings.TrimSpace(os.Getenv("HOSTSLEUTH_OS_RELEASE_PATH")); path != "" {
+		return path
+	}
+	return "/etc/os-release"
+}
+
 func Collect(ctx context.Context) Snapshot {
 	hostname, _ := os.Hostname()
+	mode := deploymentMode()
 	s := Snapshot{
 		SchemaVersion: 1,
 		CapturedAt:    time.Now().UTC(),
+		Mode:          mode,
 		Host: HostInfo{
 			Hostname:     hostname,
 			OS:           readOSRelease(),
@@ -31,16 +46,20 @@ func Collect(ctx context.Context) Snapshot {
 		},
 	}
 	s.Interfaces = collectInterfaces()
-	s.Filesystems = collectFilesystems()
+	if mode != dockerDeploymentMode {
+		s.Filesystems = collectFilesystems()
+	}
 	s.Routes = lines(run(ctx, "ip", "route", "show"))
 	s.Listeners = collectListeners(ctx)
-	s.Services = collectServices(ctx)
+	if mode != dockerDeploymentMode {
+		s.Services = collectServices(ctx)
+	}
 	s.Containers = collectContainers(ctx)
 	return s
 }
 
 func readOSRelease() string {
-	b, err := os.ReadFile("/etc/os-release")
+	b, err := os.ReadFile(osReleasePath())
 	if err != nil {
 		return runtime.GOOS
 	}
