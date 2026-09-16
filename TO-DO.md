@@ -17,15 +17,15 @@ This file is intentionally short. Completed milestone history belongs in `docs/h
 
 The sequence stays fixed: M3.1 Web UI -> M3.2 Usability -> M3.3 Docker release. Finish the active section before starting the next one.
 
-### M3.2 — Usability — active
+### M3.2 — Usability — implementation complete, pending merge
 
-- [ ] Review and simplify user-facing wording.
-- [ ] Make first-run state obvious and non-confusing.
-- [ ] Make version/build information easy to find.
-- [ ] Add concise screenshots/examples to the README once the UI is visually accepted.
-- [ ] Simplify installation documentation around the recommended deployment paths.
+- [x] Review and simplify user-facing wording.
+- [x] Make first-run state obvious and non-confusing.
+- [x] Make version/build information easy to find.
+- [x] Add concise README usage examples; capture a real UI screenshot later from an accepted deployed build rather than using a mockup.
+- [x] Simplify installation documentation around the recommended deployment paths.
 
-### M3.3 — Docker release — after M3.2
+### M3.3 — Docker release — after M3.2 merge
 
 - [ ] Create an official Dockerfile.
 - [ ] Provide one recommended `compose.yaml` rather than many deployment variants.
@@ -43,6 +43,7 @@ These are not rejected ideas and they are not automatically future features. Kee
 
 For each item, ask: **Does this solve a common HostSleuth user problem without making installation, operation, or the UI meaningfully harder?** If not, leave it out.
 
+- [ ] Capture one real Web UI screenshot for the README after an accepted deployed build is available.
 - [ ] Authentication before normal non-loopback dashboard exposure.
 - [ ] Reverse-proxy awareness for Nginx, Caddy, Traefik, and Nginx Proxy Manager.
 - [ ] TLS/certificate diagnostics.
