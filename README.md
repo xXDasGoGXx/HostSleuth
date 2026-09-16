@@ -124,7 +124,7 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - native Certbot lineage/renewal evidence is unavailable in the default Docker deployment because host `/etc/letsencrypt` and systemd state are not mounted;
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - remote/served TLS certificate evidence remains available because it comes from the diagnosed endpoint itself;
-- Incident Lens can still show whichever retained event categories the Docker deployment actually records, without pretending unavailable native evidence exists;
+- Incident Lens and Reboot Story can still use whichever retained evidence the Docker deployment actually records, without pretending unavailable native systemd/journal evidence exists;
 - native installation remains the recommended choice when full host visibility matters.
 
 The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when its bind path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
@@ -147,6 +147,7 @@ HOSTSLEUTH_IMAGE=hostsleuth:dev docker compose up -d
 HostSleuth periodically captures useful local state including:
 
 - host identity, OS, kernel, and memory;
+- Linux kernel boot ID and exact boot start when available;
 - filesystems and capacity in native mode;
 - interfaces and routes;
 - listening sockets;
@@ -155,7 +156,7 @@ HostSleuth periodically captures useful local state including:
 - bounded Debian/Ubuntu package install, update, and removal history from local `dpkg` logs, with `apt` history as a fallback, in native mode;
 - SHA-256 fingerprints for a small explicit set of high-value configuration files in native mode, storing path/state/fingerprint/size rather than file contents.
 
-It compares snapshots and records meaningful service/container/listener/package/configuration changes in one local event timeline. Known noisy changes such as Docker uptime progression are suppressed. Package history and configuration fingerprints are baselined across their schema upgrades so existing evidence is not falsely replayed as new changes.
+It compares snapshots and records meaningful service/container/listener/package/configuration changes in one local event timeline. A reboot event is recorded only when a previously known kernel boot ID changes to another known boot ID. Known noisy changes such as Docker uptime progression are suppressed. Package history, configuration fingerprints, and boot identity are baselined across schema upgrades so pre-existing or newly introduced evidence is not falsely replayed as a change.
 
 Configuration fingerprinting currently covers `/etc/hosts`, `/etc/fstab`, `/etc/ssh/sshd_config`, `/etc/docker/daemon.json`, and `/etc/nftables.conf`. Missing or unreadable files remain truthful and quiet, and HostSleuth does not recursively crawl `/etc`.
 
@@ -211,6 +212,24 @@ Incident Lens:
 
 Incident Lens does not create a time-series database, reconstruct historical packets/TLS sessions, alert on uptime, infer causes, or modify the host.
 
+### Reboot Story
+
+M10 adds a read-only Reboot Story for answering what happened around the current boot and which observed services/listeners/containers failed to recover.
+
+Reboot Story:
+
+- uses kernel boot identity rather than human-readable uptime to detect a new boot;
+- anchors a bounded +/- 15 minute retained-event window on the exact boot start when available;
+- reads bounded previous/current boot journal evidence where the running account has access;
+- reports inaccessible or unavailable journal history as `unknown` instead of inventing evidence;
+- classifies orderly or abnormal shutdown only when direct bounded evidence supports that distinction;
+- shows current failed systemd services in native mode;
+- calls a service/listener/container a recovery issue only when retained post-boot evidence and the current snapshot agree that the problem remains;
+- shows package/kernel/system/configuration changes near boot as context only;
+- explicitly does not claim reboot cause from temporal proximity.
+
+Reboot Story does not reboot, shut down, restart, reload, repair, or otherwise modify the host.
+
 ![HostSleuth Diagnose view](docs/images/hostsleuth-diagnose.png)
 
 _Real public-safe Diagnose view captured from the supported Docker Compose deployment during M3 acceptance._
@@ -239,6 +258,12 @@ Inspect a bounded incident window, optionally with a fresh endpoint check:
 
 ```bash
 hostsleuth incident --at 2026-09-16T20:00:00Z --target example.com:443
+```
+
+Build the current Reboot Story:
+
+```bash
+hostsleuth reboot
 ```
 
 Show recent events:
@@ -309,15 +334,15 @@ HostSleuth is intentionally:
 - deterministic before explanatory;
 - loopback-only by default for the Web UI.
 
-HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reload services, manage ACME accounts, handle private keys, or reconfigure the host.
+HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reload services, reboot/shut down the host, manage ACME accounts, handle private keys, or reconfigure the host.
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, and M8 Incident Lens are complete in source.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, and M10 Reboot Story are complete in source.
 
-Stable `v0.3.0` remains the current published native/Docker release. It contains M5 configuration fingerprinting and M6 TLS/certificate capabilities; M7 and M8 are newer source capabilities and are **not** claimed to be present in the published v0.3.0 artifacts.
+Stable `v0.3.0` remains the current published native/Docker release. It contains M5 configuration fingerprinting and M6 TLS/certificate capabilities; M7, M8, M9, and M10 are newer source capabilities and are **not** claimed to be present in the published v0.3.0 artifacts.
 
-The next roadmap milestone is **M9 — HostSleuth Workbench**. Continue in the locked order through Workbench, Reboot Story, Optional Safe Actions, and eventually a redacted evidence bundle. Consumer-product research may refine those future milestones but does not reorder or silently broaden them.
+The next roadmap milestone is **M11 — Optional Safe Actions**, but it has **not started**. It is the first milestone that may cross the read-only boundary and requires explicit owner direction plus a security/design review before implementation.
 
 Publication of v0.3.0 did not authorize a live OMV upgrade; the known-good production/recovery deployment remains intentionally pinned separately.
 
@@ -325,7 +350,7 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardr
 
 ## Security and privacy
 
-HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, certificate metadata/fingerprints, bounded service runtime properties, sanitized journal evidence, and retained incident-window context. It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, M7 does not expose service control, and M8 does not infer causal relationships from nearby timestamps. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, certificate metadata/fingerprints, kernel boot identity/start time, bounded service runtime properties, sanitized journal evidence, retained incident-window context, and bounded boot/recovery context. It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, M7 does not expose service control, M8 does not infer causal relationships from nearby timestamps, and M10 does not infer reboot cause from temporal proximity or broaden privileges to obtain inaccessible journal history. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
 
 ## Project files
 
@@ -334,6 +359,7 @@ HostSleuth can collect hostnames, IP addresses, mount paths, service names, list
 - `TO-DO.md` — active checklist and product decisions.
 - `docs/ROADMAP.md` — owner-approved ordered product roadmap.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
+- `docs/history/M10-REBOOT-STORY.md` — completed M10 implementation and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
