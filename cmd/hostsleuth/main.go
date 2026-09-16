@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +16,9 @@ import (
 )
 
 var version = "0.1.0-dev"
+
+//go:embed web/index.html web/app.css web/app.js
+var webAssets embed.FS
 
 func main() {
 	if len(os.Args) < 2 {
@@ -142,12 +145,25 @@ func runServe(args []string) {
 		}
 	}()
 
+	indexHTML, err := webAssets.ReadFile("web/index.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	appCSS, err := webAssets.ReadFile("web/app.css")
+	if err != nil {
+		log.Fatal(err)
+	}
+	appJS, err := webAssets.ReadFile("web/app.js")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/snapshot", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		s, err := store.LoadSnapshot()
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		_ = json.NewEncoder(w).Encode(s)
@@ -156,7 +172,7 @@ func runServe(args []string) {
 		w.Header().Set("Content-Type", "application/json")
 		e, err := store.ReadEvents(100)
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		_ = json.NewEncoder(w).Encode(e)
@@ -164,7 +180,7 @@ func runServe(args []string) {
 	mux.HandleFunc("/api/diagnose", func(w http.ResponseWriter, r *http.Request) {
 		target := r.URL.Query().Get("target")
 		if target == "" {
-			http.Error(w, "target is required", 400)
+			http.Error(w, "target is required", http.StatusBadRequest)
 			return
 		}
 		s, err := store.LoadSnapshot()
@@ -174,17 +190,26 @@ func runServe(args []string) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(core.Diagnose(r.Context(), target, s))
 	})
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		s, _ := store.LoadSnapshot()
-		e, _ := store.ReadEvents(20)
-		_ = dashboard.Execute(w, struct {
-			Snapshot core.Snapshot
-			Events   []core.Event
-			Version  string
-		}{s, e, version})
+	mux.HandleFunc("/assets/app.css", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/css; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-cache")
+		_, _ = w.Write(appCSS)
 	})
+	mux.HandleFunc("/assets/app.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-cache")
+		_, _ = w.Write(appJS)
+	})
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-cache")
+		_, _ = w.Write(indexHTML)
+	})
+
 	log.Printf("HostSleuth %s listening on http://%s", version, *listen)
 	log.Fatal(http.ListenAndServe(*listen, mux))
 }
-
-var dashboard = template.Must(template.New("dashboard").Parse(`<!doctype html><html><head><meta charset="utf-8"><title>HostSleuth</title><style>body{font-family:system-ui;margin:2rem;max-width:1100px;background:#0b1220;color:#e5edf7}a{color:#8ab4ff}.card{background:#121c2d;padding:1rem 1.2rem;border-radius:12px;margin:1rem 0}.muted{color:#95a3b8}input,button{padding:.6rem;font:inherit}code{color:#a7f3d0}.warn{color:#fbbf24}</style></head><body><h1>HostSleuth</h1><p class="muted">What changed, what broke, and why?</p><div class="card"><h2>{{.Snapshot.Host.Hostname}}</h2><p>{{.Snapshot.Host.OS}} · kernel {{.Snapshot.Host.Kernel}}</p><p>{{len .Snapshot.Services}} services · {{len .Snapshot.Listeners}} listeners · {{len .Snapshot.Containers}} containers</p></div><div class="card"><h2>Diagnose</h2><form action="/api/diagnose"><input name="target" placeholder="host:port" required><button>Run diagnosis</button></form></div><div class="card"><h2>Recent changes</h2>{{if .Events}}{{range .Events}}<p><code>{{.At.Format "2006-01-02 15:04:05"}}</code> <span class="{{if eq .Severity "warning"}}warn{{end}}">{{.Summary}}</span></p>{{end}}{{else}}<p class="muted">No recorded changes yet.</p>{{end}}</div><p class="muted">HostSleuth {{.Version}}</p></body></html>`))
