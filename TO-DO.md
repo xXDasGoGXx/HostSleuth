@@ -22,28 +22,21 @@ This file stays intentionally short. Completed milestone history belongs in `doc
 - [x] M6 local listener/container correlation plus native read-only Certbot lineage/renewal/timer/service evidence.
 - [x] M6 local-vs-served certificate comparison with conservative stale-served detection.
 - [x] M6 focused tests, normal CI, and isolated real OMV native acceptance.
+- [x] Publish stable `v0.3.0` from accepted main `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`.
+- [x] v0.3.0 release workflow completed successfully with native amd64/arm64 binaries and `SHA256SUMS`.
+- [x] Publish `mjmalleo/hostsleuth:0.3.0` and move `latest`.
+- [x] Verify anonymous Docker registry access; `0.3.0` and `latest` resolve to the same linux/amd64 + linux/arm64 OCI index.
+- [x] Verify downloaded release checksums and bounded real-consumer amd64 `version` execution.
 
-Stable `v0.2.0` remains the current published release. M5 and M6 are source capabilities intended for the next approved stable release; neither is claimed to be present in the existing v0.2.0 artifacts. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
+Stable `v0.3.0` is now the current published release and contains M5 + M6. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`; publication did not migrate production.
 
-## Active — 2. Publish stable v0.3.0
+## Next — 3. M7 Service Story
 
-Do not publish automatically. This is an explicit owner approval boundary.
+M7 is the next approved milestone, but it has **not** started. Begin only when the owner explicitly tells HostSleuth work to continue into M7.
 
-- [ ] Include M5 + M6.
-- [ ] Re-check exact accepted `main` SHA and release workflow.
-- [ ] Present the exact release state to the owner.
-- [ ] Stop for explicit owner publication approval.
-- [ ] After approval, create `release/v0.3.0` from the exact accepted `main`.
-- [ ] Publish native amd64/arm64 binaries + `SHA256SUMS`.
-- [ ] Publish `mjmalleo/hostsleuth:0.3.0` and move `latest`.
-- [ ] Verify anonymous registry/platform manifests and one bounded consumer acceptance.
-- [ ] Do not change live OMV merely to chase version numbers.
+Correlate systemd/journal, process/listener ownership, port collisions, containers, nearby package/config changes, TLS, and listener history to answer why a service will not start or an endpoint disappeared. Evidence story only; no service controls.
 
 ## Then — exact approved order
-
-### 3. M7 — Service Story
-
-Correlate systemd/journal, process/listener ownership, port collisions, containers, nearby package/config changes, TLS, and listener history to answer why a service will not start or an endpoint disappeared. No service controls.
 
 ### 4. M8 — Incident Lens
 
