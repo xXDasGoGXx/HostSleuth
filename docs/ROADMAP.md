@@ -29,60 +29,55 @@ Delivered bounded read-only systemd runtime/journal, process/listener ownership,
 
 ## 4. M8 — Incident Lens — COMPLETE
 
-Goal: answer "what changed around the time this broke?" without turning nearby timestamps into an invented cause.
+Delivered a bounded read-only +/- 15 minute incident window anchored from an exact time, retained event, or completed diagnosis. Existing event categories are reused with deterministic ordering, current endpoint Diagnose/TLS evidence is explicitly separated from historical context, and temporal proximity is never presented as proof of causation.
 
-Delivered bounded read-only correlation:
+M8 added no time-series database, alerting layer, historical network reconstruction, service control, remediation, or reboot-cause analysis.
 
-- explicit incident anchor time;
-- fixed initial +/- 15 minute retained-event window;
-- all existing event categories preserved inside the window, including package, configuration, service, container, listener, and system events when present;
-- deterministic chronological ordering and a 100-event cap;
-- optional current endpoint Diagnose/TLS evidence for a supplied `host:port`;
-- current endpoint capture timestamp kept explicitly separate from the historical incident anchor;
-- Changes-integrated Web UI with **Inspect window** actions on retained timeline entries;
-- CLI `incident --at <RFC3339> [--target host:port]` and API `/api/incident-lens`;
-- explicit language that temporal proximity is context, not proof of causation.
+## 5. M9 — HostSleuth Workbench — COMPLETE
 
-M8 reuses the existing JSONL event model and adds no time-series database, alerting layer, historical network reconstruction, service control, or remediation. Boot/reboot-cause analysis remains reserved for M10.
+Goal: reduce common troubleshooting workflows that normally force an administrator across several shell commands or one-off websites, without becoming a miscellaneous utility collection or browser shell.
 
-Real-host acceptance on isolated OMV state found and fixed one truthfulness defect before closeout: an absent endpoint probe initially serialized a zero capture timestamp. The timestamp is now optional and omitted when no endpoint was checked.
+Delivered bounded read-only tools:
 
-## 5. M9 — HostSleuth Workbench — ACTIVE
+- selected-file SHA-256 and SHA-512 calculation without returning or storing file contents;
+- expected SHA-256/SHA-512 verification;
+- file-to-file comparison by SHA-256 fingerprint;
+- file path, size, mode/permissions, mtime, UID/GID, owner/group, and fingerprints;
+- common DNS evidence through the host system resolver: A, AAAA, CNAME where distinct, MX, NS, TXT, and PTR for IP input;
+- direct HTTP/HTTPS HEAD inspection with a bounded redirect chain and selected response metadata;
+- public PEM certificate metadata/fingerprint inspection;
+- exact public certificate file fingerprint vs direct-TLS served certificate comparison;
+- CLI, JSON API, and a dedicated Workbench Web UI tab.
 
-Goal: provide a small set of practical troubleshooting tools that normally force an administrator into several shell commands or websites.
+Security/product boundaries:
 
-Candidates for the first bounded Workbench:
+- no arbitrary command field or hidden shell hook;
+- no file editor or file-content display;
+- no custom HTTP headers, cookies, credentials, or request body;
+- certificate inspection refuses a private-key PEM block encountered before a public certificate;
+- Workbench Web/API operations are loopback-only because file hashing plus server-side DNS/HTTP probing would be inappropriate on an unauthenticated LAN-visible endpoint; local CLI and the recommended SSH-tunnel workflow remain available;
+- Docker Workbench file inspection only sees files actually readable inside the supported container/mounts and does not manufacture broader host-filesystem visibility.
 
-- SHA-256 / SHA-512 calculation for a selected local file without storing file contents;
-- expected-checksum verification;
-- compare two files by fingerprint;
-- inspect path owner/group/permissions/mtime/size/hash;
-- DNS lookup for common records with deterministic raw evidence retained;
-- HTTP HEAD / redirect-chain inspection;
-- inspect a PEM certificate;
-- compare a certificate file fingerprint with the certificate a remote/local service is actually presenting.
+Validation includes focused tests, full test/vet/build/format checks, syntax validation of every UI fragment and the exact concatenated served JavaScript, Docker smoke coverage, and isolated real-OMV CLI/API/UI acceptance. The real-host validation also caught an environment-specific umask assumption in a test; the test was corrected to verify actual observed permissions instead of assuming a host umask.
 
-Consumer research can refine which of these solve the strongest real workflows. In particular, read-only protocol-aware certificate inspection such as STARTTLS may be considered when M9 is designed, but only if it fits the Workbench's bounded troubleshooting purpose.
+M9 intentionally spans file integrity, DNS, HTTP, and certificate identity. Certificate tooling is one Workbench workflow, not the product's sole enhancement direction.
 
-M9 must not become a miscellaneous-tools junk drawer. Every tool must answer one concrete troubleshooting question. Do not add a web shell, arbitrary command box, file editor, generic system-control panel, or write action.
+## 6. M10 — Reboot Story — ACTIVE
 
-Validation requirements remain focused tests, normal CI, and bounded real-host acceptance.
+Goal: answer "why did this host reboot, and what failed to come back?" using bounded deterministic evidence.
 
-## 6. M10 — Reboot Story
+Initial scope:
 
-Goal: answer "why did this host reboot, and what failed to come back?"
-
-Bounded evidence can include:
-
-- current boot time and previous boot/shutdown evidence where available;
+- current boot time and bounded previous boot/shutdown evidence where available;
 - orderly vs abnormal shutdown indicators only when deterministically supported;
-- package/kernel/configuration changes near the reboot;
-- services that are failed after boot;
-- listeners that existed before but did not return;
-- container state changes;
-- certificate/listener/service context relevant to lost endpoints.
+- package/kernel/configuration changes around the reboot as context rather than invented cause;
+- services failed after boot;
+- listeners that existed before but did not return only when retained evidence supports that statement;
+- container state changes relevant to boot recovery;
+- current service/listener/certificate context for a missing endpoint only when the evidence can be connected honestly;
+- reuse of Incident Lens/event primitives rather than a second history database.
 
-Do not claim a reboot cause without direct evidence.
+Do not claim a reboot cause without direct evidence. M10 remains read-only.
 
 ## 7. M11 — Optional Safe Actions
 
@@ -90,42 +85,44 @@ Goal: carefully test whether HostSleuth can offer a very small number of surgica
 
 This milestone changes HostSleuth's current read-only boundary and therefore requires an explicit design/security review before implementation.
 
-The first candidate action family remains certificate lifecycle because it is narrow and auditable. Consumer research may refine this beyond a simple renewal button toward a safer deployment workflow, for example:
+Certificate lifecycle remains one candidate because it is narrow and auditable, but it is not the only possible safe-action family. Consumer research should compare multiple real troubleshooting workflows before any action set is approved.
 
-- renewal dry-run or explicit renewal through a known certificate client;
-- an explicit, predefined certificate deployment recipe rather than an arbitrary shell hook;
-- preview of source/destination fingerprints and intended file/service effects;
-- optional bounded reload of a known associated service only when ownership is clear;
-- post-action re-probe proving which certificate the endpoint actually serves;
-- audit evidence for the requested and observed operation.
+Possible design properties include:
 
-Any handling of private-key material, destination writes, ownership/mode changes, ACME account credentials, or rollback semantics requires specific threat-model/design work before implementation.
+- explicit predefined schemas/recipes rather than arbitrary commands;
+- exact preview of intended effects;
+- optional bounded operation only when ownership/target is clear;
+- post-action verification against an observable condition;
+- audit evidence for requested and observed behavior;
+- disabled-by-default action capability and explicit confirmation.
 
-Any action framework must require explicit enablement, show the exact operation before execution, require confirmation, create an audit event, expose no arbitrary command field, and default to disabled. Generic service/package/firewall administration remains out of scope unless separately justified later.
+Any handling of private keys, destination writes, ownership/mode changes, credentials/tokens, package/service/firewall state, or rollback semantics requires specific threat-model/design work before implementation. Generic administration remains out of scope unless separately justified later.
 
 ## 8. Later — Redacted Evidence Bundle
 
 Goal: make HostSleuth evidence safely shareable after redaction rules and a threat model are mature enough.
 
-A bundle may include selected Host Story, diagnosis, event, route/listener/service/container, package, configuration-fingerprint, certificate, Service Story, and Incident Lens evidence. It must apply documented redaction rules before export and must never silently include configuration contents, credentials, tokens, private keys, or other secrets.
+A bundle may include selected Host Story, diagnosis, event, route/listener/service/container, package, configuration-fingerprint, certificate, Service Story, Incident Lens, Workbench, and Reboot Story evidence. It must apply documented redaction rules before export and must never silently include configuration contents, credentials, tokens, private keys, or other secrets.
 
 Do not build export/import before the redaction/threat-model work is strong enough to support it.
 
 ## Research backlog — not an implementation milestone
 
-Ongoing market/user-workflow research should compare HostSleuth against what people currently assemble from monitoring products, admin consoles, ACME clients, TLS scanners, scripts, and single-purpose websites.
+Ongoing market/user-workflow research should compare HostSleuth against what people currently assemble from CLI tools, monitoring products, admin consoles, log viewers, DNS/HTTP/TLS sites, package tools, scripts, and single-purpose utilities.
 
 The detailed current research artifact is `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`.
 
-Promising differentiated questions include:
+Research is deliberately broader than certificate management. Promising differentiated questions include:
 
-- can HostSleuth explain and verify the entire path from renewed certificate on disk to destination copy to the certificate actually being served?
-- should later TLS inspection understand STARTTLS protocols such as SMTP rather than assuming immediate TLS?
-- can a bounded endpoint contract tie a service, port/bind, protocol/TLS expectation, certificate fingerprint, and recent host changes together?
-- can HostSleuth detect inconsistent certificate rollout across several local consumers/endpoints without becoming a multi-host controller?
-- can optional safe actions use explicit schemas/recipes plus postcondition verification instead of generic scripts or command fields?
+- can an expected-endpoint contract tie service ownership, listener/bind, DNS, protocol/TLS behavior, local file/certificate evidence, and retained changes into one troubleshooting story?
+- can HostSleuth explain resolver/delegation or split-view DNS mismatches without becoming a DNS server manager?
+- can it explain redirect, reverse-proxy, Host-header, or upstream mismatches with bounded HTTP evidence without becoming a proxy manager?
+- can permissions/ownership/path evidence explain why a service cannot consume a file it is expected to use?
+- should later protocol inspection understand STARTTLS services such as SMTP/IMAP rather than assuming immediate TLS?
+- can certificate source -> destination -> actually-served comparison verify deployment and rollout without becoming a generic ACME manager?
+- can optional safe actions use explicit schemas plus observable postcondition verification instead of generic scripts or command fields?
 
-Research findings must be deliberately assigned to M9, M11, or a later approved milestone before implementation.
+Research findings must be deliberately assigned to an approved milestone before implementation.
 
 ## Guardrails that remain in force
 
@@ -138,6 +135,6 @@ Do not drift into:
 - generic package/firewall/configuration administration;
 - AI-generated causal claims;
 - automatic remediation;
-- broad privilege expansion simply to make a feature easier.
+- broad privilege expansion simply to make features easier.
 
 HostSleuth should feel powerful because it connects deterministic evidence into answers people actually need, not because it exposes every system control in a browser.
