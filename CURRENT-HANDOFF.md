@@ -114,20 +114,15 @@ Do not publish a new release merely for version-number alignment.
 
 ## Live OMV / recovery boundary
 
-The known-good live HostSleuth remains managed through Arcane on OMV host `192.168.2.181` using:
+M10 did not change the production HostSleuth deployment, production state, Compose definition, Docker image selection, or recovery repository.
+
+A final read-only check of the live endpoint at `http://192.168.2.181:8787` reported application version `v0.3.0`. The unprivileged HomeCommander acceptance account could not read `/srv/docker/volumes/compose/hostsleuth/compose.yaml`, so the exact active image tag is not independently verified here.
+
+The separate `xXDasGoGXx/OMV-Docker-Rebuild` repository still documents its disaster-recovery HostSleuth definition as pinned to:
 
 `mjmalleo/hostsleuth:0.1.0`
 
-Deployment state:
-
-- UI/API: `http://192.168.2.181:8787`
-- persistent state: `/srv/docker/volumes/hostsleuth/data`
-- Compose path: `/srv/docker/volumes/compose/hostsleuth/compose.yaml`
-- trusted-LAN bind: `192.168.2.181:8787`
-
-`xXDasGoGXx/OMV-Docker-Rebuild` intentionally remains pinned to `mjmalleo/hostsleuth:0.1.0` so recovery matches the actual live deployment.
-
-Do not change the live deployment, Compose, persistent state, Docker tag, or recovery pin merely to chase source/release numbers.
+Do not reconcile, repin, redeploy, or otherwise change that live/recovery divergence as part of M10. Re-check both sources before any future production or recovery change.
 
 ## Next milestone boundary
 
