@@ -1,46 +1,61 @@
 # HostSleuth — TO-DO
 
-This file stays intentionally short. Completed milestone history belongs in `docs/history/DEVELOPMENT-HISTORY.md`. The ordered forward plan is in `docs/ROADMAP.md`.
+This file stays intentionally short. Completed milestone detail belongs in `docs/history/`. The ordered forward plan is in `docs/ROADMAP.md`.
 
 ## Completed
 
 - [x] M0 — repository foundation.
 - [x] M1 — deployable single-host MVP.
 - [x] M2 — deeper deterministic diagnosis.
-- [x] M3.1 — modern responsive Web UI.
-- [x] M3.2 — usability and installation clarity.
-- [x] M3.3 — supported Docker Compose deployment with amd64/arm64 CI validation.
-- [x] M3 acceptance — native and Docker runtime validation.
-- [x] M3.4 — public container distribution and stable `v0.1.0` publication.
+- [x] M3 — Product Experience and supported Docker acceptance.
+- [x] M3.4 — public container distribution and stable v0.1.0 publication.
 - [x] M4 — bounded native Debian/Ubuntu package-change timeline.
-- [x] Publish stable `v0.2.0` with native amd64/arm64 assets, checksums, and public multi-platform Docker tags.
+- [x] Publish stable v0.2.0.
 - [x] M5 — bounded native configuration fingerprinting.
-- [x] M5 schema-3 upgrade baseline preserves M4 package events.
-- [x] M5 CI and isolated real OMV Debian acceptance.
 - [x] M6 — bounded read-only Certificate Story / TLS Detective.
-- [x] M6 TLS evidence: handshake, subject/SANs/issuer/serial/validity/lifetime/SHA-256 fingerprint, hostname, trust/chain.
-- [x] M6 local listener/container correlation plus native read-only Certbot lineage/renewal/timer/service evidence.
-- [x] M6 local-vs-served certificate comparison with conservative stale-served detection.
-- [x] M6 focused tests, normal CI, and isolated real OMV native acceptance.
-- [x] Publish stable `v0.3.0` from accepted main `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`.
-- [x] v0.3.0 release workflow completed successfully with native amd64/arm64 binaries and `SHA256SUMS`.
-- [x] Publish `mjmalleo/hostsleuth:0.3.0` and move `latest`.
-- [x] Verify anonymous Docker registry access; `0.3.0` and `latest` resolve to the same linux/amd64 + linux/arm64 OCI index.
-- [x] Verify downloaded release checksums and bounded real-consumer amd64 `version` execution.
+- [x] Publish stable v0.3.0 from accepted source `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1` with native amd64/arm64 assets, checksums, and public multi-platform Docker tags.
+- [x] M7 — read-only Service Story.
+- [x] M7 systemd runtime/result + bounded sanitized journal evidence.
+- [x] M7 cgroup/main-PID to listener correlation and deterministic port-collision evidence.
+- [x] M7 endpoint/TLS reuse, container-port context, and bounded nearby retained changes.
+- [x] M7 Diagnose-integrated Web UI, CLI, and API.
+- [x] M7 full tests/vet/build/JS checks plus isolated real OMV and Web/API acceptance.
+- [x] M7 regression: hidden listener PID remains unknown and cannot become a false collision claim.
 
-Stable `v0.3.0` is now the current published release and contains M5 + M6. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`; publication did not migrate production.
+Stable `v0.3.0` remains the current published release. M7 is newer source capability and is not claimed to be included in v0.3.0. The live OMV/Arcane deployment and `OMV-Docker-Rebuild` remain intentionally pinned to known-good `mjmalleo/hostsleuth:0.1.0`.
 
-## Next — 3. M7 Service Story
+## Active — 4. M8 Incident Lens
 
-M7 is the next approved milestone, but it has **not** started. Begin only when the owner explicitly tells HostSleuth work to continue into M7.
+Keep M8 bounded and evidence-first:
 
-Correlate systemd/journal, process/listener ownership, port collisions, containers, nearby package/config changes, TLS, and listener history to answer why a service will not start or an endpoint disappeared. Evidence story only; no service controls.
+- [ ] Allow a diagnosis/event/time to anchor a bounded incident window, initially +/- 15 minutes.
+- [ ] Show nearby package events.
+- [ ] Show nearby configuration-fingerprint events.
+- [ ] Show nearby systemd service changes.
+- [ ] Show nearby container changes.
+- [ ] Show nearby listener changes.
+- [ ] Include TLS/certificate context where retained/current evidence can be connected honestly.
+- [ ] Include boot/reboot context only when already available; do not pull M10 forward.
+- [ ] Label temporal proximity as context, never proof of causation.
+- [ ] Reuse the existing event model; do not create a time-series monitoring database.
+- [ ] Integrate with existing Host Story/Diagnose patterns; do not create a generic monitoring dashboard.
+- [ ] Add focused tests, normal CI, and one bounded real-host acceptance.
+
+## Consumer/product research — separate backlog, not active scope
+
+Research what users currently assemble from monitoring tools, admin consoles, certificate clients, TLS scanners, scripts, and one-off websites. Record differentiated opportunities without changing the ordered roadmap or smuggling them into M8.
+
+Promising themes to evaluate for later milestones include:
+
+- protocol-aware TLS/STARTTLS inspection for mail and other non-HTTPS services;
+- certificate source/destination/served fingerprint verification;
+- tightly bounded certificate deployment recipes with preview/postcondition verification;
+- rollout consistency checks that can prove different endpoints are serving different certificates;
+- expected-endpoint contracts tying a service, listener, protocol/TLS expectation, local certificate evidence, and retained changes into one troubleshooting story.
+
+Any write/action feature remains reserved for M11 security/design review.
 
 ## Then — exact approved order
-
-### 4. M8 — Incident Lens
-
-Bounded time-window context around a diagnosis/event/time. Nearby package/config/service/container/listener/TLS evidence is context, not proven causation.
 
 ### 5. M9 — HostSleuth Workbench
 
@@ -52,7 +67,7 @@ Boot/shutdown evidence plus what failed to return after reboot. Never invent reb
 
 ### 7. M11 — Optional Safe Actions
 
-Requires explicit security/design review before crossing the read-only boundary. First candidate: Certbot dry-run, explicit renewal, and tightly bounded associated service reload. Disabled by default, previewed, confirmed, audited, no arbitrary command field.
+Requires explicit security/design review before crossing the read-only boundary. Actions must be disabled by default, previewed, confirmed, audited, and expose no arbitrary command field.
 
 ### 8. Later — Redacted Evidence Bundle
 

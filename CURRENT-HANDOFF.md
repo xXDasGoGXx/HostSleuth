@@ -15,7 +15,7 @@ Keep it evidence-first, local-first, single-host first, and deliberately small. 
 
 Repository: `xXDasGoGXx/HostSleuth`
 
-Always re-check current `main` before starting code or a release rather than relying on a self-referential SHA in this file.
+Always re-check current `main` before starting code, a release, or a deployment rather than relying on a self-referential SHA in this file.
 
 Completed milestones:
 
@@ -27,7 +27,8 @@ Completed milestones:
 - M4 — package-change timeline;
 - M5 — configuration fingerprinting;
 - M6 — Certificate Story / TLS Detective;
-- stable v0.3.0 publication.
+- stable v0.3.0 publication;
+- M7 — Service Story.
 
 Published stable release:
 
@@ -42,7 +43,7 @@ Published Docker tags:
 - `mjmalleo/hostsleuth:0.3.0`
 - `mjmalleo/hostsleuth:latest`
 
-Anonymous registry verification confirmed both tags resolve to the same multi-platform OCI index:
+Both resolve anonymously to the same multi-platform OCI index:
 
 `sha256:127b388fbf794841b22d06b281fe89dc1500188fdb4215eec023b392aa98c05d`
 
@@ -51,51 +52,57 @@ Platforms:
 - `linux/amd64`
 - `linux/arm64`
 
-Release workflow run `35138865223` completed successfully. GitHub release `v0.3.0` targets the exact accepted source commit and contains:
+M7 is newer source capability and is **not** claimed to be present in the already-published v0.3.0 artifacts.
 
-- `hostsleuth-linux-amd64`;
-- `hostsleuth-linux-arm64`;
-- `SHA256SUMS`.
+## M7 — Service Story
 
-Downloaded release assets passed `sha256sum -c SHA256SUMS`. A bounded real-consumer check on the OMV Debian host executed the downloaded amd64 binary from `/tmp`; `hostsleuth version` reported `v0.3.0 (6e6b45ca5e4a)`. No live HostSleuth service was stopped, restarted, reconfigured, or upgraded during publication/acceptance.
+M7 answers why a selected native systemd service is failed/inactive or why an expected endpoint disappeared without turning HostSleuth into a service manager.
 
-## M5 — configuration fingerprinting
+Delivered evidence:
 
-Native Linux fingerprints this deliberately small explicit set:
+- bounded `systemctl show` properties for load/active/sub/unit-file/result/main-PID/cgroup/exit status;
+- bounded current-boot unit journal, passed through existing secret sanitization;
+- service cgroup PID membership;
+- listener ownership when local permissions expose listener PIDs;
+- deterministic expected-port collision only when a competing PID is positively visible;
+- expected-port presence with `unknown` ownership when listener PID metadata is hidden;
+- related container host-port publication context;
+- reuse of the existing endpoint Diagnose engine, including TLS/certificate evidence;
+- direct retained service/listener history plus package/configuration/container context within +/- 15 minutes of the newest direct event;
+- CLI `hostsleuth service ...`;
+- API `/api/service-story`;
+- Service Story UI embedded inside the existing Diagnose view, preserving the accepted four top-level tabs.
 
-- `/etc/hosts`
-- `/etc/fstab`
-- `/etc/ssh/sshd_config`
-- `/etc/docker/daemon.json`
-- `/etc/nftables.conf`
+M7 remains read-only. It adds no start/stop/restart/reload/enable/disable buttons and no arbitrary command field.
 
-Snapshots store only canonical path, state, SHA-256 fingerprint, and size for readable regular files. States are `present`, `missing`, or `unreadable`. File contents are not stored.
+### M7 validation
 
-Configuration appeared/disappeared/content-changed records reuse the existing Changes timeline as `category=configuration`. Snapshot schema 3 baselines existing configuration fingerprints across the schema 2 -> 3 upgrade while preserving M4 package-event behavior.
+Focused and full branch validation passed:
 
-## M6 — Certificate Story / TLS Detective
+- formatting;
+- `go test ./...`;
+- `go vet ./...`;
+- native build;
+- existing Web JavaScript syntax;
+- M7 JavaScript syntax;
+- concatenated served JavaScript syntax.
 
-M6 extends the existing Diagnose flow without creating a separate certificate-management product.
+Real-host acceptance ran on the actual OMV Debian host using an isolated `/tmp` state directory and branch binary.
 
-For a reachable TLS endpoint HostSleuth records bounded read-only evidence for:
+The first SSH acceptance found a correctness defect: the host exposed TCP/22 but hid its listener PID from the unprivileged snapshot, and the first implementation interpreted missing ownership as a competing process. That was fixed so collision claims require positive competing PID evidence, and a regression test was added.
 
-- TLS handshake result, negotiated protocol, and cipher suite;
-- served certificate subject, SANs, issuer, serial, valid-from, valid-until, remaining lifetime, and SHA-256 fingerprint;
-- hostname match/mismatch;
-- trust-chain verification against the local host trust store plus bounded served-chain subjects;
-- positive local listener/process and Docker publication context when the target resolves locally.
+Corrected acceptance for `ssh.service` + `127.0.0.1:22` confirmed:
 
-On native Linux, when a local endpoint actually negotiates TLS, HostSleuth also performs bounded read-only Certbot discovery:
+- systemd runtime `loaded / active / running`;
+- cgroup/main-PID evidence available;
+- journal evidence unavailable because of local permissions, truthfully `unknown`;
+- TCP/22 present with hidden listener owner, truthfully `unknown` ownership;
+- endpoint reachable;
+- high-confidence conclusion that the service is active and expected endpoint reachable.
 
-- Certbot executable detection;
-- up to 32 renewal lineage configurations;
-- certificate/fullchain paths and selected non-secret renewal metadata;
-- `certbot.timer` and `certbot.service` state through bounded `systemctl show` evidence;
-- readable lineage certificate metadata and SHA-256 fingerprint comparison with the served certificate.
+An isolated Web/API smoke also passed. No live HostSleuth process, Compose file, persistent production state, or recovery definition was changed.
 
-A stale-served-certificate conclusion is intentionally conservative. HostSleuth only states that the certificate on disk is newer/different than the one being served when exactly one readable local Certbot lineage matches the requested host and its certificate differs while having deterministically newer validity evidence. A fingerprint difference by itself remains an `unknown` comparison rather than proof of staleness.
-
-M6 remains read-only. It does not renew certificates, reload/restart services, install certificates, manage ACME accounts, read private keys, or expose arbitrary commands.
+Full implementation/acceptance detail: `docs/history/M7-SERVICE-STORY.md`.
 
 ## Live OMV / recovery boundary
 
@@ -112,11 +119,11 @@ Deployment state:
 
 `xXDasGoGXx/OMV-Docker-Rebuild` intentionally remains pinned to `mjmalleo/hostsleuth:0.1.0` so recovery matches the actual live deployment.
 
-Do not change the live deployment or recovery definition merely to chase release numbers. Docker mode intentionally keeps reduced host visibility and does not mount host Certbot/configuration material merely to expose native evidence.
+Do not change the live deployment or recovery definition merely to chase release numbers.
 
 ## Ordered roadmap — owner approved
 
-The owner explicitly approved the following order. Stay in this order unless the owner deliberately changes it. Full detail is in `docs/ROADMAP.md`.
+The owner explicitly approved continuing in this order without deviation. Future consumer/product research may refine a later milestone, but it does not silently reorder or expand the active milestone.
 
 ### 1. M6 — Certificate Story / TLS Detective — COMPLETE
 
@@ -126,15 +133,13 @@ Read-only TLS/certificate troubleshooting is implemented and accepted.
 
 Published and verified from exact accepted source commit `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`. Live OMV was intentionally not migrated.
 
-### 3. M7 — Service Story — NEXT, NOT STARTED
+### 3. M7 — Service Story — COMPLETE
 
-Answer why a service will not start or why an endpoint disappeared by correlating systemd/journal, process/listener ownership, port collisions, containers, package/config changes, TLS, and listener history. Evidence story only; no service controls.
+Read-only systemd/runtime/journal/listener/endpoint/change correlation is implemented and accepted.
 
-Do not begin M7 until the owner explicitly tells HostSleuth work to continue into M7.
+### 4. M8 — Incident Lens — NEXT
 
-### 4. M8 — Incident Lens
-
-Anchor a bounded time window around a diagnosis/event/time and show temporally nearby package/config/service/container/listener/TLS evidence. Temporal proximity is context, not proven causation.
+Anchor a diagnosis/event/time to a bounded evidence window, initially +/- 15 minutes, and show nearby package/configuration/service/container/listener/TLS context. Temporal proximity is context, not proven causation. Reuse the event model rather than building a time-series monitoring database.
 
 ### 5. M9 — HostSleuth Workbench
 
@@ -146,11 +151,23 @@ Explain boot/shutdown evidence and what failed to come back using kernel/package
 
 ### 7. M11 — Optional Safe Actions
 
-This is the first planned milestone that may cross HostSleuth's read-only boundary, so it requires explicit design/security review first. Initial candidate: Certbot dry-run, explicit renewal, and tightly bounded associated service reload. Actions must be disabled by default, explicitly enabled, previewed, confirmed, and audited. No arbitrary command execution.
+This is the first planned milestone that may cross HostSleuth's read-only boundary and therefore still requires explicit design/security review before implementation. Candidate actions must be narrow, disabled by default, previewed, confirmed, and audited. No arbitrary command execution.
 
 ### 8. Later — Redacted Evidence Bundle
 
-Only after redaction rules and threat-model work are mature enough. Export selected HostSleuth evidence while excluding secrets/config contents/private keys/tokens.
+Only after redaction rules and threat-model work are mature enough.
+
+## Consumer/product research boundary
+
+Current research is intentionally separate from implementation scope. It may identify differentiated later opportunities such as certificate deployment verification, STARTTLS-aware certificate inspection, or tightly bounded deployment recipes, but those ideas must be assigned to an appropriate future milestone before implementation.
+
+Research must not turn HostSleuth into:
+
+- another uptime/metrics dashboard;
+- a generic ACME/certificate manager;
+- a generic control panel;
+- a web shell;
+- a multi-host orchestration system.
 
 ## Product guardrails
 
@@ -167,10 +184,6 @@ Do not drift into:
 
 The product should feel powerful because it connects deterministic evidence into answers people actually need.
 
-## Release/deployment boundary
-
-Stable v0.3.0 is published. Publication alone does not authorize changing the live OMV deployment, recovery repository pin, or beginning M7. Those remain separate owner-controlled actions.
-
 ## Repository reading order
 
 When resuming, read:
@@ -180,8 +193,9 @@ When resuming, read:
 3. `TO-DO.md`
 4. `docs/ROADMAP.md`
 5. `docs/history/DEVELOPMENT-HISTORY.md`
-6. `docs/design/HOST-STORY-UI.md`
-7. `.github/workflows/ci.yml`
-8. `.github/workflows/release.yml`
-9. `Dockerfile`
-10. `compose.yaml`
+6. `docs/history/M7-SERVICE-STORY.md`
+7. `docs/design/HOST-STORY-UI.md`
+8. `.github/workflows/ci.yml`
+9. `.github/workflows/release.yml`
+10. `Dockerfile`
+11. `compose.yaml`
