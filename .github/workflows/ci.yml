@@ -23,7 +23,18 @@ jobs:
       - name: Test
         run: go test ./...
       - name: Web JS syntax
-        run: node --check cmd/hostsleuth/web/app.js
+        run: |
+          node --check cmd/hostsleuth/web/app.js
+          node --check cmd/hostsleuth/web/service_story.js
+          node --check cmd/hostsleuth/web/incident_lens.js
+          node --check cmd/hostsleuth/web/workbench.js
+          cat \
+            cmd/hostsleuth/web/app.js \
+            cmd/hostsleuth/web/service_story.js \
+            cmd/hostsleuth/web/incident_lens.js \
+            cmd/hostsleuth/web/workbench.js \
+            > /tmp/hostsleuth-served-app.js
+          node --check /tmp/hostsleuth-served-app.js
       - name: Build
         run: go build -trimpath -o hostsleuth ./cmd/hostsleuth
 
@@ -85,11 +96,13 @@ jobs:
           assert not snapshot.get('services'), snapshot
           assert not snapshot.get('filesystems'), snapshot
           PY
-      - name: Verify Web UI and self-diagnosis
+      - name: Verify Web UI self-diagnosis and Workbench
         run: |
           set -eu
           curl -fsS http://127.0.0.1:8787/ | grep -q 'HostSleuth'
+          curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'HOSTSLEUTH WORKBENCH'
           curl -fsS 'http://127.0.0.1:8787/api/diagnose?target=127.0.0.1:8787' > /tmp/hostsleuth-diagnosis.json
+          curl -fsS --get --data-urlencode 'path=/host/etc/os-release' 'http://127.0.0.1:8787/api/workbench/file' > /tmp/hostsleuth-workbench-file.json
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -97,6 +110,10 @@ jobs:
           diagnosis = json.loads(Path('/tmp/hostsleuth-diagnosis.json').read_text())
           assert diagnosis.get('conclusion') == 'target is reachable', diagnosis
           assert diagnosis.get('confidence') == 'high', diagnosis
+
+          file_evidence = json.loads(Path('/tmp/hostsleuth-workbench-file.json').read_text())
+          assert len(file_evidence.get('sha256', '')) == 64, file_evidence
+          assert len(file_evidence.get('sha512', '')) == 128, file_evidence
           PY
       - name: Show logs on failure
         if: failure()
