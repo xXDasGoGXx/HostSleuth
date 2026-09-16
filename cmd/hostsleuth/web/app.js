@@ -284,9 +284,11 @@ async function loadAbout() {
     const response = await fetch("/api/about", { cache: "no-store" });
     if (!response.ok) return;
     const about = await response.json();
-    text(byId("appVersion"), about.version || "");
+    const version = about.version || "";
+    const revision = about.revision || "";
+    text(byId("appVersion"), [version, revision ? `(${revision})` : ""].filter(Boolean).join(" "));
   } catch (_) {
-    // Version display is helpful but must never block the dashboard.
+    // Build information is helpful but must never block the dashboard.
   }
 }
 
