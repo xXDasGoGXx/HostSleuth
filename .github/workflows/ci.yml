@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, m11-safe-actions]
   pull_request:
 
 permissions:
