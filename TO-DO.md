@@ -23,13 +23,15 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M11 loopback-only Action Web/API; Docker mode remains action-unavailable and no writable Docker socket was added.
 - [x] M11 disposable real-systemd restart acceptance in CI.
 - [x] Publish stable `v0.4.0` from exact source `6566c505b32cc47d96384152a988736173d3f7cd`.
-- [x] v0.4.0 linux/amd64 and linux/arm64 binaries plus `SHA256SUMS` published.
-- [x] v0.4.0 multi-platform Docker image published as `mjmalleo/hostsleuth:0.4.0` and `latest`.
-- [x] Independently verify the published amd64 checksum/version and default-disabled Safe Actions.
 - [x] Align live Arcane/Docker production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:0.4.0`.
 - [x] Redacted Evidence Bundle threat model/redaction contract accepted.
 - [x] Redacted Evidence Bundle bounded typed exporter implemented and adversarially tested.
 - [x] Redacted Evidence Bundle PR #40 merged to `main` at `f1d756fa42baf71d9b762127b8d5d6ef6b77b796`.
+- [x] Publish stable `v0.5.0` from exact source `04a53f8f0f3f48f7118a9ee9a688820cc000a340`.
+- [x] v0.5.0 linux/amd64 and linux/arm64 binaries plus `SHA256SUMS` published.
+- [x] v0.5.0 multi-platform Docker image published as `mjmalleo/hostsleuth:0.5.0` and `latest`.
+- [x] Independently verify the published amd64 checksum/version and Evidence Bundle CLI.
+- [x] Independently verify Docker `0.5.0` and `latest` share OCI index `sha256:a17325980d5e9ec9760f9003aa8a9490962bb06ffbbd5a393a0ad31a218e480d` with amd64 + arm64 manifests.
 
 M10 implementation/acceptance: `docs/history/M10-REBOOT-STORY.md`.
 
@@ -41,29 +43,28 @@ Redacted Evidence Bundle design: `docs/design/REDACTED-EVIDENCE-BUNDLE.md`.
 
 Redacted Evidence Bundle closeout: `docs/history/REDACTED-EVIDENCE-BUNDLE.md`.
 
-## Redacted Evidence Bundle — merged source state
+v0.5.0 publication record: `docs/history/V0.5.0-PUBLICATION.md`.
 
-The merged first version provides:
+## Current release/live/recovery boundary
 
-- `hostsleuth evidence preview` with no archive write;
-- `hostsleuth evidence export [--output PATH]` for a bounded local ZIP;
-- typed Snapshot/Event/ActionAudit redaction only;
-- deterministic bundle-local pseudonymization and credential/private-key scrubbing;
-- manifest, redaction counts, file SHA-256 values, `checksums.txt`, and final archive SHA-256;
-- 200-event / 100-action-audit / 1 MiB JSON / 2 MiB total payload limits;
-- owner-only archive permissions, overwrite refusal, and temporary cleanup on failure;
-- explicit exclusion of raw journal text, raw action command output, arbitrary file/config contents, action confirmation material, cloud upload, and automatic sharing;
-- full local and GitHub CI validation plus disposable end-to-end leak-scan acceptance.
+Public stable is now:
 
-## Current release boundary
+`v0.5.0` / `mjmalleo/hostsleuth:0.5.0`
 
-Stable/public/live/recovery remain on:
+Docker `latest` also resolves to the verified v0.5.0 OCI index.
 
-`v0.4.0` / `mjmalleo/hostsleuth:0.4.0`
+The live Arcane deployment and `OMV-Docker-Rebuild` disaster-recovery definition remain on:
 
-The Redacted Evidence Bundle is merged to source `main` but is **not in stable v0.4.0**.
+`mjmalleo/hostsleuth:0.4.0`
 
-A new release/publication decision is the next possible step only if explicitly chosen. Production/recovery rollout must remain a separate later step after release verification.
+## Next — production / recovery v0.5.0 alignment
+
+- [ ] Stage the recovery image-pin bump from `0.4.0` to `0.5.0` without merging it ahead of production.
+- [ ] Redeploy the existing Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.5.0` through the supported authenticated path.
+- [ ] Verify `/api/about`, `/api/snapshot`, LAN reachability, retained state/events, and Docker-mode Safe Actions boundary after redeploy.
+- [ ] Exercise the published v0.5.0 Evidence Bundle CLI against retained HostSleuth state using a safe local output path and inspect the resulting preview/archive behavior.
+- [ ] Update and merge the recovery pin only after live v0.5.0 acceptance passes.
+- [ ] Record final live/recovery alignment in `CURRENT-HANDOFF.md`.
 
 ## Guardrails
 

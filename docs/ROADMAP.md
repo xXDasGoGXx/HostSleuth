@@ -77,45 +77,27 @@ Stable `v0.4.0` was published from exact accepted source commit:
 
 `6566c505b32cc47d96384152a988736173d3f7cd`
 
-Release workflow run #5 (`35193948370`) completed successfully.
-
-Publication verification includes:
-
-- GitHub linux/amd64 and linux/arm64 binaries;
-- `SHA256SUMS`;
-- independent amd64 checksum/version execution;
-- confirmation that Safe Actions remain disabled by default;
-- public `mjmalleo/hostsleuth:0.4.0` plus `latest`;
-- both Docker tags resolving to OCI index `sha256:03b5824fddc50a707e5486033afed3f01d0be76e9adef64292d7a72743578bf0`;
-- linux/amd64 and linux/arm64 manifests.
+Publication verification included GitHub linux/amd64 and linux/arm64 binaries, `SHA256SUMS`, independent amd64 execution, and public multi-platform Docker verification.
 
 Full record: `docs/history/V0.4.0-PUBLICATION.md`.
 
 ## 9. Production / recovery v0.4.0 alignment — COMPLETE
 
-The live Arcane-managed OMV deployment was redeployed through the authenticated Arcane UI to:
+The live Arcane-managed OMV deployment and `xXDasGoGXx/OMV-Docker-Rebuild` recovery definition were aligned on:
 
 `mjmalleo/hostsleuth:0.4.0`
 
-Post-redeploy acceptance confirmed:
-
-- `/api/about` = `v0.4.0`;
-- `/api/snapshot` = schema 4 / Docker mode;
-- live container image = `mjmalleo/hostsleuth:0.4.0`;
-- `192.168.2.181:8787` remains healthy;
-- retained state/events survived the redeploy;
-- Optional Safe Actions remain disabled/unavailable in Docker/default mode;
-- Action Web/API remains loopback-only.
-
-The disaster-recovery repository `xXDasGoGXx/OMV-Docker-Rebuild` was aligned to the same pinned image and PR #4 was merged at:
+Recovery alignment merged at:
 
 `ad2bd53ca3a469272eba6343c03936b7c1a04bc0`
 
-No Arcane authentication, HomeCommander Docker/sudo safeguard, or deployment-control boundary was bypassed.
+Post-redeploy acceptance confirmed version/schema/mode, retained state/events, LAN health, and the Docker-mode Safe Actions boundary.
 
-## 10. Redacted Evidence Bundle — COMPLETE IN SOURCE
+## 10. Redacted Evidence Bundle — COMPLETE
 
-Owner accepted the threat model/redaction contract in `docs/design/REDACTED-EVIDENCE-BUNDLE.md` on 2026-09-17. The bounded first implementation is complete on PR #40.
+Owner accepted the threat model/redaction contract in `docs/design/REDACTED-EVIDENCE-BUNDLE.md`. PR #40 merged at:
+
+`f1d756fa42baf71d9b762127b8d5d6ef6b77b796`
 
 Delivered:
 
@@ -123,19 +105,47 @@ Delivered:
 - `hostsleuth evidence preview` with no archive write;
 - explicit `hostsleuth evidence export` to one local ZIP;
 - deterministic bundle-local aliases for sensitive host/infrastructure identifiers;
-- secret, credential, URL-userinfo/query, full/truncated-private-key, domain, IPv4/IPv6, path, service/container/network, opaque-ID, and fingerprint redaction;
+- credential/private-key/domain/IP/path/service/container/network/opaque-ID/fingerprint redaction;
 - preservation of useful ports, prefix lengths, loopback/unspecified semantics, package/version data, statuses, UTC ordering, URL shape, and IPv6-CIDR shape;
-- `manifest.json`, summary, redacted JSON payloads, SHA-256 checksums, and final archive SHA-256;
-- owner-only output permissions, overwrite refusal, temporary-file cleanup on failure, and bounded record/payload sizes;
+- manifest, redacted payloads, SHA-256 checksums, owner-only output permissions, overwrite refusal, cleanup on failure, and bounded payload sizes;
 - explicit exclusion of raw journal text, raw action command output, arbitrary file/config contents, action confirmation material, arbitrary Workbench inputs, cloud upload, and automatic sharing.
 
-Acceptance includes adversarial leak tests, full local formatting/vet/test/build validation, GitHub test plus amd64/arm64 image builds, Docker smoke, native-actions smoke, and a disposable end-to-end CLI preview/export run whose planted-secret scan was clean and whose checksums and `0600` archive permissions verified.
+Acceptance included adversarial leak tests, full local formatting/vet/test/build validation, GitHub test plus amd64/arm64 image builds, Docker smoke, native-actions smoke, and disposable end-to-end CLI preview/export verification.
 
 Full closeout: `docs/history/REDACTED-EVIDENCE-BUNDLE.md`.
 
-This milestone is **not in stable v0.4.0**. Release/publication and production/recovery deployment remain separate future decisions.
+## 11. Publish stable v0.5.0 — COMPLETE
 
-No raw/unredacted mode, journal inclusion, arbitrary file inclusion, broader sharing/upload mechanism, or additional Safe Action family is authorized by this milestone.
+Stable `v0.5.0` was published from exact source:
+
+`04a53f8f0f3f48f7118a9ee9a688820cc000a340`
+
+Release workflow run `35281793336` completed successfully.
+
+Independent verification confirmed:
+
+- published amd64 checksum and execution;
+- version `v0.5.0 (04a53f8f0f3f)`;
+- Evidence Bundle CLI present;
+- public `mjmalleo/hostsleuth:0.5.0` and `latest` share OCI index `sha256:a17325980d5e9ec9760f9003aa8a9490962bb06ffbbd5a393a0ad31a218e480d`;
+- linux/amd64 and linux/arm64 manifests are present.
+
+Full record: `docs/history/V0.5.0-PUBLICATION.md`.
+
+## 12. Production / recovery v0.5.0 alignment — ACTIVE NEXT STEP
+
+Public stable is v0.5.0, while live Arcane production and the disaster-recovery definition remain pinned to v0.4.0.
+
+Ordered rollout:
+
+1. stage the recovery image-pin bump to `mjmalleo/hostsleuth:0.5.0` without merging ahead of production;
+2. redeploy the existing Arcane-managed HostSleuth project through the supported authenticated UI;
+3. verify live version/schema/mode, LAN health, retained state/events, and Docker-mode Safe Actions boundary;
+4. exercise the published Evidence Bundle CLI against retained state using a safe local output path;
+5. merge the recovery pin only after live v0.5.0 acceptance passes;
+6. record final production/recovery alignment.
+
+Do not bypass Arcane authentication or HomeCommander deployment safeguards.
 
 ## Research backlog — not an implementation milestone
 
@@ -155,5 +165,7 @@ Do not drift into:
 - AI-generated causal claims;
 - automatic remediation;
 - broad privilege expansion simply to make features easier.
+
+Do not add a raw/unredacted evidence mode, raw journal export, arbitrary file inclusion, cloud upload, automatic sharing, or new Safe Action family without a separate explicit design decision.
 
 HostSleuth should feel powerful because it connects deterministic evidence into answers people actually need, not because it exposes every system control in a browser.
