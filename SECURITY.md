@@ -34,6 +34,26 @@ Workbench does not return file contents, edit files, accept arbitrary commands, 
 
 The generic file identity tool does read the bytes of a user-selected readable regular file in order to calculate SHA-256/SHA-512. It returns metadata and digests only; it does not retain or return file contents. Treat file paths and fingerprints as potentially sensitive evidence.
 
+## Redacted Evidence Bundle boundary
+
+The Redacted Evidence Bundle is a local, operator-triggered support export. It is not a backup, forensic image, remote collection mechanism, or automatic sharing feature.
+
+The first supported implementation is intentionally typed and bounded. It exports only the current snapshot, at most 200 recent events, and at most 100 Safe Action audit records. It does not provide a generic serializer or arbitrary include paths.
+
+Before any archive is written, `hostsleuth evidence preview` builds the same redacted payload in memory and reports included/omitted evidence classes, record counts, redaction counts, files, bounded size, unavailable evidence, and warnings. Preview does not create an archive. Export is a separate explicit command.
+
+The `redacted-v1` policy pseudonymizes non-loopback host/domain/IP identifiers, MAC addresses, arbitrary paths, service/container/network/interface identities, opaque machine IDs, image repository identity, e-mail addresses, and configuration fingerprints while preserving useful equality relationships inside one bundle. Ports, state/status fields, package names/versions, OS/kernel/architecture data, UTC timestamps, and loopback/unspecified-address semantics remain available where useful.
+
+Exportable free-form evidence is scrubbed for password/token/API-key/cookie/session/authorization forms, URL credentials and query strings, PEM private-key material including truncated private-key blocks, plain domains, IPv4/IPv6 identifiers, service names, MAC/UUID values, and paths. Redaction is performed on copies only and never modifies retained HostSleuth state.
+
+The first bundle explicitly excludes raw journal text, raw Safe Action command output, ActionPreview command/confirmation material, arbitrary file contents, arbitrary configuration contents, and arbitrary Workbench file/URL/DNS inputs. There is no cloud upload or automatic sending.
+
+Bundles are limited to 1 MiB per JSON payload and 2 MiB total uncompressed payload. Temporary and final archive files use owner-only permissions (`0600`) where supported. The exporter refuses to overwrite an existing archive, writes through a temporary file, removes temporary output on failure where practical, emits SHA-256 checksums for bundle payloads, and prints the final archive SHA-256 after success.
+
+Redaction reduces disclosure risk but cannot guarantee anonymity. Timing, package versions, topology shape, or other contextual evidence may still identify an environment to a recipient who already knows it. Operators should review the preview and bundle before sharing.
+
+Full design/threat model: `docs/design/REDACTED-EVIDENCE-BUNDLE.md`.
+
 ## Docker socket
 
 The supported Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is a powerful host capability: mounting the socket path read-only does not make Docker API access inherently read-only.
