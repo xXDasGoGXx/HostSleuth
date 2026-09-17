@@ -49,7 +49,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.4.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.5.0`.
 
 ### Docker Compose
 
@@ -65,7 +65,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.4.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.5.0 docker compose up -d
 ```
 
 ### Docker run
@@ -260,9 +260,9 @@ HostSleuth writes durable audit evidence before execution, bounds command time/o
 
 The Action Web/API surface is loopback-only. State-changing Web requests require JSON and `X-HostSleuth-Action: confirm`. Docker mode reports native systemd restart unavailable, so the supported Docker deployment does not gain host service-control capability.
 
-### Redacted Evidence Bundle — development source
+### Redacted Evidence Bundle — stable v0.5.0
 
-The accepted Redacted Evidence Bundle creates a bounded local support package from selected HostSleuth evidence. The first version exports only the current snapshot, bounded recent events, and bounded Safe Action audit records through typed redactors. It pseudonymizes host/infrastructure identifiers, scrubs credential/private-key patterns, excludes raw journal/command/config/file content, and includes a manifest plus SHA-256 checksums.
+The Redacted Evidence Bundle creates a bounded local support package from selected HostSleuth evidence. The first version exports only the current snapshot, bounded recent events, and bounded Safe Action audit records through typed redactors. It pseudonymizes host/infrastructure identifiers, scrubs credential/private-key patterns, excludes raw journal/command/config/file content, and includes a manifest plus SHA-256 checksums.
 
 Preview and export are separate operations: preview writes no archive, while export creates an owner-only local ZIP and refuses to overwrite an existing destination. Redaction reduces disclosure risk but cannot guarantee anonymity; review the preview and bundle before sharing.
 
@@ -337,7 +337,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.4.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.5.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -395,13 +395,13 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, and M11 Optional Safe Actions are complete in source.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, M11 Optional Safe Actions, and the Redacted Evidence Bundle are complete.
 
-Stable `v0.4.0` is the current published native/Docker release and contains the completed M7–M11 capabilities.
+Stable `v0.5.0` is the current published native/Docker release and includes the Redacted Evidence Bundle.
 
-The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.4.0` as of 2026-09-17. Post-redeploy acceptance confirmed schema 4 / Docker mode, retained state/events, and Optional Safe Actions disabled/unavailable in the default Docker deployment.
+The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.5.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.5.0, schema 4 / Docker mode, retained pre-upgrade events, Optional Safe Actions disabled/unavailable, the loopback-only Action Web/API boundary, and a successful bounded Evidence Bundle preview/export against a disposable copy of live API evidence.
 
-The **Redacted Evidence Bundle** is complete in development source on PR #40, with its accepted threat model, bounded CLI preview/export flow, adversarial redaction tests, and end-to-end acceptance. Stable `v0.4.0` does **not** contain this source milestone; publication and production deployment remain separate later decisions.
+No new feature milestone is active yet. The research backlog remains design input until the next bounded milestone is explicitly selected.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -423,6 +423,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/V0.4.0-PUBLICATION.md` — v0.4.0 publication and verification record.
 - `docs/design/REDACTED-EVIDENCE-BUNDLE.md` — accepted bundle threat model and redaction contract.
 - `docs/history/REDACTED-EVIDENCE-BUNDLE.md` — bundle implementation and acceptance closeout.
+- `docs/history/V0.5.0-PUBLICATION.md` — v0.5.0 publication and verification record.
+- `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md` — v0.5.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
