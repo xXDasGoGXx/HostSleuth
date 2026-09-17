@@ -86,9 +86,12 @@ type ActionManager struct {
 }
 
 var actionServiceRestart = func(ctx context.Context, unit string) (boundedCommandResult, error) {
+	command, err := actionSystemctlPath()
+	if err != nil {
+		return boundedCommandResult{}, err
+	}
 	actionCtx, cancel := context.WithTimeout(ctx, actionExecutionTimeout)
 	defer cancel()
-	command := resolveCommand("systemctl", "/usr/bin/systemctl", "/bin/systemctl")
 	return runBoundedCommand(actionCtx, actionCommandOutputLimit, command, "restart", unit)
 }
 
@@ -160,10 +163,15 @@ func (m *ActionManager) Preview(ctx context.Context, actionID, target, mode stri
 		preview.Checks = append(preview.Checks, Check{Name: "action-policy", Status: "fail", Evidence: "target is not explicitly allowlisted for restart"})
 		return preview
 	}
+	command, commandErr := actionSystemctlPath()
+	if commandErr != nil {
+		preview.Checks = append(preview.Checks, Check{Name: "action-command", Status: "fail", Evidence: boundedEvidence(commandErr.Error(), 384)})
+		return preview
+	}
 	preview.Allowed = true
 	preview.Checks = append(preview.Checks, Check{Name: "action-policy", Status: "pass", Evidence: "target is explicitly allowlisted for service.restart"})
 
-	before, err := collectServiceRuntime(ctx, preview.Target)
+	before, err := collectActionServiceRuntime(ctx, preview.Target)
 	preview.Before = before
 	if before == nil {
 		evidence := "systemd runtime evidence is unavailable"
@@ -185,7 +193,6 @@ func (m *ActionManager) Preview(ctx context.Context, actionID, target, mode stri
 		Evidence: fmt.Sprintf("load=%s active=%s sub=%s result=%s",
 			fallback(before.LoadState, "unknown"), fallback(before.ActiveState, "unknown"), fallback(before.SubState, "unknown"), fallback(before.Result, "unknown")),
 	})
-	command := resolveCommand("systemctl", "/usr/bin/systemctl", "/bin/systemctl")
 	preview.Command = []string{command, "restart", preview.Target}
 	preview.Effect = "Restart only the allowlisted systemd unit " + preview.Target + " and verify ActiveState=active afterward."
 	preview.Confirmation = "RESTART " + preview.Target
@@ -244,7 +251,7 @@ func (m *ActionManager) Run(ctx context.Context, actionID, target, confirmation,
 
 	commandResult, commandErr := actionServiceRestart(ctx, result.Target)
 	result.CommandOutput = boundedEvidence(strings.TrimSpace(commandResult.Output), actionCommandOutputLimit)
-	after, afterErr := collectServiceRuntime(ctx, result.Target)
+	after, afterErr := collectActionServiceRuntime(ctx, result.Target)
 	result.After = after
 
 	switch {
