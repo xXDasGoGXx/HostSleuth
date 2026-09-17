@@ -3,19 +3,24 @@ package core
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
 
 func withActionMocks(t *testing.T, runtime func(context.Context, string) (boundedCommandResult, error), restart func(context.Context, string) (boundedCommandResult, error)) {
 	t.Helper()
-	oldRuntime := serviceRuntimeLookup
+	oldRuntime := actionServiceRuntimeLookup
 	oldRestart := actionServiceRestart
-	serviceRuntimeLookup = runtime
+	oldPath := actionSystemctlPath
+	actionServiceRuntimeLookup = runtime
 	actionServiceRestart = restart
+	actionSystemctlPath = func() (string, error) { return "/usr/bin/systemctl", nil }
 	t.Cleanup(func() {
-		serviceRuntimeLookup = oldRuntime
+		actionServiceRuntimeLookup = oldRuntime
 		actionServiceRestart = oldRestart
+		actionSystemctlPath = oldPath
 	})
 }
 
@@ -40,6 +45,25 @@ func TestActionPolicyRejectsUnsafeServiceNames(t *testing.T) {
 		if _, err := NewActionPolicy(true, []string{value}); err == nil {
 			t.Fatalf("unsafe service %q was accepted", value)
 		}
+	}
+}
+
+func TestTrustedExecutableIgnoresPATHAndRequiresAbsoluteCandidate(t *testing.T) {
+	dir := t.TempDir()
+	fake := filepath.Join(dir, "systemctl")
+	if err := os.WriteFile(fake, []byte("#!/bin/sh\nexit 0\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir)
+	if got, err := trustedExecutable("systemctl"); err == nil {
+		t.Fatalf("relative PATH command was trusted: %q", got)
+	}
+	got, err := trustedExecutable(fake)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != fake {
+		t.Fatalf("trusted executable = %q, want %q", got, fake)
 	}
 }
 
