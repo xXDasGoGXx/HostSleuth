@@ -1,6 +1,6 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-09-16
+Last updated: 2026-09-17
 
 ## Product identity
 
@@ -11,7 +11,7 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 
 Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform or browser-based server administration suite.
 
-## Current authoritative state
+## Current authoritative source state
 
 Repository: `xXDasGoGXx/HostSleuth`
 
@@ -28,61 +28,85 @@ Completed source milestones:
 - M7 — Service Story;
 - M8 — Incident Lens;
 - M9 — HostSleuth Workbench;
-- M10 — Reboot Story.
+- M10 — Reboot Story;
+- M11 — Optional Safe Actions.
 
-M10 was developed on `m10-reboot-story` in PR #34. Its final implementation and acceptance record is:
+M10 implementation/acceptance history:
 
 `docs/history/M10-REBOOT-STORY.md`
 
-The earlier `docs/history/M10-REBOOT-STORY-WIP.md` is historical only.
+M11 implementation/security/acceptance history:
 
-No M11 implementation has started.
+`docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`
 
-## M10 — Reboot Story — complete in source
+M11 was developed on `m11-safe-actions` in PR #38.
 
-M10 answers:
+## M11 — Optional Safe Actions — complete in source
 
-**What happened around this reboot, and what failed to come back afterward?**
+M11 is the first source milestone that crosses HostSleuth's read-only boundary, but read-only operation remains the default.
 
-Delivered behavior includes:
+Only one real action is implemented:
 
-- snapshot schema version 4;
-- Linux kernel boot ID capture when available;
-- exact boot-start capture from `/proc/stat` `btime` when available;
-- deterministic reboot detection only when a known boot ID changes to another known boot ID;
-- no reboot inference from human-readable uptime;
-- regression coverage proving an older snapshot with no boot ID does not emit a false reboot during schema upgrade;
-- bounded previous-boot and current-boot journal evidence;
-- explicit `unknown` behavior when journal history is unavailable or inaccessible;
-- orderly-vs-abnormal shutdown classification only when direct bounded evidence supports it;
-- current failed-service evidence;
-- retained post-boot service/listener/container problem correlation;
-- recovery issues only when retained post-boot evidence and current snapshot state agree the problem remains;
-- package/kernel/system/configuration context around boot without causal overclaiming;
-- CLI, JSON API, runtime Web asset, and Reboot-tab integration;
-- no reboot/shutdown/restart/reload/service-control/package/firewall/file-write/arbitrary-command action.
+`service.restart`
 
-M10 remains read-only and explicitly separates reboot detection from reboot explanation. Temporal proximity is context, not proof of cause.
+It is intentionally narrow:
 
-### M10 validation
+- actions are disabled unless `--enable-actions` is supplied;
+- a target service must also be explicitly listed through repeated `--allow-restart-service UNIT` flags;
+- only conservative `.service` unit names are accepted;
+- no arbitrary command, argv, script, or shell field exists;
+- no generic service manager exists;
+- action pre/post evidence and execution use trusted absolute `/usr/bin/systemctl` or `/bin/systemctl`, not `$PATH` resolution;
+- preview exposes the exact target, effect, argv, and confirmation value;
+- execution requires the exact confirmation returned by preview;
+- a durable audit record is required before restart execution;
+- command output and execution time are bounded;
+- action execution is serialized;
+- success requires post-action `ActiveState=active` evidence;
+- Action Web/API endpoints are loopback-only;
+- state-changing Web requests require JSON plus `X-HostSleuth-Action: confirm`;
+- Docker mode reports native systemd restart unavailable;
+- M11 does not add a writable Docker socket, automatic remediation, package/firewall/file administration, or generic server control.
 
-Validation included:
+Delivered interfaces:
 
-- focused M10 tests;
-- full `go test ./...`;
-- `go vet ./...`;
+```text
+hostsleuth action list
+hostsleuth action preview
+hostsleuth action run
+hostsleuth action audit
+```
+
+plus the loopback-only JSON Action API and dedicated Actions Web UI.
+
+### M11 validation
+
+Exact-branch validation in an isolated `/tmp` clone on OMV passed:
+
 - `gofmt` cleanliness;
-- individual JavaScript syntax checks;
-- syntax validation of the exact concatenated served script;
+- `go vet ./...`;
+- `go test ./...`;
 - native build;
-- Docker runtime smoke including Reboot Story API/UI wiring;
+- JavaScript syntax;
+- exact concatenated served-JavaScript syntax.
+
+No OMV production action or deployment change was performed during that validation.
+
+CI run #205 validated functional source at:
+
+`25318fed095f311221b44d67a427f033b1a46993`
+
+All jobs passed:
+
+- test / format / vet / Go tests / JS / native build;
+- `native-actions-smoke`;
+- Docker runtime smoke;
 - linux/amd64 image build;
-- linux/arm64 image build;
-- isolated real-OMV snapshot and journal acceptance.
+- linux/arm64 image build.
 
-Real OMV acceptance confirmed schema 4, live boot ID, exact boot start, native service/listener evidence, and the real journal permission boundary. The unprivileged acceptance account receives `No journal files were opened due to insufficient permissions.` for previous/current boot journal reads. M10 now recognizes that diagnostic as unavailable evidence and reports `unknown`; no privilege expansion was added.
+The native action smoke used a disposable systemd unit on an ephemeral GitHub-hosted Ubuntu runner. It proved preview, exact-confirmation enforcement, denied action without PID change, a real allowlisted restart with PID change, `ActiveState=active` postcondition verification, expected audit records, and cleanup.
 
-Full details: `docs/history/M10-REBOOT-STORY.md`.
+The OMV production host was not used for a real action restart, which avoids bypassing HomeCommander administrative safeguards merely to satisfy acceptance.
 
 ## Published release boundary
 
@@ -108,42 +132,41 @@ Platforms:
 - `linux/amd64`
 - `linux/arm64`
 
-M7, M8, M9, and M10 are newer source capabilities and are **not** claimed to be included in v0.3.0.
+M7, M8, M9, M10, and M11 are newer source capabilities and are **not** claimed to be included in v0.3.0.
 
-Do not publish a new release merely for version-number alignment.
+Do not publish a new release merely for version-number alignment. M11 completion is not release authorization.
 
 ## Live OMV / recovery boundary
 
-M10 did not change the production HostSleuth deployment, production state, Compose definition, Docker image selection, or recovery repository.
-
-A post-M10 read-only audit of the live service at `http://192.168.2.181:8787` verified the production image selection without requiring direct Docker CLI access:
-
-- `/api/about` reports application version `v0.3.0`;
-- `/api/snapshot` reports the running `hostsleuth` container as ID `b823980dd527` using image `mjmalleo/hostsleuth:0.3.0` on host networking;
-- `/proc/1449941/cgroup` identifies the live HostSleuth process inside Docker container `b823980dd5274089a7722cb1ff2260f6135c4d84bae20b759cd9a9ab229a2361`, matching the snapshot container ID;
-- the live snapshot reports schema version 3, consistent with the published v0.3.0 generation rather than the newer schema-4 M10 source.
-
-Therefore the active production image tag is independently verified as:
+The active production HostSleuth image remains independently verified as:
 
 `mjmalleo/hostsleuth:0.3.0`
 
-After explicit owner approval, the separate `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery source of truth was updated in PR #3 to pin the same image:
+The separate `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery source of truth was explicitly repinned in PR #3 to the same image:
 
 `mjmalleo/hostsleuth:0.3.0`
 
-Recovery and live production are now aligned at the image-tag level. The recovery update changed only the Git disaster-recovery definition and documentation; it did not redeploy, restart, or otherwise modify the running production HostSleuth container.
+Production and recovery therefore remain aligned at the image-tag level.
 
-Future production or recovery image changes remain explicit owner-approved actions.
+M11 did **not**:
 
-## Next milestone boundary
+- restart or redeploy the live HostSleuth container;
+- change the production Compose definition;
+- enable actions in production;
+- change the recovery image tag;
+- publish an image or release.
 
-### M11 — Optional Safe Actions — NOT STARTED
+Future release, production, or recovery image changes remain explicit owner-approved actions.
 
-M11 is the first planned milestone that may cross HostSleuth's read-only boundary. Before implementing it, perform an explicit security/design review.
+## Next decision boundary
 
-Any future action must be narrow, disabled by default, previewed, explicitly confirmed, audited, postcondition-verified, and free of arbitrary shell/command fields.
+There is no automatic M12 start.
 
-Do not start M11 automatically after M10. It requires explicit owner direction.
+The immediate decision is whether the accepted post-v0.3.0 source should become a new public release. Release publication and any later OMV/recovery upgrade are separate explicit decisions.
+
+The next planned product feature after that decision is the **Redacted Evidence Bundle**, but it is NOT STARTED and must not begin without explicit owner direction. Redaction/threat-model rules come before export implementation.
+
+Do not expand Optional Safe Actions with more action families merely because the framework exists. A future action must independently justify its privilege cost and preserve the M11 explicit-schema, allowlist, preview, confirmation, audit, and postcondition model.
 
 ## Consumer/product research boundary
 
@@ -151,9 +174,7 @@ Research remains separate from implementation scope. The detailed artifact is:
 
 `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
 
-Certificates/Certbot are one opportunity among many, not the product direction. Promising areas include endpoint-path reasoning, expected-state contracts, DNS resolver/delegation/split-view discrepancies, HTTP/reverse-proxy/upstream problems, port/listener ownership, file permissions/ownership/deployment paths, container disappearance/dependencies, mail/STARTTLS inspection, boot/recovery workflows, and certificate delivery/rollout verification.
-
-A future feature should generally provide correlation, verification, and boundedness without turning HostSleuth into a generic administration platform.
+Promising later areas include endpoint-path/expected-state contracts, resolver/delegation/split-view DNS discrepancies, HTTP/reverse-proxy/upstream problems, permissions/ownership/deployment-path reasoning, container disappearance/dependencies, protocol-aware STARTTLS inspection, and certificate source -> destination -> actually-served verification.
 
 ## Product guardrails
 
@@ -170,17 +191,15 @@ Do not drift into:
 
 ## Resume order for future work
 
-Before consequential writes, re-check current `main`, open PRs, and the active milestone branch. Then read:
+Do not restart a full audit on every continuation. Reuse this handoff unless a consequential write genuinely depends on something that may have changed.
+
+Before a consequential release/deployment or new milestone branch, check the directly relevant current state, then read:
 
 1. `CURRENT-HANDOFF.md`
 2. `TO-DO.md`
 3. `docs/ROADMAP.md`
-4. `docs/history/DEVELOPMENT-HISTORY.md`
-5. the most recent milestone history document
-6. `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
-7. `.github/workflows/ci.yml`
-8. `.github/workflows/release.yml`
-9. `Dockerfile`
-10. `compose.yaml`
+4. the most recent milestone history document
+5. `.github/workflows/ci.yml` when changing executable source
+6. `.github/workflows/release.yml` only for release work
 
-For M10 implementation/acceptance history specifically, use `docs/history/M10-REBOOT-STORY.md`.
+M11 closeout: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
