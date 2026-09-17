@@ -183,3 +183,19 @@ func TestEvaluateEndpointContractServiceAndContainerState(t *testing.T) {
 		t.Fatalf("expected dns, tcp, service, container checks, got %d", len(evaluation.Checks))
 	}
 }
+
+
+func TestEndpointContractFailurePrecedesEarlierUnknownForFirstMismatch(t *testing.T) {
+	withEndpointContractStubs(t, nil, nil)
+	evaluation, err := EvaluateEndpointContract(context.Background(), EndpointContract{
+		Target:    "127.0.0.1:8080",
+		TLS:       EndpointTLSPresent,
+		Container: "missing",
+	}, Snapshot{Mode: dockerDeploymentMode, Containers: []ContainerInfo{{Name: "other", Status: "Up 1 minute"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if evaluation.Status != "fail" || evaluation.FirstMismatch != "container" {
+		t.Fatalf("expected first proven failure to win over earlier unknown: %#v", evaluation)
+	}
+}
