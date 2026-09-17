@@ -21,113 +21,109 @@ Stable `v0.3.0` was published from accepted source commit:
 
 `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`
 
-Publication verification included native linux/amd64 and linux/arm64 binaries, `SHA256SUMS`, public `mjmalleo/hostsleuth:0.3.0` plus `latest`, anonymous multi-platform registry verification, and bounded real-consumer execution. Live OMV was intentionally not migrated.
+Publication verification included native linux/amd64 and linux/arm64 binaries, `SHA256SUMS`, public `mjmalleo/hostsleuth:0.3.0` plus `latest`, anonymous multi-platform registry verification, and bounded real-consumer execution.
 
 ## 3. M7 — Service Story — COMPLETE
 
-Delivered bounded read-only systemd runtime/journal, process/listener ownership, expected-port collision, container-port, endpoint Diagnose/TLS, and retained-change correlation. M7 added no service controls. Real-host acceptance found and fixed a false collision inference when listener PID metadata was hidden.
+Delivered bounded read-only systemd runtime/journal, process/listener ownership, expected-port collision, container-port, endpoint Diagnose/TLS, and retained-change correlation. M7 added no service controls.
 
 ## 4. M8 — Incident Lens — COMPLETE
 
-Delivered a bounded read-only +/- 15 minute incident window anchored from an exact time, retained event, or completed diagnosis. Existing event categories are reused with deterministic ordering, current endpoint Diagnose/TLS evidence is explicitly separated from historical context, and temporal proximity is never presented as proof of causation.
-
-M8 added no time-series database, alerting layer, historical network reconstruction, service control, remediation, or reboot-cause analysis.
+Delivered a bounded read-only +/- 15 minute incident window anchored from an exact time, retained event, or completed diagnosis. Existing event categories are reused with deterministic ordering, current endpoint evidence is explicitly separated from historical context, and temporal proximity is never presented as proof of causation.
 
 ## 5. M9 — HostSleuth Workbench — COMPLETE
 
-Goal: reduce common troubleshooting workflows that normally force an administrator across several shell commands or one-off websites, without becoming a miscellaneous utility collection or browser shell.
+Delivered bounded read-only file identity/checksum comparison, DNS inspection, HTTP/redirect inspection, public certificate inspection/comparison, CLI/JSON API, and a dedicated Workbench UI.
 
-Delivered bounded read-only tools:
-
-- selected-file SHA-256 and SHA-512 calculation without returning or storing file contents;
-- expected SHA-256/SHA-512 verification;
-- file-to-file comparison by SHA-256 fingerprint;
-- file path, size, mode/permissions, mtime, UID/GID, owner/group, and fingerprints;
-- common DNS evidence through the host system resolver: A, AAAA, CNAME where distinct, MX, NS, TXT, and PTR for IP input;
-- direct HTTP/HTTPS HEAD inspection with a bounded redirect chain and selected response metadata;
-- public PEM certificate metadata/fingerprint inspection;
-- exact public certificate file fingerprint vs direct-TLS served certificate comparison;
-- CLI, JSON API, and a dedicated Workbench Web UI tab.
-
-Security/product boundaries:
-
-- no arbitrary command field or hidden shell hook;
-- no file editor or file-content display;
-- no custom HTTP headers, cookies, credentials, or request body;
-- certificate inspection refuses a private-key PEM block encountered before a public certificate;
-- Workbench Web/API operations are loopback-only because file hashing plus server-side DNS/HTTP probing would be inappropriate on an unauthenticated LAN-visible endpoint; local CLI and the recommended SSH-tunnel workflow remain available;
-- Docker Workbench file inspection only sees files actually readable inside the supported container/mounts and does not manufacture broader host-filesystem visibility.
-
-Validation includes focused tests, full test/vet/build/format checks, syntax validation of every UI fragment and the exact concatenated served JavaScript, Docker smoke coverage, and isolated real-OMV CLI/API/UI acceptance. The real-host validation also caught an environment-specific umask assumption in a test; the test was corrected to verify actual observed permissions instead of assuming a host umask.
-
-M9 intentionally spans file integrity, DNS, HTTP, and certificate identity. Certificate tooling is one Workbench workflow, not the product's sole enhancement direction.
+Workbench Web/API operations are loopback-only because selected-file hashing plus server-side DNS/HTTP probing would be inappropriate on an unauthenticated LAN-visible endpoint. It does not expose file contents, arbitrary commands, custom HTTP credentials/headers, or private-key viewing.
 
 ## 6. M10 — Reboot Story — COMPLETE
 
-Goal: answer **"What happened around this reboot, and what failed to come back afterward?"** using bounded deterministic evidence without inventing a reboot cause.
+Delivered deterministic reboot detection from kernel boot IDs, exact boot-start evidence, bounded previous/current boot journal evidence, direct-evidence-only shutdown classification, current failed-service evidence, retained post-boot recovery correlation, non-causal nearby change context, CLI/API/UI integration, and schema-upgrade protection against false reboot events.
 
-Delivered:
+M10 remains read-only and does not infer a reboot cause from temporal proximity.
 
-- snapshot schema v4 with Linux kernel boot ID and exact `/proc/stat` `btime` when available;
-- reboot detection only when a previously known boot ID changes to another known boot ID;
-- no inference from human-readable uptime;
-- schema-upgrade protection so an older snapshot with no boot ID cannot create a false reboot event;
-- bounded previous-boot and current-boot journal evidence;
-- explicit `unknown` behavior when journal history is unavailable or permissions prevent access;
-- orderly-vs-abnormal shutdown classification only when direct bounded evidence supports it;
-- current failed-service evidence;
-- retained post-boot service/listener/container recovery correlation;
-- a recovery issue only when retained post-boot evidence and current snapshot state agree the problem remains;
-- nearby package/kernel/system/configuration changes as context, never timing-based proof of cause;
-- CLI, JSON API, and a dedicated Reboot Web UI tab;
-- reuse of the existing retained event/Incident Lens primitives rather than a second history store.
+Full closeout: `docs/history/M10-REBOOT-STORY.md`.
 
-Real-host acceptance on OMV found that `journalctl` may return `No journal files were opened due to insufficient permissions.` as output. M10 now recognizes that diagnostic as unavailable evidence and reports `unknown`; no privilege expansion was added. Full source validation included tests, vet, formatting, JavaScript fragments plus exact served-script syntax, native build, Docker smoke, and linux/amd64 + linux/arm64 image builds.
+## 7. M11 — Optional Safe Actions — COMPLETE
 
-M10 remains read-only. No reboot cause is claimed from temporal proximity. Full closeout detail is in `docs/history/M10-REBOOT-STORY.md`.
+Goal: prove that HostSleuth can offer one surgical administrative action without becoming Webmin, Cockpit, a browser shell, or an automatic-remediation engine.
 
-## 7. M11 — Optional Safe Actions — NOT STARTED
+Delivered one fixed action only:
 
-Goal: carefully test whether HostSleuth can offer a very small number of surgical administrative actions without becoming Webmin, Cockpit, or a browser shell.
+`service.restart`
 
-This milestone changes HostSleuth's current read-only boundary and therefore requires an explicit design/security review **before implementation**. Do not start M11 automatically after M10; explicit owner direction is required.
+Security/product boundaries:
 
-Certificate lifecycle remains one candidate because it is narrow and auditable, but it is not the only possible safe-action family. Consumer research should compare multiple real troubleshooting workflows before any action set is approved.
+- actions are disabled by default;
+- explicit `--enable-actions` opt-in is required;
+- each restart target must be explicitly allowlisted with `--allow-restart-service UNIT`;
+- conservative `.service` unit validation;
+- no arbitrary command, argv, script, or shell field;
+- no generic systemd controller;
+- trusted absolute `/usr/bin/systemctl` or `/bin/systemctl` for action evidence and execution rather than `$PATH` resolution;
+- deterministic preview of target/effect/argv;
+- exact confirmation value required before execution;
+- durable audit write required before the restart command runs;
+- bounded before/after evidence and action timeout;
+- success only after observing `ActiveState=active`;
+- loopback-only Action Web/API operations;
+- JSON-only state-changing Web requests plus explicit `X-HostSleuth-Action: confirm` header;
+- Docker mode reports native systemd restart unavailable;
+- no writable Docker socket added;
+- no automatic remediation.
 
-Possible design properties include:
+Delivered surfaces:
 
-- explicit predefined schemas/recipes rather than arbitrary commands;
-- exact preview of intended effects;
-- optional bounded operation only when ownership/target is clear;
-- post-action verification against an observable condition;
-- audit evidence for requested and observed behavior;
-- disabled-by-default action capability and explicit confirmation.
+- `hostsleuth action list|preview|run|audit`;
+- loopback-only Action JSON API;
+- dedicated Actions UI with allowlisted target selection, preview, exact confirmation, result, and audit display.
 
-Any handling of private keys, destination writes, ownership/mode changes, credentials/tokens, package/service/firewall state, or rollback semantics requires specific threat-model/design work before implementation. Generic administration remains out of scope unless separately justified later.
+Validation includes focused security/regression tests, full format/vet/test/build checks, exact served-JavaScript syntax, Docker smoke, linux/amd64 and linux/arm64 image builds, and a disposable real-systemd acceptance on an ephemeral GitHub runner. The real acceptance proved wrong-confirmation denial without PID change, a successful allowlisted restart with PID change, `ActiveState=active` postcondition verification, the expected audit sequence, and cleanup.
 
-## 8. Later — Redacted Evidence Bundle
+No OMV production service was restarted or redeployed for M11 acceptance.
 
-Goal: make HostSleuth evidence safely shareable after redaction rules and a threat model are mature enough.
+Full closeout: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
 
-A bundle may include selected Host Story, diagnosis, event, route/listener/service/container, package, configuration-fingerprint, certificate, Service Story, Incident Lens, Workbench, and Reboot Story evidence. It must apply documented redaction rules before export and must never silently include configuration contents, credentials, tokens, private keys, or other secrets.
+## 8. Release / deployment decision — NOT STARTED
 
-Do not build export/import before the redaction/threat-model work is strong enough to support it.
+M11 completion does not automatically authorize a new public release, Docker publication, OMV production upgrade, or disaster-recovery repin.
+
+Stable public production/recovery remains `mjmalleo/hostsleuth:0.3.0` until an explicit owner decision changes that boundary.
+
+If a new release is approved, validate the exact accepted source, native assets, checksums, amd64/arm64 container images, Docker smoke, upgrade notes, and then separately decide whether live OMV/recovery should move to the new tag.
+
+## 9. Later — Redacted Evidence Bundle — NOT STARTED
+
+Goal: make HostSleuth evidence safely shareable only after redaction rules and a threat model are mature enough.
+
+A bundle may include selected Host Story, diagnosis, event, route/listener/service/container, package, configuration-fingerprint, certificate, Service Story, Incident Lens, Workbench, Reboot Story, and safe-action audit evidence.
+
+Requirements before implementation:
+
+- explicit inclusion rules;
+- deterministic documented redaction rules;
+- preview before export;
+- no silent configuration-content export;
+- no credentials, tokens, cookies, private keys, or other secrets;
+- clear manifest of what was included/redacted;
+- bounded output and integrity/checksum information.
+
+Do not build export/import before the redaction/threat-model work is strong enough, and do not start this milestone without explicit owner direction.
 
 ## Research backlog — not an implementation milestone
 
-Ongoing market/user-workflow research should compare HostSleuth against what people currently assemble from CLI tools, monitoring products, admin consoles, log viewers, DNS/HTTP/TLS sites, package tools, scripts, and single-purpose utilities.
-
 The detailed current research artifact is `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`.
 
-Research is deliberately broader than certificate management. Promising differentiated questions include:
+Promising differentiated questions include:
 
-- can an expected-endpoint contract tie service ownership, listener/bind, DNS, protocol/TLS behavior, local file/certificate evidence, and retained changes into one troubleshooting story?
-- can HostSleuth explain resolver/delegation or split-view DNS mismatches without becoming a DNS server manager?
-- can it explain redirect, reverse-proxy, Host-header, or upstream mismatches with bounded HTTP evidence without becoming a proxy manager?
-- can permissions/ownership/path evidence explain why a service cannot consume a file it is expected to use?
-- should later protocol inspection understand STARTTLS services such as SMTP/IMAP rather than assuming immediate TLS?
-- can certificate source -> destination -> actually-served comparison verify deployment and rollout without becoming a generic ACME manager?
-- can optional safe actions use explicit schemas plus observable postcondition verification instead of generic scripts or command fields?
+- expected-endpoint contracts tying ownership, listener/bind, DNS, protocol/TLS, local files/certificates, and retained changes together;
+- resolver/delegation or split-view DNS mismatches without becoming a DNS manager;
+- redirect, reverse-proxy, Host-header, or upstream mismatches without becoming a proxy manager;
+- permissions/ownership/path evidence explaining why a service cannot consume an expected file;
+- protocol-aware STARTTLS inspection for SMTP/IMAP and similar services;
+- certificate source -> destination -> actually-served verification;
+- narrowly justified future safe actions using the M11 explicit-schema/allowlist/preview/confirmation/audit/postcondition model.
 
 Research findings must be deliberately assigned to an approved milestone before implementation.
 
