@@ -25,7 +25,7 @@ Stable v0.4.0 source:
 
 `6566c505b32cc47d96384152a988736173d3f7cd`
 
-The live Arcane-managed OMV deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition are aligned on 0.4.0. Recovery alignment was merged in OMV-Docker-Rebuild PR #4 at:
+The live Arcane-managed OMV deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition remain aligned on 0.4.0. Recovery alignment was merged in OMV-Docker-Rebuild PR #4 at:
 
 `ad2bd53ca3a469272eba6343c03936b7c1a04bc0`
 
@@ -53,19 +53,15 @@ M11 closeout: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
 
 v0.4.0 publication record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-## Redacted Evidence Bundle — COMPLETE IN DEVELOPMENT SOURCE
+## Redacted Evidence Bundle — COMPLETE AND MERGED TO MAIN
 
 Owner accepted the threat-model/redaction contract in:
 
 `docs/design/REDACTED-EVIDENCE-BUNDLE.md`
 
-Development branch:
+PR #40 merged successfully on 2026-09-17 at:
 
-`redacted-evidence-bundle`
-
-PR:
-
-`#40 — Redacted Evidence Bundle: threat model and bounded exporter`
+`f1d756fa42baf71d9b762127b8d5d6ef6b77b796`
 
 Closeout record:
 
@@ -104,19 +100,13 @@ The first version explicitly excludes raw journal text, raw Safe Action command 
 
 Redaction lowers disclosure risk but cannot guarantee anonymity. The bundle must still be reviewed before sharing.
 
-### Validation
+### Validation and acceptance
 
 An isolated OMV `/tmp` clone used a temporary Go 1.24.13 toolchain. Nothing was installed system-wide and production HostSleuth was not modified.
 
-Local validation passed:
+Local validation passed gofmt cleanliness, `go vet ./...`, `go test ./...`, native build, and `git diff --check`.
 
-- gofmt cleanliness;
-- `go vet ./...`;
-- `go test ./...`;
-- native build;
-- `git diff --check`.
-
-GitHub CI on the completed implementation passed:
+The final docs-inclusive PR #40 head passed the complete GitHub matrix:
 
 - test/format/vet/native build;
 - linux/amd64 image build;
@@ -124,20 +114,13 @@ GitHub CI on the completed implementation passed:
 - supported Docker smoke;
 - native-actions smoke.
 
-Disposable end-to-end CLI acceptance used synthetic state only and confirmed:
-
-- preview created no ZIP;
-- export created the expected bounded bundle;
-- final archive mode was `0600`;
-- bundle checksums verified;
-- planted private hostname/domain/IPv4/IPv6/interface/service/container/network/registry/path/password/Bearer-token/URL-credential/query/private-key values did not survive the leak scan;
-- redacted URL and IPv6-CIDR structure remained readable.
+Disposable end-to-end CLI acceptance used synthetic state only and confirmed preview created no ZIP, export created the expected bounded bundle, final archive mode was `0600`, bundle checksums verified, planted private/credential values did not survive the leak scan, and redacted URL/IPv6-CIDR structure remained readable.
 
 Adversarial testing caught and fixed a real first-draft Bearer-token scrubber bug plus later domain/IPv6/truncated-private-key and evidence-structure edge cases. Regression tests cover them.
 
 ## Current release boundary
 
-The Redacted Evidence Bundle is complete in source, but **stable v0.4.0 does not contain it**.
+The Redacted Evidence Bundle is merged to `main`, but **stable v0.4.0 does not contain it**.
 
 Do not automatically:
 
@@ -146,15 +129,15 @@ Do not automatically:
 - redeploy the live Arcane project;
 - change the recovery image pin.
 
-Release/publication and production/recovery deployment require a separate explicit decision after PR #40 is merged.
+Release/publication and production/recovery deployment require a separate explicit owner decision.
 
 ## Resume order
 
 Do not restart a full audit on every continuation.
 
-1. If PR #40 is still open, verify its latest head CI is green, move it out of draft, and merge it.
-2. After merge, record the merge SHA in this handoff/TO-DO if needed.
-3. Keep stable/public/live/recovery on v0.4.0 until a separate release decision is made.
+1. Treat the Redacted Evidence Bundle source milestone as complete and merged.
+2. Keep stable/public/live/recovery on v0.4.0 until a separate release decision is made.
+3. If the owner chooses to release, perform release/publication verification first and treat production/recovery rollout as a separate subsequent step.
 4. Do not invent or automatically start a new feature milestone; the research backlog remains design input only.
 
 Do not add a raw/unredacted export mode, raw journal export, arbitrary file inclusion, cloud upload, automatic sharing, or additional Safe Action families without a separate explicit design decision.
