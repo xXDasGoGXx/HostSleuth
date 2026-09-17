@@ -27,6 +27,9 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] v0.4.0 multi-platform Docker image published as `mjmalleo/hostsleuth:0.4.0` and `latest`.
 - [x] Independently verify the published amd64 checksum/version and default-disabled Safe Actions.
 - [x] Align live Arcane/Docker production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:0.4.0`.
+- [x] Redacted Evidence Bundle threat model/redaction contract accepted.
+- [x] Redacted Evidence Bundle bounded typed exporter implemented and adversarially tested.
+- [x] Redacted Evidence Bundle PR #40 merged to `main` at `f1d756fa42baf71d9b762127b8d5d6ef6b77b796`.
 
 M10 implementation/acceptance: `docs/history/M10-REBOOT-STORY.md`.
 
@@ -34,32 +37,33 @@ M11 implementation/security/acceptance: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.
 
 v0.4.0 publication record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-## Redacted Evidence Bundle — implementation/acceptance complete on PR #40
+Redacted Evidence Bundle design: `docs/design/REDACTED-EVIDENCE-BUNDLE.md`.
 
-Branch: `redacted-evidence-bundle`
+Redacted Evidence Bundle closeout: `docs/history/REDACTED-EVIDENCE-BUNDLE.md`.
 
-Design contract: `docs/design/REDACTED-EVIDENCE-BUNDLE.md`
+## Redacted Evidence Bundle — merged source state
 
-- [x] Owner accepted the redaction/threat-model contract.
-- [x] Implement typed Snapshot/Event/ActionAudit redaction; no generic serialize-everything path.
-- [x] Implement deterministic bundle-local pseudonymization and secret/private-key scrubbing.
-- [x] Implement `hostsleuth evidence preview` with no archive write.
-- [x] Implement bounded local ZIP export with manifest, checksums, owner-only permissions, overwrite refusal, and cleanup on failure.
-- [x] Enforce 200-event / 100-action-audit / 1 MiB JSON / 2 MiB total payload limits.
-- [x] Add adversarial tests for credentials, tokens, cookies, Authorization/Bearer, URL userinfo/query strings, full/truncated private keys, domains, IPv4/IPv6, paths, services, containers, networks, opaque IDs, and fingerprints.
-- [x] Preserve useful URL and IPv6-CIDR structure after redaction.
-- [x] Verify the redaction policy is independent of deployment mode.
-- [x] Keep raw journal text, raw action command output, arbitrary file/config contents, action confirmation material, cloud upload, and automatic sharing out of scope.
-- [x] Keep the first implementation CLI-only; no Web/API surface is required for this bounded version.
-- [x] Pass full Go formatting/vet/tests/native build plus GitHub test, amd64/arm64 image build, Docker smoke, and native-actions smoke.
-- [x] Pass disposable end-to-end preview/export acceptance with clean planted-secret leak scan, verified bundle checksums, and final archive mode `0600`.
-- [x] Document the security boundary and closeout before merge.
+The merged first version provides:
 
-Closeout: `docs/history/REDACTED-EVIDENCE-BUNDLE.md`.
+- `hostsleuth evidence preview` with no archive write;
+- `hostsleuth evidence export [--output PATH]` for a bounded local ZIP;
+- typed Snapshot/Event/ActionAudit redaction only;
+- deterministic bundle-local pseudonymization and credential/private-key scrubbing;
+- manifest, redaction counts, file SHA-256 values, `checksums.txt`, and final archive SHA-256;
+- 200-event / 100-action-audit / 1 MiB JSON / 2 MiB total payload limits;
+- owner-only archive permissions, overwrite refusal, and temporary cleanup on failure;
+- explicit exclusion of raw journal text, raw action command output, arbitrary file/config contents, action confirmation material, cloud upload, and automatic sharing;
+- full local and GitHub CI validation plus disposable end-to-end leak-scan acceptance.
 
-## Current stable/live/recovery boundary
+## Current release boundary
 
-Stable/public/live/recovery remain on `v0.4.0` / `mjmalleo/hostsleuth:0.4.0`. The Redacted Evidence Bundle is source work on PR #40 only until a separate release/publication decision is made.
+Stable/public/live/recovery remain on:
+
+`v0.4.0` / `mjmalleo/hostsleuth:0.4.0`
+
+The Redacted Evidence Bundle is merged to source `main` but is **not in stable v0.4.0**.
+
+A new release/publication decision is the next possible step only if explicitly chosen. Production/recovery rollout must remain a separate later step after release verification.
 
 ## Guardrails
 
