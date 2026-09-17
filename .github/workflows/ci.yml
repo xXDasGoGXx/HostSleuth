@@ -42,6 +42,111 @@ jobs:
       - name: Build
         run: go build -trimpath -o hostsleuth ./cmd/hostsleuth
 
+  native-actions-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Build native HostSleuth
+        run: go build -trimpath -o hostsleuth ./cmd/hostsleuth
+      - name: Create disposable systemd service
+        run: |
+          set -eu
+          sudo tee /etc/systemd/system/hostsleuth-m11-accept.service >/dev/null <<'EOF'
+          [Unit]
+          Description=HostSleuth M11 disposable action acceptance
+
+          [Service]
+          Type=simple
+          ExecStart=/bin/sleep infinity
+          EOF
+          sudo systemctl daemon-reload
+          sudo systemctl start hostsleuth-m11-accept.service
+          sudo systemctl is-active --quiet hostsleuth-m11-accept.service
+      - name: Verify preview confirmation audit and real restart
+        run: |
+          set -eu
+          state=/tmp/hostsleuth-m11-action-state
+          sudo mkdir -p "$state"
+
+          sudo ./hostsleuth action preview \
+            --state-dir "$state" \
+            --enable-actions \
+            --allow-restart-service hostsleuth-m11-accept \
+            --target hostsleuth-m11-accept.service \
+            > /tmp/hostsleuth-m11-preview.json
+
+          before_pid=$(sudo systemctl show hostsleuth-m11-accept.service --property=MainPID --value)
+          test -n "$before_pid"
+          test "$before_pid" != "0"
+
+          set +e
+          sudo ./hostsleuth action run \
+            --state-dir "$state" \
+            --enable-actions \
+            --allow-restart-service hostsleuth-m11-accept \
+            --target hostsleuth-m11-accept.service \
+            --confirm WRONG \
+            > /tmp/hostsleuth-m11-denied.json 2>/tmp/hostsleuth-m11-denied.err
+          denied_rc=$?
+          set -e
+          test "$denied_rc" -ne 0
+
+          after_denied_pid=$(sudo systemctl show hostsleuth-m11-accept.service --property=MainPID --value)
+          test "$before_pid" = "$after_denied_pid"
+
+          sudo ./hostsleuth action run \
+            --state-dir "$state" \
+            --enable-actions \
+            --allow-restart-service hostsleuth-m11-accept \
+            --target hostsleuth-m11-accept.service \
+            --confirm 'RESTART hostsleuth-m11-accept.service' \
+            > /tmp/hostsleuth-m11-run.json
+
+          after_pid=$(sudo systemctl show hostsleuth-m11-accept.service --property=MainPID --value)
+          test -n "$after_pid"
+          test "$after_pid" != "0"
+          test "$before_pid" != "$after_pid"
+
+          sudo ./hostsleuth action audit \
+            --state-dir "$state" \
+            --limit 10 \
+            > /tmp/hostsleuth-m11-audit.json
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          preview = json.loads(Path('/tmp/hostsleuth-m11-preview.json').read_text())
+          assert preview['available'] is True, preview
+          assert preview['allowed'] is True, preview
+          assert preview['confirmation'] == 'RESTART hostsleuth-m11-accept.service', preview
+          assert preview['command'][0] in ('/usr/bin/systemctl', '/bin/systemctl'), preview
+          assert preview['command'][1:] == ['restart', 'hostsleuth-m11-accept.service'], preview
+
+          denied = json.loads(Path('/tmp/hostsleuth-m11-denied.json').read_text())
+          assert denied['status'] == 'denied', denied
+
+          result = json.loads(Path('/tmp/hostsleuth-m11-run.json').read_text())
+          assert result['status'] == 'success', result
+          assert result['before']['active_state'] == 'active', result
+          assert result['after']['active_state'] == 'active', result
+
+          audits = json.loads(Path('/tmp/hostsleuth-m11-audit.json').read_text())
+          assert len(audits) == 3, audits
+          assert audits[0]['phase'] == 'denied' and audits[0]['status'] == 'denied', audits
+          assert audits[1]['phase'] == 'requested' and audits[1]['status'] == 'requested', audits
+          assert audits[2]['phase'] == 'completed' and audits[2]['status'] == 'success', audits
+          PY
+      - name: Remove disposable systemd service
+        if: always()
+        run: |
+          sudo systemctl stop hostsleuth-m11-accept.service 2>/dev/null || true
+          sudo rm -f /etc/systemd/system/hostsleuth-m11-accept.service
+          sudo systemctl daemon-reload
+
   docker-build:
     runs-on: ubuntu-latest
     strategy:
