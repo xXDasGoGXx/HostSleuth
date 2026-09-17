@@ -26,15 +26,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] v0.4.0 linux/amd64 and linux/arm64 binaries plus `SHA256SUMS` published.
 - [x] v0.4.0 multi-platform Docker image published as `mjmalleo/hostsleuth:0.4.0` and `latest`.
 - [x] Independently verify the published amd64 checksum/version and default-disabled Safe Actions.
-- [x] Independently verify Docker `0.4.0` and `latest` share OCI digest `sha256:03b5824fddc50a707e5486033afed3f01d0be76e9adef64292d7a72743578bf0` with amd64 + arm64 manifests.
-- [x] Stage `OMV-Docker-Rebuild` PR #4 for recovery image `mjmalleo/hostsleuth:0.4.0` without merging it ahead of production.
-- [x] Redeploy the existing Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.4.0` through the authenticated Arcane UI.
-- [x] Verify `/api/about` = `v0.4.0`.
-- [x] Verify `/api/snapshot` = schema 4 / Docker mode and reports image `mjmalleo/hostsleuth:0.4.0`.
-- [x] Verify `192.168.2.181:8787` remains reachable and retained state/events remain present.
-- [x] Verify Optional Safe Actions remain disabled/unavailable in Docker/default mode and the Action Web/API remains loopback-only.
-- [x] Update recovery PR #4 with live acceptance evidence and merge it; recovery merge commit `ad2bd53ca3a469272eba6343c03936b7c1a04bc0`.
-- [x] Update `CURRENT-HANDOFF.md` with the final aligned live/recovery state.
+- [x] Align live Arcane/Docker production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:0.4.0`.
 
 M10 implementation/acceptance: `docs/history/M10-REBOOT-STORY.md`.
 
@@ -42,19 +34,36 @@ M11 implementation/security/acceptance: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.
 
 v0.4.0 publication record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-## Current stable/live/recovery state
+## Redacted Evidence Bundle — implementation/acceptance complete on PR #40
 
-Public stable, the live Arcane/Docker deployment, and the `OMV-Docker-Rebuild` disaster-recovery definition are all aligned on:
+Branch: `redacted-evidence-bundle`
 
-`mjmalleo/hostsleuth:0.4.0`
+Design contract: `docs/design/REDACTED-EVIDENCE-BUNDLE.md`
 
-Post-redeploy acceptance is recorded in `CURRENT-HANDOFF.md`.
+- [x] Owner accepted the redaction/threat-model contract.
+- [x] Implement typed Snapshot/Event/ActionAudit redaction; no generic serialize-everything path.
+- [x] Implement deterministic bundle-local pseudonymization and secret/private-key scrubbing.
+- [x] Implement `hostsleuth evidence preview` with no archive write.
+- [x] Implement bounded local ZIP export with manifest, checksums, owner-only permissions, overwrite refusal, and cleanup on failure.
+- [x] Enforce 200-event / 100-action-audit / 1 MiB JSON / 2 MiB total payload limits.
+- [x] Add adversarial tests for credentials, tokens, cookies, Authorization/Bearer, URL userinfo/query strings, full/truncated private keys, domains, IPv4/IPv6, paths, services, containers, networks, opaque IDs, and fingerprints.
+- [x] Preserve useful URL and IPv6-CIDR structure after redaction.
+- [x] Verify the redaction policy is independent of deployment mode.
+- [x] Keep raw journal text, raw action command output, arbitrary file/config contents, action confirmation material, cloud upload, and automatic sharing out of scope.
+- [x] Keep the first implementation CLI-only; no Web/API surface is required for this bounded version.
+- [x] Pass full Go formatting/vet/tests/native build plus GitHub test, amd64/arm64 image build, Docker smoke, and native-actions smoke.
+- [x] Pass disposable end-to-end preview/export acceptance with clean planted-secret leak scan, verified bundle checksums, and final archive mode `0600`.
+- [x] Document the security boundary and closeout before merge.
 
-## Next — Redacted Evidence Bundle — NOT STARTED
+Closeout: `docs/history/REDACTED-EVIDENCE-BUNDLE.md`.
 
-Only begin after explicit owner direction. Redaction/threat-model rules come before export implementation. The bundle must never silently include credentials, tokens, private keys, configuration contents, or other secrets.
+## Current stable/live/recovery boundary
+
+Stable/public/live/recovery remain on `v0.4.0` / `mjmalleo/hostsleuth:0.4.0`. The Redacted Evidence Bundle is source work on PR #40 only until a separate release/publication decision is made.
 
 ## Guardrails
+
+Do not add a raw/unredacted export mode, raw journal export, arbitrary file inclusion, cloud upload, or automatic sharing without a separate explicit design decision.
 
 Do not add more action families merely because M11 created the framework. A future action must independently justify its privilege cost and preserve explicit schema, allowlist, preview, confirmation, audit, and postcondition verification.
 

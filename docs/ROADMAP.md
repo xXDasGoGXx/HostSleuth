@@ -113,23 +113,29 @@ The disaster-recovery repository `xXDasGoGXx/OMV-Docker-Rebuild` was aligned to 
 
 No Arcane authentication, HomeCommander Docker/sudo safeguard, or deployment-control boundary was bypassed.
 
-## 10. Later — Redacted Evidence Bundle — NOT STARTED
+## 10. Redacted Evidence Bundle — COMPLETE IN SOURCE
 
-Goal: make HostSleuth evidence safely shareable only after redaction rules and a threat model are mature enough.
+Owner accepted the threat model/redaction contract in `docs/design/REDACTED-EVIDENCE-BUNDLE.md` on 2026-09-17. The bounded first implementation is complete on PR #40.
 
-A bundle may include selected Host Story, diagnosis, event, route/listener/service/container, package, configuration-fingerprint, certificate, Service Story, Incident Lens, Workbench, Reboot Story, and safe-action audit evidence.
+Delivered:
 
-Requirements before implementation:
+- typed current-Snapshot, recent-Event, and Safe-Action-audit export paths only;
+- `hostsleuth evidence preview` with no archive write;
+- explicit `hostsleuth evidence export` to one local ZIP;
+- deterministic bundle-local aliases for sensitive host/infrastructure identifiers;
+- secret, credential, URL-userinfo/query, full/truncated-private-key, domain, IPv4/IPv6, path, service/container/network, opaque-ID, and fingerprint redaction;
+- preservation of useful ports, prefix lengths, loopback/unspecified semantics, package/version data, statuses, UTC ordering, URL shape, and IPv6-CIDR shape;
+- `manifest.json`, summary, redacted JSON payloads, SHA-256 checksums, and final archive SHA-256;
+- owner-only output permissions, overwrite refusal, temporary-file cleanup on failure, and bounded record/payload sizes;
+- explicit exclusion of raw journal text, raw action command output, arbitrary file/config contents, action confirmation material, arbitrary Workbench inputs, cloud upload, and automatic sharing.
 
-- explicit inclusion rules;
-- deterministic documented redaction rules;
-- preview before export;
-- no silent configuration-content export;
-- no credentials, tokens, cookies, private keys, or other secrets;
-- clear manifest of what was included/redacted;
-- bounded output and integrity/checksum information.
+Acceptance includes adversarial leak tests, full local formatting/vet/test/build validation, GitHub test plus amd64/arm64 image builds, Docker smoke, native-actions smoke, and a disposable end-to-end CLI preview/export run whose planted-secret scan was clean and whose checksums and `0600` archive permissions verified.
 
-Do not begin this milestone merely because v0.4.0 publication/deployment alignment is complete. It requires explicit owner direction, and redaction/threat-model design comes before export implementation.
+Full closeout: `docs/history/REDACTED-EVIDENCE-BUNDLE.md`.
+
+This milestone is **not in stable v0.4.0**. Release/publication and production/recovery deployment remain separate future decisions.
+
+No raw/unredacted mode, journal inclusion, arbitrary file inclusion, broader sharing/upload mechanism, or additional Safe Action family is authorized by this milestone.
 
 ## Research backlog — not an implementation milestone
 

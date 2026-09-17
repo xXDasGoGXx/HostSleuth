@@ -260,6 +260,14 @@ HostSleuth writes durable audit evidence before execution, bounds command time/o
 
 The Action Web/API surface is loopback-only. State-changing Web requests require JSON and `X-HostSleuth-Action: confirm`. Docker mode reports native systemd restart unavailable, so the supported Docker deployment does not gain host service-control capability.
 
+### Redacted Evidence Bundle — development source
+
+The accepted Redacted Evidence Bundle creates a bounded local support package from selected HostSleuth evidence. The first version exports only the current snapshot, bounded recent events, and bounded Safe Action audit records through typed redactors. It pseudonymizes host/infrastructure identifiers, scrubs credential/private-key patterns, excludes raw journal/command/config/file content, and includes a manifest plus SHA-256 checksums.
+
+Preview and export are separate operations: preview writes no archive, while export creates an owner-only local ZIP and refuses to overwrite an existing destination. Redaction reduces disclosure risk but cannot guarantee anonymity; review the preview and bundle before sharing.
+
+Full security rules are documented in `docs/design/REDACTED-EVIDENCE-BUNDLE.md` and `SECURITY.md`.
+
 ![HostSleuth Diagnose view](docs/images/hostsleuth-diagnose.png)
 
 _Real public-safe Diagnose view captured from the supported Docker Compose deployment during M3 acceptance._
@@ -300,6 +308,18 @@ Inspect Safe Action capabilities:
 
 ```bash
 hostsleuth action list
+```
+
+Preview a redacted evidence bundle without writing an archive:
+
+```bash
+hostsleuth evidence preview
+```
+
+Export the bounded redacted bundle to a local ZIP:
+
+```bash
+hostsleuth evidence export --output hostsleuth-evidence.zip
 ```
 
 Show recent events:
@@ -381,7 +401,7 @@ Stable `v0.4.0` is the current published native/Docker release and contains the 
 
 The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.4.0` as of 2026-09-17. Post-redeploy acceptance confirmed schema 4 / Docker mode, retained state/events, and Optional Safe Actions disabled/unavailable in the default Docker deployment.
 
-The next planned product feature is the **Redacted Evidence Bundle**, but it is **not started**. Redaction/threat-model design must precede export implementation, and starting it requires explicit owner direction.
+The **Redacted Evidence Bundle** is complete in development source on PR #40, with its accepted threat model, bounded CLI preview/export flow, adversarial redaction tests, and end-to-end acceptance. Stable `v0.4.0` does **not** contain this source milestone; publication and production deployment remain separate later decisions.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -389,7 +409,7 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardr
 
 HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, certificate metadata/fingerprints, kernel boot identity/start time, bounded service runtime properties, sanitized journal evidence, retained incident-window context, bounded boot/recovery context, and Safe Action audit metadata.
 
-It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, M8 does not infer causal relationships from nearby timestamps, M10 does not infer reboot cause from temporal proximity or broaden privileges to obtain inaccessible journal history, and M11 provides no arbitrary command surface or automatic remediation. Treat snapshots, event logs, diagnostic output, and action audit logs as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, M8 does not infer causal relationships from nearby timestamps, M10 does not infer reboot cause from temporal proximity or broaden privileges to obtain inaccessible journal history, and M11 provides no arbitrary command surface or automatic remediation. The Redacted Evidence Bundle uses a separate fail-closed export policy with deterministic pseudonymization and explicit omissions, but redaction cannot guarantee anonymity. Treat snapshots, event logs, diagnostic output, action audit logs, and exported bundles as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
 
 ## Project files
 
@@ -401,6 +421,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/M10-REBOOT-STORY.md` — completed M10 implementation and acceptance record.
 - `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md` — completed M11 security model and acceptance record.
 - `docs/history/V0.4.0-PUBLICATION.md` — v0.4.0 publication and verification record.
+- `docs/design/REDACTED-EVIDENCE-BUNDLE.md` — accepted bundle threat model and redaction contract.
+- `docs/history/REDACTED-EVIDENCE-BUNDLE.md` — bundle implementation and acceptance closeout.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License

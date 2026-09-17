@@ -11,11 +11,27 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 
 Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform, browser shell, or automatic-remediation engine.
 
-## Current authoritative source state
+## Stable/public/live/recovery state
 
-Repository: `xXDasGoGXx/HostSleuth`
+Stable public release:
 
-Completed source milestones:
+`v0.4.0`
+
+Published/live/recovery image:
+
+`mjmalleo/hostsleuth:0.4.0`
+
+Stable v0.4.0 source:
+
+`6566c505b32cc47d96384152a988736173d3f7cd`
+
+The live Arcane-managed OMV deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition are aligned on 0.4.0. Recovery alignment was merged in OMV-Docker-Rebuild PR #4 at:
+
+`ad2bd53ca3a469272eba6343c03936b7c1a04bc0`
+
+Live acceptance previously confirmed schema 4 / Docker mode, retained state/events, and Optional Safe Actions disabled/unavailable in the default Docker deployment. Do not disturb this production baseline as part of source development.
+
+## Completed source milestones through v0.4.0
 
 - M0 — repository foundation;
 - M1 — deployable single-host MVP;
@@ -35,108 +51,110 @@ M10 closeout: `docs/history/M10-REBOOT-STORY.md`.
 
 M11 closeout: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
 
-M11 merged in PR #38 at:
+v0.4.0 publication record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-`6566c505b32cc47d96384152a988736173d3f7cd`
+## Redacted Evidence Bundle — COMPLETE IN DEVELOPMENT SOURCE
 
-Post-merge main CI run #216 completed successfully.
+Owner accepted the threat-model/redaction contract in:
 
-## M11 — Optional Safe Actions
+`docs/design/REDACTED-EVIDENCE-BUNDLE.md`
 
-Read-only behavior remains the default. The only state-changing action is:
+Development branch:
 
-`service.restart`
+`redacted-evidence-bundle`
 
-Security boundary:
+PR:
 
-- actions require explicit `--enable-actions` opt-in;
-- each restart target must be explicitly allowlisted with `--allow-restart-service UNIT`;
-- only conservative `.service` unit names are accepted;
-- no arbitrary command, argv, script, or shell field exists;
-- no generic service manager exists;
-- action evidence and execution use trusted absolute `/usr/bin/systemctl` or `/bin/systemctl`;
-- preview exposes exact target/effect/argv/confirmation;
-- execution requires the exact preview confirmation;
-- durable audit is required before execution;
-- time and output are bounded;
-- success requires observed post-action `ActiveState=active`;
-- Action Web/API operations are loopback-only;
-- state-changing Web requests are JSON-only and require `X-HostSleuth-Action: confirm`;
-- Docker mode reports native systemd restart unavailable;
-- no writable Docker socket, automatic remediation, package/firewall/file administration, or generic server control was added.
+`#40 — Redacted Evidence Bundle: threat model and bounded exporter`
 
-The permanent CI `native-actions-smoke` uses a disposable systemd service on an ephemeral GitHub runner and proves wrong-confirmation denial, real allowlisted restart, postcondition verification, audit sequence, and cleanup without touching OMV production.
+Closeout record:
 
-## Stable public release — v0.4.0
+`docs/history/REDACTED-EVIDENCE-BUNDLE.md`
 
-Stable `v0.4.0` was published on 2026-09-17 from exact accepted source:
+### Delivered first version
 
-`6566c505b32cc47d96384152a988736173d3f7cd`
+CLI:
 
-Release workflow run #5 (`35193948370`) completed successfully.
+```text
+hostsleuth evidence preview
+hostsleuth evidence export [--output PATH]
+```
 
-GitHub release assets:
+The first exporter is deliberately typed and bounded. It includes only:
 
-- `hostsleuth-linux-amd64` — `sha256:0ea9c20ade7a96fe208aef4b29416f6ebc831dc971e87d2f6ff07d8f93b03233`
-- `hostsleuth-linux-arm64` — `sha256:017144dfd5cddf5fb5a351318079d094687650d1ba6bc2759a9eceeae1c82d83`
-- `SHA256SUMS` — `sha256:b7c5dc0ab4c62287e28e0c5ce051d598a3bf202f6c062e605c72c382eeb01f58`
+- current Snapshot;
+- at most 200 recent Events;
+- at most 100 Safe Action audit records when present.
 
-Published Docker tags:
+It does not provide arbitrary file inclusion or a generic serialize-everything path.
 
-- `mjmalleo/hostsleuth:0.4.0`
-- `mjmalleo/hostsleuth:latest`
+`preview` builds the same redacted payload in memory and writes no archive. `export` creates one local ZIP, refuses an existing destination, writes through an owner-only temporary file, and leaves the final archive `0600` where supported.
 
-Both resolve to multi-platform OCI index:
+The bundle contains a manifest, summary, redacted JSON payloads, and SHA-256 checksums. Individual JSON payloads are capped at 1 MiB and the total uncompressed bundle payload at 2 MiB.
 
-`sha256:03b5824fddc50a707e5486033afed3f01d0be76e9adef64292d7a72743578bf0`
+### Redaction/security boundary
 
-Platforms:
+The accepted `redacted-v1` policy pseudonymizes or removes sensitive host/infrastructure identifiers and credentials while retaining useful diagnostic relationships inside the bundle.
 
-- linux/amd64 — `sha256:f001ab1537184b4841688b5838dff5c7fca95ce7c2dfcf6eb578ec1a441b7299`
-- linux/arm64 — `sha256:4e70aa4a4439801d5e14d89d1193ab87befdc96a56fad107a725fee412dd0320`
+Covered evidence includes host/domain identifiers, non-loopback IPv4/IPv6, MACs, arbitrary paths, service/container/network/interface identities, image repository identity, e-mail addresses, opaque IDs, configuration fingerprints, URL credentials/query strings, credential-like key/value forms, and full or truncated private-key material.
 
-Independent consumer verification on OMV downloaded the published amd64 binary, validated it against `SHA256SUMS`, confirmed `v0.4.0 (6566c505b32c)`, and confirmed Safe Actions are disabled/unavailable by default.
+Useful semantics such as ports, prefix lengths, loopback/unspecified addresses, package/version data, state/status values, UTC ordering, redacted URL shape, and IPv6-CIDR shape remain available where safe.
 
-Full publication record: `docs/history/V0.4.0-PUBLICATION.md`.
+The first version explicitly excludes raw journal text, raw Safe Action command output, ActionPreview command/confirmation material, arbitrary file/configuration contents, arbitrary Workbench file/URL/DNS inputs, cloud upload, and automatic sharing.
 
-## Live OMV / disaster-recovery alignment — COMPLETE
+Redaction lowers disclosure risk but cannot guarantee anonymity. The bundle must still be reviewed before sharing.
 
-The existing Arcane-managed production deployment was redeployed through the authenticated Arcane UI to:
+### Validation
 
-`mjmalleo/hostsleuth:0.4.0`
+An isolated OMV `/tmp` clone used a temporary Go 1.24.13 toolchain. Nothing was installed system-wide and production HostSleuth was not modified.
 
-No raw Docker/sudo bypass was used.
+Local validation passed:
 
-Post-redeploy acceptance on 2026-09-17 confirmed:
+- gofmt cleanliness;
+- `go vet ./...`;
+- `go test ./...`;
+- native build;
+- `git diff --check`.
 
-1. `/api/about` reports `v0.4.0`;
-2. `/api/snapshot` reports schema 4 and Docker mode;
-3. the live `hostsleuth` container reports image `mjmalleo/hostsleuth:0.4.0`;
-4. `192.168.2.181:8787` remains reachable and healthy;
-5. persistent state/events survived the redeploy, with `/api/events` still returning pre-redeploy history;
-6. Optional Safe Actions remain `enabled=false` and `available=false` in the default Docker deployment;
-7. the Action Web/API remains loopback-only and returns HTTP 403 from LAN access.
+GitHub CI on the completed implementation passed:
 
-The disaster-recovery repository `xXDasGoGXx/OMV-Docker-Rebuild` was updated to the same pinned image. Recovery PR #4 was updated with the live acceptance evidence and merged successfully on 2026-09-17.
+- test/format/vet/native build;
+- linux/amd64 image build;
+- linux/arm64 image build;
+- supported Docker smoke;
+- native-actions smoke.
 
-Recovery merge commit:
+Disposable end-to-end CLI acceptance used synthetic state only and confirmed:
 
-`ad2bd53ca3a469272eba6343c03936b7c1a04bc0`
+- preview created no ZIP;
+- export created the expected bounded bundle;
+- final archive mode was `0600`;
+- bundle checksums verified;
+- planted private hostname/domain/IPv4/IPv6/interface/service/container/network/registry/path/password/Bearer-token/URL-credential/query/private-key values did not survive the leak scan;
+- redacted URL and IPv6-CIDR structure remained readable.
 
-Production and disaster recovery are therefore aligned on `mjmalleo/hostsleuth:0.4.0`.
+Adversarial testing caught and fixed a real first-draft Bearer-token scrubber bug plus later domain/IPv6/truncated-private-key and evidence-structure edge cases. Regression tests cover them.
 
-## Next product milestone boundary
+## Current release boundary
 
-The **Redacted Evidence Bundle** is NOT STARTED.
+The Redacted Evidence Bundle is complete in source, but **stable v0.4.0 does not contain it**.
 
-Do not start it merely as release/deployment cleanup. It requires explicit owner direction. Redaction/threat-model rules must precede export implementation, and the bundle must never silently include credentials, tokens, private keys, configuration contents, or other secrets.
+Do not automatically:
 
-Do not expand Optional Safe Actions with additional action families merely because the framework exists.
+- publish a new release;
+- move `latest`;
+- redeploy the live Arcane project;
+- change the recovery image pin.
+
+Release/publication and production/recovery deployment require a separate explicit decision after PR #40 is merged.
 
 ## Resume order
 
-Do not restart a full audit on every continuation. Reuse this handoff unless a consequential write depends on something that may have changed.
+Do not restart a full audit on every continuation.
 
-Current stable/public/live/recovery state is all `v0.4.0`.
+1. If PR #40 is still open, verify its latest head CI is green, move it out of draft, and merge it.
+2. After merge, record the merge SHA in this handoff/TO-DO if needed.
+3. Keep stable/public/live/recovery on v0.4.0 until a separate release decision is made.
+4. Do not invent or automatically start a new feature milestone; the research backlog remains design input only.
 
-If asked to continue product work, the next planned milestone is the **Redacted Evidence Bundle**, beginning with redaction/threat-model design only after explicit owner direction. Do not begin export implementation before those rules are accepted.
+Do not add a raw/unredacted export mode, raw journal export, arbitrary file inclusion, cloud upload, automatic sharing, or additional Safe Action families without a separate explicit design decision.

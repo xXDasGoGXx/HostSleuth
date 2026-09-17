@@ -41,6 +41,8 @@ func main() {
 		runWorkbench(os.Args[2:])
 	case "action":
 		runAction(os.Args[2:])
+	case "evidence":
+		runEvidence(os.Args[2:])
 	case "events":
 		runEvents(os.Args[2:])
 	case "serve":
@@ -55,7 +57,7 @@ func main() {
 
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
-	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|incident|reboot|workbench|action|events|serve|version> [options]")
+	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|incident|reboot|workbench|action|evidence|events|serve|version> [options]")
 }
 
 func buildRevision() string {
