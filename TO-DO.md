@@ -28,6 +28,13 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Independently verify the published amd64 checksum/version and default-disabled Safe Actions.
 - [x] Independently verify Docker `0.4.0` and `latest` share OCI digest `sha256:03b5824fddc50a707e5486033afed3f01d0be76e9adef64292d7a72743578bf0` with amd64 + arm64 manifests.
 - [x] Stage `OMV-Docker-Rebuild` PR #4 for recovery image `mjmalleo/hostsleuth:0.4.0` without merging it ahead of production.
+- [x] Redeploy the existing Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.4.0` through the authenticated Arcane UI.
+- [x] Verify `/api/about` = `v0.4.0`.
+- [x] Verify `/api/snapshot` = schema 4 / Docker mode and reports image `mjmalleo/hostsleuth:0.4.0`.
+- [x] Verify `192.168.2.181:8787` remains reachable and retained state/events remain present.
+- [x] Verify Optional Safe Actions remain disabled/unavailable in Docker/default mode and the Action Web/API remains loopback-only.
+- [x] Update recovery PR #4 with live acceptance evidence and merge it; recovery merge commit `ad2bd53ca3a469272eba6343c03936b7c1a04bc0`.
+- [x] Update `CURRENT-HANDOFF.md` with the final aligned live/recovery state.
 
 M10 implementation/acceptance: `docs/history/M10-REBOOT-STORY.md`.
 
@@ -35,23 +42,15 @@ M11 implementation/security/acceptance: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.
 
 v0.4.0 publication record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-## Active operational step — production/recovery alignment
+## Current stable/live/recovery state
 
-Public stable is now `v0.4.0`, but the live Arcane/Docker deployment is still verified on `mjmalleo/hostsleuth:0.3.0`.
+Public stable, the live Arcane/Docker deployment, and the `OMV-Docker-Rebuild` disaster-recovery definition are all aligned on:
 
-Recovery PR #4 stages `0.4.0` and remains intentionally open/unmerged until production is actually upgraded and verified.
+`mjmalleo/hostsleuth:0.4.0`
 
-- [ ] Redeploy the existing Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.4.0` using an authenticated Arcane session/API.
-- [ ] Verify `/api/about` = `v0.4.0`.
-- [ ] Verify `/api/snapshot` = schema 4 / Docker mode and reports image `mjmalleo/hostsleuth:0.4.0`.
-- [ ] Verify `192.168.2.181:8787` remains reachable and retained state/events remain present.
-- [ ] Verify Actions remain unavailable in Docker mode/default deployment.
-- [ ] Update recovery PR #4 documentation to mark live/recovery aligned and merge PR #4.
-- [ ] Update `CURRENT-HANDOFF.md` with the final aligned live/recovery state.
+Post-redeploy acceptance is recorded in `CURRENT-HANDOFF.md`.
 
-Do not bypass Arcane authentication, HomeCommander Docker/sudo safeguards, or the uninstalled native `hostsleuth` deployment record to complete these items.
-
-## Later — Redacted Evidence Bundle — NOT STARTED
+## Next — Redacted Evidence Bundle — NOT STARTED
 
 Only begin after explicit owner direction. Redaction/threat-model rules come before export implementation. The bundle must never silently include credentials, tokens, private keys, configuration contents, or other secrets.
 
