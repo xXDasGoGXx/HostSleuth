@@ -99,47 +99,44 @@ Independent consumer verification on OMV downloaded the published amd64 binary, 
 
 Full publication record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-## Live OMV / disaster-recovery boundary
+## Live OMV / disaster-recovery alignment — COMPLETE
 
-Publication did **not** redeploy the live container.
-
-Current live production remains independently verified as:
-
-`mjmalleo/hostsleuth:0.3.0`
-
-Live `/api/about` reports `v0.3.0`, and `/api/snapshot` reports schema 3 / Docker mode with container `hostsleuth` on image `mjmalleo/hostsleuth:0.3.0`.
-
-The current disaster-recovery `main` branch also remains pinned to `0.3.0`.
-
-With explicit owner approval, recovery PR #4 now stages the future recovery pin:
+The existing Arcane-managed production deployment was redeployed through the authenticated Arcane UI to:
 
 `mjmalleo/hostsleuth:0.4.0`
 
-PR #4 is intentionally **not merged yet**. Recovery must not silently move ahead of production.
+No raw Docker/sudo bypass was used.
 
-### Remaining approved operational step
-
-Redeploy the existing Arcane-managed `hostsleuth` Compose project to `mjmalleo/hostsleuth:0.4.0`, preserving its current bind/state/security settings. Then verify:
+Post-redeploy acceptance on 2026-09-17 confirmed:
 
 1. `/api/about` reports `v0.4.0`;
 2. `/api/snapshot` reports schema 4 and Docker mode;
-3. the `hostsleuth` container reports image `mjmalleo/hostsleuth:0.4.0`;
-4. `192.168.2.181:8787` remains reachable;
-5. state/events remain present;
-6. Actions remain unavailable in Docker mode/default deployment.
+3. the live `hostsleuth` container reports image `mjmalleo/hostsleuth:0.4.0`;
+4. `192.168.2.181:8787` remains reachable and healthy;
+5. persistent state/events survived the redeploy, with `/api/events` still returning pre-redeploy history;
+6. Optional Safe Actions remain `enabled=false` and `available=false` in the default Docker deployment;
+7. the Action Web/API remains loopback-only and returns HTTP 403 from LAN access.
 
-Arcane itself is healthy at port 3552, but its project API requires authentication. This session has no authorized Arcane credential/connector. HomeCommander correctly blocks raw Docker/sudo access, and its `hostsleuth` managed-deployment record is an old uninstalled native-systemd path, not the live Arcane/Docker project. Do not bypass those controls.
+The disaster-recovery repository `xXDasGoGXx/OMV-Docker-Rebuild` was updated to the same pinned image. Recovery PR #4 was updated with the live acceptance evidence and merged successfully on 2026-09-17.
 
-After the authenticated Arcane redeploy is verified, update recovery PR #4 documentation to say production/recovery are aligned, merge it, and update this handoff.
+Recovery merge commit:
+
+`ad2bd53ca3a469272eba6343c03936b7c1a04bc0`
+
+Production and disaster recovery are therefore aligned on `mjmalleo/hostsleuth:0.4.0`.
 
 ## Next product milestone boundary
 
 The **Redacted Evidence Bundle** is NOT STARTED.
 
-Do not start it as part of release/deployment cleanup. Redaction/threat-model rules must precede export implementation. Do not expand Optional Safe Actions with additional action families merely because the framework exists.
+Do not start it merely as release/deployment cleanup. It requires explicit owner direction. Redaction/threat-model rules must precede export implementation, and the bundle must never silently include credentials, tokens, private keys, configuration contents, or other secrets.
+
+Do not expand Optional Safe Actions with additional action families merely because the framework exists.
 
 ## Resume order
 
 Do not restart a full audit on every continuation. Reuse this handoff unless a consequential write depends on something that may have changed.
 
-For the current continuation, the next check should be only the live HostSleuth image/version. If it is still `0.3.0`, the remaining task is the authenticated Arcane redeploy described above. If it is already `0.4.0`, verify the six acceptance points and finish recovery PR #4.
+Current stable/public/live/recovery state is all `v0.4.0`.
+
+If asked to continue product work, the next planned milestone is the **Redacted Evidence Bundle**, beginning with redaction/threat-model design only after explicit owner direction. Do not begin export implementation before those rules are accepted.
