@@ -42,7 +42,7 @@ Production and disaster recovery are now aligned at the HostSleuth image-tag lev
 
 Owner direction to begin M11 was given on 2026-09-17. The explicit security/design review is captured in `docs/history/M11-OPTIONAL-SAFE-ACTIONS-WIP.md`.
 
-Current implementation on `m11-safe-actions` / PR #37:
+Current implementation on `m11-safe-actions` / PR #38:
 
 - [x] Actions disabled by default; explicit `--enable-actions` opt-in required.
 - [x] Fixed `service.restart` action only; no generic command field or generic service controller.
