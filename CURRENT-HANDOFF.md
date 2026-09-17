@@ -125,13 +125,35 @@ Recovery merge commit:
 
 Production and disaster recovery are therefore aligned on `mjmalleo/hostsleuth:0.4.0`.
 
-## Next product milestone boundary
+## Active milestone — Redacted Evidence Bundle design
 
-The **Redacted Evidence Bundle** is NOT STARTED.
+Owner explicitly directed this milestone to begin on 2026-09-17.
 
-Do not start it merely as release/deployment cleanup. It requires explicit owner direction. Redaction/threat-model rules must precede export implementation, and the bundle must never silently include credentials, tokens, private keys, configuration contents, or other secrets.
+Development branch:
 
-Do not expand Optional Safe Actions with additional action families merely because the framework exists.
+`redacted-evidence-bundle`
+
+Design contract:
+
+`docs/design/REDACTED-EVIDENCE-BUNDLE.md`
+
+The design draft is committed. No exporter implementation has started.
+
+The draft defines:
+
+- a fail-closed threat model;
+- explicit included/excluded evidence classes;
+- no credentials, tokens, cookies, private keys, arbitrary config contents, arbitrary file contents, raw journal text, or raw action command output in the default bundle;
+- deterministic bundle-local aliases for hostnames/domains, non-loopback IPs/CIDRs, MACs, usernames/e-mails, arbitrary paths, container/service/network identifiers, boot/opaque IDs, and configuration/certificate fingerprints;
+- preservation of diagnostically important non-identifying semantics such as ports, package/version data, status/state fields, UTC timestamps, and loopback/unspecified addresses;
+- secret-pattern scrubbing before identifier pseudonymization for all exportable free-form strings;
+- `hostsleuth evidence preview` as a no-write first workflow;
+- a bounded local ZIP export with manifest, per-file SHA-256 checksums, owner-only permissions, cleanup on failure, and no cloud upload/sharing;
+- initial record/size limits and required adversarial acceptance tests.
+
+The current hard boundary is: do not implement the exporter until the owner accepts the redaction/threat-model contract. Acceptance authorizes only the bounded first implementation described in the design document; weakening redaction defaults or adding raw evidence paths requires a separate explicit decision.
+
+Do not expand Optional Safe Actions with additional action families as part of this milestone.
 
 ## Resume order
 
@@ -139,4 +161,4 @@ Do not restart a full audit on every continuation. Reuse this handoff unless a c
 
 Current stable/public/live/recovery state is all `v0.4.0`.
 
-If asked to continue product work, the next planned milestone is the **Redacted Evidence Bundle**, beginning with redaction/threat-model design only after explicit owner direction. Do not begin export implementation before those rules are accepted.
+For the active product milestone, first obtain owner acceptance (or requested edits) for `docs/design/REDACTED-EVIDENCE-BUNDLE.md`. Only after acceptance, implement the typed redaction primitives and `hostsleuth evidence preview` before archive export.
