@@ -49,7 +49,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.5.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.6.0`.
 
 ### Docker Compose
 
@@ -65,7 +65,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.5.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.6.0 docker compose up -d
 ```
 
 ### Docker run
@@ -181,7 +181,7 @@ The Web UI presents the answer first and keeps the underlying evidence available
 
 HostSleuth only calls a local certificate "newer/different than the one this endpoint is serving" when a unique readable Certbot lineage matches the requested host and deterministic validity/fingerprint evidence supports that statement. A fingerprint difference alone is not treated as proof of staleness.
 
-### Expected Endpoint Contracts — development source
+### Expected Endpoint Contracts — stable v0.6.0
 
 M12 adds an on-demand Expected-vs-Observed check for an endpoint. A contract always requires TCP reachability and can optionally require an exact DNS address set, TLS behavior, an active native systemd service, and/or a running container.
 
@@ -365,7 +365,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.5.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.6.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -425,11 +425,11 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, M11 Optional Safe Actions, and the Redacted Evidence Bundle are complete.
 
-Stable `v0.5.0` is the current published native/Docker release and includes the Redacted Evidence Bundle.
+Stable `v0.6.0` is the current published native/Docker release and includes M12 Expected Endpoint Contracts.
 
 The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.5.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.5.0, schema 4 / Docker mode, retained pre-upgrade events, Optional Safe Actions disabled/unavailable, the loopback-only Action Web/API boundary, and a successful bounded Evidence Bundle preview/export against a disposable copy of live API evidence.
 
-M12 Expected Endpoint Contracts is complete on `main`; PR #43 passed the full CI matrix and merged at `1c193473d9220c34ec2820526df76076bfb41ce9`. Stable `v0.5.0` does **not** contain M12 yet; publication and production rollout remain separate gated steps.
+M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6.0`, and independently verified. Live OMV production and disaster recovery still remain on v0.5.0 until the separate v0.6.0 rollout passes.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -454,7 +454,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/V0.5.0-PUBLICATION.md` — v0.5.0 publication and verification record.
 - `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md` — v0.5.0 live/recovery rollout and acceptance record.
 - `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 contract semantics and security/product boundary.
-- `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 implementation and local acceptance closeout.
+- `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 implementation and acceptance closeout.
+- `docs/history/V0.6.0-PUBLICATION.md` — v0.6.0 publication and independent verification record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
