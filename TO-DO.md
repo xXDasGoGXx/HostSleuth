@@ -52,11 +52,14 @@ Stable/public/live/recovery are aligned on:
 
 Docker `latest` resolves to the same verified v0.5.0 OCI index.
 
-## Next milestone
+## Active next step — M12 merge / v0.6.0 publication
 
-No new feature milestone is active yet.
-
-Use `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` as design input when the owner chooses the next bounded milestone. Do not silently promote a research idea into implementation scope.
+- [ ] Open M12 PR only after the branch remains locally green.
+- [ ] Require full GitHub CI on the exact PR head before merge.
+- [ ] Merge M12 to `main` and record the merge SHA.
+- [ ] Publish stable `v0.6.0` from the exact accepted source.
+- [ ] Independently verify native assets/checksums and the multi-platform Docker image.
+- [ ] Keep production/recovery on v0.5.0 until the separately verified v0.6.0 rollout.
 
 ## Guardrails
 
