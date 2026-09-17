@@ -9,7 +9,7 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 1. **Remember meaningful host changes.**
 2. **Explain why a host/service/port is or is not reachable using deterministic evidence.**
 
-Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform or browser-based server administration suite.
+Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform, browser shell, or automatic-remediation engine.
 
 ## Current authoritative source state
 
@@ -31,175 +31,115 @@ Completed source milestones:
 - M10 — Reboot Story;
 - M11 — Optional Safe Actions.
 
-M10 implementation/acceptance history:
+M10 closeout: `docs/history/M10-REBOOT-STORY.md`.
 
-`docs/history/M10-REBOOT-STORY.md`
+M11 closeout: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
 
-M11 implementation/security/acceptance history:
+M11 merged in PR #38 at:
 
-`docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`
+`6566c505b32cc47d96384152a988736173d3f7cd`
 
-M11 was developed on `m11-safe-actions` in PR #38.
+Post-merge main CI run #216 completed successfully.
 
-## M11 — Optional Safe Actions — complete in source
+## M11 — Optional Safe Actions
 
-M11 is the first source milestone that crosses HostSleuth's read-only boundary, but read-only operation remains the default.
-
-Only one real action is implemented:
+Read-only behavior remains the default. The only state-changing action is:
 
 `service.restart`
 
-It is intentionally narrow:
+Security boundary:
 
-- actions are disabled unless `--enable-actions` is supplied;
-- a target service must also be explicitly listed through repeated `--allow-restart-service UNIT` flags;
+- actions require explicit `--enable-actions` opt-in;
+- each restart target must be explicitly allowlisted with `--allow-restart-service UNIT`;
 - only conservative `.service` unit names are accepted;
 - no arbitrary command, argv, script, or shell field exists;
 - no generic service manager exists;
-- action pre/post evidence and execution use trusted absolute `/usr/bin/systemctl` or `/bin/systemctl`, not `$PATH` resolution;
-- preview exposes the exact target, effect, argv, and confirmation value;
-- execution requires the exact confirmation returned by preview;
-- a durable audit record is required before restart execution;
-- command output and execution time are bounded;
-- action execution is serialized;
-- success requires post-action `ActiveState=active` evidence;
-- Action Web/API endpoints are loopback-only;
-- state-changing Web requests require JSON plus `X-HostSleuth-Action: confirm`;
+- action evidence and execution use trusted absolute `/usr/bin/systemctl` or `/bin/systemctl`;
+- preview exposes exact target/effect/argv/confirmation;
+- execution requires the exact preview confirmation;
+- durable audit is required before execution;
+- time and output are bounded;
+- success requires observed post-action `ActiveState=active`;
+- Action Web/API operations are loopback-only;
+- state-changing Web requests are JSON-only and require `X-HostSleuth-Action: confirm`;
 - Docker mode reports native systemd restart unavailable;
-- M11 does not add a writable Docker socket, automatic remediation, package/firewall/file administration, or generic server control.
+- no writable Docker socket, automatic remediation, package/firewall/file administration, or generic server control was added.
 
-Delivered interfaces:
+The permanent CI `native-actions-smoke` uses a disposable systemd service on an ephemeral GitHub runner and proves wrong-confirmation denial, real allowlisted restart, postcondition verification, audit sequence, and cleanup without touching OMV production.
 
-```text
-hostsleuth action list
-hostsleuth action preview
-hostsleuth action run
-hostsleuth action audit
-```
+## Stable public release — v0.4.0
 
-plus the loopback-only JSON Action API and dedicated Actions Web UI.
+Stable `v0.4.0` was published on 2026-09-17 from exact accepted source:
 
-### M11 validation
+`6566c505b32cc47d96384152a988736173d3f7cd`
 
-Exact-branch validation in an isolated `/tmp` clone on OMV passed:
+Release workflow run #5 (`35193948370`) completed successfully.
 
-- `gofmt` cleanliness;
-- `go vet ./...`;
-- `go test ./...`;
-- native build;
-- JavaScript syntax;
-- exact concatenated served-JavaScript syntax.
+GitHub release assets:
 
-No OMV production action or deployment change was performed during that validation.
+- `hostsleuth-linux-amd64` — `sha256:0ea9c20ade7a96fe208aef4b29416f6ebc831dc971e87d2f6ff07d8f93b03233`
+- `hostsleuth-linux-arm64` — `sha256:017144dfd5cddf5fb5a351318079d094687650d1ba6bc2759a9eceeae1c82d83`
+- `SHA256SUMS` — `sha256:b7c5dc0ab4c62287e28e0c5ce051d598a3bf202f6c062e605c72c382eeb01f58`
 
-CI run #205 validated functional source at:
+Published Docker tags:
 
-`25318fed095f311221b44d67a427f033b1a46993`
-
-All jobs passed:
-
-- test / format / vet / Go tests / JS / native build;
-- `native-actions-smoke`;
-- Docker runtime smoke;
-- linux/amd64 image build;
-- linux/arm64 image build.
-
-The native action smoke used a disposable systemd unit on an ephemeral GitHub-hosted Ubuntu runner. It proved preview, exact-confirmation enforcement, denied action without PID change, a real allowlisted restart with PID change, `ActiveState=active` postcondition verification, expected audit records, and cleanup.
-
-The OMV production host was not used for a real action restart, which avoids bypassing HomeCommander administrative safeguards merely to satisfy acceptance.
-
-## Published release boundary
-
-Stable public release remains:
-
-`v0.3.0`
-
-Release source commit:
-
-`6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1`
-
-Published Docker tags remain:
-
-- `mjmalleo/hostsleuth:0.3.0`
+- `mjmalleo/hostsleuth:0.4.0`
 - `mjmalleo/hostsleuth:latest`
 
-Published multi-platform OCI index:
+Both resolve to multi-platform OCI index:
 
-`sha256:127b388fbf794841b22d06b281fe89dc1500188fdb4215eec023b392aa98c05d`
+`sha256:03b5824fddc50a707e5486033afed3f01d0be76e9adef64292d7a72743578bf0`
 
 Platforms:
 
-- `linux/amd64`
-- `linux/arm64`
+- linux/amd64 — `sha256:f001ab1537184b4841688b5838dff5c7fca95ce7c2dfcf6eb578ec1a441b7299`
+- linux/arm64 — `sha256:4e70aa4a4439801d5e14d89d1193ab87befdc96a56fad107a725fee412dd0320`
 
-M7, M8, M9, M10, and M11 are newer source capabilities and are **not** claimed to be included in v0.3.0.
+Independent consumer verification on OMV downloaded the published amd64 binary, validated it against `SHA256SUMS`, confirmed `v0.4.0 (6566c505b32c)`, and confirmed Safe Actions are disabled/unavailable by default.
 
-Do not publish a new release merely for version-number alignment. M11 completion is not release authorization.
+Full publication record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-## Live OMV / recovery boundary
+## Live OMV / disaster-recovery boundary
 
-The active production HostSleuth image remains independently verified as:
+Publication did **not** redeploy the live container.
 
-`mjmalleo/hostsleuth:0.3.0`
-
-The separate `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery source of truth was explicitly repinned in PR #3 to the same image:
+Current live production remains independently verified as:
 
 `mjmalleo/hostsleuth:0.3.0`
 
-Production and recovery therefore remain aligned at the image-tag level.
+Live `/api/about` reports `v0.3.0`, and `/api/snapshot` reports schema 3 / Docker mode with container `hostsleuth` on image `mjmalleo/hostsleuth:0.3.0`.
 
-M11 did **not**:
+The current disaster-recovery `main` branch also remains pinned to `0.3.0`.
 
-- restart or redeploy the live HostSleuth container;
-- change the production Compose definition;
-- enable actions in production;
-- change the recovery image tag;
-- publish an image or release.
+With explicit owner approval, recovery PR #4 now stages the future recovery pin:
 
-Future release, production, or recovery image changes remain explicit owner-approved actions.
+`mjmalleo/hostsleuth:0.4.0`
 
-## Next decision boundary
+PR #4 is intentionally **not merged yet**. Recovery must not silently move ahead of production.
 
-There is no automatic M12 start.
+### Remaining approved operational step
 
-The immediate decision is whether the accepted post-v0.3.0 source should become a new public release. Release publication and any later OMV/recovery upgrade are separate explicit decisions.
+Redeploy the existing Arcane-managed `hostsleuth` Compose project to `mjmalleo/hostsleuth:0.4.0`, preserving its current bind/state/security settings. Then verify:
 
-The next planned product feature after that decision is the **Redacted Evidence Bundle**, but it is NOT STARTED and must not begin without explicit owner direction. Redaction/threat-model rules come before export implementation.
+1. `/api/about` reports `v0.4.0`;
+2. `/api/snapshot` reports schema 4 and Docker mode;
+3. the `hostsleuth` container reports image `mjmalleo/hostsleuth:0.4.0`;
+4. `192.168.2.181:8787` remains reachable;
+5. state/events remain present;
+6. Actions remain unavailable in Docker mode/default deployment.
 
-Do not expand Optional Safe Actions with more action families merely because the framework exists. A future action must independently justify its privilege cost and preserve the M11 explicit-schema, allowlist, preview, confirmation, audit, and postcondition model.
+Arcane itself is healthy at port 3552, but its project API requires authentication. This session has no authorized Arcane credential/connector. HomeCommander correctly blocks raw Docker/sudo access, and its `hostsleuth` managed-deployment record is an old uninstalled native-systemd path, not the live Arcane/Docker project. Do not bypass those controls.
 
-## Consumer/product research boundary
+After the authenticated Arcane redeploy is verified, update recovery PR #4 documentation to say production/recovery are aligned, merge it, and update this handoff.
 
-Research remains separate from implementation scope. The detailed artifact is:
+## Next product milestone boundary
 
-`docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
+The **Redacted Evidence Bundle** is NOT STARTED.
 
-Promising later areas include endpoint-path/expected-state contracts, resolver/delegation/split-view DNS discrepancies, HTTP/reverse-proxy/upstream problems, permissions/ownership/deployment-path reasoning, container disappearance/dependencies, protocol-aware STARTTLS inspection, and certificate source -> destination -> actually-served verification.
+Do not start it as part of release/deployment cleanup. Redaction/threat-model rules must precede export implementation. Do not expand Optional Safe Actions with additional action families merely because the framework exists.
 
-## Product guardrails
+## Resume order
 
-Do not drift into:
+Do not restart a full audit on every continuation. Reuse this handoff unless a consequential write depends on something that may have changed.
 
-- multi-host controller/agent architecture;
-- generic network-device/SNMP monitoring;
-- time-series monitoring/graph platform behavior;
-- arbitrary web terminal or command execution;
-- generic package/firewall/configuration administration;
-- AI-generated causal claims;
-- automatic remediation;
-- broad privilege expansion merely to make features easier.
-
-## Resume order for future work
-
-Do not restart a full audit on every continuation. Reuse this handoff unless a consequential write genuinely depends on something that may have changed.
-
-Before a consequential release/deployment or new milestone branch, check the directly relevant current state, then read:
-
-1. `CURRENT-HANDOFF.md`
-2. `TO-DO.md`
-3. `docs/ROADMAP.md`
-4. the most recent milestone history document
-5. `.github/workflows/ci.yml` when changing executable source
-6. `.github/workflows/release.yml` only for release work
-
-M11 closeout: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
+For the current continuation, the next check should be only the live HostSleuth image/version. If it is still `0.3.0`, the remaining task is the authenticated Arcane redeploy described above. If it is already `0.4.0`, verify the six acceptance points and finish recovery PR #4.
