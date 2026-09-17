@@ -113,37 +113,29 @@ The disaster-recovery repository `xXDasGoGXx/OMV-Docker-Rebuild` was aligned to 
 
 No Arcane authentication, HomeCommander Docker/sudo safeguard, or deployment-control boundary was bypassed.
 
-## 10. Redacted Evidence Bundle — DESIGN ACTIVE
+## 10. Redacted Evidence Bundle — COMPLETE IN SOURCE
 
-Owner direction to begin this milestone was given on 2026-09-17.
+Owner accepted the threat model/redaction contract in `docs/design/REDACTED-EVIDENCE-BUNDLE.md` on 2026-09-17. The bounded first implementation is complete on PR #40.
 
-Active branch:
+Delivered:
 
-`redacted-evidence-bundle`
+- typed current-Snapshot, recent-Event, and Safe-Action-audit export paths only;
+- `hostsleuth evidence preview` with no archive write;
+- explicit `hostsleuth evidence export` to one local ZIP;
+- deterministic bundle-local aliases for sensitive host/infrastructure identifiers;
+- secret, credential, URL-userinfo/query, full/truncated-private-key, domain, IPv4/IPv6, path, service/container/network, opaque-ID, and fingerprint redaction;
+- preservation of useful ports, prefix lengths, loopback/unspecified semantics, package/version data, statuses, UTC ordering, URL shape, and IPv6-CIDR shape;
+- `manifest.json`, summary, redacted JSON payloads, SHA-256 checksums, and final archive SHA-256;
+- owner-only output permissions, overwrite refusal, temporary-file cleanup on failure, and bounded record/payload sizes;
+- explicit exclusion of raw journal text, raw action command output, arbitrary file/config contents, action confirmation material, arbitrary Workbench inputs, cloud upload, and automatic sharing.
 
-Threat model and redaction contract:
+Acceptance includes adversarial leak tests, full local formatting/vet/test/build validation, GitHub test plus amd64/arm64 image builds, Docker smoke, native-actions smoke, and a disposable end-to-end CLI preview/export run whose planted-secret scan was clean and whose checksums and `0600` archive permissions verified.
 
-`docs/design/REDACTED-EVIDENCE-BUNDLE.md`
+Full closeout: `docs/history/REDACTED-EVIDENCE-BUNDLE.md`.
 
-The design draft now defines the bounded first implementation and must be accepted before exporter code begins.
+This milestone is **not in stable v0.4.0**. Release/publication and production/recovery deployment remain separate future decisions.
 
-The proposed first version is deliberately smaller than the full long-term evidence surface:
-
-- latest snapshot only;
-- at most 200 recent change events;
-- at most 100 Safe Action audit records;
-- `hostsleuth evidence preview` before any archive write;
-- local ZIP only, no upload/sharing;
-- `manifest.json`, redacted JSON payloads, summary, and SHA-256 checksums;
-- owner-only output permissions;
-- 2 MiB maximum uncompressed payload;
-- fail closed on unregistered/unsafe evidence classes.
-
-Default policy pseudonymizes host/domain/IP/MAC/user/path/container/service/network/machine-ID/config-fingerprint/certificate-fingerprint identifiers while preserving diagnostic semantics such as ports, states, package names/versions, UTC ordering, and loopback/unspecified addresses.
-
-The first version explicitly excludes raw journal text, raw action command output, arbitrary Workbench file/URL/DNS inputs, arbitrary file/config contents, action confirmation material, cloud upload, and automatic sharing.
-
-Before implementation, the owner must accept or request changes to the design contract. Acceptance authorizes only this bounded version. Any weaker redaction mode, raw identifier export, journal export, arbitrary file inclusion, or broader sharing mechanism requires a separate explicit decision.
+No raw/unredacted mode, journal inclusion, arbitrary file inclusion, broader sharing/upload mechanism, or additional Safe Action family is authorized by this milestone.
 
 ## Research backlog — not an implementation milestone
 
