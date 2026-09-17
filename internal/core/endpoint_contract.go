@@ -35,13 +35,13 @@ type EndpointContractCheck struct {
 }
 
 type EndpointContractEvaluation struct {
-	Contract       EndpointContract        `json:"contract"`
-	StartedAt      time.Time               `json:"started_at"`
-	Status         string                  `json:"status"`
-	Conclusion     string                  `json:"conclusion"`
+	Contract      EndpointContract        `json:"contract"`
+	StartedAt     time.Time               `json:"started_at"`
+	Status        string                  `json:"status"`
+	Conclusion    string                  `json:"conclusion"`
 	FirstMismatch string                  `json:"first_mismatch,omitempty"`
-	Checks         []EndpointContractCheck `json:"checks"`
-	Diagnosis      Diagnosis               `json:"diagnosis"`
+	Checks        []EndpointContractCheck `json:"checks"`
+	Diagnosis     Diagnosis               `json:"diagnosis"`
 }
 
 func NormalizeEndpointContract(contract EndpointContract) (EndpointContract, error) {
