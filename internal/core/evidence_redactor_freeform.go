@@ -1,0 +1,93 @@
+package core
+
+import (
+	"net"
+	"net/url"
+	"sort"
+	"strings"
+)
+
+func (r *evidenceRedactor) freeform(value string) string {
+	if strings.TrimSpace(value) == "" {
+		return value
+	}
+	out := evidencePrivateKeyBlockPattern.ReplaceAllString(value, "[REDACTED_PRIVATE_KEY]")
+	out = evidencePrivateKeyHeaderPattern.ReplaceAllString(out, "[REDACTED_PRIVATE_KEY]")
+	out = evidenceSecretKVPattern.ReplaceAllString(out, "$1=[REDACTED_SECRET]")
+	out = evidenceAuthPattern.ReplaceAllString(out, "$1 [REDACTED_SECRET]")
+	out = evidenceURLPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.redactURL(raw) })
+	out = evidenceEmailPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("email", raw) })
+
+	out = r.replaceKnownAliases(out)
+	out = evidenceMACPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("mac", raw) })
+	out = evidenceUUIDPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("id", raw) })
+	out = evidenceServicePattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("service", raw) })
+	out = evidenceIPv4Pattern.ReplaceAllStringFunc(out, func(raw string) string {
+		if net.ParseIP(raw) == nil {
+			return raw
+		}
+		return r.ip(raw)
+	})
+	out = evidenceAbsPathPattern.ReplaceAllStringFunc(out, func(match string) string {
+		idx := strings.Index(match, "/")
+		if idx < 0 {
+			return match
+		}
+		prefix, path := match[:idx], match[idx:]
+		path = strings.TrimRight(path, ".);]")
+		return prefix + r.path(path)
+	})
+	if len(out) > evidenceFreeformLimit {
+		out = out[:evidenceFreeformLimit] + " [truncated after redaction]"
+	}
+	return out
+}
+
+func (r *evidenceRedactor) replaceKnownAliases(value string) string {
+	type replacement struct{ original, alias, category string }
+	var replacements []replacement
+	for category, values := range r.aliases {
+		for original, alias := range values {
+			if original == "" || len(original) < 3 {
+				continue
+			}
+			replacements = append(replacements, replacement{original: original, alias: alias, category: category})
+		}
+	}
+	sort.Slice(replacements, func(i, j int) bool { return len(replacements[i].original) > len(replacements[j].original) })
+	out := value
+	for _, item := range replacements {
+		count := strings.Count(out, item.original)
+		if count == 0 {
+			continue
+		}
+		out = strings.ReplaceAll(out, item.original, item.alias)
+		r.counts[item.category] += count
+	}
+	return out
+}
+
+func (r *evidenceRedactor) redactURL(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		r.counts["url"]++
+		return "[REDACTED_URL]"
+	}
+	u.User = nil
+	u.RawQuery = ""
+	u.Fragment = ""
+	host := u.Hostname()
+	port := u.Port()
+	redactedHost := r.host(host)
+	if port != "" {
+		u.Host = net.JoinHostPort(redactedHost, port)
+	} else {
+		u.Host = redactedHost
+	}
+	if u.Path != "" && u.Path != "/" {
+		u.Path = "/[redacted]"
+		u.RawPath = ""
+	}
+	r.counts["url"]++
+	return u.String()
+}
