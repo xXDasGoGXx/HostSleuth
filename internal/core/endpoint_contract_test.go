@@ -165,7 +165,7 @@ func TestEvaluateEndpointContractServiceUnknownInDockerMode(t *testing.T) {
 func TestEvaluateEndpointContractServiceAndContainerState(t *testing.T) {
 	withEndpointContractStubs(t, nil, nil)
 	snap := Snapshot{
-		Services: []ServiceInfo{{Name: "nginx.service", Active: "failed", Sub: "failed"}},
+		Services:   []ServiceInfo{{Name: "nginx.service", Active: "failed", Sub: "failed"}},
 		Containers: []ContainerInfo{{Name: "web", Status: "Exited (1) 10 seconds ago"}},
 	}
 	evaluation, err := EvaluateEndpointContract(context.Background(), EndpointContract{
