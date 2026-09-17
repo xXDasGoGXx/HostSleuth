@@ -159,7 +159,7 @@ func TestEvidenceBundleRedactsSensitiveEvidenceAndPreservesUsefulShape(t *testin
 			t.Fatalf("bundle leaked %q", forbidden)
 		}
 	}
-	for _, expected := range []string{"127.0.0.1", "::1", "openssl", "1.1", "host-01.invalid", "ipv4-", "service-", "container-", "config-fingerprint-"} {
+	for _, expected := range []string{"127.0.0.1", "::1", "openssl", "1.1", "host-", "ipv4-", "service-", "container-", "config-fingerprint-"} {
 		if !strings.Contains(all, expected) {
 			t.Fatalf("bundle missing useful/redacted evidence %q", expected)
 		}
@@ -234,5 +234,91 @@ func ioReadAll(r interface{ Read([]byte) (int, error) }) ([]byte, error) {
 			}
 			return out, err
 		}
+	}
+}
+
+func TestEvidenceFreeformRedactsPlainDomainIPv6AndTruncatedPrivateKey(t *testing.T) {
+	source := evidenceSource{Events: []Event{{
+		Category: "system",
+		Summary:  "resolver controlplane.private.example reached [2001:db8:abcd::42]:443 then -----BEGIN OPENSSH PRIVATE KEY----- TRUNCATED-SECRET-MATERIAL",
+	}}}
+	r := newEvidenceRedactor(source)
+	out := r.freeform(source.Events[0].Summary)
+	for _, forbidden := range []string{"controlplane.private.example", "2001:db8:abcd::42", "TRUNCATED-SECRET-MATERIAL"} {
+		if strings.Contains(out, forbidden) {
+			t.Fatalf("sensitive free-form value survived redaction: %q in %q", forbidden, out)
+		}
+	}
+	for _, expected := range []string{"host-", "ipv6-", "[REDACTED_PRIVATE_KEY]"} {
+		if !strings.Contains(out, expected) {
+			t.Fatalf("expected %q in redacted output %q", expected, out)
+		}
+	}
+}
+
+func TestEvidenceRecordLimitsAreEnforced(t *testing.T) {
+	dir := t.TempDir()
+	store := Store{Dir: dir}
+	now := time.Date(2026, 9, 17, 22, 0, 0, 0, time.UTC)
+	if err := store.SaveSnapshot(Snapshot{SchemaVersion: snapshotSchemaVersion, CapturedAt: now, Host: HostInfo{Hostname: "limit-test.example"}}); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < EvidenceEventLimit+25; i++ {
+		if err := store.AppendEvents([]Event{{SchemaVersion: 1, At: now.Add(time.Duration(i) * time.Second), Category: "system", Severity: "info", Summary: "bounded event"}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for i := 0; i < EvidenceActionAuditLimit+25; i++ {
+		if err := store.AppendActionAudit(ActionAudit{SchemaVersion: actionSchemaVersion, At: now.Add(time.Duration(i) * time.Second), Phase: "completed", ActionID: actionServiceRestartID, Target: "bounded.service", Status: "success", Summary: "bounded audit"}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	preview, err := BuildEvidencePreview(store, "v-test", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if preview.RecordCounts["events"] != EvidenceEventLimit {
+		t.Fatalf("events = %d, want %d", preview.RecordCounts["events"], EvidenceEventLimit)
+	}
+	if preview.RecordCounts["action_audits"] != EvidenceActionAuditLimit {
+		t.Fatalf("action audits = %d, want %d", preview.RecordCounts["action_audits"], EvidenceActionAuditLimit)
+	}
+}
+
+func TestEvidenceExportFailureLeavesNoOutput(t *testing.T) {
+	dir := t.TempDir()
+	store := Store{Dir: dir}
+	now := time.Now().UTC()
+	if err := store.SaveSnapshot(Snapshot{SchemaVersion: snapshotSchemaVersion, CapturedAt: now, Host: HostInfo{OS: strings.Repeat("x", EvidenceMaxJSONBytes+1024)}}); err != nil {
+		t.Fatal(err)
+	}
+	out := filepath.Join(dir, "must-not-exist.zip")
+	if _, err := ExportEvidence(store, "v-test", out, now); err == nil {
+		t.Fatal("expected export to fail on oversized JSON")
+	}
+	if _, err := os.Stat(out); !os.IsNotExist(err) {
+		t.Fatalf("failed export left output behind: %v", err)
+	}
+	matches, err := filepath.Glob(filepath.Join(dir, ".hostsleuth-evidence-*.tmp"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(matches) != 0 {
+		t.Fatalf("failed export left temporary files: %#v", matches)
+	}
+}
+
+func TestEvidencePolicyIsModeIndependent(t *testing.T) {
+	base := Snapshot{Host: HostInfo{Hostname: "mode-private.example"}, Interfaces: []InterfaceInfo{{Name: "eth0", Addresses: []string{"10.20.30.40/24"}}}}
+	one := base
+	one.Mode = "mode-a"
+	two := base
+	two.Mode = "mode-b"
+	rOne := newEvidenceRedactor(evidenceSource{Snapshot: one})
+	rTwo := newEvidenceRedactor(evidenceSource{Snapshot: two})
+	a := rOne.snapshot(one)
+	b := rTwo.snapshot(two)
+	if a.Host.Hostname != b.Host.Hostname || a.Interfaces[0].Addresses[0] != b.Interfaces[0].Addresses[0] {
+		t.Fatalf("redaction differs by deployment mode: one=%#v two=%#v", a, b)
 	}
 }

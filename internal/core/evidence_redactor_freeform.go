@@ -12,11 +12,19 @@ func (r *evidenceRedactor) freeform(value string) string {
 		return value
 	}
 	out := evidencePrivateKeyBlockPattern.ReplaceAllString(value, "[REDACTED_PRIVATE_KEY]")
+	out = evidencePrivateKeyRemainderPattern.ReplaceAllString(out, "[REDACTED_PRIVATE_KEY]")
 	out = evidencePrivateKeyHeaderPattern.ReplaceAllString(out, "[REDACTED_PRIVATE_KEY]")
 	out = evidenceSecretKVPattern.ReplaceAllString(out, "$1=[REDACTED_SECRET]")
 	out = evidenceAuthPattern.ReplaceAllString(out, "$1 [REDACTED_SECRET]")
 	out = evidenceURLPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.redactURL(raw) })
 	out = evidenceEmailPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("email", raw) })
+	out = evidenceDomainPattern.ReplaceAllStringFunc(out, func(raw string) string {
+		lower := strings.ToLower(raw)
+		if strings.HasSuffix(lower, ".invalid") || strings.HasSuffix(lower, ".service") {
+			return raw
+		}
+		return r.alias("host", raw)
+	})
 
 	out = r.replaceKnownAliases(out)
 	out = evidenceMACPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("mac", raw) })

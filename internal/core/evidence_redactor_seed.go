@@ -55,6 +55,7 @@ func newEvidenceRedactor(source evidenceSource) *evidenceRedactor {
 			}
 		}
 		collectGenericAliases(add, container.Ports)
+		collectGenericAliases(add, container.Status)
 	}
 	for _, fingerprint := range source.Snapshot.ConfigFingerprints {
 		if !evidenceLiteralConfigPaths[fingerprint.Path] {

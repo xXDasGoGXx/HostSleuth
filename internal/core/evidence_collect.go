@@ -63,6 +63,12 @@ func collectImageAlias(add func(string, string), value string) {
 }
 
 func collectGenericAliases(add func(string, string), value string) {
+	for _, token := range strings.Fields(value) {
+		candidate := strings.Trim(token, `(){}<>"\' ,;`)
+		if strings.Contains(candidate, ":") || strings.Contains(candidate, "/") {
+			collectAddressAlias(add, candidate)
+		}
+	}
 	for _, raw := range evidenceIPv4Pattern.FindAllString(value, -1) {
 		collectIPAlias(add, raw)
 	}
@@ -74,6 +80,13 @@ func collectGenericAliases(add func(string, string), value string) {
 	}
 	for _, raw := range evidenceEmailPattern.FindAllString(value, -1) {
 		add("email", raw)
+	}
+	for _, raw := range evidenceDomainPattern.FindAllString(value, -1) {
+		lower := strings.ToLower(raw)
+		if strings.HasSuffix(lower, ".service") || strings.HasSuffix(lower, ".invalid") {
+			continue
+		}
+		add("host", raw)
 	}
 	for _, raw := range evidenceServicePattern.FindAllString(value, -1) {
 		add("service", raw)
