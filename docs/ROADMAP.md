@@ -113,23 +113,37 @@ The disaster-recovery repository `xXDasGoGXx/OMV-Docker-Rebuild` was aligned to 
 
 No Arcane authentication, HomeCommander Docker/sudo safeguard, or deployment-control boundary was bypassed.
 
-## 10. Later — Redacted Evidence Bundle — NOT STARTED
+## 10. Redacted Evidence Bundle — DESIGN ACTIVE
 
-Goal: make HostSleuth evidence safely shareable only after redaction rules and a threat model are mature enough.
+Owner direction to begin this milestone was given on 2026-09-17.
 
-A bundle may include selected Host Story, diagnosis, event, route/listener/service/container, package, configuration-fingerprint, certificate, Service Story, Incident Lens, Workbench, Reboot Story, and safe-action audit evidence.
+Active branch:
 
-Requirements before implementation:
+`redacted-evidence-bundle`
 
-- explicit inclusion rules;
-- deterministic documented redaction rules;
-- preview before export;
-- no silent configuration-content export;
-- no credentials, tokens, cookies, private keys, or other secrets;
-- clear manifest of what was included/redacted;
-- bounded output and integrity/checksum information.
+Threat model and redaction contract:
 
-Do not begin this milestone merely because v0.4.0 publication/deployment alignment is complete. It requires explicit owner direction, and redaction/threat-model design comes before export implementation.
+`docs/design/REDACTED-EVIDENCE-BUNDLE.md`
+
+The design draft now defines the bounded first implementation and must be accepted before exporter code begins.
+
+The proposed first version is deliberately smaller than the full long-term evidence surface:
+
+- latest snapshot only;
+- at most 200 recent change events;
+- at most 100 Safe Action audit records;
+- `hostsleuth evidence preview` before any archive write;
+- local ZIP only, no upload/sharing;
+- `manifest.json`, redacted JSON payloads, summary, and SHA-256 checksums;
+- owner-only output permissions;
+- 2 MiB maximum uncompressed payload;
+- fail closed on unregistered/unsafe evidence classes.
+
+Default policy pseudonymizes host/domain/IP/MAC/user/path/container/service/network/machine-ID/config-fingerprint/certificate-fingerprint identifiers while preserving diagnostic semantics such as ports, states, package names/versions, UTC ordering, and loopback/unspecified addresses.
+
+The first version explicitly excludes raw journal text, raw action command output, arbitrary Workbench file/URL/DNS inputs, arbitrary file/config contents, action confirmation material, cloud upload, and automatic sharing.
+
+Before implementation, the owner must accept or request changes to the design contract. Acceptance authorizes only this bounded version. Any weaker redaction mode, raw identifier export, journal export, arbitrary file inclusion, or broader sharing mechanism requires a separate explicit decision.
 
 ## Research backlog — not an implementation milestone
 
