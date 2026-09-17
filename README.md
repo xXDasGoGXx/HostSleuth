@@ -49,7 +49,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.3.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.4.0`.
 
 ### Docker Compose
 
@@ -65,7 +65,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.3.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.4.0 docker compose up -d
 ```
 
 ### Docker run
@@ -125,7 +125,8 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - remote/served TLS certificate evidence remains available because it comes from the diagnosed endpoint itself;
 - Incident Lens and Reboot Story can still show whichever retained event categories the Docker deployment actually records, without pretending unavailable native evidence exists;
-- native installation remains the recommended choice when full host visibility matters.
+- M11 native systemd Safe Actions are unavailable in Docker mode;
+- native installation remains the recommended choice when full host visibility or optional Safe Actions matter.
 
 The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when its bind path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
 
@@ -196,7 +197,7 @@ M7 adds a read-only service story inside the existing Diagnose workflow. Select 
 
 Nearby retained changes are context, not proof of causation. If local permissions hide a journal or listener owner, HostSleuth reports `unknown` rather than inventing an answer.
 
-Service Story does not start, stop, restart, reload, enable, disable, or otherwise modify a service.
+Service Story itself does not start, stop, restart, reload, enable, disable, or otherwise modify a service.
 
 ### Incident Lens
 
@@ -229,6 +230,35 @@ Reboot Story:
 - explicitly does not claim reboot cause from temporal proximity.
 
 Reboot Story does not reboot, shut down, restart, reload, repair, or otherwise modify the host.
+
+### Optional Safe Actions — native Linux
+
+M11 adds one deliberately narrow state-changing action: restart an explicitly allowlisted systemd service and verify that it returns active.
+
+Safe Actions are **disabled by default**. Enabling them requires both an explicit action opt-in and an explicit per-service allowlist. There is no arbitrary command, script, shell, generic service-control field, or automatic remediation path.
+
+Example local CLI workflow:
+
+```bash
+hostsleuth action preview \
+  --enable-actions \
+  --allow-restart-service nginx \
+  --target nginx.service
+```
+
+The preview returns the exact effect, trusted `systemctl` argv, and an exact confirmation value. Execution requires that exact value:
+
+```bash
+hostsleuth action run \
+  --enable-actions \
+  --allow-restart-service nginx \
+  --target nginx.service \
+  --confirm 'RESTART nginx.service'
+```
+
+HostSleuth writes durable audit evidence before execution, bounds command time/output, collects before/after systemd evidence, and only reports success after observing `ActiveState=active`.
+
+The Action Web/API surface is loopback-only. State-changing Web requests require JSON and `X-HostSleuth-Action: confirm`. Docker mode reports native systemd restart unavailable, so the supported Docker deployment does not gain host service-control capability.
 
 ![HostSleuth Diagnose view](docs/images/hostsleuth-diagnose.png)
 
@@ -266,6 +296,12 @@ Build the current Reboot Story:
 hostsleuth reboot
 ```
 
+Inspect Safe Action capabilities:
+
+```bash
+hostsleuth action list
+```
+
 Show recent events:
 
 ```bash
@@ -281,7 +317,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.3.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.4.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -330,27 +366,30 @@ HostSleuth is intentionally:
 
 - local-first;
 - single-host first;
-- read-only;
+- read-only by default;
 - deterministic before explanatory;
-- loopback-only by default for the Web UI.
+- loopback-only by default for sensitive Web/API operations;
+- explicit rather than automatic about the one optional native Safe Action.
 
-HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reload services, reboot/shut down the host, manage ACME accounts, handle private keys, or reconfigure the host.
+HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reboot/shut down the host, manage ACME accounts, handle private keys, or reconfigure the host. Its only state-changing capability is the explicitly enabled, explicitly allowlisted native `service.restart` action described above.
 
 ## Current stage
 
-M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, and M10 Reboot Story are complete in source.
+M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, and M11 Optional Safe Actions are complete in source.
 
-Stable `v0.3.0` remains the current published native/Docker release. It contains M5 configuration fingerprinting and M6 TLS/certificate capabilities; M7, M8, M9, and M10 are newer source capabilities and are **not** claimed to be present in the published v0.3.0 artifacts.
+Stable `v0.4.0` is the current published native/Docker release and contains the completed M7–M11 capabilities.
 
-The next roadmap milestone is **M11 — Optional Safe Actions**, but it has **not started**. It is the first milestone that may cross the read-only boundary and requires explicit owner direction plus a security/design review before implementation.
+Release publication is separate from deployment. The known live OMV Arcane/Docker deployment remains on `mjmalleo/hostsleuth:0.3.0` until its separately approved authenticated redeploy is completed and verified. The disaster-recovery v0.4.0 bump is staged separately and must not be treated as final alignment until production moves.
 
-Publication of v0.3.0 did not authorize a live OMV upgrade; the known-good production/recovery deployment remains intentionally pinned separately.
+The next planned product feature is the **Redacted Evidence Bundle**, but it is **not started**. Redaction/threat-model design must precede export implementation, and publication of v0.4.0 does not automatically authorize starting it.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
 ## Security and privacy
 
-HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, certificate metadata/fingerprints, kernel boot identity/start time, bounded service runtime properties, sanitized journal evidence, retained incident-window context, and bounded boot/recovery context. It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, M7 does not expose service control, M8 does not infer causal relationships from nearby timestamps, and M10 does not infer reboot cause from temporal proximity or broaden privileges to obtain inaccessible journal history. Treat snapshots, event logs, and diagnostic output as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
+HostSleuth can collect hostnames, IP addresses, mount paths, service names, listener addresses, container metadata, package names/versions, configuration paths/fingerprints, certificate metadata/fingerprints, kernel boot identity/start time, bounded service runtime properties, sanitized journal evidence, retained incident-window context, bounded boot/recovery context, and Safe Action audit metadata.
+
+It does not store configuration file contents as part of M5 fingerprinting, M6 does not read private keys, M8 does not infer causal relationships from nearby timestamps, M10 does not infer reboot cause from temporal proximity or broaden privileges to obtain inaccessible journal history, and M11 provides no arbitrary command surface or automatic remediation. Treat snapshots, event logs, diagnostic output, and action audit logs as potentially sensitive. See [`SECURITY.md`](SECURITY.md) for the current security posture and vulnerability-reporting guidance.
 
 ## Project files
 
@@ -360,6 +399,8 @@ HostSleuth can collect hostnames, IP addresses, mount paths, service names, list
 - `docs/ROADMAP.md` — owner-approved ordered product roadmap.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 - `docs/history/M10-REBOOT-STORY.md` — completed M10 implementation and acceptance record.
+- `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md` — completed M11 security model and acceptance record.
+- `docs/history/V0.4.0-PUBLICATION.md` — v0.4.0 publication and verification record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
