@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	actionSchemaVersion       = 1
-	actionServiceRestartID    = "service.restart"
-	actionCommandOutputLimit  = 8 * 1024
-	actionExecutionTimeout    = 10 * time.Second
+	actionSchemaVersion      = 1
+	actionServiceRestartID   = "service.restart"
+	actionCommandOutputLimit = 8 * 1024
+	actionExecutionTimeout   = 10 * time.Second
 )
 
 var safeActionServiceUnitPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.@:-]*\.service$`)
