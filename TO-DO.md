@@ -29,12 +29,14 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M10 focused and full Go validation, vet, formatting, individual/exact-served JavaScript syntax, native build, Docker smoke, linux/amd64 build, and linux/arm64 build.
 - [x] M10 isolated real-OMV acceptance without changing the live HostSleuth deployment.
 - [x] M10 real-host regression: `No journal files were opened due to insufficient permissions.` is unavailable evidence and remains `unknown` without privilege expansion.
+- [x] Post-M10 live deployment audit verified `mjmalleo/hostsleuth:0.3.0` in production.
+- [x] With explicit owner approval, `OMV-Docker-Rebuild` recovery was repinned to `mjmalleo/hostsleuth:0.3.0` in PR #3 without redeploying production.
 
 Full M10 implementation and acceptance record: `docs/history/M10-REBOOT-STORY.md`.
 
 Stable `v0.3.0` remains the current published release. M7, M8, M9, and M10 are newer source capabilities and are not claimed to be included in v0.3.0.
 
-M10 did not change production or recovery configuration. A final read-only production check reported application version `v0.3.0`; the exact live image tag could not be read by the unprivileged acceptance account. The separate `OMV-Docker-Rebuild` repository still documents its HostSleuth recovery definition as pinned to `mjmalleo/hostsleuth:0.1.0`. Do not reconcile that divergence as part of M10.
+Production and disaster recovery are now aligned at the HostSleuth image-tag level on `mjmalleo/hostsleuth:0.3.0`. The recovery repin changed only the disaster-recovery Git source of truth; it did not restart or redeploy the live HostSleuth container.
 
 ## Next — M11 Optional Safe Actions — NOT STARTED
 

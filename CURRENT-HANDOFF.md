@@ -116,7 +116,7 @@ Do not publish a new release merely for version-number alignment.
 
 M10 did not change the production HostSleuth deployment, production state, Compose definition, Docker image selection, or recovery repository.
 
-A post-M10 read-only audit of the live service at `http://192.168.2.181:8787` now verifies the production image selection without requiring direct Docker CLI access:
+A post-M10 read-only audit of the live service at `http://192.168.2.181:8787` verified the production image selection without requiring direct Docker CLI access:
 
 - `/api/about` reports application version `v0.3.0`;
 - `/api/snapshot` reports the running `hostsleuth` container as ID `b823980dd527` using image `mjmalleo/hostsleuth:0.3.0` on host networking;
@@ -127,13 +127,13 @@ Therefore the active production image tag is independently verified as:
 
 `mjmalleo/hostsleuth:0.3.0`
 
-The separate `xXDasGoGXx/OMV-Docker-Rebuild` repository still documents and defines its disaster-recovery HostSleuth deployment as pinned to:
+After explicit owner approval, the separate `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery source of truth was updated in PR #3 to pin the same image:
 
-`mjmalleo/hostsleuth:0.1.0`
+`mjmalleo/hostsleuth:0.3.0`
 
-This is a confirmed live/recovery divergence. If the recovery definition were used as written, it would restore the older 0.1.0 image rather than the currently running 0.3.0 image.
+Recovery and live production are now aligned at the image-tag level. The recovery update changed only the Git disaster-recovery definition and documentation; it did not redeploy, restart, or otherwise modify the running production HostSleuth container.
 
-Do not repin the recovery repository, redeploy production, or otherwise reconcile this divergence automatically. Any recovery-state change requires an explicit owner decision and validation. Re-check both sources immediately before any future production or recovery change.
+Future production or recovery image changes remain explicit owner-approved actions.
 
 ## Next milestone boundary
 
