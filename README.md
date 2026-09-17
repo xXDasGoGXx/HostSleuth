@@ -379,9 +379,9 @@ M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic
 
 Stable `v0.4.0` is the current published native/Docker release and contains the completed M7–M11 capabilities.
 
-Release publication is separate from deployment. The known live OMV Arcane/Docker deployment remains on `mjmalleo/hostsleuth:0.3.0` until its separately approved authenticated redeploy is completed and verified. The disaster-recovery v0.4.0 bump is staged separately and must not be treated as final alignment until production moves.
+The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.4.0` as of 2026-09-17. Post-redeploy acceptance confirmed schema 4 / Docker mode, retained state/events, and Optional Safe Actions disabled/unavailable in the default Docker deployment.
 
-The next planned product feature is the **Redacted Evidence Bundle**, but it is **not started**. Redaction/threat-model design must precede export implementation, and publication of v0.4.0 does not automatically authorize starting it.
+The next planned product feature is the **Redacted Evidence Bundle**, but it is **not started**. Redaction/threat-model design must precede export implementation, and starting it requires explicit owner direction.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
