@@ -25,75 +25,93 @@ Publication verification included native linux/amd64 and linux/arm64 binaries, `
 
 ## 3. M7 — Service Story — COMPLETE
 
-Delivered bounded read-only systemd runtime/journal, process/listener ownership, expected-port collision, container-port, endpoint Diagnose/TLS, and retained-change correlation. M7 added no service controls.
+Delivered bounded read-only systemd runtime/journal, process/listener ownership, expected-port collision, container-port, endpoint Diagnose/TLS, and retained-change correlation.
 
 ## 4. M8 — Incident Lens — COMPLETE
 
-Delivered a bounded read-only +/- 15 minute incident window anchored from an exact time, retained event, or completed diagnosis. Existing event categories are reused with deterministic ordering, current endpoint evidence is explicitly separated from historical context, and temporal proximity is never presented as proof of causation.
+Delivered a bounded read-only +/- 15 minute incident window anchored from an exact time, retained event, or completed diagnosis. Current endpoint evidence is explicitly separated from historical context, and temporal proximity is never presented as proof of causation.
 
 ## 5. M9 — HostSleuth Workbench — COMPLETE
 
 Delivered bounded read-only file identity/checksum comparison, DNS inspection, HTTP/redirect inspection, public certificate inspection/comparison, CLI/JSON API, and a dedicated Workbench UI.
 
-Workbench Web/API operations are loopback-only because selected-file hashing plus server-side DNS/HTTP probing would be inappropriate on an unauthenticated LAN-visible endpoint. It does not expose file contents, arbitrary commands, custom HTTP credentials/headers, or private-key viewing.
+Sensitive Workbench Web/API operations are loopback-only and expose no arbitrary commands, file contents, custom HTTP credentials/headers, or private-key viewing.
 
 ## 6. M10 — Reboot Story — COMPLETE
 
 Delivered deterministic reboot detection from kernel boot IDs, exact boot-start evidence, bounded previous/current boot journal evidence, direct-evidence-only shutdown classification, current failed-service evidence, retained post-boot recovery correlation, non-causal nearby change context, CLI/API/UI integration, and schema-upgrade protection against false reboot events.
 
-M10 remains read-only and does not infer a reboot cause from temporal proximity.
+M10 remains read-only and does not infer reboot cause from temporal proximity.
 
 Full closeout: `docs/history/M10-REBOOT-STORY.md`.
 
 ## 7. M11 — Optional Safe Actions — COMPLETE
 
-Goal: prove that HostSleuth can offer one surgical administrative action without becoming Webmin, Cockpit, a browser shell, or an automatic-remediation engine.
-
-Delivered one fixed action only:
+Delivered one fixed native action only:
 
 `service.restart`
 
 Security/product boundaries:
 
-- actions are disabled by default;
-- explicit `--enable-actions` opt-in is required;
-- each restart target must be explicitly allowlisted with `--allow-restart-service UNIT`;
+- actions disabled by default;
+- explicit `--enable-actions` opt-in;
+- explicit per-service `--allow-restart-service UNIT` allowlist;
 - conservative `.service` unit validation;
-- no arbitrary command, argv, script, or shell field;
-- no generic systemd controller;
-- trusted absolute `/usr/bin/systemctl` or `/bin/systemctl` for action evidence and execution rather than `$PATH` resolution;
-- deterministic preview of target/effect/argv;
-- exact confirmation value required before execution;
-- durable audit write required before the restart command runs;
-- bounded before/after evidence and action timeout;
-- success only after observing `ActiveState=active`;
+- no arbitrary command, argv, script, shell field, or generic systemd controller;
+- trusted absolute `/usr/bin/systemctl` or `/bin/systemctl` for action evidence and execution;
+- deterministic preview and exact confirmation;
+- durable audit before execution;
+- bounded timeout/output and before/after evidence;
+- success only after observed `ActiveState=active`;
 - loopback-only Action Web/API operations;
-- JSON-only state-changing Web requests plus explicit `X-HostSleuth-Action: confirm` header;
-- Docker mode reports native systemd restart unavailable;
-- no writable Docker socket added;
+- Docker mode action-unavailable and no writable Docker socket;
 - no automatic remediation.
 
-Delivered surfaces:
-
-- `hostsleuth action list|preview|run|audit`;
-- loopback-only Action JSON API;
-- dedicated Actions UI with allowlisted target selection, preview, exact confirmation, result, and audit display.
-
-Validation includes focused security/regression tests, full format/vet/test/build checks, exact served-JavaScript syntax, Docker smoke, linux/amd64 and linux/arm64 image builds, and a disposable real-systemd acceptance on an ephemeral GitHub runner. The real acceptance proved wrong-confirmation denial without PID change, a successful allowlisted restart with PID change, `ActiveState=active` postcondition verification, the expected audit sequence, and cleanup.
-
-No OMV production service was restarted or redeployed for M11 acceptance.
+Permanent CI includes a disposable real-systemd acceptance on an ephemeral GitHub runner.
 
 Full closeout: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
 
-## 8. Release / deployment decision — NOT STARTED
+## 8. Publish stable v0.4.0 — COMPLETE
 
-M11 completion does not automatically authorize a new public release, Docker publication, OMV production upgrade, or disaster-recovery repin.
+Stable `v0.4.0` was published from exact accepted source commit:
 
-Stable public production/recovery remains `mjmalleo/hostsleuth:0.3.0` until an explicit owner decision changes that boundary.
+`6566c505b32cc47d96384152a988736173d3f7cd`
 
-If a new release is approved, validate the exact accepted source, native assets, checksums, amd64/arm64 container images, Docker smoke, upgrade notes, and then separately decide whether live OMV/recovery should move to the new tag.
+Release workflow run #5 (`35193948370`) completed successfully.
 
-## 9. Later — Redacted Evidence Bundle — NOT STARTED
+Publication verification includes:
+
+- GitHub linux/amd64 and linux/arm64 binaries;
+- `SHA256SUMS`;
+- independent amd64 checksum/version execution;
+- confirmation that Safe Actions remain disabled by default;
+- public `mjmalleo/hostsleuth:0.4.0` plus `latest`;
+- both Docker tags resolving to OCI index `sha256:03b5824fddc50a707e5486033afed3f01d0be76e9adef64292d7a72743578bf0`;
+- linux/amd64 and linux/arm64 manifests.
+
+Full record: `docs/history/V0.4.0-PUBLICATION.md`.
+
+## 9. Production / recovery v0.4.0 alignment — IN PROGRESS
+
+Release publication is complete, but deployment alignment is deliberately separate.
+
+Current live OMV Arcane/Docker HostSleuth remains verified on:
+
+`mjmalleo/hostsleuth:0.3.0`
+
+Current disaster-recovery `main` also remains on `0.3.0`.
+
+Recovery PR #4 stages `mjmalleo/hostsleuth:0.4.0` but is intentionally unmerged so disaster recovery does not silently move ahead of production.
+
+Remaining steps:
+
+1. redeploy the existing Arcane-managed HostSleuth project to `0.4.0` through an authenticated Arcane session/API;
+2. verify version, schema/mode, image identity, endpoint availability, retained state, and Docker action-unavailable behavior;
+3. update/merge recovery PR #4 and record final alignment.
+
+Do not bypass Arcane authentication or HomeCommander Docker/sudo safeguards to complete this step.
+
+## 10. Later — Redacted Evidence Bundle — NOT STARTED
 
 Goal: make HostSleuth evidence safely shareable only after redaction rules and a threat model are mature enough.
 
@@ -109,23 +127,13 @@ Requirements before implementation:
 - clear manifest of what was included/redacted;
 - bounded output and integrity/checksum information.
 
-Do not build export/import before the redaction/threat-model work is strong enough, and do not start this milestone without explicit owner direction.
+Do not begin this milestone merely because v0.4.0 publication is complete. It requires explicit owner direction, and redaction/threat-model design comes before export implementation.
 
 ## Research backlog — not an implementation milestone
 
 The detailed current research artifact is `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`.
 
-Promising differentiated questions include:
-
-- expected-endpoint contracts tying ownership, listener/bind, DNS, protocol/TLS, local files/certificates, and retained changes together;
-- resolver/delegation or split-view DNS mismatches without becoming a DNS manager;
-- redirect, reverse-proxy, Host-header, or upstream mismatches without becoming a proxy manager;
-- permissions/ownership/path evidence explaining why a service cannot consume an expected file;
-- protocol-aware STARTTLS inspection for SMTP/IMAP and similar services;
-- certificate source -> destination -> actually-served verification;
-- narrowly justified future safe actions using the M11 explicit-schema/allowlist/preview/confirmation/audit/postcondition model.
-
-Research findings must be deliberately assigned to an approved milestone before implementation.
+Promising differentiated questions include expected-endpoint contracts, resolver/delegation/split-view DNS mismatches, reverse-proxy/upstream problems, permissions/ownership/deployment-path reasoning, STARTTLS inspection, certificate rollout verification, and only narrowly justified future actions using the M11 security model.
 
 ## Guardrails that remain in force
 
