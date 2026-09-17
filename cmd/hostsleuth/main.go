@@ -39,6 +39,8 @@ func main() {
 		runRebootStory(os.Args[2:])
 	case "workbench":
 		runWorkbench(os.Args[2:])
+	case "action":
+		runAction(os.Args[2:])
 	case "events":
 		runEvents(os.Args[2:])
 	case "serve":
@@ -53,7 +55,7 @@ func main() {
 
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
-	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|incident|reboot|workbench|events|serve|version> [options]")
+	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|incident|reboot|workbench|action|events|serve|version> [options]")
 }
 
 func buildRevision() string {
@@ -203,8 +205,16 @@ func runServe(args []string) {
 	state := fs.String("state-dir", defaultStateDir(), "state directory")
 	listen := fs.String("listen", "127.0.0.1:8787", "HTTP listen address")
 	interval := fs.Duration("interval", 60*time.Second, "snapshot interval")
+	enableActions := fs.Bool("enable-actions", false, "explicitly enable optional safe actions")
+	allowedRestartServices := &stringListFlag{}
+	fs.Var(allowedRestartServices, "allow-restart-service", "allow one systemd service for service.restart; repeat for additional services")
 	_ = fs.Parse(args)
 	store := core.Store{Dir: *state}
+	actionPolicy, err := core.NewActionPolicy(*enableActions, *allowedRestartServices)
+	if err != nil {
+		log.Fatal(err)
+	}
+	actionManager := &core.ActionManager{Policy: actionPolicy, Store: store}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -230,6 +240,10 @@ func runServe(args []string) {
 			}
 		}
 	}()
+	actionDeploymentMode := ""
+	if snap, err := store.LoadSnapshot(); err == nil {
+		actionDeploymentMode = snap.Mode
+	}
 
 	indexHTML, err := webAssets.ReadFile("web/index.html")
 	if err != nil {
@@ -247,6 +261,7 @@ func runServe(args []string) {
 	appCSS, appJS = appendIncidentLensAssets(appCSS, appJS)
 	appCSS, appJS = appendRebootStoryAssets(appCSS, appJS)
 	appCSS, appJS = appendWorkbenchAssets(appCSS, appJS)
+	appCSS, appJS = appendActionAssets(appCSS, appJS)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/about", func(w http.ResponseWriter, r *http.Request) {
@@ -329,6 +344,7 @@ func runServe(args []string) {
 	})
 	registerRebootStoryAPI(mux, store)
 	registerWorkbenchAPI(mux)
+	registerActionAPI(mux, actionManager, actionDeploymentMode)
 	mux.HandleFunc("/assets/app.css", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/css; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-cache")

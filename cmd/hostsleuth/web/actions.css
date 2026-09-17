@@ -1,0 +1,25 @@
+.action-intro { margin-bottom: 1rem; }
+.action-capability { margin-top: 1rem; }
+.action-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.4fr) minmax(18rem, .8fr); }
+.action-card { min-width: 0; }
+.action-form, .action-confirm { display: grid; gap: .75rem; margin-top: 1rem; }
+.action-form label, .action-confirm label { display: grid; gap: .4rem; font-weight: 600; }
+.action-form select, .action-confirm input { width: 100%; padding: .7rem .8rem; border: 1px solid var(--border); border-radius: .55rem; background: var(--surface); color: var(--text); }
+.action-result { margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--surface-soft); }
+.action-confirm { margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: .75rem; }
+.action-pairs { display: grid; grid-template-columns: minmax(8rem, auto) 1fr; gap: .35rem .8rem; margin: .75rem 0 0; }
+.action-pairs dt { color: var(--muted); font-size: .85rem; }
+.action-pairs dd { margin: 0; overflow-wrap: anywhere; }
+.action-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.action-check-list { display: grid; gap: .5rem; margin-top: .85rem; }
+.action-check { display: grid; gap: .15rem; padding: .65rem .75rem; border-left: 3px solid var(--border); background: var(--surface); }
+.action-check.pass { border-left-color: #4f8a5b; }
+.action-check.fail { border-left-color: #b25757; }
+.action-check.unknown { border-left-color: #8b7b4e; }
+.action-check span { color: var(--muted); font-size: .9rem; }
+.action-audit { display: grid; gap: .65rem; margin-top: 1rem; }
+.action-audit-row { display: grid; gap: .2rem; padding: .75rem; border: 1px solid var(--border); border-radius: .65rem; }
+.action-audit-row span, .action-audit-row p { color: var(--muted); font-size: .9rem; margin: 0; }
+.action-result-success { color: #4f8a5b; }
+.action-result-failed, .action-result-denied, .action-result-blocked { color: #b25757; }
+@media (max-width: 900px) { .action-grid { grid-template-columns: 1fr; } .action-pairs { grid-template-columns: 1fr; } }
