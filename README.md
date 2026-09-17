@@ -181,6 +181,28 @@ The Web UI presents the answer first and keeps the underlying evidence available
 
 HostSleuth only calls a local certificate "newer/different than the one this endpoint is serving" when a unique readable Certbot lineage matches the requested host and deterministic validity/fingerprint evidence supports that statement. A fingerprint difference alone is not treated as proof of staleness.
 
+### Expected Endpoint Contracts — development source
+
+M12 adds an on-demand Expected-vs-Observed check for an endpoint. A contract always requires TCP reachability and can optionally require an exact DNS address set, TLS behavior, an active native systemd service, and/or a running container.
+
+Example:
+
+```bash
+hostsleuth contract \
+  --expect-ip 192.0.2.10 \
+  --tls verified \
+  --container web \
+  example.com:443
+```
+
+The result reports each expectation as `pass`, `fail`, or `unknown`, identifies the first proven mismatch, and includes the existing full Diagnosis evidence for deeper inspection. Exact DNS expectations are order-independent exact sets; omit them for endpoints whose addresses are intentionally dynamic.
+
+The Web UI exposes the same workflow under **Expectations** and can hand the target to the existing full Diagnose view.
+
+M12 is read-only. It does not add polling, alerts, persistent contract storage, automatic discovery of expected state, new privileges, or remediation.
+
+Full design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
+
 ### Service Story — native Linux
 
 M7 adds a read-only service story inside the existing Diagnose workflow. Select a systemd unit and optionally the `host:port` you expect it to provide. HostSleuth can correlate:
@@ -284,6 +306,12 @@ Diagnose a target:
 
 ```bash
 hostsleuth diagnose example.com:443
+```
+
+Check an expected endpoint contract:
+
+```bash
+hostsleuth contract --tls verified --expect-ip 192.0.2.10 example.com:443
 ```
 
 Build a native systemd service story, optionally with its expected endpoint:
@@ -401,7 +429,7 @@ Stable `v0.5.0` is the current published native/Docker release and includes the 
 
 The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.5.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.5.0, schema 4 / Docker mode, retained pre-upgrade events, Optional Safe Actions disabled/unavailable, the loopback-only Action Web/API boundary, and a successful bounded Evidence Bundle preview/export against a disposable copy of live API evidence.
 
-No new feature milestone is active yet. The research backlog remains design input until the next bounded milestone is explicitly selected.
+M12 Expected Endpoint Contracts is complete in development source on branch `m12-expected-endpoint-contracts` and has passed local format/vet/test/build plus disposable HTTP/UI acceptance. Stable `v0.5.0` does **not** contain M12 yet; merge, publication, and production rollout remain separate gated steps.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -424,7 +452,7 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/design/REDACTED-EVIDENCE-BUNDLE.md` — accepted bundle threat model and redaction contract.
 - `docs/history/REDACTED-EVIDENCE-BUNDLE.md` — bundle implementation and acceptance closeout.
 - `docs/history/V0.5.0-PUBLICATION.md` — v0.5.0 publication and verification record.
-- `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md` — v0.5.0 live/recovery rollout and acceptance record.
+- `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md` — v0.5.0 live/recovery rollout and acceptance record.\n- `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 contract semantics and security/product boundary.\n- `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 implementation and local acceptance closeout.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
