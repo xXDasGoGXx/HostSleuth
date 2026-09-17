@@ -82,11 +82,33 @@ The first version is deliberately bounded to current Snapshot, recent Events, an
 
 Redaction lowers disclosure risk but cannot guarantee anonymity. Bundles must still be reviewed before sharing.
 
-## Current milestone boundary
+## M12 — Expected Endpoint Contracts
 
-v0.5.0 publication and production/recovery rollout are complete.
+The owner selected Expected Endpoint Contracts as the next bounded milestone. Implementation is complete on branch `m12-expected-endpoint-contracts` and has passed local acceptance.
 
-Do not automatically start a new feature milestone merely because this boundary is clean. The research backlog in `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` remains design input only until the owner selects the next milestone.
+Delivered on the branch:
+
+- typed read-only contract with target, optional exact DNS set, TLS mode, optional systemd service, and optional container;
+- TCP reachability always required;
+- ordered Expected-vs-Observed checklist;
+- proven failure takes precedence over unresolved evidence for `first_mismatch`;
+- full existing Diagnosis included for deeper route/listener/container/TLS/firewall evidence;
+- `hostsleuth contract` CLI;
+- `GET /api/contract`;
+- Web UI **Expectations** view with handoff to full Diagnose;
+- no polling, alerts, remediation, persistent contract database, or new privilege.
+
+Local Go 1.24.13 format/vet/full-test/build and disposable HTTP/UI acceptance passed.
+
+Design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
+
+Closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
+
+## Active next step
+
+Open the M12 PR, require full CI, and merge only if the exact head is green. After merge, publication as v0.6.0 is the next distinct step.
+
+Stable/public/live/recovery remain v0.5.0 until that release is independently verified and separately rolled out.
 
 Do not restart a broad audit on continuation; use this handoff.
 
