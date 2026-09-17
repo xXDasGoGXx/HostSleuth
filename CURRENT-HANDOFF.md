@@ -116,13 +116,24 @@ Do not publish a new release merely for version-number alignment.
 
 M10 did not change the production HostSleuth deployment, production state, Compose definition, Docker image selection, or recovery repository.
 
-A final read-only check of the live endpoint at `http://192.168.2.181:8787` reported application version `v0.3.0`. The unprivileged HomeCommander acceptance account could not read `/srv/docker/volumes/compose/hostsleuth/compose.yaml`, so the exact active image tag is not independently verified here.
+A post-M10 read-only audit of the live service at `http://192.168.2.181:8787` now verifies the production image selection without requiring direct Docker CLI access:
 
-The separate `xXDasGoGXx/OMV-Docker-Rebuild` repository still documents its disaster-recovery HostSleuth definition as pinned to:
+- `/api/about` reports application version `v0.3.0`;
+- `/api/snapshot` reports the running `hostsleuth` container as ID `b823980dd527` using image `mjmalleo/hostsleuth:0.3.0` on host networking;
+- `/proc/1449941/cgroup` identifies the live HostSleuth process inside Docker container `b823980dd5274089a7722cb1ff2260f6135c4d84bae20b759cd9a9ab229a2361`, matching the snapshot container ID;
+- the live snapshot reports schema version 3, consistent with the published v0.3.0 generation rather than the newer schema-4 M10 source.
+
+Therefore the active production image tag is independently verified as:
+
+`mjmalleo/hostsleuth:0.3.0`
+
+The separate `xXDasGoGXx/OMV-Docker-Rebuild` repository still documents and defines its disaster-recovery HostSleuth deployment as pinned to:
 
 `mjmalleo/hostsleuth:0.1.0`
 
-Do not reconcile, repin, redeploy, or otherwise change that live/recovery divergence as part of M10. Re-check both sources before any future production or recovery change.
+This is a confirmed live/recovery divergence. If the recovery definition were used as written, it would restore the older 0.1.0 image rather than the currently running 0.3.0 image.
+
+Do not repin the recovery repository, redeploy production, or otherwise reconcile this divergence automatically. Any recovery-state change requires an explicit owner decision and validation. Re-check both sources immediately before any future production or recovery change.
 
 ## Next milestone boundary
 
