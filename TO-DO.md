@@ -38,21 +38,28 @@ Stable `v0.3.0` remains the current published release. M7, M8, M9, and M10 are n
 
 Production and disaster recovery are now aligned at the HostSleuth image-tag level on `mjmalleo/hostsleuth:0.3.0`. The recovery repin changed only the disaster-recovery Git source of truth; it did not restart or redeploy the live HostSleuth container.
 
-## Next — M11 Optional Safe Actions — NOT STARTED
+## Active — M11 Optional Safe Actions — IN PROGRESS
 
-Do not begin implementation without explicit owner direction and an explicit security/design review. M11 is the first planned milestone that may cross HostSleuth's read-only boundary.
+Owner direction to begin M11 was given on 2026-09-17. The explicit security/design review is captured in `docs/history/M11-OPTIONAL-SAFE-ACTIONS-WIP.md`.
 
-Any approved action must be:
+Current implementation on `m11-safe-actions` / PR #37:
 
-- narrow and predefined;
-- disabled by default;
-- previewed;
-- explicitly confirmed;
-- audited;
-- postcondition-verified;
-- free of arbitrary shell/command fields.
+- [x] Actions disabled by default; explicit `--enable-actions` opt-in required.
+- [x] Fixed `service.restart` action only; no generic command field or generic service controller.
+- [x] Repeated `--allow-restart-service UNIT` allowlist with conservative unit-name validation.
+- [x] Deterministic preview with exact target/effect/argv and exact confirmation value.
+- [x] Direct argv execution of `systemctl restart UNIT`; no shell interpretation.
+- [x] Durable pre-execution audit requirement plus final outcome audit.
+- [x] Bounded before/after systemd evidence and required `ActiveState=active` success postcondition.
+- [x] Loopback-only Action Web/API surface with JSON-only requests and explicit action header.
+- [x] Docker mode remains unavailable for systemd restart and receives no writable Docker socket.
+- [x] CLI, JSON API, Web UI, and focused security/regression tests implemented.
+- [x] CI definition extended for Actions JavaScript and disabled-by-default Docker smoke coverage.
+- [ ] Full PR CI green.
+- [ ] Isolated native-host acceptance of preview, denied path, audit path, and one deliberately selected harmless service restart.
+- [ ] Replace WIP history with final M11 closeout; update roadmap/handoff and mark M11 complete.
 
-Certificates/Certbot are only one candidate family. Do not make certificates the product direction.
+Do not add additional action families during M11 merely because the framework exists. Prove this one narrow action first.
 
 ## Consumer/product research — separate backlog, not active scope
 
