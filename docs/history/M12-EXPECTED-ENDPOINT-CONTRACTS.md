@@ -1,6 +1,6 @@
 # M12 — Expected Endpoint Contracts Closeout
 
-Status: source implementation complete; publication remains a separate step.
+Status: source implementation complete and merged on 2026-09-17; publication remains a separate step.
 
 ## Delivered
 
@@ -55,6 +55,12 @@ Local Go 1.24.13 validation passed:
 - M12 JavaScript syntax.
 
 Disposable server acceptance confirmed pass/fail behavior, first-mismatch reporting, HTTP 400 validation, and delivery of the combined UI asset.
+
+## Merge acceptance
+
+PR #43 passed the full GitHub CI matrix — test/format/vet/build, native-actions smoke, Docker smoke, and linux/amd64 plus linux/arm64 image builds — and merged to `main` at:
+
+`1c193473d9220c34ec2820526df76076bfb41ce9`
 
 ## Release boundary
 

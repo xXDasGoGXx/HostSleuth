@@ -84,9 +84,9 @@ Redaction lowers disclosure risk but cannot guarantee anonymity. Bundles must st
 
 ## M12 — Expected Endpoint Contracts
 
-The owner selected Expected Endpoint Contracts as the next bounded milestone. Implementation is complete on branch `m12-expected-endpoint-contracts` and has passed local acceptance.
+The owner selected Expected Endpoint Contracts as the next bounded milestone. PR #43 passed full CI and merged to `main` at `1c193473d9220c34ec2820526df76076bfb41ce9`.
 
-Delivered on the branch:
+Delivered:
 
 - typed read-only contract with target, optional exact DNS set, TLS mode, optional systemd service, and optional container;
 - TCP reachability always required;
@@ -104,11 +104,11 @@ Design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
 Closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
-## Active next step
+## Active next step — publish v0.6.0
 
-Open the M12 PR, require full CI, and merge only if the exact head is green. After merge, publication as v0.6.0 is the next distinct step.
+M12 source is complete on `main`. Publish stable v0.6.0 only from the accepted source after the closeout documentation is merged, then independently verify native assets/checksums and the multi-platform Docker image.
 
-Stable/public/live/recovery remain v0.5.0 until that release is independently verified and separately rolled out.
+Stable/public/live/recovery remain v0.5.0 until v0.6.0 publication is independently verified. Production/recovery rollout remains a separate later step.
 
 Do not restart a broad audit on continuation; use this handoff.
 

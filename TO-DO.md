@@ -59,9 +59,9 @@ Docker `latest` resolves to the same verified v0.5.0 OCI index.
 
 ## Active next step — M12 merge / v0.6.0 publication
 
-- [ ] Open M12 PR only after the branch remains locally green.
-- [ ] Require full GitHub CI on the exact PR head before merge.
-- [ ] Merge M12 to `main` and record the merge SHA.
+- [x] Open M12 PR only after the branch remains locally green.
+- [x] Require full GitHub CI on the exact PR head before merge.
+- [x] Merge M12 PR #43 to `main` at `1c193473d9220c34ec2820526df76076bfb41ce9`.
 - [ ] Publish stable `v0.6.0` from the exact accepted source.
 - [ ] Independently verify native assets/checksums and the multi-platform Docker image.
 - [ ] Keep production/recovery on v0.5.0 until the separately verified v0.6.0 rollout.

@@ -429,7 +429,7 @@ Stable `v0.5.0` is the current published native/Docker release and includes the 
 
 The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.5.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.5.0, schema 4 / Docker mode, retained pre-upgrade events, Optional Safe Actions disabled/unavailable, the loopback-only Action Web/API boundary, and a successful bounded Evidence Bundle preview/export against a disposable copy of live API evidence.
 
-M12 Expected Endpoint Contracts is complete in development source on branch `m12-expected-endpoint-contracts` and has passed local format/vet/test/build plus disposable HTTP/UI acceptance. Stable `v0.5.0` does **not** contain M12 yet; merge, publication, and production rollout remain separate gated steps.
+M12 Expected Endpoint Contracts is complete on `main`; PR #43 passed the full CI matrix and merged at `1c193473d9220c34ec2820526df76076bfb41ce9`. Stable `v0.5.0` does **not** contain M12 yet; publication and production rollout remain separate gated steps.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 

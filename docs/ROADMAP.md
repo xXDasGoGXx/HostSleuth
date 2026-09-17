@@ -153,7 +153,7 @@ Recovery alignment PR #5 merged at:
 
 Full record: `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md`.
 
-## 13. M12 — Expected Endpoint Contracts — IMPLEMENTED ON BRANCH
+## 13. M12 — Expected Endpoint Contracts — COMPLETE
 
 The owner selected Expected Endpoint Contracts as the next bounded milestone.
 
@@ -175,7 +175,7 @@ Delivered interfaces:
 - `GET /api/contract`;
 - Web UI Expectations view with handoff to full Diagnose.
 
-Local Go 1.24.13 format/vet/test/build and disposable HTTP/UI acceptance passed before opening a PR.
+Local Go 1.24.13 format/vet/test/build and disposable HTTP/UI acceptance passed before opening the PR. PR #43 then passed the full GitHub CI matrix and merged at `1c193473d9220c34ec2820526df76076bfb41ce9`.
 
 M12 remains read-only and adds no scheduler, alerting, persistent contract database, arbitrary file reads, new privilege, or remediation path.
 
@@ -183,9 +183,9 @@ Design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
 Closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
-## 14. Publish stable v0.6.0 — NEXT AFTER M12 MERGE
+## 14. Publish stable v0.6.0 — ACTIVE NEXT STEP
 
-Publication is separate from source completion. Only after the exact M12 PR head passes full GitHub CI and merges should v0.6.0 be published and independently verified.
+M12 is merged and source-complete. Publish v0.6.0 from the exact accepted `main` source only after this closeout documentation is merged, then independently verify the native assets/checksums and public multi-platform Docker image.
 
 Production and disaster recovery remain on v0.5.0 until the published v0.6.0 artifacts are verified and the separate rollout passes live acceptance.
 
