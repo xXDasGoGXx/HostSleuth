@@ -13,74 +13,50 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Publish stable v0.2.0.
 - [x] M5 — bounded native configuration fingerprinting.
 - [x] M6 — bounded read-only Certificate Story / TLS Detective.
-- [x] Publish stable v0.3.0 from accepted source `6e6b45ca5e4a4c54897ad69a3b20a377e68fccb1` with native amd64/arm64 assets, checksums, and public multi-platform Docker tags.
+- [x] Publish stable v0.3.0.
 - [x] M7 — read-only Service Story.
 - [x] M8 — read-only Incident Lens.
 - [x] M9 — read-only HostSleuth Workbench.
 - [x] M10 — read-only Reboot Story.
-- [x] Post-M10 live deployment audit verified `mjmalleo/hostsleuth:0.3.0` in production.
-- [x] With explicit owner approval, `OMV-Docker-Rebuild` recovery was repinned to `mjmalleo/hostsleuth:0.3.0` without redeploying production.
 - [x] M11 — Optional Safe Actions with one fixed native `service.restart` action.
-- [x] M11 actions disabled by default and gated by explicit `--enable-actions` plus per-service allowlisting.
-- [x] M11 trusted absolute systemctl path, exact preview/confirmation, durable audit-before-execute, timeout, bounded before/after evidence, and `ActiveState=active` postcondition.
-- [x] M11 loopback-only Action Web/API surface; Docker mode remains action-unavailable and gains no writable Docker socket.
-- [x] M11 CLI, JSON API, Web UI, security/regression tests, amd64/arm64 container builds, Docker smoke, and disposable real-systemd restart acceptance.
+- [x] M11 explicit enablement + per-service allowlist + exact preview/confirmation + audit-before-execute + postcondition verification.
+- [x] M11 loopback-only Action Web/API; Docker mode remains action-unavailable and no writable Docker socket was added.
+- [x] M11 disposable real-systemd restart acceptance in CI.
+- [x] Publish stable `v0.4.0` from exact source `6566c505b32cc47d96384152a988736173d3f7cd`.
+- [x] v0.4.0 linux/amd64 and linux/arm64 binaries plus `SHA256SUMS` published.
+- [x] v0.4.0 multi-platform Docker image published as `mjmalleo/hostsleuth:0.4.0` and `latest`.
+- [x] Independently verify the published amd64 checksum/version and default-disabled Safe Actions.
+- [x] Independently verify Docker `0.4.0` and `latest` share OCI digest `sha256:03b5824fddc50a707e5486033afed3f01d0be76e9adef64292d7a72743578bf0` with amd64 + arm64 manifests.
+- [x] Stage `OMV-Docker-Rebuild` PR #4 for recovery image `mjmalleo/hostsleuth:0.4.0` without merging it ahead of production.
 
-M10 implementation and acceptance record: `docs/history/M10-REBOOT-STORY.md`.
+M10 implementation/acceptance: `docs/history/M10-REBOOT-STORY.md`.
 
-M11 implementation, security model, and acceptance record: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
+M11 implementation/security/acceptance: `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md`.
 
-Stable `v0.3.0` remains the current published release. M7, M8, M9, M10, and M11 are newer source capabilities and are not claimed to be included in v0.3.0.
+v0.4.0 publication record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-Production and disaster recovery remain aligned at the HostSleuth image-tag level on `mjmalleo/hostsleuth:0.3.0`. M11 did not restart, redeploy, publish, or enable actions on the production Docker deployment.
+## Active operational step — production/recovery alignment
 
-## Next decision — NOT STARTED
+Public stable is now `v0.4.0`, but the live Arcane/Docker deployment is still verified on `mjmalleo/hostsleuth:0.3.0`.
 
-M11 source completion does not automatically authorize a release or production upgrade. Decide separately whether the accepted post-v0.3.0 source should become a new public release and whether production/recovery should later move to it.
+Recovery PR #4 stages `0.4.0` and remains intentionally open/unmerged until production is actually upgraded and verified.
 
-Do not add more action families merely because M11 created the framework. A future action must independently justify its privilege cost and preserve the explicit schema, allowlist, preview, confirmation, audit, and postcondition model.
+- [ ] Redeploy the existing Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.4.0` using an authenticated Arcane session/API.
+- [ ] Verify `/api/about` = `v0.4.0`.
+- [ ] Verify `/api/snapshot` = schema 4 / Docker mode and reports image `mjmalleo/hostsleuth:0.4.0`.
+- [ ] Verify `192.168.2.181:8787` remains reachable and retained state/events remain present.
+- [ ] Verify Actions remain unavailable in Docker mode/default deployment.
+- [ ] Update recovery PR #4 documentation to mark live/recovery aligned and merge PR #4.
+- [ ] Update `CURRENT-HANDOFF.md` with the final aligned live/recovery state.
+
+Do not bypass Arcane authentication, HomeCommander Docker/sudo safeguards, or the uninstalled native `hostsleuth` deployment record to complete these items.
 
 ## Later — Redacted Evidence Bundle — NOT STARTED
 
-Only begin after explicit owner direction. The bundle must have a mature redaction/threat model before export and must never silently include credentials, tokens, private keys, configuration contents, or other secrets.
+Only begin after explicit owner direction. Redaction/threat-model rules come before export implementation. The bundle must never silently include credentials, tokens, private keys, configuration contents, or other secrets.
 
-## Consumer/product research — separate backlog, not active scope
+## Guardrails
 
-Promising themes remain:
+Do not add more action families merely because M11 created the framework. A future action must independently justify its privilege cost and preserve explicit schema, allowlist, preview, confirmation, audit, and postcondition verification.
 
-- endpoint-path and expected-state contracts;
-- DNS resolver/delegation/split-view evidence;
-- HTTP/reverse-proxy/upstream mismatch evidence;
-- port/listener/bind ownership;
-- file permissions/ownership/deployment-path problems;
-- container disappearance/dependency evidence;
-- protocol-aware TLS/STARTTLS inspection for mail and other non-HTTPS services;
-- boot/recovery workflows;
-- certificate source -> destination -> actually-served fingerprint verification and rollout consistency.
-
-## Demand-gated
-
-Only pursue if real use proves the need:
-
-- Authentication for direct non-loopback Web UI exposure.
-- Reverse-proxy awareness beyond evidence needed for the approved roadmap.
-- `.deb` packaging and signed artifacts.
-- Privilege separation if future collectors genuinely justify it.
-- SQLite if JSON/JSONL becomes a demonstrated limitation.
-- Broader baseline-vs-incident comparison if real use proves necessary.
-- README screenshot refresh when naturally useful; no cosmetic workstream.
-
-## Not planned unless HostSleuth changes direction
-
-- Multi-host controller/agent architecture.
-- General dependency-graph platform.
-- Pluggable diagnosis-rule ecosystem.
-- AI explanation layer.
-- Automatic remediation.
-- Generic network-device/SNMP monitoring platform.
-- Arbitrary web terminal/command execution.
-- Generic server-control panel.
-
-## Rule for new ideas
-
-An idea must strengthen one of HostSleuth's two core jobs and fit the approved order before it becomes active. Interesting is not enough; it must improve a common troubleshooting workflow without making installation, operation, security, or the UI meaningfully worse.
+Do not drift into a generic server-control panel, arbitrary command execution, automatic remediation, multi-host controller architecture, or unrelated monitoring work.
