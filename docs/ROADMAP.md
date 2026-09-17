@@ -91,25 +91,27 @@ Publication verification includes:
 
 Full record: `docs/history/V0.4.0-PUBLICATION.md`.
 
-## 9. Production / recovery v0.4.0 alignment — IN PROGRESS
+## 9. Production / recovery v0.4.0 alignment — COMPLETE
 
-Release publication is complete, but deployment alignment is deliberately separate.
+The live Arcane-managed OMV deployment was redeployed through the authenticated Arcane UI to:
 
-Current live OMV Arcane/Docker HostSleuth remains verified on:
+`mjmalleo/hostsleuth:0.4.0`
 
-`mjmalleo/hostsleuth:0.3.0`
+Post-redeploy acceptance confirmed:
 
-Current disaster-recovery `main` also remains on `0.3.0`.
+- `/api/about` = `v0.4.0`;
+- `/api/snapshot` = schema 4 / Docker mode;
+- live container image = `mjmalleo/hostsleuth:0.4.0`;
+- `192.168.2.181:8787` remains healthy;
+- retained state/events survived the redeploy;
+- Optional Safe Actions remain disabled/unavailable in Docker/default mode;
+- Action Web/API remains loopback-only.
 
-Recovery PR #4 stages `mjmalleo/hostsleuth:0.4.0` but is intentionally unmerged so disaster recovery does not silently move ahead of production.
+The disaster-recovery repository `xXDasGoGXx/OMV-Docker-Rebuild` was aligned to the same pinned image and PR #4 was merged at:
 
-Remaining steps:
+`ad2bd53ca3a469272eba6343c03936b7c1a04bc0`
 
-1. redeploy the existing Arcane-managed HostSleuth project to `0.4.0` through an authenticated Arcane session/API;
-2. verify version, schema/mode, image identity, endpoint availability, retained state, and Docker action-unavailable behavior;
-3. update/merge recovery PR #4 and record final alignment.
-
-Do not bypass Arcane authentication or HomeCommander Docker/sudo safeguards to complete this step.
+No Arcane authentication, HomeCommander Docker/sudo safeguard, or deployment-control boundary was bypassed.
 
 ## 10. Later — Redacted Evidence Bundle — NOT STARTED
 
@@ -127,7 +129,7 @@ Requirements before implementation:
 - clear manifest of what was included/redacted;
 - bounded output and integrity/checksum information.
 
-Do not begin this milestone merely because v0.4.0 publication is complete. It requires explicit owner direction, and redaction/threat-model design comes before export implementation.
+Do not begin this milestone merely because v0.4.0 publication/deployment alignment is complete. It requires explicit owner direction, and redaction/threat-model design comes before export implementation.
 
 ## Research backlog — not an implementation milestone
 
