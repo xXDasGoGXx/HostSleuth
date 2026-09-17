@@ -184,7 +184,6 @@ func TestEvaluateEndpointContractServiceAndContainerState(t *testing.T) {
 	}
 }
 
-
 func TestEndpointContractFailurePrecedesEarlierUnknownForFirstMismatch(t *testing.T) {
 	withEndpointContractStubs(t, nil, nil)
 	evaluation, err := EvaluateEndpointContract(context.Background(), EndpointContract{
