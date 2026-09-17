@@ -1,0 +1,114 @@
+.contract-intro {
+  display: grid;
+  gap: 1rem;
+}
+
+.contract-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: .5rem;
+}
+
+.contract-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.contract-grid label {
+  display: grid;
+  gap: .45rem;
+  font-weight: 650;
+}
+
+.contract-grid label small {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.contract-grid input,
+.contract-grid select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: .75rem;
+  background: var(--input, rgba(255,255,255,.035));
+  color: inherit;
+  padding: .8rem .9rem;
+  font: inherit;
+}
+
+.contract-actions,
+.contract-result-actions {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  flex-wrap: wrap;
+}
+
+.contract-checks {
+  display: grid;
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.contract-check {
+  border: 1px solid var(--border);
+  border-radius: .85rem;
+  padding: .9rem 1rem;
+  background: rgba(255,255,255,.025);
+}
+
+.contract-check.fail {
+  border-color: rgba(248, 113, 113, .45);
+}
+
+.contract-check.pass {
+  border-color: rgba(74, 222, 128, .35);
+}
+
+.contract-check-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.contract-check-status {
+  border-radius: 999px;
+  padding: .18rem .55rem;
+  font-size: .72rem;
+  letter-spacing: .06em;
+  font-weight: 800;
+}
+
+.contract-check-status.pass,
+.contract-status.pass {
+  color: #86efac;
+}
+
+.contract-check-status.fail,
+.contract-status.fail {
+  color: #fca5a5;
+}
+
+.contract-check-status.unknown,
+.contract-status.unknown {
+  color: #fcd34d;
+}
+
+.contract-expected,
+.contract-observed {
+  margin: .55rem 0 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.contract-observed {
+  color: var(--text);
+}
+
+@media (max-width: 760px) {
+  .contract-grid {
+    grid-template-columns: 1fr;
+  }
+}
