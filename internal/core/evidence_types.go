@@ -24,6 +24,7 @@ var (
 	evidenceServicePattern             = regexp.MustCompile(`\b[A-Za-z0-9][A-Za-z0-9_.@:-]*\.service\b`)
 	evidenceURLPattern                 = regexp.MustCompile(`(?i)https?://[^\s"'<>]+`)
 	evidenceAbsPathPattern             = regexp.MustCompile(`(?:^|[\s(=,:])(/[A-Za-z0-9._~@%+\-,/:]+)`)
+	evidenceCIDRSuffixPattern          = regexp.MustCompile(`^/[0-9]{1,3}$`)
 	evidencePrivateKeyBlockPattern     = regexp.MustCompile(`(?is)-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----.*?-----END [A-Z0-9 ]*PRIVATE KEY-----`)
 	evidencePrivateKeyHeaderPattern    = regexp.MustCompile(`(?i)-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----`)
 	evidencePrivateKeyRemainderPattern = regexp.MustCompile(`(?is)-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----.*$`)

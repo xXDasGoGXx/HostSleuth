@@ -93,7 +93,11 @@ func collectGenericAliases(add func(string, string), value string) {
 	}
 	for _, match := range evidenceAbsPathPattern.FindAllStringSubmatch(value, -1) {
 		if len(match) > 1 {
-			collectPathAlias(add, strings.TrimRight(match[1], ".);]"))
+			path := strings.TrimRight(match[1], ".);]")
+			if evidenceCIDRSuffixPattern.MatchString(path) {
+				continue
+			}
+			collectPathAlias(add, path)
 		}
 	}
 }

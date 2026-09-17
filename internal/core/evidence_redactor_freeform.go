@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"net"
 	"net/url"
 	"sort"
@@ -27,6 +28,7 @@ func (r *evidenceRedactor) freeform(value string) string {
 	})
 
 	out = r.replaceKnownAliases(out)
+	out = r.redactIPv6Tokens(out)
 	out = evidenceMACPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("mac", raw) })
 	out = evidenceUUIDPattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("id", raw) })
 	out = evidenceServicePattern.ReplaceAllStringFunc(out, func(raw string) string { return r.alias("service", raw) })
@@ -43,6 +45,12 @@ func (r *evidenceRedactor) freeform(value string) string {
 		}
 		prefix, path := match[:idx], match[idx:]
 		path = strings.TrimRight(path, ".);]")
+		if prefix == ":" && strings.HasPrefix(path, "//") {
+			return match
+		}
+		if evidenceCIDRSuffixPattern.MatchString(path) {
+			return match
+		}
 		return prefix + r.path(path)
 	})
 	if len(out) > evidenceFreeformLimit {
@@ -92,10 +100,50 @@ func (r *evidenceRedactor) redactURL(raw string) string {
 	} else {
 		u.Host = redactedHost
 	}
-	if u.Path != "" && u.Path != "/" {
-		u.Path = "/[redacted]"
-		u.RawPath = ""
+	path := u.Path
+	switch {
+	case path == "":
+		path = ""
+	case path == "/":
+		path = "/"
+	default:
+		path = "/[redacted]"
 	}
 	r.counts["url"]++
-	return u.String()
+	return u.Scheme + "://" + u.Host + path
+}
+
+func (r *evidenceRedactor) redactIPv6Tokens(value string) string {
+	out := value
+	for _, field := range strings.Fields(value) {
+		candidate := strings.Trim(field, `(){}<>"\' ,;`)
+		redacted, ok := r.redactIPv6Candidate(candidate)
+		if !ok || redacted == candidate {
+			continue
+		}
+		out = strings.Replace(out, candidate, redacted, 1)
+	}
+	return out
+}
+
+func (r *evidenceRedactor) redactIPv6Candidate(value string) (string, bool) {
+	if value == "" {
+		return value, false
+	}
+	if host, port, err := net.SplitHostPort(value); err == nil {
+		host = strings.Trim(host, "[]")
+		ip := net.ParseIP(host)
+		if ip != nil && ip.To4() == nil {
+			return r.ip(host) + ":" + port, true
+		}
+	}
+	trimmed := strings.Trim(value, "[]")
+	if ip, network, err := net.ParseCIDR(trimmed); err == nil && ip.To4() == nil {
+		prefix, _ := network.Mask.Size()
+		return r.ip(ip.String()) + fmt.Sprintf("/%d", prefix), true
+	}
+	if ip := net.ParseIP(trimmed); ip != nil && ip.To4() == nil {
+		return r.ip(ip.String()), true
+	}
+	return value, false
 }
