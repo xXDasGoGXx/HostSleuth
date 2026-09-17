@@ -31,6 +31,8 @@ func main() {
 		runSnapshot(os.Args[2:])
 	case "diagnose":
 		runDiagnose(os.Args[2:])
+	case "contract":
+		runEndpointContract(os.Args[2:])
 	case "service":
 		runServiceStory(os.Args[2:])
 	case "incident":
@@ -57,7 +59,7 @@ func main() {
 
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
-	fmt.Println("usage: hostsleuth <snapshot|diagnose|service|incident|reboot|workbench|action|evidence|events|serve|version> [options]")
+	fmt.Println("usage: hostsleuth <snapshot|diagnose|contract|service|incident|reboot|workbench|action|evidence|events|serve|version> [options]")
 }
 
 func buildRevision() string {
@@ -263,6 +265,7 @@ func runServe(args []string) {
 	appCSS, appJS = appendIncidentLensAssets(appCSS, appJS)
 	appCSS, appJS = appendRebootStoryAssets(appCSS, appJS)
 	appCSS, appJS = appendWorkbenchAssets(appCSS, appJS)
+	appCSS, appJS = appendEndpointContractAssets(appCSS, appJS)
 	appCSS, appJS = appendActionAssets(appCSS, appJS)
 
 	mux := http.NewServeMux()
@@ -345,6 +348,7 @@ func runServe(args []string) {
 		_ = json.NewEncoder(w).Encode(core.BuildIncidentLens(r.Context(), anchor, r.URL.Query().Get("target"), s, events))
 	})
 	registerRebootStoryAPI(mux, store)
+	registerEndpointContractAPI(mux, store)
 	registerWorkbenchAPI(mux)
 	registerActionAPI(mux, actionManager, actionDeploymentMode)
 	mux.HandleFunc("/assets/app.css", func(w http.ResponseWriter, r *http.Request) {

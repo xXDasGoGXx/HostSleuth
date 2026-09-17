@@ -33,6 +33,9 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Exercise v0.5.0 Evidence Bundle preview/export against a disposable copy of live API evidence; mode `0600` and embedded checksums verified.
 - [x] Merge `OMV-Docker-Rebuild` recovery alignment PR #5 at `9387d85acef8d19d913458cf45d48a765b6b8299`.
 - [x] Shut down the temporary Arcane tunnel and remove disposable acceptance files.
+- [x] M12 — Expected Endpoint Contracts core evaluator with exact DNS, TCP, TLS, optional service, and optional container expectations.
+- [x] M12 CLI/API/Web UI integration with ordered Expected-vs-Observed checks and first-mismatch reporting.
+- [x] M12 local Go 1.24.13 format/vet/test/build plus disposable HTTP/UI acceptance.
 
 ## Records
 
@@ -43,6 +46,8 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - Redacted Evidence Bundle closeout: `docs/history/REDACTED-EVIDENCE-BUNDLE.md`
 - v0.5.0 publication: `docs/history/V0.5.0-PUBLICATION.md`
 - v0.5.0 production/recovery alignment: `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md`
+- M12 design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`
+- M12 closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`
 
 ## Current state
 
@@ -52,11 +57,14 @@ Stable/public/live/recovery are aligned on:
 
 Docker `latest` resolves to the same verified v0.5.0 OCI index.
 
-## Next milestone
+## Active next step — M12 merge / v0.6.0 publication
 
-No new feature milestone is active yet.
-
-Use `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` as design input when the owner chooses the next bounded milestone. Do not silently promote a research idea into implementation scope.
+- [ ] Open M12 PR only after the branch remains locally green.
+- [ ] Require full GitHub CI on the exact PR head before merge.
+- [ ] Merge M12 to `main` and record the merge SHA.
+- [ ] Publish stable `v0.6.0` from the exact accepted source.
+- [ ] Independently verify native assets/checksums and the multi-platform Docker image.
+- [ ] Keep production/recovery on v0.5.0 until the separately verified v0.6.0 rollout.
 
 ## Guardrails
 
