@@ -50,9 +50,25 @@ Public stable, the live Arcane/Docker deployment, and the `OMV-Docker-Rebuild` d
 
 Post-redeploy acceptance is recorded in `CURRENT-HANDOFF.md`.
 
-## Next — Redacted Evidence Bundle — NOT STARTED
+## Active — Redacted Evidence Bundle design
 
-Only begin after explicit owner direction. Redaction/threat-model rules come before export implementation. The bundle must never silently include credentials, tokens, private keys, configuration contents, or other secrets.
+Branch: `redacted-evidence-bundle`
+
+Design contract: `docs/design/REDACTED-EVIDENCE-BUNDLE.md`
+
+- [x] Create dedicated milestone branch.
+- [x] Inspect current snapshot/event/Service Story/Incident Lens/Reboot Story/Safe Action evidence for disclosure risks.
+- [x] Write explicit threat model, inclusion/exclusion policy, deterministic pseudonymization rules, preview/export contract, fail-closed behavior, limits, permissions, integrity rules, and required acceptance tests.
+- [ ] Owner accepts the redaction/threat-model contract.
+- [ ] Implement typed core redaction primitives only after acceptance.
+- [ ] Implement `hostsleuth evidence preview` with no archive write.
+- [ ] Implement bounded local ZIP export with manifest, checksums, owner-only permissions, and cleanup on failure.
+- [ ] Add adversarial secret/redaction/unit tests and regression coverage.
+- [ ] Add a bounded Web/API surface only if it can preserve the existing loopback-only security model; CLI is sufficient for the first accepted implementation.
+- [ ] Complete native + Docker acceptance without changing production host state.
+- [ ] Write closeout history and update README/SECURITY/roadmap before merge.
+
+No exporter implementation is authorized until the design contract is accepted. Raw journal text, raw action command output, arbitrary file inclusion, cloud upload, and automatic sharing remain out of scope.
 
 ## Guardrails
 
