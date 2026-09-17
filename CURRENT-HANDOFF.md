@@ -11,40 +11,40 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 
 Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform, browser shell, or automatic-remediation engine.
 
-## Stable / public / live / recovery state — v0.5.0
+## Stable/public state — v0.6.0
 
 Stable public release:
 
-`v0.5.0`
+`v0.6.0`
 
 Exact published source:
 
-`04a53f8f0f3f48f7118a9ee9a688820cc000a340`
+`fcb08be51ae3da8cd20dc3929cf9d736b15f170c`
 
-GitHub release workflow:
+Release workflow:
 
-`35281793336` — success
+`35284864117` — success
 
 Published Docker tags:
 
-- `mjmalleo/hostsleuth:0.5.0`
+- `mjmalleo/hostsleuth:0.6.0`
 - `mjmalleo/hostsleuth:latest`
 
-Both resolve to OCI index:
+Both resolve to verified OCI index:
 
-`sha256:a17325980d5e9ec9760f9003aa8a9490962bb06ffbbd5a393a0ad31a218e480d`
+`sha256:6b9f90209f477ba8213d9c4bf7db7996d6c52d2caae2cfce405822df8bc8ef2a`
 
-The live Arcane-managed OMV deployment and the `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition are now both aligned on:
+Independent verification passed for native checksums/execution, the M12 `contract` command, and linux/amd64 + linux/arm64 Docker manifests.
+
+Full publication record: `docs/history/V0.6.0-PUBLICATION.md`.
+
+## Live / disaster-recovery state — still v0.5.0
+
+The existing Arcane-managed production deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition remain pinned to:
 
 `mjmalleo/hostsleuth:0.5.0`
 
-Recovery alignment PR #5 merged at:
-
-`9387d85acef8d19d913458cf45d48a765b6b8299`
-
-Full publication record: `docs/history/V0.5.0-PUBLICATION.md`.
-
-Full production/recovery alignment record: `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md`.
+Publication of v0.6.0 is not proof of production rollout. The v0.6.0 live/recovery alignment is now the active next step.
 
 ## Live v0.5.0 acceptance
 
@@ -104,11 +104,9 @@ Design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
 Closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
-## Active next step — publish v0.6.0
+## Active next step — production / recovery v0.6.0 alignment
 
-M12 source is complete on `main`. Publish stable v0.6.0 only from the accepted source after the closeout documentation is merged, then independently verify native assets/checksums and the multi-platform Docker image.
-
-Stable/public/live/recovery remain v0.5.0 until v0.6.0 publication is independently verified. Production/recovery rollout remains a separate later step.
+Stage the `OMV-Docker-Rebuild` image pin at 0.6.0 without merging ahead of production. Then redeploy the existing authenticated Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.6.0`, verify version/schema/mode, retained state/events, Docker Safe Actions boundaries, and an Expected Endpoint Contract in the live UI/API. Merge recovery alignment only after live acceptance passes.
 
 Do not restart a broad audit on continuation; use this handoff.
 
