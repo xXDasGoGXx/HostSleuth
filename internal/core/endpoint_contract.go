@@ -344,25 +344,27 @@ func endpointContainerContractCheck(name string, snap Snapshot) EndpointContract
 func endpointContractOutcome(checks []EndpointContractCheck) (status, first, conclusion string) {
 	failed := 0
 	unknown := 0
+	firstFail := ""
+	firstUnknown := ""
 	for _, check := range checks {
 		switch check.Status {
 		case "fail":
 			failed++
-			if first == "" {
-				first = check.Name
+			if firstFail == "" {
+				firstFail = check.Name
 			}
 		case "unknown":
 			unknown++
-			if first == "" {
-				first = check.Name
+			if firstUnknown == "" {
+				firstUnknown = check.Name
 			}
 		}
 	}
 	switch {
 	case failed > 0:
-		return "fail", first, fmt.Sprintf("%d expectation(s) failed; first mismatch: %s", failed, first)
+		return "fail", firstFail, fmt.Sprintf("%d expectation(s) failed; first mismatch: %s", failed, firstFail)
 	case unknown > 0:
-		return "unknown", first, fmt.Sprintf("no expectation is proven false, but %d expectation(s) remain unknown; first unresolved check: %s", unknown, first)
+		return "unknown", firstUnknown, fmt.Sprintf("no expectation is proven false, but %d expectation(s) remain unknown; first unresolved check: %s", unknown, firstUnknown)
 	default:
 		return "pass", "", "all endpoint expectations are satisfied"
 	}
