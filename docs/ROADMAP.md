@@ -183,11 +183,28 @@ Design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
 Closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
-## 14. Publish stable v0.6.0 — ACTIVE NEXT STEP
+## 14. Publish stable v0.6.0 — COMPLETE
 
-M12 is merged and source-complete. Publish v0.6.0 from the exact accepted `main` source only after this closeout documentation is merged, then independently verify the native assets/checksums and public multi-platform Docker image.
+Stable `v0.6.0` was published from exact accepted source:
 
-Production and disaster recovery remain on v0.5.0 until the published v0.6.0 artifacts are verified and the separate rollout passes live acceptance.
+`fcb08be51ae3da8cd20dc3929cf9d736b15f170c`
+
+Release workflow run `35284864117` completed successfully. Independent verification confirmed native amd64/arm64 checksums, amd64 execution/version, the M12 `contract` command, and public `0.6.0` plus `latest` on OCI index `sha256:6b9f90209f477ba8213d9c4bf7db7996d6c52d2caae2cfce405822df8bc8ef2a` with linux/amd64 and linux/arm64 manifests.
+
+Full record: `docs/history/V0.6.0-PUBLICATION.md`.
+
+## 15. Production / recovery v0.6.0 alignment — ACTIVE NEXT STEP
+
+Public stable is v0.6.0 while live Arcane production and the disaster-recovery definition remain pinned to v0.5.0.
+
+Ordered rollout:
+
+1. stage the recovery image-pin bump to `mjmalleo/hostsleuth:0.6.0` without merging ahead of production;
+2. redeploy the existing Arcane-managed project through the supported authenticated UI;
+3. verify live version/schema/mode, retained state/events, LAN health, and Docker-mode Safe Actions boundary;
+4. exercise M12 Expected Endpoint Contracts against the live v0.6.0 service;
+5. merge the recovery pin only after live acceptance passes;
+6. record final v0.6.0 production/recovery alignment.
 
 ## Research backlog — not automatically scheduled
 
