@@ -132,26 +132,38 @@ Independent verification confirmed:
 
 Full record: `docs/history/V0.5.0-PUBLICATION.md`.
 
-## 12. Production / recovery v0.5.0 alignment — ACTIVE NEXT STEP
+## 12. Production / recovery v0.5.0 alignment — COMPLETE
 
-Public stable is v0.5.0, while live Arcane production and the disaster-recovery definition remain pinned to v0.4.0.
+The live Arcane-managed OMV deployment and `xXDasGoGXx/OMV-Docker-Rebuild` recovery definition are aligned on:
 
-Ordered rollout:
+`mjmalleo/hostsleuth:0.5.0`
 
-1. stage the recovery image-pin bump to `mjmalleo/hostsleuth:0.5.0` without merging ahead of production;
-2. redeploy the existing Arcane-managed HostSleuth project through the supported authenticated UI;
-3. verify live version/schema/mode, LAN health, retained state/events, and Docker-mode Safe Actions boundary;
-4. exercise the published Evidence Bundle CLI against retained state using a safe local output path;
-5. merge the recovery pin only after live v0.5.0 acceptance passes;
-6. record final production/recovery alignment.
+Live acceptance confirmed:
 
-Do not bypass Arcane authentication or HomeCommander deployment safeguards.
+- `/api/about` = `v0.5.0`;
+- `/api/snapshot` = schema 4 / Docker mode;
+- retained pre-upgrade events survived;
+- Optional Safe Actions remain disabled/unavailable;
+- Action Web/API remains loopback-only with HTTP 403 from LAN;
+- a disposable v0.5.0 Evidence Bundle preview/export against a copy of live API evidence succeeded with expected bounded files, mode `0600`, and verified checksums.
 
-## Research backlog — not an implementation milestone
+Recovery alignment PR #5 merged at:
 
-The detailed current research artifact is `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`.
+`9387d85acef8d19d913458cf45d48a765b6b8299`
+
+Full record: `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md`.
+
+## Next milestone — not yet selected
+
+No new implementation milestone is active. The owner must select the next bounded milestone before implementation begins.
+
+The detailed research artifact remains:
+
+`docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
 
 Promising differentiated questions include expected-endpoint contracts, resolver/delegation/split-view DNS mismatches, reverse-proxy/upstream problems, permissions/ownership/deployment-path reasoning, STARTTLS inspection, certificate rollout verification, and only narrowly justified future actions using the M11 security model.
+
+Research is design input only; it does not silently become implementation scope.
 
 ## Guardrails that remain in force
 
