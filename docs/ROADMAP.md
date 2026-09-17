@@ -153,17 +153,51 @@ Recovery alignment PR #5 merged at:
 
 Full record: `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md`.
 
-## Next milestone — not yet selected
+## 13. M12 — Expected Endpoint Contracts — IMPLEMENTED ON BRANCH
 
-No new implementation milestone is active. The owner must select the next bounded milestone before implementation begins.
+The owner selected Expected Endpoint Contracts as the next bounded milestone.
+
+M12 adds one on-demand read-only contract that can state:
+
+- required `host:port` target;
+- optional exact DNS address set;
+- TLS expectation: ignore, present, verified, or forbidden;
+- optional systemd service expected active;
+- optional container expected running.
+
+TCP reachability is always required.
+
+HostSleuth reuses the existing Diagnose engine, renders ordered Expected-vs-Observed checks, and reports the first proven failure. Missing Docker/systemd evidence remains `unknown`; an earlier unknown does not mask a later proven failure.
+
+Delivered interfaces:
+
+- `hostsleuth contract` CLI;
+- `GET /api/contract`;
+- Web UI Expectations view with handoff to full Diagnose.
+
+Local Go 1.24.13 format/vet/test/build and disposable HTTP/UI acceptance passed before opening a PR.
+
+M12 remains read-only and adds no scheduler, alerting, persistent contract database, arbitrary file reads, new privilege, or remediation path.
+
+Design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
+
+Closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
+
+## 14. Publish stable v0.6.0 — NEXT AFTER M12 MERGE
+
+Publication is separate from source completion. Only after the exact M12 PR head passes full GitHub CI and merges should v0.6.0 be published and independently verified.
+
+Production and disaster recovery remain on v0.5.0 until the published v0.6.0 artifacts are verified and the separate rollout passes live acceptance.
+
+## Research backlog — not automatically scheduled
 
 The detailed research artifact remains:
 
 `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
 
-Promising differentiated questions include expected-endpoint contracts, resolver/delegation/split-view DNS mismatches, reverse-proxy/upstream problems, permissions/ownership/deployment-path reasoning, STARTTLS inspection, certificate rollout verification, and only narrowly justified future actions using the M11 security model.
+Remaining promising differentiated questions include resolver/delegation/split-view DNS mismatches, reverse-proxy/upstream problems, permissions/ownership/deployment-path reasoning, STARTTLS inspection, certificate rollout verification, and only narrowly justified future actions using the M11 security model.
 
-Research is design input only; it does not silently become implementation scope.
+Research remains design input only; it does not silently become implementation scope.
 
 ## Guardrails that remain in force
 
