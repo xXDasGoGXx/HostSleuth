@@ -452,7 +452,9 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/design/REDACTED-EVIDENCE-BUNDLE.md` — accepted bundle threat model and redaction contract.
 - `docs/history/REDACTED-EVIDENCE-BUNDLE.md` — bundle implementation and acceptance closeout.
 - `docs/history/V0.5.0-PUBLICATION.md` — v0.5.0 publication and verification record.
-- `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md` — v0.5.0 live/recovery rollout and acceptance record.\n- `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 contract semantics and security/product boundary.\n- `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 implementation and local acceptance closeout.
+- `docs/history/V0.5.0-PRODUCTION-ALIGNMENT.md` — v0.5.0 live/recovery rollout and acceptance record.
+- `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 contract semantics and security/product boundary.
+- `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 implementation and local acceptance closeout.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
