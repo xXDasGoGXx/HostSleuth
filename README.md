@@ -582,7 +582,7 @@ M16 STARTTLS / Mail Service Story is complete on `main` as development source. I
 
 M17 Certificate Rollout Verification is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
 
-M18 Safe Actions II passed its required candidate/threat-model review, and the owner explicitly approved exactly `service.reload` under the documented separate-allowlist/native-only security contract. Implementation is being validated as development source; it is not part of the published/live/recovery v0.8.0 release.
+M18 Safe Actions II is complete on `main` as development source. The owner-approved fixed native `service.reload` action passed the full security contract, exact-head CI, and real disposable systemd reload acceptance. It is not part of the published/live/recovery v0.8.0 release.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -622,7 +622,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md` — M16 implementation and acceptance closeout.
 - `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md` — M17 rollout-comparison semantics and no-private-key-read boundary.
 - `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md` — M17 implementation and acceptance closeout.
-- `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md` — M18 candidate comparison, threat model, privilege-cost analysis, and pending owner decision.
+- `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md` — M18 candidate comparison, accepted threat model, and privilege-cost contract.
+- `docs/history/M18-SAFE-ACTIONS-II.md` — M18 implementation and real native reload acceptance closeout.
 - `docs/history/V0.8.0-PUBLICATION.md` — v0.8.0 publication and independent verification record.
 - `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
