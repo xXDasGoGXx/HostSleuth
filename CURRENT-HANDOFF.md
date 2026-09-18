@@ -82,11 +82,54 @@ Design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
 Closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
-## Current milestone boundary
+## Approved forward direction
 
-v0.6.0 publication and production/recovery rollout are complete.
+The owner explicitly approved all of the following as future HostSleuth milestones, plus continuous UI/UX polish:
 
-Do not automatically start a new feature milestone merely because this boundary is clean. Use `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` as design input only when the owner selects the next bounded milestone.
+1. M13 — DNS Detective / split-view resolver comparison.
+2. M14 — Reverse Proxy / Upstream Story.
+3. M15 — Deployment / Permissions Story.
+4. M16 — STARTTLS / Mail Service Story.
+5. M17 — Certificate Rollout Verification.
+6. M18 — exactly one additional Safe Action after a fresh privilege/threat-model gate.
+
+The canonical ordered plan is now in `docs/ROADMAP.md`.
+
+## Active milestone — M13 DNS Detective + Admin Console v1
+
+Branch:
+
+`m13-dns-detective-admin-console`
+
+Implemented on the branch:
+
+- system resolver plus up to four explicit custom resolver IP comparisons;
+- IP-only custom resolver validation, DNS port 53 only;
+- normalized A/AAAA/CNAME or PTR evidence;
+- resolver latency/error evidence;
+- address-scope classification;
+- bounded runtime `/etc/resolv.conf` context;
+- deterministic `agree`, `diverge`, `partial`, and `single` outcomes;
+- bounded split-view hint when private/local and global resolver views differ;
+- `hostsleuth dns` CLI;
+- `GET /api/dns-detective`;
+- dedicated DNS Detective Web UI;
+- Admin Console v1 desktop navigation rail;
+- global Quick Target bar with Diagnose / Expectations / DNS routing;
+- browser-local recent targets and density preference;
+- `/` keyboard shortcut to focus the target bar;
+- responsive navigation fallback;
+- CI cancellation for obsolete PR runs plus M13 JS/Docker smoke coverage.
+
+Local validation passed with Go 1.24.13: gofmt, vet, full tests, native build, and JavaScript syntax.
+
+Disposable HTTP acceptance passed. Real resolver comparison also demonstrated resolver-specific behavior: system DNS and `192.168.3.5` agreed for the test name while `192.168.2.5` timed out; HostSleuth reported partial resolver evidence rather than collapsing that into a generic DNS error.
+
+Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
+
+## Active next step
+
+Perform the final M13 branch audit, write the closeout record, then open the PR. Require full CI on the exact head before merge. Stable/public/live/recovery remain on v0.6.0 until a later independently verified v0.7.0 publication and rollout.
 
 Do not restart a broad audit on continuation; use this handoff.
 
