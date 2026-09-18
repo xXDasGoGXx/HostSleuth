@@ -1,6 +1,6 @@
 # M13 — DNS Detective + Admin Console v1
 
-Status: active design and implementation.
+Status: implemented and locally accepted; PR/CI/release remain separate gates.
 
 ## Admin question
 
