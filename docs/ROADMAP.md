@@ -463,20 +463,42 @@ Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
 Stable/public/live/recovery remain on v0.8.0; M16 is development source until a separate publication/rollout decision.
 
-## 25. M17 — Certificate Rollout Verification — IMPLEMENTATION IN PROGRESS
+## 25. M17 — Certificate Rollout Verification — COMPLETE
 
 Goal:
 
 > I renewed/replaced the certificate; which endpoint is still serving the old one?
 
-Bounded direction:
+Delivered bounded source implementation:
 
-- compare one expected certificate fingerprint/file or reference endpoint against multiple explicit endpoints;
-- served fingerprint, identity/SAN, validity, hostname/trust, and match/mismatch;
-- deterministic endpoint matrix;
-- no renewal, install, reload, private-key reads, or ACME management.
+- exactly one expected source: SHA-256 fingerprint or explicit reference direct-TLS endpoint;
+- up to 16 explicit direct-TLS host:port endpoints;
+- numeric-port validation and duplicate rejection;
+- deterministic MATCH / MISMATCH / UNKNOWN rollout identity;
+- separate certificate validity, hostname, and trust health;
+- bounded four-worker probing with user endpoint order preserved;
+- CLI/API/dedicated Cert Rollout Admin Console matrix;
+- no arbitrary certificate-file reads, private-key reads, renewal, install, reload, ACME management, or remediation.
 
-## 26. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
+Arbitrary certificate-file input was intentionally omitted because an arbitrary path cannot be proven safe before opening it; fingerprint/reference sources preserve the no-private-key-read boundary.
+
+PR #59 passed the complete GitHub CI matrix on final exact head:
+
+`32f0ad2dc3211e5af38a643a5d2f38081d440645`
+
+Native two-certificate CLI/API/UI acceptance also passed.
+
+PR #59 squash-merged to `main` at:
+
+`f12bbd8aacb9689bb31d5b9b6535479882cb6ce6`
+
+Design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
+
+Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
+
+Stable/public/live/recovery remain on v0.8.0; M17 is development source until a separate publication/rollout decision.
+
+## 26. M18 — Safe Actions II — ACTIVE NEXT: SECURITY REVIEW
 
 One additional action is approved in principle, but the exact action is **not** pre-approved.
 
