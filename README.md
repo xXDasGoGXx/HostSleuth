@@ -284,6 +284,26 @@ Full design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
 Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
+### STARTTLS / Mail Service Story — development source
+
+M16 adds a bounded read-only pre-authentication mail TLS story for the question: **the mail port is open; did STARTTLS actually negotiate correctly?**
+
+```bash
+hostsleuth starttls --protocol smtp mail.example.com:25
+hostsleuth starttls --protocol imap mail.example.com:143
+hostsleuth starttls --protocol pop3 mail.example.com:110
+```
+
+HostSleuth supports SMTP STARTTLS, IMAP STARTTLS, and POP3 STLS using one deterministic stage model: TCP, greeting, capability advertisement, protocol upgrade, TLS negotiation, certificate validity, hostname, and trust. Protocol reads are bounded and the TLS/certificate interpretation is shared with the existing TLS engine.
+
+The protocol surface is deliberately fixed and pre-authentication only. HostSleuth does not accept or send usernames, passwords, OAuth tokens, arbitrary mail commands, mail submission commands, mailbox selection/retrieval commands, message bodies, or attachments. It does not edit mail configuration, restart mail services, renew/install certificates, or read private keys.
+
+The Web UI adds a dedicated **STARTTLS** view with protocol selection, visual upgrade/TLS stages, pre-upgrade capability evidence, TLS version/cipher, and served-certificate metadata.
+
+Full design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
+
+Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
+
 ### Service Story — native Linux
 
 M7 adds a read-only service story inside the existing Diagnose workflow. Select a systemd unit and optionally the `host:port` you expect it to provide. HostSleuth can correlate:
@@ -532,7 +552,9 @@ M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete on `main`, pub
 
 M15 Deployment / Permissions Story is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
 
-The active next source milestone is M16 STARTTLS / Mail Service Story. The owner-approved roadmap then continues through Certificate Rollout Verification and one additional Safe Action only after a fresh security gate.
+M16 STARTTLS / Mail Service Story is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
+
+The active next source milestone is M17 Certificate Rollout Verification. The owner-approved roadmap then continues to one additional Safe Action only after a fresh security gate.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -568,6 +590,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md` — M14 implementation and local acceptance closeout.
 - `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md` — M15 permission semantics and privacy/security boundary.
 - `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md` — M15 implementation and acceptance closeout.
+- `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md` — M16 mail protocol/TLS semantics and safety boundary.
+- `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md` — M16 implementation and acceptance closeout.
 - `docs/history/V0.8.0-PUBLICATION.md` — v0.8.0 publication and independent verification record.
 - `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
