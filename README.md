@@ -203,6 +203,36 @@ M12 is read-only. It does not add polling, alerts, persistent contract storage, 
 
 Full design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
+### DNS Detective — development source
+
+M13 adds an on-demand resolver comparison story for one DNS name or IP. HostSleuth always shows the system resolver view and can compare up to four resolver IPs that you explicitly supply.
+
+Example:
+
+```bash
+hostsleuth dns \
+  --resolver local-a=192.0.2.53 \
+  --resolver public=1.1.1.1 \
+  app.example.com
+```
+
+For names, DNS Detective compares normalized A/AAAA answers plus canonical CNAME evidence. For IP inputs, it compares PTR answers. Each resolver view includes lookup duration, bounded error evidence, and address scope (loopback/private/link-local/global/other).
+
+Results are deterministic:
+
+- `agree` — compared resolver views match;
+- `diverge` — successful resolver views disagree;
+- `partial` — one or more resolver lookups failed without a proven disagreement;
+- `single` — only the system resolver view is available.
+
+When resolver views differ between private/local and global addresses, HostSleuth may say the pattern is **consistent with split-view DNS or resolver-specific overrides**. It does not claim split-horizon configuration exists without direct configuration evidence.
+
+Custom Web/API resolvers are IP addresses on DNS port 53 only. HostSleuth never silently sends a hostname to a public resolver; a custom resolver is queried only because the operator explicitly supplied it.
+
+M13 also introduces Admin Console v1: desktop navigation rail, global Quick Target bar, browser-local recent targets and density preference, keyboard `/` focus, and responsive fallback navigation.
+
+Full design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
+
 ### Service Story — native Linux
 
 M7 adds a read-only service story inside the existing Diagnose workflow. Select a systemd unit and optionally the `host:port` you expect it to provide. HostSleuth can correlate:
@@ -312,6 +342,12 @@ Check an expected endpoint contract:
 
 ```bash
 hostsleuth contract --tls verified --expect-ip 192.0.2.10 example.com:443
+```
+
+Compare DNS resolver views:
+
+```bash
+hostsleuth dns --resolver local=192.0.2.53 --resolver public=1.1.1.1 example.com
 ```
 
 Build a native systemd service story, optionally with its expected endpoint:
