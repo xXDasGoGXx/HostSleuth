@@ -1,6 +1,6 @@
 # M13 — DNS Detective + Admin Console v1 Closeout
 
-Status: source implementation complete and locally accepted on branch `m13-dns-detective-admin-console`. Publication and production rollout remain separate gates.
+Status: source implementation complete and merged on 2026-09-17. Publication and production rollout remain separate gates.
 
 ## Delivered — DNS Detective
 
@@ -105,6 +105,25 @@ Disposable HTTP server acceptance confirmed:
 - headless browser DOM execution produced the Quick Target deck, DNS navigation/view, density control, and recent-target container.
 
 A local headless screenshot was also produced for visual sanity checking but was not committed.
+
+## Merge acceptance
+
+PR #47 ran on exact head:
+
+`4d5d8f857e362217028efbdedb20e020f7a85d48`
+
+The full CI matrix passed:
+
+- format/vet/test/native build;
+- served JavaScript syntax;
+- Docker smoke including DNS Detective and Admin Console markers;
+- native Safe Actions real-systemd smoke;
+- linux/amd64 image build;
+- linux/arm64 image build.
+
+PR #47 then squash-merged to `main` at:
+
+`182a27384a090f5538bb6d76a0c4dd917ce63932`
 
 ## Release boundary
 
