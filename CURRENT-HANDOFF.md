@@ -136,9 +136,38 @@ Disposable HTTP acceptance passed. Real resolver comparison also demonstrated re
 
 Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-## Active next step — M14 Reverse Proxy / Upstream Story
+## M14 — Reverse Proxy / Upstream Story + Admin Console v2
 
-v0.7.0 publication, live production acceptance, and disaster-recovery alignment are complete. Begin M14 from the approved roadmap: deterministic public-endpoint to upstream request-path diagnosis plus Admin Console v2 visual path/story work. Do not restart a broad audit on continuation.
+Implementation is complete on branch `m14-reverse-proxy-upstream-story` and has passed local acceptance.
+
+Delivered on the branch:
+
+- explicit public HTTP/HTTPS URL plus explicit expected upstream URL;
+- deterministic public DNS/route/TCP/TLS/HTTP and upstream DNS/route/TCP/TLS/HTTP stages;
+- local listener/Docker publication context when the public endpoint is proven local;
+- native upstream Host/SNI probe;
+- public Host/SNI probe against the same explicit upstream when identities differ;
+- first proven failure / warning / unknown precedence;
+- HTTP 4xx warning and 5xx failure semantics;
+- HEAD-only metadata probes with no bodies, credentials, cookies, Authorization, or arbitrary headers;
+- bounded same-host redirects and cross-host redirect stop;
+- query-string redaction in returned URL/Location evidence;
+- `hostsleuth proxy` CLI;
+- `GET /api/proxy-story`;
+- dedicated visual **Proxy Path** Web UI;
+- Admin Console v2 Proxy Quick Target action;
+- bounded copyable evidence summary with LAN-HTTP clipboard fallback;
+- permanent CI coverage for Proxy Path/Admin Console v2 JavaScript and Docker-mode proxy-story smoke.
+
+Local validation passed with Go 1.24.13: gofmt, diff-check, vet, full tests, `go test -race ./internal/core`, native build, every Web JS syntax check, and disposable CLI/API/UI/headless-browser acceptance.
+
+Design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
+
+Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
+
+## Active next step
+
+Perform the final exact-head M14 branch audit, then open the PR and require the full GitHub CI matrix before merge. Stable/public/live/recovery remain on v0.7.0 until a later independently verified v0.8.0 publication and rollout.
 
 Do not restart a broad audit on continuation; use this handoff.
 
