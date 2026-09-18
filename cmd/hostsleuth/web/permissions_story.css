@@ -1,0 +1,332 @@
+.permission-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.permission-hero::before {
+  content: "";
+  position: absolute;
+  width: 34rem;
+  height: 18rem;
+  right: -12rem;
+  top: -8rem;
+  background: radial-gradient(ellipse, rgba(103,212,255,.12), transparent 68%);
+  pointer-events: none;
+}
+
+.permission-readonly-chip {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(103,212,255,.26);
+  border-radius: 999px;
+  padding: .45rem .7rem;
+  color: var(--accent);
+  background: rgba(103,212,255,.055);
+  font-size: .72rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.permission-form {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0,.7fr) minmax(0,1.3fr);
+  gap: .8rem;
+  margin-top: 1.15rem;
+}
+
+.permission-form label {
+  display: grid;
+  gap: .45rem;
+  font-weight: 760;
+}
+
+.permission-form input,
+.permission-search {
+  min-height: 44px;
+  border: 1px solid #31506f;
+  border-radius: 11px;
+  background: #06111e;
+  color: var(--text);
+  padding: .72rem .85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.permission-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  flex-wrap: wrap;
+}
+
+.permission-verdict-row,
+.permission-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.permission-verdict.pass,
+.permission-status-cell.pass { color: var(--good); }
+
+.permission-verdict.fail,
+.permission-status-cell.fail { color: var(--bad); }
+
+.permission-verdict.unknown,
+.permission-status-cell.unknown { color: var(--muted); }
+
+.permission-identity-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: .65rem;
+  margin: 1.1rem 0 1.35rem;
+}
+
+.permission-identity-card {
+  display: grid;
+  gap: .38rem;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: .72rem .8rem;
+  background: rgba(4,13,23,.58);
+}
+
+.permission-identity-card span {
+  color: var(--muted);
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.permission-identity-card code {
+  overflow-wrap: anywhere;
+  color: #d7e8f8;
+  font-size: .76rem;
+}
+
+.permission-section-head {
+  margin-top: 1rem;
+}
+
+.permission-section-head h3 {
+  margin: .2rem 0 0;
+}
+
+.permission-chain {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  padding: .75rem 2px 1rem;
+}
+
+.permission-node {
+  flex: 0 0 220px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--muted-2);
+  border-radius: 12px;
+  padding: .78rem;
+  background: linear-gradient(180deg, rgba(12,25,42,.98), rgba(7,17,29,.98));
+}
+
+.permission-node.pass { border-top-color: var(--good); }
+.permission-node.fail { border-top-color: var(--bad); }
+.permission-node.unknown { border-top-color: var(--muted); }
+.permission-node.target { box-shadow: 0 0 0 1px rgba(103,212,255,.12); }
+
+.permission-node-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .5rem;
+}
+
+.permission-node-head code {
+  overflow-wrap: anywhere;
+  font-size: .72rem;
+  color: #d9eaff;
+}
+
+.permission-node-badge {
+  border-radius: 999px;
+  padding: .18rem .4rem;
+  font-size: .56rem;
+  font-weight: 900;
+}
+
+.permission-node-badge.pass { color: var(--good); background: rgba(125,232,170,.08); }
+.permission-node-badge.fail { color: var(--bad); background: rgba(255,159,159,.08); }
+.permission-node-badge.unknown { color: var(--muted); background: rgba(145,164,188,.08); }
+
+.permission-node p {
+  min-height: 48px;
+  margin: .65rem 0;
+  color: var(--muted);
+  font-size: .7rem;
+  line-height: 1.45;
+}
+
+.permission-node-ops {
+  display: flex;
+  gap: .35rem;
+  flex-wrap: wrap;
+}
+
+.permission-op {
+  border-radius: 999px;
+  padding: .2rem .42rem;
+  font-size: .59rem;
+  font-weight: 800;
+}
+
+.permission-op.pass { color: var(--good); background: rgba(125,232,170,.075); }
+.permission-op.fail { color: var(--bad); background: rgba(255,159,159,.075); }
+.permission-op.unknown { color: var(--muted); background: rgba(145,164,188,.075); }
+
+.permission-chain-arrow {
+  flex: 0 0 26px;
+  display: grid;
+  place-items: center;
+  color: #436585;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.evidence-head {
+  align-items: end;
+  margin-top: 1.15rem;
+}
+
+.permission-search {
+  width: min(360px, 100%);
+}
+
+.permission-table-wrap {
+  margin-top: .7rem;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.permission-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 820px;
+  font-size: .72rem;
+}
+
+.permission-table th,
+.permission-table td {
+  padding: .65rem .7rem;
+  border-bottom: 1px solid rgba(62,85,110,.35);
+  text-align: left;
+  vertical-align: top;
+}
+
+.permission-table th {
+  color: var(--muted);
+  font-size: .62rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  background: rgba(7,17,29,.86);
+}
+
+.permission-table code {
+  overflow-wrap: anywhere;
+  color: #cfe2f5;
+  font-size: .69rem;
+}
+
+.permission-empty {
+  color: var(--muted);
+  text-align: center !important;
+}
+
+.permission-mounts,
+.permission-scope {
+  margin-top: 1rem;
+}
+
+.permission-mounts > div {
+  display: grid;
+  gap: .5rem;
+  margin-top: .55rem;
+}
+
+.permission-mount-card {
+  display: grid;
+  grid-template-columns: minmax(120px,.3fr) minmax(0,1fr);
+  gap: .7rem;
+  padding: .65rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(4,13,23,.52);
+}
+
+.permission-mount-card code {
+  overflow-wrap: anywhere;
+  color: #cfe2f5;
+}
+
+.permission-scope summary {
+  cursor: pointer;
+  color: #bfd1e4;
+  font-weight: 750;
+}
+
+.permission-scope li {
+  margin: .35rem 0;
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+html[data-density="compact"] .permission-table th,
+html[data-density="compact"] .permission-table td {
+  padding: .42rem .55rem;
+}
+
+html[data-density="compact"] .permission-node {
+  padding: .6rem;
+}
+
+@media (max-width: 900px) {
+  .permission-form,
+  .permission-identity-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .permission-form-actions {
+    grid-column: 1;
+  }
+
+  .permission-chain {
+    display: grid;
+    gap: .45rem;
+    overflow: visible;
+  }
+
+  .permission-node {
+    width: 100%;
+  }
+
+  .permission-chain-arrow {
+    min-height: 18px;
+    transform: rotate(90deg);
+  }
+
+  .evidence-head {
+    display: grid;
+  }
+
+  .permission-search {
+    width: 100%;
+  }
+
+  .permission-mount-card {
+    grid-template-columns: 1fr;
+  }
+}
