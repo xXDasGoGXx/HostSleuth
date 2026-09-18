@@ -233,7 +233,7 @@ UI/UX is now a cross-cutting implementation track rather than end-of-project pol
 
 Detailed forward design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-## 17. M13 — DNS Detective + Admin Console v1 — ACTIVE
+## 17. M13 — DNS Detective + Admin Console v1 — COMPLETE
 
 Goal:
 
@@ -274,9 +274,17 @@ Privacy boundary:
 - reduced-motion support;
 - no decorative monitoring graphs.
 
-Release target after source acceptance: `v0.7.0`.
+PR #47 passed test/format/vet/build, Docker smoke, native-actions smoke, and both linux/amd64 + linux/arm64 image builds on exact head `4d5d8f857e362217028efbdedb20e020f7a85d48`, then squash-merged to `main` at `182a27384a090f5538bb6d76a0c4dd917ce63932`.
 
-## 18. M14 — Reverse Proxy / Upstream Story — APPROVED NEXT
+Full closeout: `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
+
+## 18. Publish stable v0.7.0 — ACTIVE NEXT STEP
+
+Publish v0.7.0 only from the exact accepted docs-inclusive `main` source after this M13 closeout documentation merges. Independently verify native assets/checksums, `hostsleuth dns`, and public multi-platform Docker tags before production rollout.
+
+Production and disaster recovery remain on v0.6.0 until that separately gated rollout passes.
+
+## 19. M14 — Reverse Proxy / Upstream Story — APPROVED NEXT
 
 Goal:
 
@@ -294,7 +302,7 @@ Bounded direction:
 
 Admin Console v2 adds a visual request-path story and bounded evidence-copy controls.
 
-## 19. M15 — Deployment / Permissions Story — APPROVED
+## 20. M15 — Deployment / Permissions Story — APPROVED
 
 Goal:
 
@@ -313,7 +321,7 @@ Bounded direction:
 
 UI adds a searchable evidence table and permission-chain story.
 
-## 20. M16 — STARTTLS / Mail Service Story — APPROVED
+## 21. M16 — STARTTLS / Mail Service Story — APPROVED
 
 Goal:
 
@@ -337,7 +345,7 @@ Evidence:
 
 No credentials, mail submission, mailbox access, or message contents.
 
-## 21. M17 — Certificate Rollout Verification — APPROVED
+## 22. M17 — Certificate Rollout Verification — APPROVED
 
 Goal:
 
@@ -350,7 +358,7 @@ Bounded direction:
 - deterministic endpoint matrix;
 - no renewal, install, reload, private-key reads, or ACME management.
 
-## 22. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
+## 23. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
 
 One additional action is approved in principle, but the exact action is **not** pre-approved.
 
