@@ -498,9 +498,9 @@ Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
 Stable/public/live/recovery remain on v0.8.0; M17 is development source until a separate publication/rollout decision.
 
-## 26. M18 — Safe Actions II — SECURITY REVIEW COMPLETE / OWNER DECISION REQUIRED
+## 26. M18 — Safe Actions II — OWNER APPROVED / IMPLEMENTATION IN VALIDATION
 
-One additional action is approved in principle, but the exact action remains **not implemented and not owner-approved**.
+The owner explicitly approved exactly one additional action: `service.reload`, under the accepted M18 security review. No other candidate is approved.
 
 The required security review compared:
 
@@ -512,7 +512,7 @@ The required security review compared:
 - systemd daemon-reload;
 - reload-or-restart.
 
-Preferred candidate pending owner approval:
+Approved action:
 
 `service.reload`
 
@@ -539,7 +539,7 @@ Security review:
 
 `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`
 
-Implementation is blocked until the owner explicitly approves exactly `service.reload`.
+Implementation must remain inside this contract and pass exact-head CI plus real disposable native reload acceptance before source closeout.
 
 ## Continuous polish / quality track — APPROVED
 
