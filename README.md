@@ -427,9 +427,9 @@ M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic
 
 Stable `v0.6.0` is the current published native/Docker release and includes M12 Expected Endpoint Contracts.
 
-The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.5.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.5.0, schema 4 / Docker mode, retained pre-upgrade events, Optional Safe Actions disabled/unavailable, the loopback-only Action Web/API boundary, and a successful bounded Evidence Bundle preview/export against a disposable copy of live API evidence.
+The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.6.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.6.0, schema 4 / Docker mode, retained pre-upgrade events, the loopback-only Action Web/API boundary, the M12 Expectations UI/API, and a passing live contract for the HostSleuth endpoint with expected plaintext TLS behavior and the running HostSleuth container.
 
-M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6.0`, and independently verified. Live OMV production and disaster recovery still remain on v0.5.0 until the separate v0.6.0 rollout passes.
+M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6.0`, independently verified, and live in production.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -456,6 +456,7 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 contract semantics and security/product boundary.
 - `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 implementation and acceptance closeout.
 - `docs/history/V0.6.0-PUBLICATION.md` — v0.6.0 publication and independent verification record.
+- `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md` — v0.6.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
