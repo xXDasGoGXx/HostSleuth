@@ -430,7 +430,7 @@ Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
 Stable/public/live/recovery remain on v0.8.0; M15 is development source until a separate publication/rollout decision.
 
-## 24. M16 — STARTTLS / Mail Service Story — ACTIVE NEXT
+## 24. M16 — STARTTLS / Mail Service Story — IMPLEMENTATION IN PROGRESS
 
 Goal:
 

@@ -37,6 +37,7 @@ jobs:
           node --check cmd/hostsleuth/web/dns_detective.js
           node --check cmd/hostsleuth/web/proxy_story.js
           node --check cmd/hostsleuth/web/permissions_story.js
+          node --check cmd/hostsleuth/web/starttls_story.js
           node --check cmd/hostsleuth/web/actions.js
           node --check cmd/hostsleuth/web/admin_console.js
           node --check cmd/hostsleuth/web/admin_console_v2.js
@@ -50,6 +51,7 @@ jobs:
             cmd/hostsleuth/web/dns_detective.js \
             cmd/hostsleuth/web/proxy_story.js \
             cmd/hostsleuth/web/permissions_story.js \
+            cmd/hostsleuth/web/starttls_story.js \
             cmd/hostsleuth/web/actions.js \
             cmd/hostsleuth/web/admin_console.js \
             cmd/hostsleuth/web/admin_console_v2.js \
@@ -232,6 +234,7 @@ jobs:
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'DNS DETECTIVE'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'REVERSE PROXY / UPSTREAM STORY'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'DEPLOYMENT / PERMISSIONS STORY'
+          curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'STARTTLS / MAIL SERVICE STORY'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'Quick target'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'globalProxy'
           curl -fsS http://127.0.0.1:8787/api/reboot-story > /tmp/hostsleuth-reboot-story.json
@@ -244,6 +247,11 @@ jobs:
             --data-urlencode 'service=ssh.service' \
             --data-urlencode 'path=/host/etc/os-release' \
             http://127.0.0.1:8787/api/permissions-story > /tmp/hostsleuth-permissions-story.json
+          starttls_status=$(curl -sS -o /tmp/hostsleuth-starttls-invalid.txt -w '%{http_code}' --get \
+            --data-urlencode 'protocol=smtp' \
+            --data-urlencode 'target=missing-port' \
+            http://127.0.0.1:8787/api/starttls-story)
+          test "$starttls_status" = 400
           curl -fsS http://127.0.0.1:8787/api/actions > /tmp/hostsleuth-actions.json
           curl -fsS 'http://127.0.0.1:8787/api/diagnose?target=127.0.0.1:8787' > /tmp/hostsleuth-diagnosis.json
           curl -fsS --get --data-urlencode 'path=/host/etc/os-release' 'http://127.0.0.1:8787/api/workbench/file' > /tmp/hostsleuth-workbench-file.json

@@ -204,21 +204,31 @@ Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
 Stable/public/live/recovery remain aligned on v0.8.0. M15 is development source on `main`; it has not been published or deployed.
 
-## Active next step — M16 STARTTLS / Mail Service Story
+## Active milestone — M16 STARTTLS / Mail Service Story
 
-Use the approved roadmap scope only:
+M16 implementation is now complete locally on a focused branch; PR/full CI are still required before source closeout.
 
-- SMTP STARTTLS;
-- IMAP STARTTLS;
-- POP3 STARTTLS only if the same bounded model remains clean;
-- greeting and advertised STARTTLS capability;
-- negotiation stage;
-- TLS version/cipher;
-- served certificate plus hostname/trust/expiry evidence;
-- first protocol stage that failed;
-- no credentials, mail submission, mailbox access, or message contents.
+Delivered on the branch:
 
-Do not restart a broad audit on continuation; begin from M16 design and implementation.
+- SMTP STARTTLS, IMAP STARTTLS, and POP3 STLS within one bounded pre-authentication model;
+- deterministic TCP → greeting → capability → upgrade → TLS → certificate validity → hostname → trust stages;
+- fixed protocol commands only, with no credentials, authentication, mail submission, mailbox access, or message contents;
+- bounded protocol reads (4 KiB line, 64 lines, fixed deadlines);
+- shared TLS/certificate interpretation with the existing TLS engine;
+- `hostsleuth starttls --protocol smtp|imap|pop3 host:port`;
+- `GET /api/starttls-story`;
+- dedicated STARTTLS Admin Console view;
+- permanent JavaScript/Docker-smoke coverage for the new interface and input boundary.
+
+Local Go 1.24.13 full tests, core race tests, vet, native build, all Web JavaScript syntax checks, and `git diff --check` pass.
+
+Disposable SMTP acceptance also passed through both the built CLI and served API/UI: STARTTLS was advertised and accepted, TLS negotiated successfully, the localhost certificate hostname matched, and the deliberately self-signed fixture correctly failed trust as the first problem.
+
+Design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
+
+Stable/public/live/recovery remain on v0.8.0. No release or deployment work is part of this implementation gate.
+
+Do not restart a broad audit on continuation; finish the focused M16 PR/CI gate.
 
 ## Guardrails
 
