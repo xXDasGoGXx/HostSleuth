@@ -467,7 +467,7 @@ The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-reco
 
 M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6.0`, independently verified, and live in production.
 
-M13 DNS Detective + Admin Console v1 is active in development source on branch `m13-dns-detective-admin-console`. The branch adds resolver-view comparison, split-view hints, a dedicated DNS Detective workflow, and the first admin-console shell upgrade with a desktop navigation rail, global target bar, browser-local recent targets, density control, and keyboard-first target focus. Stable/live v0.6.0 does **not** contain M13 yet.
+M13 DNS Detective + Admin Console v1 is complete on `main`; PR #47 passed the full CI matrix and squash-merged at `182a27384a090f5538bb6d76a0c4dd917ce63932`. Stable/live v0.6.0 does **not** contain M13 yet; publication and rollout remain separately gated.
 
 The owner-approved forward roadmap now continues through Reverse Proxy / Upstream Story, Deployment / Permissions Story, STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
 
@@ -497,7 +497,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md` — M12 implementation and acceptance closeout.
 - `docs/history/V0.6.0-PUBLICATION.md` — v0.6.0 publication and independent verification record.
 - `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md` — v0.6.0 live/recovery rollout and acceptance record.
-- `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md` — active M13 DNS Detective and Admin Console v1 design.
+- `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md` — M13 DNS Detective and Admin Console v1 design.
+- `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md` — M13 implementation and acceptance closeout.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
