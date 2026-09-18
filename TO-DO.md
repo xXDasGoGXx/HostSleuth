@@ -97,28 +97,26 @@ Stable/public/live/recovery are aligned on `v0.9.0` / `mjmalleo/hostsleuth:0.9.0
 
 The owner-approved roadmap through M18 is now source-complete, published, live, and recovery-aligned. No additional feature milestone is automatically approved.
 
-## Current next step — v1.0.0 production / recovery alignment
+## v1.0.0 production / recovery alignment — COMPLETE
 
-Feature-free v1.0 readiness:
-
-- [x] Complete all bounded readiness gates and closeout.
+- [x] Complete all bounded v1 readiness gates and closeout.
 - [x] Owner explicitly approves v1.0.0 publication.
-- [x] Create `release/v1.0.0` from exact accepted source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`.
+- [x] Publish from exact accepted source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`.
 - [x] Release workflow `35358798799` succeeds.
-- [x] Independently verify GitHub tag/release targets exact accepted source.
-- [x] Independently verify amd64/arm64 binaries against `SHA256SUMS`.
-- [x] Verify published amd64 binary reports `v1.0.0 (27971e67ad7e)`.
+- [x] Independently verify GitHub tag, native checksums/version, and Docker multi-architecture artifacts.
 - [x] Verify Docker `1.0.0` and `latest` share OCI index `sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`.
-- [x] Verify linux/amd64 and linux/arm64 Docker manifests.
-- [x] Stage `OMV-Docker-Rebuild` PR #11 changing only the HostSleuth image pin to `1.0.0`.
-- [x] Keep recovery PR #11 unmerged before production acceptance.
-- [ ] Update the existing Arcane-managed `hostsleuth` project image only from `0.9.0` to `1.0.0` and redeploy.
-- [ ] Run the complete v1.0.0 live acceptance checklist.
-- [ ] If live acceptance passes, merge recovery PR #11.
-- [ ] Verify recovery `main` pins `mjmalleo/hostsleuth:1.0.0`.
-- [ ] Record final v1.0.0 production/recovery alignment.
+- [x] Stage recovery PR #11 without merging before production acceptance.
+- [x] Redeploy the existing Arcane-managed `hostsleuth` project from `0.9.0` to `1.0.0` without changing project settings.
+- [x] Pass the complete v1.0.0 live acceptance checklist.
+- [x] Merge recovery PR #11 at `44d6a30e580e2b333841f14eade2e10cca4b5ba5`.
+- [x] Verify recovery `main` pins `mjmalleo/hostsleuth:1.0.0`.
+- [x] Record final v1.0.0 production/recovery alignment.
 
-Stable/public = v1.0.0. Live/recovery remain v0.9.0 until production acceptance and recovery alignment complete.
+Stable/public/live/recovery are aligned on v1.0.0.
+
+## Next decision
+
+No additional feature milestone or Safe Action family is currently approved. New feature work, a new release cycle, or another privileged action requires a separate owner decision.
 
 ## Guardrails
 
