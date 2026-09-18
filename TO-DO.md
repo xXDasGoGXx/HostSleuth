@@ -54,37 +54,33 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M13 closeout: `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`
 - v0.7.0 publication: `docs/history/V0.7.0-PUBLICATION.md`
 - v0.7.0 production/recovery alignment: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`
+- M14 design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
+- M14 closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
 
 ## Current state
 
 Stable/public/live/recovery are aligned on `v0.7.0` / `mjmalleo/hostsleuth:0.7.0`. Docker `latest` resolves to the same verified v0.7.0 OCI index.
 
-## Active next step — M14 Reverse Proxy / Upstream Story
+## Active milestone — M14 Reverse Proxy / Upstream Story + Admin Console v2
 
-Owner approved M13-M18 plus continuous UI/UX and engineering polish.
-
-- [x] Promote the approved M13-M18 direction into the canonical roadmap.
-- [x] Write the bounded M13 DNS Detective / Admin Console v1 design.
-- [x] Implement DNS Detective core comparison engine.
-- [x] Add `hostsleuth dns` CLI and `GET /api/dns-detective`.
-- [x] Add dedicated DNS Detective Web UI.
-- [x] Add Admin Console v1 shell: desktop nav rail, global target bar, recent targets, density control, keyboard focus shortcut, responsive fallback.
-- [x] Add CI cancellation for obsolete PR runs and cover M13 JS/Docker smoke.
-- [x] Local Go 1.24.13 format/vet/test/build and JavaScript syntax checks.
-- [x] Disposable API/UI acceptance against the M13 build.
-- [x] Real resolver comparison proved agreement with one explicit local resolver and a timeout from another, producing resolver-specific evidence rather than a generic DNS failure.
-- [x] Final branch audit / closeout record.
-- [x] Open M13 PR #47 only after the exact branch remained locally green.
-- [x] Require full GitHub CI on exact head `4d5d8f857e362217028efbdedb20e020f7a85d48`; all jobs passed.
-- [x] Squash-merge M13 PR #47 to `main` at `182a27384a090f5538bb6d76a0c4dd917ce63932`.
-- [x] Publish stable v0.7.0 from exact source `236002106afd6aa042fd131c0edc0f3455b9cfdf`.
-- [x] Independently verify native assets/checksums, `hostsleuth dns`, resolver validation, and the multi-platform Docker image.
-- [x] Stage recovery image pin at 0.7.0 without merging ahead of production.
-- [x] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.7.0`.
-- [x] Verify live v0.7.0, retained pre-upgrade state/events, Safe Actions boundary, DNS Detective, and Admin Console UI.
-- [x] Merge recovery alignment PR #7 at `80e7c7c08b5905c7fbad158e4b11e6e4b4ced1f9` after production acceptance.
-- [x] Stop the temporary Arcane Cloudflare tunnel after local access resumed.
-
+- [x] Write bounded M14 design and HTTP safety boundary.
+- [x] Implement public→upstream path core with deterministic stage ordering.
+- [x] Compare native upstream behavior with public Host/SNI against the same explicit upstream.
+- [x] Add same-host redirect following, cross-host redirect stop, and query-string redaction.
+- [x] Add `hostsleuth proxy --upstream URL PUBLIC_URL`.
+- [x] Add `GET /api/proxy-story`.
+- [x] Add dedicated visual Proxy Path Web UI.
+- [x] Add Admin Console v2 Proxy quick-action and evidence-copy controls with LAN clipboard fallback.
+- [x] Extend permanent CI syntax/Docker smoke coverage for M14.
+- [x] Local Go 1.24.13 format/vet/full-test/race-test/build and Web JS validation.
+- [x] Disposable CLI/API/UI/headless-browser acceptance.
+- [x] Write M14 closeout record.
+- [ ] Final exact-head branch audit.
+- [ ] Open M14 PR only after the branch remains locally green.
+- [ ] Require full GitHub CI on the exact PR head.
+- [ ] Merge M14 to `main`.
+- [ ] Publish and independently verify stable v0.8.0.
+- [ ] Roll live/recovery to v0.8.0 only after publication verification.
 
 ## Guardrails
 
