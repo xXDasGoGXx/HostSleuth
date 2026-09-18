@@ -129,7 +129,7 @@ Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
 ## Active next step
 
-Perform the final M13 branch audit, write the closeout record, then open the PR. Require full CI on the exact head before merge. Stable/public/live/recovery remain on v0.6.0 until a later independently verified v0.7.0 publication and rollout.
+Local acceptance and the final branch audit are complete. Open the M13 PR next and require full CI on the exact head before merge. Stable/public/live/recovery remain on v0.6.0 until a later independently verified v0.7.0 publication and rollout.
 
 Do not restart a broad audit on continuation; use this handoff.
 
