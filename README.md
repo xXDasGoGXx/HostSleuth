@@ -304,6 +304,27 @@ Full design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
 Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
+### Certificate Rollout Verification — development source
+
+M17 adds a bounded read-only certificate rollout story for the question: **I renewed or replaced a certificate; which explicit endpoint is still serving a different one?**
+
+```bash
+hostsleuth cert-rollout \
+  --fingerprint SHA256 \
+  --endpoint edge-a.example.com:443 \
+  --endpoint edge-b.example.com:443
+```
+
+You can also use one explicit direct-TLS reference endpoint as the expected source instead of typing a fingerprint. HostSleuth compares up to 16 explicit direct-TLS endpoints and reports rollout identity as `match`, `mismatch`, or `unknown`, while keeping certificate validity, hostname, and trust health separate.
+
+Arbitrary certificate-file paths are intentionally not exposed: HostSleuth cannot prove an arbitrary path is not a private key before opening it. M17 therefore preserves the no-private-key-read boundary while still supporting deterministic rollout verification through fingerprint/reference sources.
+
+The Web UI adds a dedicated **Cert Rollout** matrix with expected-certificate context, rollout summary, subject, expiry, hostname, trust, and served SHA-256 fingerprint evidence.
+
+Full design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
+
+Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
+
 ### Service Story — native Linux
 
 M7 adds a read-only service story inside the existing Diagnose workflow. Select a systemd unit and optionally the `host:port` you expect it to provide. HostSleuth can correlate:
@@ -554,7 +575,9 @@ M15 Deployment / Permissions Story is complete on `main` as development source. 
 
 M16 STARTTLS / Mail Service Story is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
 
-The active next source milestone is M17 Certificate Rollout Verification. The owner-approved roadmap then continues to one additional Safe Action only after a fresh security gate.
+M17 Certificate Rollout Verification is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
+
+The active next source milestone is M18 Safe Actions II, beginning with the required candidate comparison, threat model, and privilege-cost/security review before any implementation.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -592,6 +615,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md` — M15 implementation and acceptance closeout.
 - `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md` — M16 mail protocol/TLS semantics and safety boundary.
 - `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md` — M16 implementation and acceptance closeout.
+- `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md` — M17 rollout-comparison semantics and no-private-key-read boundary.
+- `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md` — M17 implementation and acceptance closeout.
 - `docs/history/V0.8.0-PUBLICATION.md` — v0.8.0 publication and independent verification record.
 - `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
