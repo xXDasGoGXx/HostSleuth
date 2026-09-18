@@ -498,48 +498,54 @@ Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
 Stable/public/live/recovery remain on v0.8.0; M17 is development source until a separate publication/rollout decision.
 
-## 26. M18 — Safe Actions II — OWNER APPROVED / IMPLEMENTATION IN VALIDATION
+## 26. M18 — Safe Actions II — COMPLETE
 
-The owner explicitly approved exactly one additional action: `service.reload`, under the accepted M18 security review. No other candidate is approved.
+The owner explicitly approved exactly one additional action: `service.reload`, under the accepted M18 security review. No other candidate was approved.
 
-The required security review compared:
-
-- service.reload;
-- service.start;
-- service.stop;
-- service.reset-failed;
-- container restart;
-- systemd daemon-reload;
-- reload-or-restart.
-
-Approved action:
-
-`service.reload`
-
-The review found reload to be the strongest fit because it can reuse M11's native systemd target/allowlist architecture without adding Docker mutation, manager-wide control, or a new OS privilege mechanism.
-
-If approved, implementation must use:
+Delivered bounded source implementation:
 
 - fixed action ID `service.reload`;
-- a separate `--allow-reload-service UNIT` allowlist;
-- existing global action opt-in;
+- independent `--allow-reload-service UNIT` allowlist;
+- existing global `--enable-actions` opt-in;
 - native mode only;
-- trusted absolute `systemctl reload UNIT.service` argv only;
-- loaded + active + reload-capable precondition;
-- exact preview/confirmation;
-- durable pre-execution audit;
-- bounded serialized execution;
-- no fallback to restart;
-- postcondition requiring command success and `ActiveState=active`;
-- existing loopback-only Web/API boundary.
+- trusted absolute systemctl path and fixed reload argv only;
+- loaded + active + `CanReload=yes` fail-closed precondition;
+- exact preview and `RELOAD UNIT.service` confirmation;
+- durable requested audit before execution;
+- bounded serialized execution/output;
+- no reload-or-restart helper and no restart fallback;
+- success only after command success and `ActiveState=active`;
+- existing loopback-only Action Web/API boundary;
+- Actions UI driven only by fixed server-provided capabilities and allowlists;
+- Docker mode remains unavailable for both native systemd actions.
 
-No generic command runner or generic service/container controller.
+Local full test/race/vet/build/JS/diff validation passed.
+
+PR #62 passed the complete GitHub CI matrix on exact head:
+
+`c46dd72ad806c688970244836ce26e3ca01eec88`
+
+CI run:
+
+`35309972305` — success
+
+The native CI fixture performed a real reload on a disposable reload-capable systemd service, proved restart-only allowlisting could not authorize reload, verified exact reload argv/confirmation and audit records, confirmed the MainPID stayed unchanged, and confirmed the service remained active afterward.
+
+PR #62 squash-merged to `main` at:
+
+`cc9c9727fe19786eba03d0b7ef51c7fae7ac8ab1`
 
 Security review:
 
 `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`
 
-Implementation must remain inside this contract and pass exact-head CI plus real disposable native reload acceptance before source closeout.
+Closeout:
+
+`docs/history/M18-SAFE-ACTIONS-II.md`
+
+Stable/public/live/recovery remain on v0.8.0; M18 is development source until a separate publication/rollout decision.
+
+The owner-approved source roadmap through M18 is complete. No additional feature milestone is approved.
 
 ## Continuous polish / quality track — APPROVED
 
