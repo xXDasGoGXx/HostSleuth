@@ -93,7 +93,7 @@ Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0
 - [x] Add focused permission fixtures and Admin Console UX for dense permission evidence.
 - [x] Local Go 1.24.13 format/full-test/race-test/vet/build and Web JS validation.
 - [ ] Push the focused M15 branch and require full GitHub CI on the exact PR head.
-- [ ] Perform bounded native acceptance with one passing and one failing permission chain.
+- [x] Perform bounded native acceptance with one passing (`ssh.service` → `/etc/ssh`) and one failing (`dbus.service` → `/root`) permission chain.
 - [ ] Write M15 closeout record and update README/roadmap/handoff only after acceptance.
 
 ## Guardrails
