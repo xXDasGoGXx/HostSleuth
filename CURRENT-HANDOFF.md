@@ -240,17 +240,32 @@ Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
 Stable/public/live/recovery remain aligned on v0.8.0. M16 is development source on `main`; it has not been published or deployed.
 
-## Active next step — M17 Certificate Rollout Verification
+## Active milestone — M17 Certificate Rollout Verification
 
-Use only the approved bounded direction:
+M17 implementation is in progress on a focused branch.
 
-- one expected certificate fingerprint/file or one explicit reference endpoint;
-- multiple explicit endpoints to compare;
-- served fingerprint, certificate identity/SAN, validity, hostname/trust, and match/mismatch evidence;
-- deterministic endpoint matrix;
-- no certificate renewal, installation, reload, private-key reads, or ACME management.
+Implemented on the branch:
 
-Do not restart a broad audit on continuation; begin from M17 design and implementation.
+- exactly one expected source: SHA-256 fingerprint or explicit reference direct-TLS endpoint;
+- up to 16 explicit direct-TLS host:port endpoints with numeric ports and duplicate rejection;
+- deterministic MATCH / MISMATCH / UNKNOWN rollout identity;
+- separate certificate validity, hostname, and trust health;
+- bounded four-worker probing while preserving user endpoint order;
+- `hostsleuth cert-rollout` CLI;
+- `GET /api/certificate-rollout`;
+- dedicated Cert Rollout Admin Console matrix;
+- focused decision tests plus a real loopback TLS integration fixture;
+- permanent JavaScript/bundle/Docker-smoke coverage.
+
+Arbitrary certificate-file reads are intentionally not exposed because HostSleuth cannot prove an arbitrary path is not a private key before opening it. This preserves the no-private-key-read boundary while still satisfying the rollout-verification goal through fingerprint/reference sources.
+
+Design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
+
+The authorized OMV execution connector became unavailable during implementation. No production or recovery state was changed. Exact-head GitHub CI is the current execution gate; native/disposable OMV acceptance remains optional if the connector returns before closeout.
+
+Stable/public/live/recovery remain on v0.8.0.
+
+Do not restart a broad audit on continuation; finish the focused M17 validation/PR gate.
 
 ## Guardrails
 
