@@ -40,6 +40,8 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M16 — STARTTLS / Mail Service Story source implementation, protocol/HTTP acceptance, full CI, and PR #57 merge.
 - [x] M17 — Certificate Rollout Verification source implementation, real-TLS/native acceptance, full CI, and PR #59 merge.
 - [x] M18 — Safe Actions II with owner-approved fixed native `service.reload`, real native reload acceptance, full CI, and PR #62 merge.
+- [x] Publish stable `v0.9.0` from exact source `b518ed901e2d3f4e95a9bb74ade37d7b3a156540`.
+- [x] Independently verify v0.9.0 native amd64/arm64 assets, SHA256SUMS, Docker `0.9.0` + `latest`, and multi-arch manifests.
 
 ## Records
 
@@ -70,29 +72,26 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M18 closeout: `docs/history/M18-SAFE-ACTIONS-II.md`
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
+- v0.9.0 publication: `docs/history/V0.9.0-PUBLICATION.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`. Docker `latest` resolves to the same verified v0.8.0 OCI index.
+Stable/public is `v0.9.0` / `mjmalleo/hostsleuth:0.9.0`, published from exact source `b518ed901e2d3f4e95a9bb74ade37d7b3a156540`. Docker `0.9.0` and `latest` resolve to verified OCI index `sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`.
 
-## Current next step — owner decision required
+Live Arcane production and disaster recovery remain on known-good `v0.8.0` / `mjmalleo/hostsleuth:0.8.0` until live v0.9.0 acceptance succeeds.
 
-M18 Safe Actions II is source-complete:
+## Current next step — v0.9.0 production/recovery alignment
 
-- [x] Complete candidate comparison, threat model, and privilege-cost review.
-- [x] Owner approves exactly `service.reload`.
-- [x] Implement independent reload allowlisting and fail-closed reload preconditions.
-- [x] Preserve fixed trusted argv, exact confirmation, durable pre-execution audit, bounded execution, and active postcondition.
-- [x] Prove reload cannot inherit restart permission and never falls back to restart.
-- [x] Preserve Docker unavailability and loopback-only Action Web/API.
-- [x] Extend Actions UI for the two fixed server-provided capabilities.
-- [x] Pass local Go 1.24.13 full-test/race/vet/build, JS syntax, and diff validation.
-- [x] Pass full GitHub CI on exact PR #62 head `c46dd72ad806c688970244836ce26e3ca01eec88`.
-- [x] Pass real disposable native reload acceptance with unchanged MainPID and active postcondition.
-- [x] Squash-merge PR #62 to `main` at `cc9c9727fe19786eba03d0b7ef51c7fae7ac8ab1`.
-- [x] Write M18 source closeout and align durable status.
+- [x] Publish and independently verify v0.9.0.
+- [ ] Redeploy the Arcane-managed HostSleuth project from `mjmalleo/hostsleuth:0.8.0` to `mjmalleo/hostsleuth:0.9.0`.
+- [ ] Verify live version/schema/Docker mode and retained pre-upgrade history.
+- [ ] Verify M15 Permissions, M16 STARTTLS, M17 Cert Rollout UI/API surfaces are present live.
+- [ ] Verify Docker Safe Actions remain disabled/unavailable and LAN Action API remains HTTP 403.
+- [ ] Verify M18 did not expose native `service.reload` in Docker mode.
+- [ ] Merge the staged `OMV-Docker-Rebuild` v0.9.0 pin only after live acceptance.
+- [ ] Record final v0.9.0 production/recovery alignment.
 
-The owner-approved roadmap through M18 is complete. Do not begin a new feature, publication, or production/recovery rollout without a separate owner decision.
+The live redeploy must use the existing Arcane project-management path. Do not bypass Arcane authentication or raw-Docker safeguards.
 
 ## Guardrails
 
