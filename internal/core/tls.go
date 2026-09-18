@@ -36,25 +36,36 @@ func probeTLS(ctx context.Context, address, host string) *TLSEvidence {
 	}
 	defer raw.Close()
 
+	conn, evidence := probeTLSOnConnection(probeCtx, raw, host)
+	if conn != nil {
+		defer conn.Close()
+	}
+	return evidence
+}
+
+func probeTLSOnConnection(ctx context.Context, raw net.Conn, host string) (*tls.Conn, *TLSEvidence) {
 	// This probe intentionally separates protocol handshake evidence from
-	// certificate validation. No application data is sent. Hostname and trust
-	// are verified explicitly below so HostSleuth can explain which validation
-	// step failed instead of collapsing everything into one TLS error.
+	// certificate validation. No application data is sent after the TLS
+	// handshake. Hostname and trust are verified explicitly below so
+	// HostSleuth can explain which validation step failed instead of
+	// collapsing everything into one TLS error.
 	conn := tls.Client(raw, &tls.Config{
 		ServerName:         host,
 		InsecureSkipVerify: true, // diagnostic capture only; explicit verification follows
 	})
-	if err := conn.HandshakeContext(probeCtx); err != nil {
-		return &TLSEvidence{
+	if err := conn.HandshakeContext(ctx); err != nil {
+		return conn, &TLSEvidence{
 			ProbeConnected:  true,
 			HandshakeStatus: "fail",
 			HandshakeError:  boundedEvidence(err.Error(), 512),
 			ServerName:      host,
 		}
 	}
-	defer conn.Close()
 
-	state := conn.ConnectionState()
+	return conn, tlsEvidenceFromState(host, conn.ConnectionState())
+}
+
+func tlsEvidenceFromState(host string, state tls.ConnectionState) *TLSEvidence {
 	evidence := &TLSEvidence{
 		ProbeConnected:  true,
 		HandshakeStatus: "pass",
