@@ -97,34 +97,28 @@ Stable/public/live/recovery are aligned on `v0.9.0` / `mjmalleo/hostsleuth:0.9.0
 
 The owner-approved roadmap through M18 is now source-complete, published, live, and recovery-aligned. No additional feature milestone is automatically approved.
 
-## Current next step — v1.0.0 publication decision after readiness closeout
+## Current next step — v1.0.0 production / recovery alignment
 
-Feature-free v1.0 readiness scope:
+Feature-free v1.0 readiness:
 
-- [x] Define bounded v1.0 readiness contract and explicit non-goals.
-- [x] Add legacy persisted-state durability regression across current snapshot/event/action-audit writes.
-- [x] Add dynamic tab/tabpanel semantics and keyboard navigation across the Admin Console.
-- [x] Add visible focus, reduced motion, live-region behavior, and served-asset budgets.
-- [x] Pass disposable headless-Chrome deep-link/accessibility and narrow-viewport no-overflow acceptance.
-- [x] Pass full GitHub CI on PR #66 exact head `299fe89f81a03eec044340dc85769339c6d62ce3`.
-- [x] Merge first readiness slice at `771b923c06d38ac528804468effbe56ffd4c8f78`.
-- [x] Add native release checksum verification before installation.
-- [x] Add restrictive browser security headers.
-- [x] Add disposable real native-install acceptance using published v0.9.0.
-- [x] Add Docker-smoke regression checks for browser security headers.
-- [x] Pass full six-job GitHub CI on PR #67 exact head `04809c69d398a82c07a97dd1031827854b3591f9`.
-- [x] Merge second readiness slice at `ec51b21aca8c4a9de50d2530d2200ba576b45989`.
-- [x] Pass real disposable forward-upgrade state acceptance: published v0.9.0 -> current candidate.
-- [x] Pass real disposable rollback state acceptance: current candidate -> published v0.9.0.
-- [x] Review the v1 publication / production / recovery / rollback procedure against the proven v0.9.0 process.
-- [x] Write `docs/design/V1.0-RELEASE-CHECKLIST.md`.
-- [x] Write `docs/history/V1.0-READINESS.md`.
-- [x] Pass full six-job GitHub CI on readiness closeout PR #68 exact head `2853f3a369a95817524935a93db6904d2ad3d31c`.
-- [x] Merge readiness closeout PR #68 at `f93330755e229609f86add144a20d3ce2234cd04`.
-- [ ] Owner explicitly approves v1.0.0 publication.
-- [ ] Only after approval, publish/verify v1.0.0, roll out production, and align recovery using the accepted checklist.
+- [x] Complete all bounded readiness gates and closeout.
+- [x] Owner explicitly approves v1.0.0 publication.
+- [x] Create `release/v1.0.0` from exact accepted source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`.
+- [x] Release workflow `35358798799` succeeds.
+- [x] Independently verify GitHub tag/release targets exact accepted source.
+- [x] Independently verify amd64/arm64 binaries against `SHA256SUMS`.
+- [x] Verify published amd64 binary reports `v1.0.0 (27971e67ad7e)`.
+- [x] Verify Docker `1.0.0` and `latest` share OCI index `sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`.
+- [x] Verify linux/amd64 and linux/arm64 Docker manifests.
+- [x] Stage `OMV-Docker-Rebuild` PR #11 changing only the HostSleuth image pin to `1.0.0`.
+- [x] Keep recovery PR #11 unmerged before production acceptance.
+- [ ] Update the existing Arcane-managed `hostsleuth` project image only from `0.9.0` to `1.0.0` and redeploy.
+- [ ] Run the complete v1.0.0 live acceptance checklist.
+- [ ] If live acceptance passes, merge recovery PR #11.
+- [ ] Verify recovery `main` pins `mjmalleo/hostsleuth:1.0.0`.
+- [ ] Record final v1.0.0 production/recovery alignment.
 
-Stable/public/live/recovery remain v0.9.0 until the separate v1.0.0 publication/rollout sequence is approved and completed.
+Stable/public = v1.0.0. Live/recovery remain v0.9.0 until production acceptance and recovery alignment complete.
 
 ## Guardrails
 
