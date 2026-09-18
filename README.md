@@ -506,7 +506,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.8.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.9.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -566,23 +566,17 @@ HostSleuth does **not** automatically restart or reload services, modify firewal
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, M11 Optional Safe Actions, and the Redacted Evidence Bundle are complete.
 
-Stable `v0.8.0` is the current published native/Docker release and includes M14 Reverse Proxy / Upstream Story + Admin Console v2.
+Stable `v0.9.0` is the current published native/Docker release, published from exact source `b518ed901e2d3f4e95a9bb74ade37d7b3a156540` and independently verified.
 
-The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.8.0` as of 2026-09-17 local time. Post-redeploy acceptance confirmed v0.8.0, schema 4 / Docker mode, retained pre-upgrade events, the loopback-only/default-disabled Safe Actions boundary, a passing live Proxy Path, and Admin Console v2.
+Docker `mjmalleo/hostsleuth:0.9.0` and `latest` resolve to OCI index `sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`.
 
-M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6.0`, independently verified, and live in production.
+The live OMV Arcane/Docker deployment and `OMV-Docker-Rebuild` recovery definition remain on known-good `mjmalleo/hostsleuth:0.8.0` until the explicit v0.9.0 live acceptance/recovery-alignment step completes.
 
-M13 DNS Detective + Admin Console v1 is complete on `main`, published in stable v0.7.0, independently verified, and live in production/recovery.
+M12 Expected Endpoint Contracts, M13 DNS Detective + Admin Console v1, and M14 Reverse Proxy / Upstream Story + Admin Console v2 remain published and live from earlier releases.
 
-M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete on `main`, published in stable v0.8.0, independently verified, and live in production/recovery.
+M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certificate Rollout Verification, and M18 Safe Actions II are now included in published stable v0.9.0.
 
-M15 Deployment / Permissions Story is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
-
-M16 STARTTLS / Mail Service Story is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
-
-M17 Certificate Rollout Verification is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
-
-M18 Safe Actions II is complete on `main` as development source. The owner-approved fixed native `service.reload` action passed the full security contract, exact-head CI, and real disposable systemd reload acceptance. It is not part of the published/live/recovery v0.8.0 release.
+The owner-approved fixed native `service.reload` action remains native-only and independently allowlisted. Docker mode exposes neither native systemd action.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -626,6 +620,7 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/M18-SAFE-ACTIONS-II.md` — M18 implementation and real native reload acceptance closeout.
 - `docs/history/V0.8.0-PUBLICATION.md` — v0.8.0 publication and independent verification record.
 - `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
+- `docs/history/V0.9.0-PUBLICATION.md` — v0.9.0 publication and independent verification record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
