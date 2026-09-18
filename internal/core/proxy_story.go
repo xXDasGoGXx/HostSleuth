@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -106,20 +107,38 @@ func BuildProxyStory(ctx context.Context, publicURL, upstreamURL string, snap Sn
 		StartedAt:      time.Now().UTC(),
 	}
 
-	story.PublicDiagnosis = proxyStoryDiagnose(probeCtx, publicTarget, snap)
-	story.UpstreamDiagnosis = proxyStoryDiagnose(probeCtx, upstreamTarget, snap)
-
-	story.PublicHTTP = proxyPublicHTTPProbe(probeCtx, publicParsed)
-	story.UpstreamNativeHTTP = proxyUpstreamHTTPProbe(probeCtx, upstreamParsed, "", "")
+	var wg sync.WaitGroup
+	wg.Add(4)
+	go func() {
+		defer wg.Done()
+		story.PublicDiagnosis = proxyStoryDiagnose(probeCtx, publicTarget, snap)
+	}()
+	go func() {
+		defer wg.Done()
+		story.UpstreamDiagnosis = proxyStoryDiagnose(probeCtx, upstreamTarget, snap)
+	}()
+	go func() {
+		defer wg.Done()
+		story.PublicHTTP = proxyPublicHTTPProbe(probeCtx, publicParsed)
+	}()
+	go func() {
+		defer wg.Done()
+		story.UpstreamNativeHTTP = proxyUpstreamHTTPProbe(probeCtx, upstreamParsed, "", "")
+	}()
 
 	if !sameDNSName(publicParsed.Hostname(), upstreamParsed.Hostname()) {
-		story.UpstreamPublicHostHTTP = proxyUpstreamHTTPProbe(
-			probeCtx,
-			upstreamParsed,
-			proxyPublicHostHeader(publicParsed),
-			publicParsed.Hostname(),
-		)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			story.UpstreamPublicHostHTTP = proxyUpstreamHTTPProbe(
+				probeCtx,
+				upstreamParsed,
+				proxyPublicHostHeader(publicParsed),
+				publicParsed.Hostname(),
+			)
+		}()
 	}
+	wg.Wait()
 
 	story.Stages = buildProxyStoryStages(story, publicParsed, upstreamParsed)
 	story.Status, story.FirstProblem, story.Conclusion = proxyStoryOutcome(story.Stages)
@@ -206,9 +225,10 @@ func inspectProxyPublicHTTP(ctx context.Context, parsed *url.URL) *ProxyHTTPProb
 		return &ProxyHTTPProbe{Status: "fail", Error: "public URL is unavailable"}
 	}
 	started := time.Now()
+	dialTarget, _ := proxyURLTarget(parsed)
 	result := &ProxyHTTPProbe{
 		URL:        displayProxyStoryURL(parsed),
-		DialTarget: parsed.Host,
+		DialTarget: dialTarget,
 		HostHeader: parsed.Host,
 		Status:     "fail",
 	}
@@ -347,7 +367,7 @@ func appendProxyHTTPHop(result *ProxyHTTPProbe, resp *http.Response) {
 		URL:         displayProxyStoryURL(resp.Request.URL),
 		StatusCode:  resp.StatusCode,
 		Status:      resp.Status,
-		Location:    boundedEvidence(resp.Header.Get("Location"), proxyHTTPHeaderMaxBytes),
+		Location:    sanitizeProxyLocation(resp.Header.Get("Location"), resp.Request.URL),
 		Server:      boundedEvidence(resp.Header.Get("Server"), 256),
 		ContentType: boundedEvidence(resp.Header.Get("Content-Type"), 256),
 	}
@@ -362,13 +382,28 @@ func appendProxyHTTPHop(result *ProxyHTTPProbe, resp *http.Response) {
 	}
 }
 
+func sanitizeProxyLocation(raw string, base *url.URL) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return ""
+	}
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return boundedEvidence(raw, proxyHTTPHeaderMaxBytes)
+	}
+	if base != nil {
+		parsed = base.ResolveReference(parsed)
+	}
+	return boundedEvidence(displayProxyStoryURL(parsed), proxyHTTPHeaderMaxBytes)
+}
+
 func populateProxyHTTPFinal(result *ProxyHTTPProbe, resp *http.Response) {
 	if result == nil || resp == nil {
 		return
 	}
 	result.StatusCode = resp.StatusCode
 	result.HTTPStatus = resp.Status
-	result.Location = boundedEvidence(resp.Header.Get("Location"), proxyHTTPHeaderMaxBytes)
+	result.Location = sanitizeProxyLocation(resp.Header.Get("Location"), resp.Request.URL)
 	result.Server = boundedEvidence(resp.Header.Get("Server"), 256)
 	result.ContentType = boundedEvidence(resp.Header.Get("Content-Type"), 256)
 }
@@ -573,6 +608,9 @@ func proxyHTTPProbeClass(probe *ProxyHTTPProbe) (string, string) {
 }
 
 func proxyHTTPStatusClass(code int) (string, string) {
+	if code == http.StatusMethodNotAllowed {
+		return "warn", "HTTP 405 reached the application, but HEAD is not allowed; HostSleuth does not fall back to a body-bearing GET in M14"
+	}
 	switch {
 	case code >= 100 && code < 400:
 		return "pass", fmt.Sprintf("HTTP %d confirms the request path answered", code)
