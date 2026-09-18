@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -497,10 +496,3 @@ func dnsOptionAllowed(value string) bool {
 	}
 }
 
-func parseDNSResolverPort(value string) (int, error) {
-	_, port, err := net.SplitHostPort(value)
-	if err != nil {
-		return 0, err
-	}
-	return strconv.Atoi(port)
-}
