@@ -75,6 +75,8 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v0.9.0 publication: `docs/history/V0.9.0-PUBLICATION.md`
 - v0.9.0 production/recovery alignment: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`
 - v1.0 readiness contract: `docs/design/V1.0-READINESS.md`
+- v1.0 release/rollback checklist: `docs/design/V1.0-RELEASE-CHECKLIST.md`
+- v1.0 readiness closeout: `docs/history/V1.0-READINESS.md`
 
 ## Current state
 
@@ -95,34 +97,34 @@ Stable/public/live/recovery are aligned on `v0.9.0` / `mjmalleo/hostsleuth:0.9.0
 
 The owner-approved roadmap through M18 is now source-complete, published, live, and recovery-aligned. No additional feature milestone is automatically approved.
 
-## Active next step — v1.0 Readiness / Hardening
+## Current next step — v1.0.0 publication decision after readiness closeout
 
-Feature-free readiness scope:
+Feature-free v1.0 readiness scope:
 
 - [x] Define bounded v1.0 readiness contract and explicit non-goals.
 - [x] Add legacy persisted-state durability regression across current snapshot/event/action-audit writes.
-- [x] Add dynamic tab/tabpanel semantics across the Admin Console.
-- [x] Add ArrowLeft / ArrowRight / Home / End tab navigation.
-- [x] Add visible keyboard focus and reduced-motion behavior.
-- [x] Add snapshot live-region semantics.
-- [x] Add exact served HTML/CSS/JavaScript asset budgets.
-- [x] Add structural responsive/accessibility regression coverage.
-- [x] Pass local full tests, core race tests, vet, native build, JavaScript syntax, and diff checks.
+- [x] Add dynamic tab/tabpanel semantics and keyboard navigation across the Admin Console.
+- [x] Add visible focus, reduced motion, live-region behavior, and served-asset budgets.
 - [x] Pass disposable headless-Chrome deep-link/accessibility and narrow-viewport no-overflow acceptance.
 - [x] Pass full GitHub CI on PR #66 exact head `299fe89f81a03eec044340dc85769339c6d62ce3`.
-- [x] Merge first readiness slice to `main` at `771b923c06d38ac528804468effbe56ffd4c8f78`.
-- [x] Review remaining v1 release gates after the first slice without adding feature scope.
+- [x] Merge first readiness slice at `771b923c06d38ac528804468effbe56ffd4c8f78`.
 - [x] Add native release checksum verification before installation.
-- [x] Add restrictive browser security headers around the existing Web/API server.
-- [x] Add disposable CI native-install acceptance using published v0.9.0 and the current installer.
+- [x] Add restrictive browser security headers.
+- [x] Add disposable real native-install acceptance using published v0.9.0.
 - [x] Add Docker-smoke regression checks for browser security headers.
-- [x] Pass local installer syntax, full tests, core race tests, vet, build, JS syntax, diff checks, and disposable header verification.
-- [ ] Pass full GitHub CI on the exact install/security PR head.
-- [ ] Review final v1 readiness gates after the install/security slice.
-- [ ] Write v1 readiness closeout only when all required hardening gates are accepted.
-- [ ] Publish v1.0.0 only after a separate publication decision.
+- [x] Pass full six-job GitHub CI on PR #67 exact head `04809c69d398a82c07a97dd1031827854b3591f9`.
+- [x] Merge second readiness slice at `ec51b21aca8c4a9de50d2530d2200ba576b45989`.
+- [x] Pass real disposable forward-upgrade state acceptance: published v0.9.0 -> current candidate.
+- [x] Pass real disposable rollback state acceptance: current candidate -> published v0.9.0.
+- [x] Review the v1 publication / production / recovery / rollback procedure against the proven v0.9.0 process.
+- [x] Write `docs/design/V1.0-RELEASE-CHECKLIST.md`.
+- [x] Write `docs/history/V1.0-READINESS.md`.
+- [ ] Pass full GitHub CI on the exact docs-only readiness closeout PR head.
+- [ ] Merge the readiness closeout.
+- [ ] Owner explicitly approves v1.0.0 publication.
+- [ ] Only after approval, publish/verify v1.0.0, roll out production, and align recovery using the accepted checklist.
 
-Stable/public/live/recovery remain v0.9.0 during readiness work.
+Stable/public/live/recovery remain v0.9.0 until the separate v1.0.0 publication/rollout sequence is approved and completed.
 
 ## Guardrails
 

@@ -47,22 +47,19 @@ Publication record: `docs/history/V0.9.0-PUBLICATION.md`.
 
 Production/recovery record: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`.
 
-## Active milestone — v1.0 Readiness / Hardening
+## v1.0 Readiness / Hardening — TECHNICAL GATES COMPLETE
 
-The owner approved a feature-free v1.0 readiness cycle.
+The owner-approved feature-free readiness cycle is technically complete.
 
-Baseline remains stable/public/live/recovery v0.9.0.
+Baseline remains stable/public/live/recovery v0.9.0 until a separate v1.0.0 publication decision.
 
-First readiness slice is accepted:
+Readiness slice 1:
 
 - legacy persisted-state compatibility regression;
-- dynamic tab/tabpanel semantics;
-- ArrowLeft / ArrowRight / Home / End keyboard navigation;
-- visible focus and reduced-motion handling;
-- snapshot live-region semantics;
-- explicit served-asset budgets;
-- structural responsive/accessibility regression;
-- disposable headless-Chrome deep-link and narrow-viewport acceptance.
+- dynamic tab/tabpanel accessibility semantics;
+- keyboard navigation, visible focus, reduced-motion, and live-region handling;
+- explicit HTML/CSS/JavaScript asset budgets;
+- headless-Chrome deep-link and narrow-viewport acceptance.
 
 PR #66 exact head:
 
@@ -72,28 +69,50 @@ CI run:
 
 `35314364419` — success
 
-PR #66 squash-merged to `main` at:
+Merge:
 
 `771b923c06d38ac528804468effbe56ffd4c8f78`
 
-Second readiness slice is implemented locally and in validation:
+Readiness slice 2:
 
-- native release installer downloads `SHA256SUMS`;
-- selected architecture binary must verify before installation;
-- missing/invalid checksum evidence fails before replacing the installed binary;
-- CI adds a disposable real native install of published v0.9.0 using the current installer;
-- Web/API responses add restrictive CSP, browser Permissions-Policy, no-referrer, nosniff, and DENY framing headers;
-- Docker smoke permanently verifies those headers.
+- native installer verifies the selected release binary against `SHA256SUMS` before installation;
+- disposable CI performed a real native install of published v0.9.0 and cleanup;
+- Web/API responses now carry restrictive CSP, Permissions-Policy, no-referrer, nosniff, and anti-framing headers;
+- Docker smoke permanently verifies the browser security-header contract.
 
-Local Go 1.24.13 full tests, core race tests, vet, native build, installer shell syntax, JavaScript syntax, diff checks, and disposable served-header verification pass.
+PR #67 exact head:
 
-Design/readiness contract:
+`04809c69d398a82c07a97dd1031827854b3591f9`
+
+CI run:
+
+`35314858546` — success
+
+Merge:
+
+`ec51b21aca8c4a9de50d2530d2200ba576b45989`
+
+Final disposable upgrade/rollback acceptance also passed:
+
+`published v0.9.0 -> current candidate -> published v0.9.0`
+
+The same disposable state retained schema-4 snapshot identity, a synthetic retained Event, and a synthetic Safe Action audit in both directions.
+
+Readiness contract:
 
 `docs/design/V1.0-READINESS.md`
 
-This milestone adds no new troubleshooting story, Safe Action family, privilege, monitoring architecture, or remediation feature.
+Release/rollback checklist:
 
-Next gate: exact-head PR CI for the install/security slice. v1.0.0 publication remains a separate owner decision after readiness source acceptance.
+`docs/design/V1.0-RELEASE-CHECKLIST.md`
+
+Closeout:
+
+`docs/history/V1.0-READINESS.md`
+
+No feature, Safe Action family, privilege, monitoring architecture, remediation behavior, production deployment, or recovery definition was changed by readiness work.
+
+Next gate: merge the docs-only readiness closeout after full CI. After that, v1.0.0 publication requires an explicit owner decision.
 
 ## Product identity
 

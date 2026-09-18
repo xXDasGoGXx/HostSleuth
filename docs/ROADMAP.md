@@ -547,34 +547,52 @@ M18 is published, live, and recovery-aligned in stable v0.9.0.
 
 The owner-approved feature roadmap through M18 is complete. No additional feature milestone is approved.
 
-## v1.0 Readiness / Hardening — ACTIVE, FEATURE-FREE
+## v1.0 Readiness / Hardening — TECHNICAL GATES COMPLETE
 
-The owner approved a bounded hardening cycle before any v1.0.0 publication decision.
+The owner-approved feature-free hardening cycle is complete pending the docs-only closeout CI/merge.
 
-This is not M19 and must not add a new troubleshooting story, Safe Action family, privilege surface, remediation feature, monitoring architecture, or cloud behavior.
+This is not M19 and added no troubleshooting story, Safe Action family, privilege surface, remediation feature, monitoring architecture, or cloud behavior.
 
-Required readiness gates are defined in:
+Readiness contract:
 
 `docs/design/V1.0-READINESS.md`
 
-Accepted first readiness slice:
+Accepted slice 1:
 
-- persisted-state compatibility across legacy/current snapshot, event, and action-audit writes;
-- keyboard/accessibility semantics for static and dynamically injected Admin Console views;
-- visible focus and reduced-motion behavior;
-- responsive/browser acceptance;
-- explicit served-asset performance budgets.
+- persisted-state compatibility regression;
+- Admin Console keyboard/accessibility semantics;
+- visible focus and reduced motion;
+- responsive browser acceptance;
+- explicit served-asset budgets.
 
-PR #66 passed full CI and merged to `main` at `771b923c06d38ac528804468effbe56ffd4c8f78`.
+PR #66 passed full CI and merged at:
 
-Second readiness slice in validation:
+`771b923c06d38ac528804468effbe56ffd4c8f78`
 
-- verify the native release binary against release `SHA256SUMS` before installation;
-- add a disposable CI native-install acceptance using the published v0.9.0 release;
-- add restrictive browser security headers to all Web/API responses;
-- permanently verify those headers in Docker smoke.
+Accepted slice 2:
 
-Stable/public/live/recovery remain v0.9.0 during readiness work. v1.0.0 publication and rollout are separate gates after readiness source acceptance.
+- native release binary checksum verification against `SHA256SUMS`;
+- real disposable native-install acceptance of published v0.9.0;
+- restrictive browser security headers;
+- permanent Docker-smoke security-header checks.
+
+PR #67 passed the complete six-job CI matrix and merged at:
+
+`ec51b21aca8c4a9de50d2530d2200ba576b45989`
+
+Final disposable state acceptance passed in both directions:
+
+`published v0.9.0 -> current candidate -> published v0.9.0`
+
+Release/rollback procedure:
+
+`docs/design/V1.0-RELEASE-CHECKLIST.md`
+
+Readiness closeout:
+
+`docs/history/V1.0-READINESS.md`
+
+Stable/public/live/recovery remain v0.9.0. v1.0.0 publication and rollout require a separate explicit owner decision after this closeout merges green.
 
 ## Continuous polish / quality track — APPROVED
 
