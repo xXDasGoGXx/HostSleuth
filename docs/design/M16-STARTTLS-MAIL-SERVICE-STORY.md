@@ -1,6 +1,6 @@
 # M16 — STARTTLS / Mail Service Story
 
-Status: implementation in progress.
+Status: source implementation complete and merged. See `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md` for acceptance details.
 
 ## Product question
 
@@ -180,10 +180,11 @@ Passed locally:
 
 The disposable fixture produced a complete eight-stage story: TCP, greeting, capability, upgrade, and TLS all passed; certificate validity and hostname passed; trust failed exactly as expected for the self-signed certificate.
 
-Still required before source closeout:
+Source closeout acceptance also passed:
 
-- exact-head GitHub CI matrix;
-- focused PR merge;
+- PR #57 exact head `579fff79889d5ab0c3430135d3f5ceba4dc28400`;
+- CI run `35303552155`, all jobs successful;
+- squash merge to `main` at `e5663d5883acdd2d859ff57b39a447c0018790b3`;
 - post-merge closeout/history alignment.
 
 Publication, production rollout, and recovery alignment remain separate owner-controlled gates.
