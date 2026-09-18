@@ -319,23 +319,37 @@ Recovery PR #7 merged at:
 
 Full record: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`.
 
-## 20. M14 — Reverse Proxy / Upstream Story — ACTIVE NEXT
+## 20. M14 — Reverse Proxy / Upstream Story — IMPLEMENTED ON BRANCH
 
 Goal:
 
 > DNS and 443 are fine; where does the request path actually break?
 
-Bounded direction:
+Implemented v1:
 
-- explicit public-facing endpoint plus expected upstream endpoint;
-- deterministic path story:
-  DNS -> route/TCP -> proxy listener -> served TLS/HTTP -> upstream DNS/route/TCP -> upstream TLS/HTTP;
-- redirect, Host/SNI, listener, and Docker publication evidence where available;
-- first proven failure highlighted visually;
-- no arbitrary proxy configuration ingestion in v1;
-- no proxy edits/reloads.
+- explicit public HTTP/HTTPS URL plus explicit expected upstream URL;
+- deterministic public DNS/route/TCP/TLS/HTTP path;
+- local listener/Docker publication context when available;
+- deterministic upstream DNS/route/TCP/TLS/HTTP path;
+- native upstream Host/SNI probe;
+- public Host/SNI probe against the same explicit upstream when identities differ;
+- first proven failure highlighted;
+- 4xx warning / 5xx failure semantics;
+- HEAD-only metadata probes with no body/credentials/cookies/arbitrary headers;
+- same-host redirect following only; cross-host redirects are recorded and stopped;
+- query strings redacted from returned URL/Location evidence;
+- CLI/API/Web UI;
+- Admin Console v2 visual path, Quick Target Proxy action, and bounded evidence-copy controls.
 
-Admin Console v2 adds a visual request-path story and bounded evidence-copy controls.
+Local format/vet/full-test/race-test/build and disposable API/UI/headless-browser acceptance passed before opening a PR.
+
+M14 remains read-only and adds no config parser, upstream discovery, authentication flow, polling, proxy reload/edit, or remediation.
+
+Design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
+
+Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
+
+Release target after accepted source: `v0.8.0`.
 
 ## 21. M15 — Deployment / Permissions Story — APPROVED
 
