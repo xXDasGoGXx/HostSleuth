@@ -53,12 +53,13 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M13 design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`
 - M13 closeout: `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`
 - v0.7.0 publication: `docs/history/V0.7.0-PUBLICATION.md`
+- v0.7.0 production/recovery alignment: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`
 
 ## Current state
 
-Stable/public are now `v0.7.0` / `mjmalleo/hostsleuth:0.7.0`; Docker `latest` resolves to the same verified v0.7.0 OCI index. Live/recovery remain aligned on `mjmalleo/hostsleuth:0.6.0` until the separate v0.7.0 rollout passes.
+Stable/public/live/recovery are aligned on `v0.7.0` / `mjmalleo/hostsleuth:0.7.0`. Docker `latest` resolves to the same verified v0.7.0 OCI index.
 
-## Active next step — production / recovery v0.7.0 alignment
+## Active next step — M14 Reverse Proxy / Upstream Story
 
 Owner approved M13-M18 plus continuous UI/UX and engineering polish.
 
@@ -78,10 +79,11 @@ Owner approved M13-M18 plus continuous UI/UX and engineering polish.
 - [x] Squash-merge M13 PR #47 to `main` at `182a27384a090f5538bb6d76a0c4dd917ce63932`.
 - [x] Publish stable v0.7.0 from exact source `236002106afd6aa042fd131c0edc0f3455b9cfdf`.
 - [x] Independently verify native assets/checksums, `hostsleuth dns`, resolver validation, and the multi-platform Docker image.
-- [ ] Stage recovery image pin at 0.7.0 without merging ahead of production.
-- [ ] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.7.0`.
-- [ ] Verify live v0.7.0, retained state/events, Safe Actions boundary, DNS Detective, and Admin Console UI.
-- [ ] Merge recovery alignment only after production acceptance.
+- [x] Stage recovery image pin at 0.7.0 without merging ahead of production.
+- [x] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.7.0`.
+- [x] Verify live v0.7.0, retained pre-upgrade state/events, Safe Actions boundary, DNS Detective, and Admin Console UI.
+- [x] Merge recovery alignment PR #7 at `80e7c7c08b5905c7fbad158e4b11e6e4b4ced1f9` after production acceptance.
+- [x] Stop the temporary Arcane Cloudflare tunnel after local access resumed.
 
 
 ## Guardrails
