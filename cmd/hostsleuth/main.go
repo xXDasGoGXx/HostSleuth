@@ -41,6 +41,8 @@ func main() {
 		runPermissionStory(os.Args[2:])
 	case "starttls":
 		runStartTLSStory(os.Args[2:])
+	case "cert-rollout":
+		runCertificateRollout(os.Args[2:])
 	case "service":
 		runServiceStory(os.Args[2:])
 	case "incident":
@@ -67,7 +69,7 @@ func main() {
 
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
-	fmt.Println("usage: hostsleuth <snapshot|diagnose|contract|dns|proxy|permissions|starttls|service|incident|reboot|workbench|action|evidence|events|serve|version> [options]")
+	fmt.Println("usage: hostsleuth <snapshot|diagnose|contract|dns|proxy|permissions|starttls|cert-rollout|service|incident|reboot|workbench|action|evidence|events|serve|version> [options]")
 }
 
 func buildRevision() string {
@@ -278,6 +280,7 @@ func runServe(args []string) {
 	appCSS, appJS = appendProxyStoryAssets(appCSS, appJS)
 	appCSS, appJS = appendPermissionStoryAssets(appCSS, appJS)
 	appCSS, appJS = appendStartTLSStoryAssets(appCSS, appJS)
+	appCSS, appJS = appendCertificateRolloutAssets(appCSS, appJS)
 	appCSS, appJS = appendActionAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleV2Assets(appCSS, appJS)
@@ -367,6 +370,7 @@ func runServe(args []string) {
 	registerProxyStoryAPI(mux, store)
 	registerPermissionStoryAPI(mux, store)
 	registerStartTLSStoryAPI(mux)
+	registerCertificateRolloutAPI(mux)
 	registerWorkbenchAPI(mux)
 	registerActionAPI(mux, actionManager, actionDeploymentMode)
 	mux.HandleFunc("/assets/app.css", func(w http.ResponseWriter, r *http.Request) {
