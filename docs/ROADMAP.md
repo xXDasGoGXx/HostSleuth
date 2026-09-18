@@ -193,18 +193,27 @@ Release workflow run `35284864117` completed successfully. Independent verificat
 
 Full record: `docs/history/V0.6.0-PUBLICATION.md`.
 
-## 15. Production / recovery v0.6.0 alignment — ACTIVE NEXT STEP
+## 15. Production / recovery v0.6.0 alignment — COMPLETE
 
-Public stable is v0.6.0 while live Arcane production and the disaster-recovery definition remain pinned to v0.5.0.
+The live Arcane-managed OMV deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition are aligned on:
 
-Ordered rollout:
+`mjmalleo/hostsleuth:0.6.0`
 
-1. stage the recovery image-pin bump to `mjmalleo/hostsleuth:0.6.0` without merging ahead of production;
-2. redeploy the existing Arcane-managed project through the supported authenticated UI;
-3. verify live version/schema/mode, retained state/events, LAN health, and Docker-mode Safe Actions boundary;
-4. exercise M12 Expected Endpoint Contracts against the live v0.6.0 service;
-5. merge the recovery pin only after live acceptance passes;
-6. record final v0.6.0 production/recovery alignment.
+Live acceptance confirmed:
+
+- `/api/about` = `v0.6.0`;
+- `/api/snapshot` = schema 4 / Docker mode;
+- 100 retained events survived, including pre-upgrade history;
+- M12 Expectations UI/API is present;
+- a live Expected Endpoint Contract for `192.168.2.181:8787` with `tls=forbidden` and `container=hostsleuth` passed DNS, TCP, plaintext-TLS, and container expectations;
+- Action Web/API remains loopback-only and returns HTTP 403 over LAN;
+- one transient post-redeploy TCP/8787 listener-disappeared event was followed by the listener reappearing on the next scheduled snapshot with live HostSleuth process ownership, matching the host socket.
+
+Recovery alignment PR #6 merged at:
+
+`f78abbe5742c315d73cf85709ebfeba620311429`
+
+Full record: `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md`.
 
 ## Research backlog — not automatically scheduled
 
