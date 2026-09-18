@@ -508,7 +508,7 @@ M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6
 
 M13 DNS Detective + Admin Console v1 is complete on `main`, published in stable v0.7.0, independently verified, and live in production/recovery.
 
-M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete in development source on branch `m14-reverse-proxy-upstream-story` and has passed local format/vet/full-test/race-test/build plus disposable CLI/API/UI/headless-browser acceptance. Stable/live v0.7.0 does **not** contain M14 yet; PR, publication, and rollout remain separate gated steps.
+M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete on `main`; PR #51 passed the full CI matrix and squash-merged at `135a73ffb333c1e4ac5135f93db7bac3dac5cdae`. Stable/live v0.7.0 does **not** contain M14 yet; publication and rollout remain separate gated steps.
 
 The owner-approved forward roadmap continues after M14 through Deployment / Permissions Story, STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
 

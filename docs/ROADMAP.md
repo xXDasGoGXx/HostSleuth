@@ -319,7 +319,7 @@ Recovery PR #7 merged at:
 
 Full record: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`.
 
-## 20. M14 — Reverse Proxy / Upstream Story — IMPLEMENTED ON BRANCH
+## 20. M14 — Reverse Proxy / Upstream Story — COMPLETE
 
 Goal:
 
@@ -349,9 +349,17 @@ Design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
 Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
-Release target after accepted source: `v0.8.0`.
+PR #51 passed test/format/vet/build, Docker smoke including the proxy-story API, native-actions smoke, and both linux/amd64 + linux/arm64 image builds on exact head `e7737c3342c628d80bf17a3b60a2cc5b4ead48c0`, then squash-merged to `main` at `135a73ffb333c1e4ac5135f93db7bac3dac5cdae`.
 
-## 21. M15 — Deployment / Permissions Story — APPROVED
+Full closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
+
+## 21. Publish stable v0.8.0 — ACTIVE NEXT STEP
+
+Publish v0.8.0 only from the exact accepted docs-inclusive `main` source after this closeout documentation merges. Independently verify native assets/checksums, `hostsleuth proxy`, and public multi-platform Docker tags before production rollout.
+
+Production and disaster recovery remain on v0.7.0 until the separately gated rollout passes.
+
+## 22. M15 — Deployment / Permissions Story — APPROVED
 
 Goal:
 
@@ -370,7 +378,7 @@ Bounded direction:
 
 UI adds a searchable evidence table and permission-chain story.
 
-## 22. M16 — STARTTLS / Mail Service Story — APPROVED
+## 23. M16 — STARTTLS / Mail Service Story — APPROVED
 
 Goal:
 
@@ -394,7 +402,7 @@ Evidence:
 
 No credentials, mail submission, mailbox access, or message contents.
 
-## 23. M17 — Certificate Rollout Verification — APPROVED
+## 24. M17 — Certificate Rollout Verification — APPROVED
 
 Goal:
 
@@ -407,7 +415,7 @@ Bounded direction:
 - deterministic endpoint matrix;
 - no renewal, install, reload, private-key reads, or ACME management.
 
-## 24. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
+## 25. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
 
 One additional action is approved in principle, but the exact action is **not** pre-approved.
 

@@ -76,10 +76,11 @@ Stable/public/live/recovery are aligned on `v0.7.0` / `mjmalleo/hostsleuth:0.7.0
 - [x] Disposable CLI/API/UI/headless-browser acceptance.
 - [x] Write M14 closeout record.
 - [x] Final exact-head branch audit passed on `a093f733e5df0909f8632db9c0ad4a287768101e`.
-- [ ] Open M14 PR only after the branch remains locally green.
-- [ ] Require full GitHub CI on the exact PR head.
-- [ ] Merge M14 to `main`.
-- [ ] Publish and independently verify stable v0.8.0.
+- [x] Open M14 PR #51 after the branch remained locally green.
+- [x] Require full GitHub CI on exact head `e7737c3342c628d80bf17a3b60a2cc5b4ead48c0`; all jobs passed.
+- [x] Squash-merge M14 PR #51 to `main` at `135a73ffb333c1e4ac5135f93db7bac3dac5cdae`.
+- [ ] Publish stable v0.8.0 from the exact accepted docs-inclusive source.
+- [ ] Independently verify native assets/checksums, `hostsleuth proxy`, and the multi-platform Docker image.
 - [ ] Roll live/recovery to v0.8.0 only after publication verification.
 
 ## Guardrails
