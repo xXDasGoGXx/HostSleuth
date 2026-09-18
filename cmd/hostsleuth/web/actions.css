@@ -1,5 +1,6 @@
 .action-intro { margin-bottom: 1rem; }
-.action-capability { margin-top: 1rem; }
+.action-capability { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: .75rem; margin-top: 1rem; }
+.action-capability-item { min-width: 0; padding: .8rem; border: 1px solid var(--border); border-radius: .65rem; background: var(--surface-soft); }
 .action-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.4fr) minmax(18rem, .8fr); }
 .action-card { min-width: 0; }
 .action-form, .action-confirm { display: grid; gap: .75rem; margin-top: 1rem; }
