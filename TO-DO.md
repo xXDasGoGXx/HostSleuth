@@ -109,8 +109,16 @@ Feature-free readiness scope:
 - [x] Add structural responsive/accessibility regression coverage.
 - [x] Pass local full tests, core race tests, vet, native build, JavaScript syntax, and diff checks.
 - [x] Pass disposable headless-Chrome deep-link/accessibility and narrow-viewport no-overflow acceptance.
-- [ ] Pass full GitHub CI on the exact readiness PR head.
-- [ ] Review remaining v1 release gates after this first readiness slice; do not add feature scope.
+- [x] Pass full GitHub CI on PR #66 exact head `299fe89f81a03eec044340dc85769339c6d62ce3`.
+- [x] Merge first readiness slice to `main` at `771b923c06d38ac528804468effbe56ffd4c8f78`.
+- [x] Review remaining v1 release gates after the first slice without adding feature scope.
+- [x] Add native release checksum verification before installation.
+- [x] Add restrictive browser security headers around the existing Web/API server.
+- [x] Add disposable CI native-install acceptance using published v0.9.0 and the current installer.
+- [x] Add Docker-smoke regression checks for browser security headers.
+- [x] Pass local installer syntax, full tests, core race tests, vet, build, JS syntax, diff checks, and disposable header verification.
+- [ ] Pass full GitHub CI on the exact install/security PR head.
+- [ ] Review final v1 readiness gates after the install/security slice.
 - [ ] Write v1 readiness closeout only when all required hardening gates are accepted.
 - [ ] Publish v1.0.0 only after a separate publication decision.
 
