@@ -1,0 +1,23 @@
+.command-input-row {
+  grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
+}
+
+.proxy-command-action {
+  border-color: rgba(139,92,246,.34);
+  background: linear-gradient(180deg, rgba(94,59,155,.20), rgba(11,23,39,1));
+}
+
+.proxy-command-action:hover {
+  border-color: rgba(167,139,250,.52);
+  background: linear-gradient(180deg, rgba(105,66,175,.28), rgba(17,31,51,1));
+}
+
+@media (max-width: 720px) {
+  .command-input-row {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .command-input-row input {
+    grid-column: 1 / -1;
+  }
+}
