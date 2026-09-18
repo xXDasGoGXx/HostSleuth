@@ -11,11 +11,11 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 
 Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform, browser shell, or automatic-remediation engine.
 
-## Stable/public state — v0.6.0
+## Stable / public / live / recovery state — v0.6.0
 
-Stable public release:
+Stable release, live Arcane production, and disaster recovery are now aligned on:
 
-`v0.6.0`
+`v0.6.0` / `mjmalleo/hostsleuth:0.6.0`
 
 Exact published source:
 
@@ -25,41 +25,19 @@ Release workflow:
 
 `35284864117` — success
 
-Published Docker tags:
-
-- `mjmalleo/hostsleuth:0.6.0`
-- `mjmalleo/hostsleuth:latest`
-
-Both resolve to verified OCI index:
+Verified public OCI index:
 
 `sha256:6b9f90209f477ba8213d9c4bf7db7996d6c52d2caae2cfce405822df8bc8ef2a`
 
-Independent verification passed for native checksums/execution, the M12 `contract` command, and linux/amd64 + linux/arm64 Docker manifests.
+Live acceptance confirmed v0.6.0, schema 4 / Docker mode, retained pre-upgrade history, the M12 Expectations UI/API, a passing live Expected Endpoint Contract, and the LAN HTTP 403 boundary for Safe Actions.
+
+`OMV-Docker-Rebuild` recovery alignment PR #6 merged at:
+
+`f78abbe5742c315d73cf85709ebfeba620311429`
 
 Full publication record: `docs/history/V0.6.0-PUBLICATION.md`.
 
-## Live / disaster-recovery state — still v0.5.0
-
-The existing Arcane-managed production deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition remain pinned to:
-
-`mjmalleo/hostsleuth:0.5.0`
-
-Publication of v0.6.0 is not proof of production rollout. The v0.6.0 live/recovery alignment is now the active next step.
-
-## Live v0.5.0 acceptance
-
-Post-redeploy acceptance confirmed:
-
-- `/api/about` reports `v0.5.0`;
-- `/api/snapshot` reports schema 4 and Docker mode;
-- retained event history survived the redeploy, including events captured hours before the upgrade;
-- Optional Safe Actions remain `enabled=false` and `available=false` in Docker/default mode;
-- the Action Web/API remains loopback-only and returns HTTP 403 from LAN access;
-- the service remains reachable at `192.168.2.181:8787`.
-
-The Redacted Evidence Bundle was exercised with the published v0.5.0 amd64 binary against a disposable copy of the live API snapshot/events. Preview reported 100 events and no action audits. Export created only the expected bounded files, wrote the archive with mode `0600`, and all embedded SHA-256 checksums verified. No privileged Docker or live state-directory access was bypassed.
-
-The temporary Arcane Cloudflare tunnel was shut down after acceptance and the disposable local acceptance directory was removed.
+Full production/recovery record: `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md`.
 
 ## Redacted Evidence Bundle — complete, published, and live
 
@@ -104,9 +82,11 @@ Design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
 Closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
-## Active next step — production / recovery v0.6.0 alignment
+## Current milestone boundary
 
-Stage the `OMV-Docker-Rebuild` image pin at 0.6.0 without merging ahead of production. Then redeploy the existing authenticated Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.6.0`, verify version/schema/mode, retained state/events, Docker Safe Actions boundaries, and an Expected Endpoint Contract in the live UI/API. Merge recovery alignment only after live acceptance passes.
+v0.6.0 publication and production/recovery rollout are complete.
+
+Do not automatically start a new feature milestone merely because this boundary is clean. Use `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` as design input only when the owner selects the next bounded milestone.
 
 Do not restart a broad audit on continuation; use this handoff.
 
