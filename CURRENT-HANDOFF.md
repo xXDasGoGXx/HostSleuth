@@ -47,7 +47,7 @@ Publication record: `docs/history/V0.9.0-PUBLICATION.md`.
 
 Production/recovery record: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`.
 
-## v1.0 Readiness / Hardening — TECHNICAL GATES COMPLETE
+## v1.0 Readiness / Hardening — COMPLETE / OWNER PUBLICATION DECISION REQUIRED
 
 The owner-approved feature-free readiness cycle is technically complete.
 
@@ -112,7 +112,21 @@ Closeout:
 
 No feature, Safe Action family, privilege, monitoring architecture, remediation behavior, production deployment, or recovery definition was changed by readiness work.
 
-Next gate: merge the docs-only readiness closeout after full CI. After that, v1.0.0 publication requires an explicit owner decision.
+Readiness closeout PR #68 passed the complete six-job CI matrix on exact head:
+
+`2853f3a369a95817524935a93db6904d2ad3d31c`
+
+CI run:
+
+`35315452571` — success
+
+PR #68 squash-merged to `main` at:
+
+`f93330755e229609f86add144a20d3ce2234cd04`
+
+The readiness cycle is complete. The next gate is an explicit owner decision on whether to publish v1.0.0 from the then-current accepted `main` source using `docs/design/V1.0-RELEASE-CHECKLIST.md`.
+
+Do not create a release branch, publish v1.0.0, change Arcane production, or change recovery until the owner explicitly approves publication.
 
 ## Product identity
 

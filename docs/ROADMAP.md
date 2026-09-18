@@ -547,7 +547,7 @@ M18 is published, live, and recovery-aligned in stable v0.9.0.
 
 The owner-approved feature roadmap through M18 is complete. No additional feature milestone is approved.
 
-## v1.0 Readiness / Hardening — TECHNICAL GATES COMPLETE
+## v1.0 Readiness / Hardening — COMPLETE / OWNER PUBLICATION DECISION REQUIRED
 
 The owner-approved feature-free hardening cycle is complete pending the docs-only closeout CI/merge.
 
@@ -592,7 +592,9 @@ Readiness closeout:
 
 `docs/history/V1.0-READINESS.md`
 
-Stable/public/live/recovery remain v0.9.0. v1.0.0 publication and rollout require a separate explicit owner decision after this closeout merges green.
+Readiness closeout PR #68 passed the complete six-job CI matrix on exact head `2853f3a369a95817524935a93db6904d2ad3d31c` and squash-merged to `main` at `f93330755e229609f86add144a20d3ce2234cd04`.
+
+Stable/public/live/recovery remain v0.9.0. The next gate is an explicit owner decision on v1.0.0 publication.
 
 ## Continuous polish / quality track — APPROVED
 

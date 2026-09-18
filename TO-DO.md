@@ -119,8 +119,8 @@ Feature-free v1.0 readiness scope:
 - [x] Review the v1 publication / production / recovery / rollback procedure against the proven v0.9.0 process.
 - [x] Write `docs/design/V1.0-RELEASE-CHECKLIST.md`.
 - [x] Write `docs/history/V1.0-READINESS.md`.
-- [ ] Pass full GitHub CI on the exact docs-only readiness closeout PR head.
-- [ ] Merge the readiness closeout.
+- [x] Pass full six-job GitHub CI on readiness closeout PR #68 exact head `2853f3a369a95817524935a93db6904d2ad3d31c`.
+- [x] Merge readiness closeout PR #68 at `f93330755e229609f86add144a20d3ce2234cd04`.
 - [ ] Owner explicitly approves v1.0.0 publication.
 - [ ] Only after approval, publish/verify v1.0.0, roll out production, and align recovery using the accepted checklist.
 

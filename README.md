@@ -580,7 +580,7 @@ M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certi
 
 The owner-approved fixed native `service.reload` action remains native-only and independently allowlisted. Docker mode exposes neither native systemd action.
 
-The feature-free **v1.0 Readiness / Hardening** technical gates are complete pending the docs-only closeout CI/merge. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers. Stable/public/live/recovery remain v0.9.0 until the owner separately approves v1.0.0 publication.
+The feature-free **v1.0 Readiness / Hardening** cycle is complete. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers. Stable/public/live/recovery remain v0.9.0; the next gate is explicit owner approval before v1.0.0 publication.
 
 See [`docs/design/V1.0-READINESS.md`](docs/design/V1.0-READINESS.md) for the readiness gates, [`docs/design/V1.0-RELEASE-CHECKLIST.md`](docs/design/V1.0-RELEASE-CHECKLIST.md) for publication/rollback ordering, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for product guardrails.
 
