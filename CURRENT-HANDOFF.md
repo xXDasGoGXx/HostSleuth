@@ -53,19 +53,39 @@ The owner approved a feature-free v1.0 readiness cycle.
 
 Baseline remains stable/public/live/recovery v0.9.0.
 
-First readiness slice implemented on the focused branch:
+First readiness slice is accepted:
 
-- persisted-state compatibility regression proving legacy snapshot/event/action-audit history survives a current schema write;
-- full tab/tabpanel semantics across static and dynamically injected console views;
+- legacy persisted-state compatibility regression;
+- dynamic tab/tabpanel semantics;
 - ArrowLeft / ArrowRight / Home / End keyboard navigation;
-- visible keyboard focus and reduced-motion handling;
-- polite live snapshot-state updates;
-- explicit HTML/CSS/JavaScript asset budgets;
-- structural responsive/accessibility regression tests.
+- visible focus and reduced-motion handling;
+- snapshot live-region semantics;
+- explicit served-asset budgets;
+- structural responsive/accessibility regression;
+- disposable headless-Chrome deep-link and narrow-viewport acceptance.
 
-Local Go 1.24.13 full tests, core race tests, vet, native build, JavaScript syntax, and diff checks pass.
+PR #66 exact head:
 
-Disposable assembled-console acceptance with headless Google Chrome also passed. A narrow viewport below the mobile breakpoint had no horizontal document overflow, and a Cert Rollout deep link exposed the correct selected tab/panel with accessibility semantics. All temporary acceptance processes were stopped afterward.
+`299fe89f81a03eec044340dc85769339c6d62ce3`
+
+CI run:
+
+`35314364419` — success
+
+PR #66 squash-merged to `main` at:
+
+`771b923c06d38ac528804468effbe56ffd4c8f78`
+
+Second readiness slice is implemented locally and in validation:
+
+- native release installer downloads `SHA256SUMS`;
+- selected architecture binary must verify before installation;
+- missing/invalid checksum evidence fails before replacing the installed binary;
+- CI adds a disposable real native install of published v0.9.0 using the current installer;
+- Web/API responses add restrictive CSP, browser Permissions-Policy, no-referrer, nosniff, and DENY framing headers;
+- Docker smoke permanently verifies those headers.
+
+Local Go 1.24.13 full tests, core race tests, vet, native build, installer shell syntax, JavaScript syntax, diff checks, and disposable served-header verification pass.
 
 Design/readiness contract:
 
@@ -73,7 +93,7 @@ Design/readiness contract:
 
 This milestone adds no new troubleshooting story, Safe Action family, privilege, monitoring architecture, or remediation feature.
 
-Next gate: focused PR + exact-head full CI. v1.0.0 publication remains a separate decision after readiness source acceptance.
+Next gate: exact-head PR CI for the install/security slice. v1.0.0 publication remains a separate owner decision after readiness source acceptance.
 
 ## Product identity
 
