@@ -2,6 +2,41 @@
 
 Last updated: 2026-09-17
 
+## Stable / public / live / recovery state — v0.9.0 publication in progress
+
+Stable/public has advanced to:
+
+`v0.9.0` / `mjmalleo/hostsleuth:0.9.0`
+
+Exact published source:
+
+`b518ed901e2d3f4e95a9bb74ade37d7b3a156540`
+
+Release workflow:
+
+`35310749834` — success
+
+Published Docker tags:
+
+- `mjmalleo/hostsleuth:0.9.0`
+- `mjmalleo/hostsleuth:latest`
+
+Both resolve to verified OCI index:
+
+`sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`
+
+Independent public verification passed for the GitHub tag, amd64/arm64 release binaries + SHA256SUMS, the published binary version, and Docker Hub's multi-architecture manifests.
+
+The live Arcane-managed deployment and `xXDasGoGXx/OMV-Docker-Rebuild` recovery pin remain on:
+
+`v0.8.0` / `mjmalleo/hostsleuth:0.8.0`
+
+That is intentional until production v0.9.0 acceptance passes. v0.8.0 remains the known-good rollback image.
+
+Publication record: `docs/history/V0.9.0-PUBLICATION.md`.
+
+Current live/recovery baseline: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`.
+
 ## Product identity
 
 HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
@@ -10,39 +45,6 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 2. **Explain why a host/service/port is or is not reachable using deterministic evidence.**
 
 Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform, browser shell, or automatic-remediation engine.
-
-## Stable / public / live / recovery state — v0.8.0
-
-Stable/public, the live Arcane-managed deployment, and `xXDasGoGXx/OMV-Docker-Rebuild` disaster recovery are aligned on:
-
-`v0.8.0` / `mjmalleo/hostsleuth:0.8.0`
-
-Exact published source:
-
-`28b8d88ec018782353840dee8528d765c4056e89`
-
-Release workflow:
-
-`35294912224` — success
-
-Published Docker tags:
-
-- `mjmalleo/hostsleuth:0.8.0`
-- `mjmalleo/hostsleuth:latest`
-
-Both resolve to verified OCI index:
-
-`sha256:152255f44e451995767cd40b64b99879feb0ed0ae28a4fddfb4a269a55fc11df`
-
-Live acceptance confirmed v0.8.0, schema 4 / Docker mode, retained pre-upgrade events, the Safe Actions loopback/default-disabled boundary, a passing live M14 Proxy Path, and Admin Console v2 in the actual live DOM.
-
-Recovery PR #8 merged at:
-
-`290e7e6a6781ad29cbc7c8296d00877fb8489fd0`
-
-Full publication record: `docs/history/V0.8.0-PUBLICATION.md`.
-
-Full production/recovery record: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`.
 
 ## Redacted Evidence Bundle — complete, published, and live
 
