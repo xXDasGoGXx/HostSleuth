@@ -305,12 +305,36 @@
     const payload = lines.join("\n").slice(0, 12000);
     const status = byId("proxyCopyStatus");
     try {
-      await navigator.clipboard.writeText(payload);
+      await writeProxyClipboard(payload);
       text(status, "Copied.");
     } catch (_) {
       text(status, "Clipboard unavailable in this browser context.");
     }
     window.setTimeout(() => text(status, ""), 2500);
+  }
+
+  async function writeProxyClipboard(payload) {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(payload);
+        return;
+      } catch (_) {
+        // LAN HTTP is often not a secure Clipboard API context; fall back below.
+      }
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = payload;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    textarea.style.top = "0";
+    document.body.append(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    const copied = document.execCommand("copy");
+    textarea.remove();
+    if (!copied) throw new Error("copy command was refused");
   }
 
   if (document.readyState === "loading") {
