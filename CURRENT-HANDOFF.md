@@ -240,32 +240,63 @@ Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
 Stable/public/live/recovery remain aligned on v0.8.0. M16 is development source on `main`; it has not been published or deployed.
 
-## Active milestone — M17 Certificate Rollout Verification
+## M17 — Certificate Rollout Verification — SOURCE COMPLETE
 
-M17 implementation is in progress on a focused branch.
+PR #59 passed the complete GitHub CI matrix on final exact head:
 
-Implemented on the branch:
+`32f0ad2dc3211e5af38a643a5d2f38081d440645`
+
+CI run:
+
+`35308369829` — success
+
+PR #59 then squash-merged to `main` at:
+
+`f12bbd8aacb9689bb31d5b9b6535479882cb6ce6`
+
+Delivered:
 
 - exactly one expected source: SHA-256 fingerprint or explicit reference direct-TLS endpoint;
-- up to 16 explicit direct-TLS host:port endpoints with numeric ports and duplicate rejection;
+- up to 16 explicit direct-TLS host:port endpoints with numeric-port validation and duplicate rejection;
 - deterministic MATCH / MISMATCH / UNKNOWN rollout identity;
 - separate certificate validity, hostname, and trust health;
 - bounded four-worker probing while preserving user endpoint order;
 - `hostsleuth cert-rollout` CLI;
 - `GET /api/certificate-rollout`;
 - dedicated Cert Rollout Admin Console matrix;
-- focused decision tests plus a real loopback TLS integration fixture;
+- focused decision tests and a real loopback TLS mismatch fixture;
 - permanent JavaScript/bundle/Docker-smoke coverage.
 
-Arbitrary certificate-file reads are intentionally not exposed because HostSleuth cannot prove an arbitrary path is not a private key before opening it. This preserves the no-private-key-read boundary while still satisfying the rollout-verification goal through fingerprint/reference sources.
+Arbitrary certificate-file reads remain intentionally unexposed because HostSleuth cannot prove an arbitrary path is not a private key before opening it. This preserves the no-private-key-read boundary.
+
+Native exact-head Go 1.24.13 validation passed: format, full tests, core race tests, vet, native build, JavaScript syntax, and diff check.
+
+Disposable native acceptance also passed in both expected-source modes. Two loopback TLS endpoints served different certificates; fingerprint-source and reference-source comparisons both identified `localhost:19444` as the mismatched endpoint, and the served API/UI reproduced the same matrix. All temporary processes were confirmed stopped afterward.
 
 Design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
-The authorized OMV execution connector became unavailable during implementation. No production or recovery state was changed. Exact-head GitHub CI is the current execution gate; native/disposable OMV acceptance remains optional if the connector returns before closeout.
+Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
+
+Stable/public/live/recovery remain aligned on v0.8.0. M17 is development source on `main`; it has not been published or deployed.
+
+## Active next step — M18 Safe Actions II — Security Review
+
+Do not implement a second Safe Action immediately.
+
+The required next work is:
+
+1. compare concrete high-value action candidates;
+2. choose exactly one;
+3. write a fresh threat model and privilege-cost analysis;
+4. define the narrow allowlist and exact command shape;
+5. preserve explicit enablement, deterministic preview, exact confirmation, durable pre-execution audit, bounded execution, and postcondition verification;
+6. reject any design that weakens Docker security merely to make the action convenient.
+
+No generic command runner, generic systemd controller, generic container controller, or broad privilege mechanism.
 
 Stable/public/live/recovery remain on v0.8.0.
 
-Do not restart a broad audit on continuation; finish the focused M17 validation/PR gate.
+Do not restart a broad audit on continuation; begin M18 with candidate comparison and security review only.
 
 ## Guardrails
 
