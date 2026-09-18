@@ -49,24 +49,15 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M12 design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`
 - M12 closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`
 - v0.6.0 publication: `docs/history/V0.6.0-PUBLICATION.md`
+- v0.6.0 production/recovery alignment: `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md`
 
 ## Current state
 
-Stable/public is now `v0.6.0` / `mjmalleo/hostsleuth:0.6.0`, and Docker `latest` resolves to the same verified v0.6.0 OCI index.
+Stable/public/live/recovery are aligned on `v0.6.0` / `mjmalleo/hostsleuth:0.6.0`. Docker `latest` resolves to the same verified v0.6.0 OCI index.
 
-Live/recovery remain aligned on `mjmalleo/hostsleuth:0.5.0` until the separate v0.6.0 rollout passes.
+## Current milestone boundary
 
-## Active next step — production / recovery v0.6.0 alignment
-
-- [x] Open M12 PR only after the branch remains locally green.
-- [x] Require full GitHub CI on the exact PR head before merge.
-- [x] Merge M12 PR #43 to `main` at `1c193473d9220c34ec2820526df76076bfb41ce9`.
-- [x] Publish stable `v0.6.0` from exact source `fcb08be51ae3da8cd20dc3929cf9d736b15f170c`.
-- [x] Independently verify v0.6.0 native assets/checksums, M12 contract CLI, and the multi-platform Docker image.
-- [ ] Stage recovery image pin at 0.6.0 without merging ahead of production.
-- [ ] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.6.0`.
-- [ ] Verify live v0.6.0, retained state/events, Docker action boundary, and M12 Expected Endpoint Contract behavior.
-- [ ] Merge recovery alignment only after production acceptance.
+All v0.6.0 source, publication, live-production, and disaster-recovery gates are complete. No new feature milestone is active until the owner selects one.
 
 ## Guardrails
 
