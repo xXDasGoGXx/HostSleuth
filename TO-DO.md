@@ -81,12 +81,16 @@ M15 source closeout is complete:
 
 Begin only the approved M16 scope:
 
-- [ ] Write bounded STARTTLS / Mail Service Story design and protocol-safety boundary.
-- [ ] Implement SMTP STARTTLS evidence stages.
-- [ ] Implement IMAP STARTTLS evidence stages.
-- [ ] Consider POP3 STARTTLS only if the same bounded model remains clean.
-- [ ] Add TLS/certificate identity/trust/expiry evidence without credentials or mailbox access.
-- [ ] Add CLI/API/UI and focused fixtures after the protocol core is deterministic.
+- [x] Write bounded STARTTLS / Mail Service Story design and protocol-safety boundary.
+- [x] Implement SMTP STARTTLS evidence stages.
+- [x] Implement IMAP STARTTLS evidence stages.
+- [x] Include POP3 STLS within the same bounded pre-authentication model.
+- [x] Add TLS/certificate identity/trust/expiry evidence without credentials or mailbox access.
+- [x] Add CLI/API/dedicated STARTTLS UI and focused protocol fixtures.
+- [x] Local Go 1.24.13 full-test/race/vet/build, all Web JS syntax, and diff validation.
+- [x] Disposable SMTP CLI/API/UI acceptance with real TLS upgrade.
+- [ ] Push the focused M16 branch and require full GitHub CI on the exact PR head.
+- [ ] Write M16 closeout record and source documentation alignment only after CI/merge acceptance.
 
 ## Guardrails
 
