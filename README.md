@@ -49,7 +49,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.6.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.7.0`.
 
 ### Docker Compose
 
@@ -65,7 +65,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.6.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.7.0 docker compose up -d
 ```
 
 ### Docker run
@@ -203,7 +203,7 @@ M12 is read-only. It does not add polling, alerts, persistent contract storage, 
 
 Full design: `docs/design/M12-EXPECTED-ENDPOINT-CONTRACTS.md`.
 
-### DNS Detective — development source
+### DNS Detective — stable v0.7.0
 
 M13 adds an on-demand resolver comparison story for one DNS name or IP. HostSleuth always shows the system resolver view and can compare up to four resolver IPs that you explicitly supply.
 
@@ -401,7 +401,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.6.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.7.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -461,13 +461,13 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, M11 Optional Safe Actions, and the Redacted Evidence Bundle are complete.
 
-Stable `v0.6.0` is the current published native/Docker release and includes M12 Expected Endpoint Contracts.
+Stable `v0.7.0` is the current published native/Docker release and includes M13 DNS Detective + Admin Console v1.
 
 The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.6.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.6.0, schema 4 / Docker mode, retained pre-upgrade events, the loopback-only Action Web/API boundary, the M12 Expectations UI/API, and a passing live contract for the HostSleuth endpoint with expected plaintext TLS behavior and the running HostSleuth container.
 
 M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6.0`, independently verified, and live in production.
 
-M13 DNS Detective + Admin Console v1 is complete on `main`; PR #47 passed the full CI matrix and squash-merged at `182a27384a090f5538bb6d76a0c4dd917ce63932`. Stable/live v0.6.0 does **not** contain M13 yet; publication and rollout remain separately gated.
+M13 DNS Detective + Admin Console v1 is complete on `main`, published in stable v0.7.0, and independently verified. Live OMV production and disaster recovery remain on v0.6.0 until the separately gated v0.7.0 rollout passes.
 
 The owner-approved forward roadmap now continues through Reverse Proxy / Upstream Story, Deployment / Permissions Story, STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
 
@@ -499,6 +499,7 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md` — v0.6.0 live/recovery rollout and acceptance record.
 - `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md` — M13 DNS Detective and Admin Console v1 design.
 - `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md` — M13 implementation and acceptance closeout.
+- `docs/history/V0.7.0-PUBLICATION.md` — v0.7.0 publication and independent verification record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License

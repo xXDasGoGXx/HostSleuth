@@ -278,13 +278,38 @@ PR #47 passed test/format/vet/build, Docker smoke, native-actions smoke, and bot
 
 Full closeout: `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-## 18. Publish stable v0.7.0 — ACTIVE NEXT STEP
+## 18. Publish stable v0.7.0 — COMPLETE
 
-Publish v0.7.0 only from the exact accepted docs-inclusive `main` source after this M13 closeout documentation merges. Independently verify native assets/checksums, `hostsleuth dns`, and public multi-platform Docker tags before production rollout.
+Stable `v0.7.0` was published from exact accepted source:
 
-Production and disaster recovery remain on v0.6.0 until that separately gated rollout passes.
+`236002106afd6aa042fd131c0edc0f3455b9cfdf`
 
-## 19. M14 — Reverse Proxy / Upstream Story — APPROVED NEXT
+Release workflow run `35292714676` completed successfully.
+
+Independent verification confirmed:
+
+- native amd64/arm64 assets match `SHA256SUMS`;
+- amd64 execution reports `v0.7.0 (236002106afd)`;
+- public `hostsleuth dns` works and custom non-53 resolver input fails closed;
+- public `0.7.0` and `latest` share OCI index `sha256:3663e8c483b67de72f3a0e26fd80e9e3686319d9b2bafe602979cd790e2ce2bb`;
+- linux/amd64 and linux/arm64 manifests are present.
+
+Full record: `docs/history/V0.7.0-PUBLICATION.md`.
+
+## 19. Production / recovery v0.7.0 alignment — ACTIVE NEXT STEP
+
+Stable/public are v0.7.0 while live Arcane production and disaster recovery remain on v0.6.0.
+
+Ordered rollout:
+
+1. stage the recovery image pin to `mjmalleo/hostsleuth:0.7.0` without merging ahead of production;
+2. redeploy the existing authenticated Arcane-managed project;
+3. verify live version/schema/mode, retained state/events, LAN reachability, and Safe Actions boundary;
+4. exercise DNS Detective and Admin Console v1 against live production;
+5. merge recovery only after live acceptance;
+6. record final v0.7.0 alignment.
+
+## 20. M14 — Reverse Proxy / Upstream Story — APPROVED NEXT
 
 Goal:
 
@@ -302,7 +327,7 @@ Bounded direction:
 
 Admin Console v2 adds a visual request-path story and bounded evidence-copy controls.
 
-## 20. M15 — Deployment / Permissions Story — APPROVED
+## 21. M15 — Deployment / Permissions Story — APPROVED
 
 Goal:
 
@@ -321,7 +346,7 @@ Bounded direction:
 
 UI adds a searchable evidence table and permission-chain story.
 
-## 21. M16 — STARTTLS / Mail Service Story — APPROVED
+## 22. M16 — STARTTLS / Mail Service Story — APPROVED
 
 Goal:
 
@@ -345,7 +370,7 @@ Evidence:
 
 No credentials, mail submission, mailbox access, or message contents.
 
-## 22. M17 — Certificate Rollout Verification — APPROVED
+## 23. M17 — Certificate Rollout Verification — APPROVED
 
 Goal:
 
@@ -358,7 +383,7 @@ Bounded direction:
 - deterministic endpoint matrix;
 - no renewal, install, reload, private-key reads, or ACME management.
 
-## 23. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
+## 24. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
 
 One additional action is approved in principle, but the exact action is **not** pre-approved.
 
