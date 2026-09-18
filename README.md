@@ -578,7 +578,9 @@ M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certi
 
 The owner-approved fixed native `service.reload` action remains native-only and independently allowlisted. Docker mode exposes neither native systemd action.
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
+A feature-free **v1.0 Readiness / Hardening** cycle is now active. The first slice adds persisted-state durability regression coverage, Admin Console tab/tabpanel keyboard/accessibility semantics, reduced-motion/focus handling, responsive browser acceptance, and explicit served-asset budgets. Stable/public/live/recovery remain v0.9.0 until readiness is accepted and a separate v1.0.0 publication decision is made.
+
+See [`docs/design/V1.0-READINESS.md`](docs/design/V1.0-READINESS.md) for the readiness gates and [`docs/ROADMAP.md`](docs/ROADMAP.md) for product guardrails.
 
 ## Security and privacy
 
@@ -592,6 +594,7 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `CURRENT-HANDOFF.md` — current project state and next task.
 - `TO-DO.md` — active checklist and product decisions.
 - `docs/ROADMAP.md` — owner-approved ordered product roadmap.
+- `docs/design/V1.0-READINESS.md` — feature-free v1.0 hardening gates and release-readiness contract.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 - `docs/history/M10-REBOOT-STORY.md` — completed M10 implementation and acceptance record.
 - `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md` — completed M11 security model and acceptance record.
