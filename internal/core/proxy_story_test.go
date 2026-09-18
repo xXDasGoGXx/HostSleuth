@@ -3,8 +3,8 @@ package core
 import (
 	"context"
 	"net/http"
-	"net/url"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
