@@ -395,26 +395,42 @@ Recovery PR #8 merged at:
 
 Full record: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`.
 
-## 23. M15 — Deployment / Permissions Story — IMPLEMENTATION IN PROGRESS
+## 23. M15 — Deployment / Permissions Story — COMPLETE
 
 Goal:
 
 > The process is running; why can it not use this path/socket/port?
 
-Bounded direction:
+Delivered bounded source implementation:
 
-- native service identity;
-- UID/GID;
-- working directory and executable identity;
-- one explicit user-supplied path;
-- ownership/mode plus parent-directory traversal chain;
-- deterministic read/write/execute/traverse reasoning;
-- relevant Docker bind-mount metadata when available;
-- no recursive filesystem crawl and no file contents.
+- one native systemd service plus one explicit absolute path/socket path;
+- observed PID, effective UID/GID, supplementary groups, working directory, executable, and effective capability mask;
+- exact ownership/mode parent-directory traversal chain;
+- deterministic read/write/execute/traverse/connect decisions;
+- capability-aware UID 0 DAC reasoning;
+- relevant Docker bind-mount metadata when already available;
+- CLI/API/dedicated Permissions Web UI;
+- searchable evidence table and visual permission-chain story;
+- no recursive filesystem crawl, file contents, remediation, or privilege expansion;
+- Docker deployment mode fails closed for native service identity rather than crossing the container boundary.
 
-UI adds a searchable evidence table and permission-chain story.
+Native pass/fail acceptance and disposable HTTP/UI acceptance passed.
 
-## 24. M16 — STARTTLS / Mail Service Story — APPROVED
+PR #55 passed the full GitHub CI matrix on exact head:
+
+`78bd31d8cdb34f9f5e592e57f14f2e8537e79b41`
+
+and squash-merged to `main` at:
+
+`d64bb387c8f9efcf5dcb9f814f54b519ee231205`
+
+Design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
+
+Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
+
+Stable/public/live/recovery remain on v0.8.0; M15 is development source until a separate publication/rollout decision.
+
+## 24. M16 — STARTTLS / Mail Service Story — ACTIVE NEXT
 
 Goal:
 

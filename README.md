@@ -264,6 +264,26 @@ The Web UI adds a visual **Proxy Path** view with first-problem highlighting, ex
 
 Full design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
+### Deployment / Permissions Story — development source
+
+M15 adds a bounded read-only permission story for the admin question: **the process is running; why can it not use this path or Unix-domain socket?**
+
+```bash
+hostsleuth permissions --service nginx.service /srv/app/data
+```
+
+For one native systemd service and one explicit absolute path, HostSleuth records the observed running process identity (PID, effective UID/GID, supplementary groups, working directory, executable, and effective capability mask), resolves the exact path chain, and evaluates the owner/group/other mode class at each parent and the target. Parent directories require traversal permission; the target receives deterministic read/write/execute/traverse decisions, while a Unix-domain socket receives a connect decision using the socket write bit.
+
+The story is deliberately bounded: no file contents, no sibling enumeration, no recursive crawl, no chmod/chown/setfacl, no service/container mutation, and no automatic remediation. POSIX ACLs, Linux Security Modules, namespaces, mount flags, and application policy remain explicit reasoning limits rather than being silently inferred.
+
+When native Docker inventory and the Docker CLI are already available, M15 may add only bind-mount metadata relevant to the explicit requested path. Docker deployment mode does not cross the container boundary to manufacture native systemd identity; it reports that evidence as unavailable.
+
+The Web UI adds a dedicated **Permissions** view with process-identity cards, a visual permission chain, searchable evidence rows, and relevant bind-mount context.
+
+Full design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
+
+Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
+
 ### Service Story — native Linux
 
 M7 adds a read-only service story inside the existing Diagnose workflow. Select a systemd unit and optionally the `host:port` you expect it to provide. HostSleuth can correlate:
@@ -510,7 +530,9 @@ M13 DNS Detective + Admin Console v1 is complete on `main`, published in stable 
 
 M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete on `main`, published in stable v0.8.0, independently verified, and live in production/recovery.
 
-The active next milestone is M15 Deployment / Permissions Story. The owner-approved roadmap then continues through STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
+M15 Deployment / Permissions Story is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
+
+The active next source milestone is M16 STARTTLS / Mail Service Story. The owner-approved roadmap then continues through Certificate Rollout Verification and one additional Safe Action only after a fresh security gate.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -544,6 +566,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md` — v0.7.0 live/recovery rollout and acceptance record.
 - `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md` — M14 request-path semantics and HTTP/security boundary.
 - `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md` — M14 implementation and local acceptance closeout.
+- `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md` — M15 permission semantics and privacy/security boundary.
+- `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md` — M15 implementation and acceptance closeout.
 - `docs/history/V0.8.0-PUBLICATION.md` — v0.8.0 publication and independent verification record.
 - `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
