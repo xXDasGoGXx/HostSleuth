@@ -212,6 +212,9 @@ func proxyPublicHostHeader(parsed *url.URL) string {
 	host := parsed.Hostname()
 	port := parsed.Port()
 	if port == "" {
+		if strings.Contains(host, ":") {
+			return "[" + host + "]"
+		}
 		return host
 	}
 	if (parsed.Scheme == "https" && port == "443") || (parsed.Scheme == "http" && port == "80") {
