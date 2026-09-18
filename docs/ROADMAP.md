@@ -498,19 +498,48 @@ Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
 Stable/public/live/recovery remain on v0.8.0; M17 is development source until a separate publication/rollout decision.
 
-## 26. M18 — Safe Actions II — ACTIVE NEXT: SECURITY REVIEW
+## 26. M18 — Safe Actions II — SECURITY REVIEW COMPLETE / OWNER DECISION REQUIRED
 
-One additional action is approved in principle, but the exact action is **not** pre-approved.
+One additional action is approved in principle, but the exact action remains **not implemented and not owner-approved**.
 
-Before implementation:
+The required security review compared:
 
-1. compare concrete high-value candidates;
-2. choose exactly one;
-3. write a fresh threat model and privilege-cost analysis;
-4. preserve explicit enablement, allowlist, deterministic preview, exact confirmation, durable pre-execution audit, bounded execution, and postcondition verification;
-5. do not weaken the Docker security posture merely to make the action easy.
+- service.reload;
+- service.start;
+- service.stop;
+- service.reset-failed;
+- container restart;
+- systemd daemon-reload;
+- reload-or-restart.
+
+Preferred candidate pending owner approval:
+
+`service.reload`
+
+The review found reload to be the strongest fit because it can reuse M11's native systemd target/allowlist architecture without adding Docker mutation, manager-wide control, or a new OS privilege mechanism.
+
+If approved, implementation must use:
+
+- fixed action ID `service.reload`;
+- a separate `--allow-reload-service UNIT` allowlist;
+- existing global action opt-in;
+- native mode only;
+- trusted absolute `systemctl reload UNIT.service` argv only;
+- loaded + active + reload-capable precondition;
+- exact preview/confirmation;
+- durable pre-execution audit;
+- bounded serialized execution;
+- no fallback to restart;
+- postcondition requiring command success and `ActiveState=active`;
+- existing loopback-only Web/API boundary.
 
 No generic command runner or generic service/container controller.
+
+Security review:
+
+`docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`
+
+Implementation is blocked until the owner explicitly approves exactly `service.reload`.
 
 ## Continuous polish / quality track — APPROVED
 

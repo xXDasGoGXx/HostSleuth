@@ -65,6 +65,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M16 closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`
 - M17 design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`
 - M17 closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`
+- M18 security review: `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 
@@ -72,7 +73,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 
 Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`. Docker `latest` resolves to the same verified v0.8.0 OCI index.
 
-## Active next step — M18 Safe Actions II — Security Review
+## Active next step — M18 Safe Actions II — Owner Decision Required
 
 M17 source closeout is complete:
 
@@ -91,12 +92,13 @@ M17 source closeout is complete:
 
 Begin M18 only with the required security gate:
 
-- [ ] Compare concrete high-value action candidates.
-- [ ] Select exactly one candidate; do not pre-approve implementation before comparison.
-- [ ] Write a fresh threat model and privilege-cost analysis for that one action.
-- [ ] Define exact allowlist, fixed command shape, preview, exact confirmation, pre-execution audit, execution bounds, and postcondition verification.
-- [ ] Reject any candidate that requires weakening Docker security or introducing a generic privileged command/controller surface.
-- [ ] Only after the security review is accepted, implement the one selected action.
+- [x] Compare concrete high-value action candidates.
+- [x] Identify one preferred candidate for owner approval: `service.reload`.
+- [x] Write the fresh threat model and privilege-cost analysis.
+- [x] Define the required separate reload allowlist, fixed argv, preview, exact confirmation, pre-execution audit, execution bounds, and postcondition verification.
+- [x] Reject candidates that weaken Docker security or introduce manager-wide/generic control.
+- [ ] Owner explicitly approves exactly `service.reload` under `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`.
+- [ ] Only after owner approval, implement the one selected action.
 
 ## Guardrails
 

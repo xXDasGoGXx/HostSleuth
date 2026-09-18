@@ -577,7 +577,7 @@ M16 STARTTLS / Mail Service Story is complete on `main` as development source. I
 
 M17 Certificate Rollout Verification is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
 
-The active next source milestone is M18 Safe Actions II, beginning with the required candidate comparison, threat model, and privilege-cost/security review before any implementation.
+M18 Safe Actions II has completed its required candidate/threat-model review. The review recommends exactly `service.reload` under a separate allowlist and the existing M11 confirmation/audit boundary, but no M18 action code is implemented and owner approval is required before implementation.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -617,6 +617,7 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md` — M16 implementation and acceptance closeout.
 - `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md` — M17 rollout-comparison semantics and no-private-key-read boundary.
 - `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md` — M17 implementation and acceptance closeout.
+- `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md` — M18 candidate comparison, threat model, privilege-cost analysis, and pending owner decision.
 - `docs/history/V0.8.0-PUBLICATION.md` — v0.8.0 publication and independent verification record.
 - `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.

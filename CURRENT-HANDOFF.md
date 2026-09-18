@@ -279,24 +279,59 @@ Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
 Stable/public/live/recovery remain aligned on v0.8.0. M17 is development source on `main`; it has not been published or deployed.
 
-## Active next step — M18 Safe Actions II — Security Review
+## M18 — Safe Actions II — SECURITY REVIEW COMPLETE / OWNER DECISION REQUIRED
 
-Do not implement a second Safe Action immediately.
+The fresh candidate/threat-model review is complete.
 
-The required next work is:
+Reviewed candidates:
 
-1. compare concrete high-value action candidates;
-2. choose exactly one;
-3. write a fresh threat model and privilege-cost analysis;
-4. define the narrow allowlist and exact command shape;
-5. preserve explicit enablement, deterministic preview, exact confirmation, durable pre-execution audit, bounded execution, and postcondition verification;
-6. reject any design that weakens Docker security merely to make the action convenient.
+- `service.reload`;
+- `service.start`;
+- `service.stop`;
+- `service.reset-failed`;
+- container restart;
+- systemd manager `daemon-reload`;
+- `reload-or-restart`.
 
-No generic command runner, generic systemd controller, generic container controller, or broad privilege mechanism.
+Preferred candidate for owner approval:
+
+`service.reload`
+
+Why it is preferred:
+
+- it reuses the existing native systemd target/allowlist architecture;
+- it requires no new OS privilege mechanism because native HostSleuth already runs as root;
+- it avoids Docker mutation and manager-wide control;
+- it can apply supported configuration/certificate changes without the full process replacement of restart;
+- it can preserve M11's exact preview, confirmation, pre-audit, bounded execution, and postcondition model.
+
+Required boundary if approved:
+
+- fixed action ID `service.reload`;
+- dedicated `--allow-reload-service UNIT` allowlist, independent of restart allowlisting;
+- existing `--enable-actions` still required;
+- native mode only; Docker remains unavailable;
+- fixed trusted absolute `systemctl reload UNIT.service` argv only;
+- loaded + active + reload-capable precondition;
+- exact confirmation `RELOAD UNIT.service`;
+- no fallback to restart;
+- success requires command success plus post-action `ActiveState=active`;
+- do not claim application-specific configuration semantics were verified;
+- existing loopback-only Web/API, durable pre-execution audit, bounded output/timeout, serialization, and final audit remain mandatory.
+
+Rejected candidates either carry larger availability/manager/Docker blast radius or provide too little diagnostic value.
+
+Design/security review:
+
+`docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`
+
+No M18 action code has been implemented.
+
+Implementation is blocked pending explicit owner approval of exactly `service.reload` under this security contract.
 
 Stable/public/live/recovery remain on v0.8.0.
 
-Do not restart a broad audit on continuation; begin M18 with candidate comparison and security review only.
+Do not begin M18 action implementation until the owner approves this exact action.
 
 ## Guardrails
 
