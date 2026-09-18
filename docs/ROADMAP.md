@@ -430,31 +430,40 @@ Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
 Stable/public/live/recovery remain on v0.8.0; M15 is development source until a separate publication/rollout decision.
 
-## 24. M16 — STARTTLS / Mail Service Story — IMPLEMENTATION IN PROGRESS
+## 24. M16 — STARTTLS / Mail Service Story — COMPLETE
 
 Goal:
 
 > The SMTP/IMAP port is open; did STARTTLS actually negotiate correctly?
 
-Initial protocol scope:
+Delivered bounded source implementation:
 
-- SMTP STARTTLS;
-- IMAP STARTTLS;
-- POP3 STARTTLS only if the same bounded model remains clean.
+- SMTP STARTTLS, IMAP STARTTLS, and POP3 STLS;
+- explicit protocol plus explicit host:port input only;
+- deterministic TCP, greeting, capability, upgrade, TLS, certificate validity, hostname, and trust stages;
+- fixed pre-authentication protocol commands only;
+- bounded 4 KiB lines, 64 response lines, and fixed deadlines;
+- shared existing TLS/certificate interpretation;
+- CLI/API/dedicated STARTTLS Admin Console view;
+- no credentials, authentication, mail submission, mailbox access, message contents, arbitrary protocol commands, or remediation.
 
-Evidence:
+Local full test/race/vet/build and disposable SMTP CLI/API/UI acceptance passed.
 
-- greeting;
-- advertised STARTTLS capability;
-- negotiation stage;
-- TLS version/cipher;
-- served certificate;
-- hostname/trust/expiry evidence;
-- first protocol stage that failed.
+PR #57 passed the complete GitHub CI matrix on exact head:
 
-No credentials, mail submission, mailbox access, or message contents.
+`579fff79889d5ab0c3430135d3f5ceba4dc28400`
 
-## 25. M17 — Certificate Rollout Verification — APPROVED
+and squash-merged to `main` at:
+
+`e5663d5883acdd2d859ff57b39a447c0018790b3`
+
+Design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
+
+Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
+
+Stable/public/live/recovery remain on v0.8.0; M16 is development source until a separate publication/rollout decision.
+
+## 25. M17 — Certificate Rollout Verification — ACTIVE NEXT
 
 Goal:
 
