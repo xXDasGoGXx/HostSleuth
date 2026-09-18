@@ -119,11 +119,11 @@ func TestInspectDNSDetectiveUsesSystemAndExplicitResolvers(t *testing.T) {
 			address = "203.0.113.10"
 		}
 		return DNSResolverEvidence{
-			Label: spec.Label,
-			Server: spec.Server,
-			Status: "pass",
+			Label:      spec.Label,
+			Server:     spec.Server,
+			Status:     "pass",
 			DurationMS: 2,
-			Addresses: []DNSAddressEvidence{{Address: address, Family: "IPv4", Scope: map[bool]string{true: "global", false: "private"}[spec.Label == "public"]}},
+			Addresses:  []DNSAddressEvidence{{Address: address, Family: "IPv4", Scope: map[bool]string{true: "global", false: "private"}[spec.Label == "public"]}},
 		}
 	}
 
