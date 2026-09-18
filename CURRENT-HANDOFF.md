@@ -167,7 +167,7 @@ Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
 v0.8.0 publication, live acceptance, and disaster-recovery alignment are complete.
 
-M15 implementation is now in progress on a focused branch. Local Go 1.24.13 format/full-test/race-test/vet/build and JavaScript syntax validation pass. PR/CI and bounded native acceptance are still required before M15 may be called complete.
+M15 implementation is now in progress on a focused branch. Local Go 1.24.13 format/full-test/race-test/vet/build and JavaScript syntax validation pass. Bounded native acceptance also passed: `ssh.service` against `/etc/ssh` produced a permitted chain, while `dbus.service` against `/root` produced a deterministic mode-bit denial. PR/full CI are still required before M15 may be called complete.
 
 Design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
