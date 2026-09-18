@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -160,9 +161,9 @@ func TestInspectDNSDetectiveSingleResolver(t *testing.T) {
 	}
 }
 
-func parseTestIP(t *testing.T, raw string) []byte {
+func parseTestIP(t *testing.T, raw string) net.IP {
 	t.Helper()
-	ip := parseIPForTest(raw)
+	ip := net.ParseIP(raw)
 	if ip == nil {
 		t.Fatalf("invalid test IP %s", raw)
 	}
