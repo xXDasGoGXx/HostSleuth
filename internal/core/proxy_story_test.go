@@ -171,7 +171,6 @@ func TestProxyHTTPStatusClasses(t *testing.T) {
 	}
 }
 
-
 func TestProxyPublicHostHeaderIPv6(t *testing.T) {
 	parsed, err := normalizeProxyStoryURL("https://[2001:db8::10]/")
 	if err != nil {
