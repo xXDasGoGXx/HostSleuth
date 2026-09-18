@@ -279,39 +279,57 @@ Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
 Stable/public/live/recovery remain aligned on v0.8.0. M17 is development source on `main`; it has not been published or deployed.
 
-## M18 — Safe Actions II — OWNER APPROVED / IMPLEMENTATION IN VALIDATION
+## M18 — Safe Actions II — SOURCE COMPLETE
 
 The owner explicitly approved exactly `service.reload` under:
 
 `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`
 
-Implementation on the focused M18 branch now includes:
+PR #62 passed the complete GitHub CI matrix on exact head:
+
+`c46dd72ad806c688970244836ce26e3ca01eec88`
+
+CI run:
+
+`35309972305` — success
+
+PR #62 then squash-merged to `main` at:
+
+`cc9c9727fe19786eba03d0b7ef51c7fae7ac8ab1`
+
+Delivered:
 
 - fixed action ID `service.reload`;
 - dedicated `--allow-reload-service UNIT` allowlist independent of restart allowlisting;
 - existing `--enable-actions` global opt-in;
 - native mode only; Docker exposes neither native systemd action;
-- trusted absolute systemctl lookup only;
-- fixed `reload UNIT.service` argv with no shell or arbitrary arguments;
-- loaded + `ActiveState=active` + `CanReload=yes` fail-closed preconditions;
-- exact confirmation `RELOAD UNIT.service`;
-- durable requested audit before execution;
-- bounded serialized execution and bounded command output;
+- trusted absolute systemctl lookup and fixed reload argv only;
+- loaded + active + `CanReload=yes` fail-closed preconditions;
+- exact `RELOAD UNIT.service` confirmation;
+- durable pre-execution audit;
+- bounded serialized execution/output;
 - no reload-or-restart helper and no restart fallback;
-- postcondition requiring command success and `ActiveState=active`;
-- result wording that does not claim application-specific configuration semantics were verified;
-- existing loopback-only Action Web/API boundary;
-- Admin Console action selector exposing restart/reload only from server-provided capabilities and allowlists;
-- focused tests proving allowlist separation, reload capability gating, exact command/confirmation, audit behavior, active postcondition, Docker unavailability, and no restart fallback;
-- permanent CI extension for a real reload-capable disposable systemd unit.
+- postcondition requiring command success plus `ActiveState=active`;
+- loopback-only Action Web/API boundary;
+- server-provided restart/reload capability selection in the Admin Console.
 
-Local Go 1.24.13 validation currently passes full tests, core race tests, vet, native build, Action JavaScript syntax, and diff checks.
+Local Go 1.24.13 full tests, core race tests, vet, native build, Action JavaScript syntax, and diff checks passed.
 
-No live OMV systemd service, container, certificate, DNS/proxy configuration, production deployment, or recovery definition has been changed.
+The permanent native CI fixture performed a real reload on a disposable reload-capable systemd unit. Restart-only allowlisting could not authorize reload; the exact reload preview/confirmation passed; MainPID stayed unchanged across reload; the unit remained active; reload audit records were verified; and the disposable unit was removed afterward.
 
-Stable/public/live/recovery remain on v0.8.0.
+Design/security review: `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`.
 
-Next gate: exact-head PR CI including the real disposable systemd reload acceptance, then source closeout if green.
+Closeout: `docs/history/M18-SAFE-ACTIONS-II.md`.
+
+Stable/public/live/recovery remain aligned on v0.8.0. M18 is development source on `main`; it has not been published or deployed.
+
+## Approved roadmap status
+
+The owner-approved source roadmap through M18 is complete.
+
+No additional feature milestone is currently approved. Do not invent or begin another feature automatically.
+
+A future publication/production rollout, a new feature roadmap, or additional Safe Action family requires a separate owner decision.
 
 ## Guardrails
 
