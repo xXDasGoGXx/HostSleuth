@@ -286,8 +286,6 @@ Production and disaster recovery remain on v0.6.0 until that separately gated ro
 
 ## 19. M14 — Reverse Proxy / Upstream Story — APPROVED NEXT
 
-## 19. M14 — Reverse Proxy / Upstream Story — APPROVED NEXT
-
 Goal:
 
 > DNS and 443 are fine; where does the request path actually break?
