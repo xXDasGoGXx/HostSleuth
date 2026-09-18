@@ -34,6 +34,16 @@ Workbench does not return file contents, edit files, accept arbitrary commands, 
 
 The generic file identity tool does read the bytes of a user-selected readable regular file in order to calculate SHA-256/SHA-512. It returns metadata and digests only; it does not retain or return file contents. Treat file paths and fingerprints as potentially sensitive evidence.
 
+## M13 DNS Detective boundary
+
+M13 adds bounded read-only resolver comparison. The normal system resolver is always inspected; additional resolver views are queried only when the operator explicitly supplies resolver IPs for that request.
+
+The first Web/API implementation accepts at most four custom resolver IPs and restricts them to DNS port 53. Hostnames are not silently sent to a hard-coded public DNS provider, and HostSleuth does not persist resolver query history server-side.
+
+DNS Detective returns normalized answer metadata, lookup duration, bounded lookup errors, runtime-visible resolver/search-domain metadata, and deterministic agreement/divergence status. It does not perform zone transfers, DNS updates, resolver reconfiguration, arbitrary UDP probing, polling, alerting, or remediation.
+
+Because a deliberately LAN-bound HostSleuth instance exposes read-only Diagnose and DNS Detective endpoints to clients that can already reach that UI, direct LAN exposure should still be treated as trusted-network access. The safer default remains loopback plus SSH tunneling.
+
 ## Redacted Evidence Bundle boundary
 
 The Redacted Evidence Bundle is a local, operator-triggered support export. It is not a backup, forensic image, remote collection mechanism, or automatic sharing feature.
