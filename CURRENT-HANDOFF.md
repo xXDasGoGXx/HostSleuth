@@ -1,57 +1,61 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-09-17
+Last updated: 2026-09-18
 
-## Stable / public / live / recovery state — v0.9.0
+## Stable/public — v1.0.0; live/recovery — v0.9.0
 
-Stable/public/live/recovery are aligned on:
+The owner explicitly approved v1.0.0 publication and the accepted release/production/recovery sequence.
 
-`v0.9.0` / `mjmalleo/hostsleuth:0.9.0`
+Stable/public release:
+
+`v1.0.0`
 
 Exact published source:
 
-`b518ed901e2d3f4e95a9bb74ade37d7b3a156540`
+`27971e67ad7ea875d83f5925a83c1991b0eb2b0f`
 
 Release workflow:
 
-`35310749834` — success
+`35358798799` — success
 
 Published Docker tags:
 
-- `mjmalleo/hostsleuth:0.9.0`
+- `mjmalleo/hostsleuth:1.0.0`
 - `mjmalleo/hostsleuth:latest`
 
 Both resolve to verified OCI index:
 
-`sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`
+`sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`
 
-Independent public verification passed for the GitHub tag, native amd64/arm64 binaries + SHA256SUMS, published binary version, and Docker Hub multi-architecture manifests.
+Independent public verification passed for the exact GitHub tag, native amd64/arm64 binaries + SHA256SUMS, published binary version, and Docker Hub amd64/arm64 manifests.
 
-Live Arcane acceptance confirmed:
+Live Arcane production remains on the known-good rollback release:
 
-- `/api/about` = `v0.9.0`;
-- snapshot schema 4 / Docker mode;
-- running container image `mjmalleo/hostsleuth:0.9.0`;
-- all 100 retained events, including pre-upgrade history;
-- live M15 Permissions surface with Docker-native service identity correctly unavailable;
-- real M16 SMTP STARTTLS negotiation through TLS/certificate/trust;
-- real M17 certificate rollout comparison with a healthy MATCH;
-- LAN Action Web/API still HTTP 403;
-- loopback `service.restart` and `service.reload` capabilities both `enabled=false` / `available=false` in Docker mode.
+`mjmalleo/hostsleuth:0.9.0`
 
-`OMV-Docker-Rebuild` PR #10 merged at:
+The live endpoint still reports v0.9.0 / schema 4 / Docker mode before the production redeploy.
 
-`813b7a8b76bfd987e97c534c76faf879c510bdec`
+Recovery `main` also remains pinned to:
 
-Publication record: `docs/history/V0.9.0-PUBLICATION.md`.
+`mjmalleo/hostsleuth:0.9.0`
 
-Production/recovery record: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`.
+Recovery PR #11 is staged from commit:
 
-## v1.0 Readiness / Hardening — COMPLETE / OWNER PUBLICATION DECISION REQUIRED
+`a4016c88a921db5aff9e249bc4dfe004e2889310`
 
-The owner-approved feature-free readiness cycle is technically complete.
+and changes only the recovery image pin to `mjmalleo/hostsleuth:1.0.0`. It must remain unmerged until live v1.0.0 acceptance passes.
 
-Baseline remains stable/public/live/recovery v0.9.0 until a separate v1.0.0 publication decision.
+Publication record: `docs/history/V1.0.0-PUBLICATION.md`.
+
+Known-good rollback record: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`.
+
+Next gate: update only the existing Arcane-managed `hostsleuth` image from `0.9.0` to `1.0.0`, redeploy, run the full live acceptance checklist, then merge recovery PR #11 only if acceptance passes.
+
+## v1.0 Readiness / Hardening — COMPLETE / PUBLISHED IN v1.0.0
+
+The owner-approved feature-free readiness cycle is complete and is now published in stable v1.0.0.
+
+Production and recovery remain on v0.9.0 until the separately gated live acceptance and recovery-alignment steps complete.
 
 Readiness slice 1:
 
@@ -124,9 +128,9 @@ PR #68 squash-merged to `main` at:
 
 `f93330755e229609f86add144a20d3ce2234cd04`
 
-The readiness cycle is complete. The next gate is an explicit owner decision on whether to publish v1.0.0 from the then-current accepted `main` source using `docs/design/V1.0-RELEASE-CHECKLIST.md`.
+The owner approved publication. v1.0.0 is now published and independently verified from exact accepted source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f` under release workflow `35358798799`.
 
-Do not create a release branch, publish v1.0.0, change Arcane production, or change recovery until the owner explicitly approves publication.
+Production/recovery remain deliberately on v0.9.0 while the Arcane live-acceptance gate is pending. Recovery PR #11 is staged but unmerged.
 
 ## Product identity
 

@@ -506,7 +506,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.9.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v1.0.0 ./scripts/install.sh
 ```
 
 The installer fetches both the selected native binary and that release's `SHA256SUMS`. Installation stops before replacing `/usr/local/bin/hostsleuth` if the expected architecture checksum is missing or does not verify.
@@ -568,19 +568,19 @@ HostSleuth does **not** automatically restart or reload services, modify firewal
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, M11 Optional Safe Actions, and the Redacted Evidence Bundle are complete.
 
-Stable `v0.9.0` is the current published native/Docker release, published from exact source `b518ed901e2d3f4e95a9bb74ade37d7b3a156540` and independently verified.
+Stable `v1.0.0` is the current published native/Docker release, published from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f` and independently verified.
 
-Docker `mjmalleo/hostsleuth:0.9.0` and `latest` resolve to OCI index `sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`.
+Docker `mjmalleo/hostsleuth:1.0.0` and `latest` resolve to OCI index `sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`.
 
-The live OMV Arcane/Docker deployment and `OMV-Docker-Rebuild` recovery definition are aligned on `mjmalleo/hostsleuth:0.9.0`. Live acceptance confirmed v0.9.0, schema 4 / Docker mode, the running 0.9.0 image, all 100 retained events, real M16 STARTTLS and M17 certificate-rollout execution, M15's Docker boundary, LAN Action API rejection, and both fixed native actions disabled/unavailable in Docker mode.
+The live OMV Arcane/Docker deployment and recovery `main` remain on the known-good `mjmalleo/hostsleuth:0.9.0` while the v1.0.0 production-acceptance gate is pending. `OMV-Docker-Rebuild` PR #11 stages only the recovery image pin to `mjmalleo/hostsleuth:1.0.0` and remains unmerged until live v1.0.0 acceptance passes.
 
 M12 Expected Endpoint Contracts, M13 DNS Detective + Admin Console v1, and M14 Reverse Proxy / Upstream Story + Admin Console v2 remain published and live from earlier releases.
 
-M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certificate Rollout Verification, and M18 Safe Actions II are now included in published stable v0.9.0.
+M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certificate Rollout Verification, and M18 Safe Actions II remain included in published stable v1.0.0.
 
 The owner-approved fixed native `service.reload` action remains native-only and independently allowlisted. Docker mode exposes neither native systemd action.
 
-The feature-free **v1.0 Readiness / Hardening** cycle is complete. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers. Stable/public/live/recovery remain v0.9.0; the next gate is explicit owner approval before v1.0.0 publication.
+The feature-free **v1.0 Readiness / Hardening** cycle is complete and published in v1.0.0. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers. Stable/public are v1.0.0; live/recovery remain v0.9.0 until production acceptance and recovery alignment complete.
 
 See [`docs/design/V1.0-READINESS.md`](docs/design/V1.0-READINESS.md) for the readiness gates, [`docs/design/V1.0-RELEASE-CHECKLIST.md`](docs/design/V1.0-RELEASE-CHECKLIST.md) for publication/rollback ordering, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for product guardrails.
 
@@ -629,6 +629,7 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
 - `docs/history/V0.9.0-PUBLICATION.md` — v0.9.0 publication and independent verification record.
 - `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md` — v0.9.0 live/recovery rollout and acceptance record.
+- `docs/history/V1.0.0-PUBLICATION.md` — v1.0.0 publication and independent verification record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
