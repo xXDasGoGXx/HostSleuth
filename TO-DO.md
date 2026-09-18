@@ -73,32 +73,32 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 
 Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`. Docker `latest` resolves to the same verified v0.8.0 OCI index.
 
-## Active next step — M18 Safe Actions II — Owner Decision Required
+## Active next step — M18 Safe Actions II — Implementation Validation
 
-M17 source closeout is complete:
-
-- [x] Bounded M17 rollout-verification/security design.
-- [x] SHA-256 fingerprint or explicit reference endpoint as the single expected source.
-- [x] Arbitrary certificate-file reads intentionally omitted to preserve the no-private-key-read boundary.
-- [x] Up to 16 explicit direct-TLS endpoints with deterministic MATCH / MISMATCH / UNKNOWN.
-- [x] Separate validity / hostname / trust health evidence.
-- [x] CLI/API/dedicated Cert Rollout Admin Console matrix.
-- [x] Focused decision tests and real loopback TLS mismatch fixture.
-- [x] Full GitHub CI on exact PR #59 head `32f0ad2dc3211e5af38a643a5d2f38081d440645`.
-- [x] Native exact-head Go 1.24.13 format/test/race/vet/build/JS/diff validation.
-- [x] Disposable fingerprint-source and reference-source CLI/API/UI acceptance with two different certificates.
-- [x] Squash-merge PR #59 to `main` at `f12bbd8aacb9689bb31d5b9b6535479882cb6ce6`.
-- [x] M17 closeout and source documentation alignment.
-
-Begin M18 only with the required security gate:
+M18 security gate:
 
 - [x] Compare concrete high-value action candidates.
-- [x] Identify one preferred candidate for owner approval: `service.reload`.
+- [x] Identify one preferred candidate: `service.reload`.
 - [x] Write the fresh threat model and privilege-cost analysis.
-- [x] Define the required separate reload allowlist, fixed argv, preview, exact confirmation, pre-execution audit, execution bounds, and postcondition verification.
+- [x] Define the separate reload allowlist, fixed argv, preview, exact confirmation, pre-execution audit, execution bounds, and postcondition verification.
 - [x] Reject candidates that weaken Docker security or introduce manager-wide/generic control.
-- [ ] Owner explicitly approves exactly `service.reload` under `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`.
-- [ ] Only after owner approval, implement the one selected action.
+- [x] Owner explicitly approved exactly `service.reload` under `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`.
+
+Approved implementation:
+
+- [x] Add fixed `service.reload` action ID only.
+- [x] Add independent `--allow-reload-service UNIT` policy and CLI/server flag.
+- [x] Require loaded + active + `CanReload=yes` before preview becomes executable.
+- [x] Use trusted absolute systemctl and fixed reload argv only.
+- [x] Preserve exact confirmation, durable pre-execution audit, bounded serialized execution, and active postcondition.
+- [x] Prove reload failure never falls back to restart.
+- [x] Keep Docker mode unavailable and preserve loopback-only Action Web/API.
+- [x] Update Actions UI for server-provided restart/reload capabilities.
+- [x] Extend native CI fixture for real reload acceptance and Docker smoke for disabled/unavailable reload.
+- [x] Pass local Go 1.24.13 full-test/race/vet/build, JS syntax, and diff validation.
+- [ ] Pass full GitHub CI on the exact implementation PR head.
+- [ ] Merge only after exact-head CI is green.
+- [ ] Write M18 source closeout and align durable status.
 
 ## Guardrails
 
