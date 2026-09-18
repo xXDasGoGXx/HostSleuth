@@ -95,13 +95,13 @@ The owner explicitly approved all of the following as future HostSleuth mileston
 
 The canonical ordered plan is now in `docs/ROADMAP.md`.
 
-## Active milestone — M13 DNS Detective + Admin Console v1
+## M13 — DNS Detective + Admin Console v1 — SOURCE COMPLETE
 
-Branch:
+PR #47 passed the full GitHub CI matrix and squash-merged to `main` at:
 
-`m13-dns-detective-admin-console`
+`182a27384a090f5538bb6d76a0c4dd917ce63932`
 
-Implemented on the branch:
+Delivered:
 
 - system resolver plus up to four explicit custom resolver IP comparisons;
 - IP-only custom resolver validation, DNS port 53 only;
@@ -127,9 +127,9 @@ Disposable HTTP acceptance passed. Real resolver comparison also demonstrated re
 
 Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-## Active next step
+## Active next step — publish v0.7.0
 
-Local acceptance and the final branch audit are complete. Open the M13 PR next and require full CI on the exact head before merge. Stable/public/live/recovery remain on v0.6.0 until a later independently verified v0.7.0 publication and rollout.
+M13 source is complete on `main`. After this closeout documentation merges, publish stable v0.7.0 from that exact accepted source and independently verify native assets, the `hostsleuth dns` command, and the multi-platform Docker image. Production/recovery remain on v0.6.0 until the separately verified v0.7.0 rollout.
 
 Do not restart a broad audit on continuation; use this handoff.
 
