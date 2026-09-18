@@ -395,7 +395,7 @@ Recovery PR #8 merged at:
 
 Full record: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`.
 
-## 23. M15 — Deployment / Permissions Story — ACTIVE NEXT
+## 23. M15 — Deployment / Permissions Story — IMPLEMENTATION IN PROGRESS
 
 Goal:
 
