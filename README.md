@@ -580,9 +580,9 @@ M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certi
 
 The owner-approved fixed native `service.reload` action remains native-only and independently allowlisted. Docker mode exposes neither native systemd action.
 
-A feature-free **v1.0 Readiness / Hardening** cycle is now active. The accepted first slice adds persisted-state durability regression coverage, Admin Console tab/tabpanel keyboard/accessibility semantics, reduced-motion/focus handling, responsive browser acceptance, and explicit served-asset budgets. The second slice hardens native release installation with SHA-256 verification and adds restrictive browser security headers plus disposable native-install CI acceptance. Stable/public/live/recovery remain v0.9.0 until readiness is accepted and a separate v1.0.0 publication decision is made.
+The feature-free **v1.0 Readiness / Hardening** technical gates are complete pending the docs-only closeout CI/merge. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers. Stable/public/live/recovery remain v0.9.0 until the owner separately approves v1.0.0 publication.
 
-See [`docs/design/V1.0-READINESS.md`](docs/design/V1.0-READINESS.md) for the readiness gates and [`docs/ROADMAP.md`](docs/ROADMAP.md) for product guardrails.
+See [`docs/design/V1.0-READINESS.md`](docs/design/V1.0-READINESS.md) for the readiness gates, [`docs/design/V1.0-RELEASE-CHECKLIST.md`](docs/design/V1.0-RELEASE-CHECKLIST.md) for publication/rollback ordering, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for product guardrails.
 
 ## Security and privacy
 
@@ -597,6 +597,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `TO-DO.md` — active checklist and product decisions.
 - `docs/ROADMAP.md` — owner-approved ordered product roadmap.
 - `docs/design/V1.0-READINESS.md` — feature-free v1.0 hardening gates and release-readiness contract.
+- `docs/design/V1.0-RELEASE-CHECKLIST.md` — exact v1.0 publication, live acceptance, recovery-alignment, and rollback checklist.
+- `docs/history/V1.0-READINESS.md` — v1.0 technical readiness acceptance closeout.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 - `docs/history/M10-REBOOT-STORY.md` — completed M10 implementation and acceptance record.
 - `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md` — completed M11 security model and acceptance record.
