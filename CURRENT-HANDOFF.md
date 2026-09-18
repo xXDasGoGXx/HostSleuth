@@ -167,7 +167,7 @@ Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
 ## Active next step
 
-Perform the final exact-head M14 branch audit, then open the PR and require the full GitHub CI matrix before merge. Stable/public/live/recovery remain on v0.7.0 until a later independently verified v0.8.0 publication and rollout.
+Exact-head local audit passed on `a093f733e5df0909f8632db9c0ad4a287768101e`. Open the M14 PR next and require the full GitHub CI matrix before merge. Stable/public/live/recovery remain on v0.7.0 until a later independently verified v0.8.0 publication and rollout.
 
 Do not restart a broad audit on continuation; use this handoff.
 
