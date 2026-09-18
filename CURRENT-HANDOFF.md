@@ -163,11 +163,15 @@ Design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
 Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
-## Active next step — M15 Deployment / Permissions Story
+## Active milestone — M15 Deployment / Permissions Story
 
 v0.8.0 publication, live acceptance, and disaster-recovery alignment are complete.
 
-Begin M15 from the approved roadmap. The bounded product question is:
+M15 implementation is now in progress on a focused branch. Local Go 1.24.13 format/full-test/race-test/vet/build and JavaScript syntax validation pass. PR/CI and bounded native acceptance are still required before M15 may be called complete.
+
+Design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
+
+The bounded product question is:
 
 > The process is running; why can it not use this path/socket/port?
 
