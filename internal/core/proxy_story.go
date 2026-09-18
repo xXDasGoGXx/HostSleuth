@@ -38,38 +38,38 @@ type ProxyHTTPHop struct {
 }
 
 type ProxyHTTPProbe struct {
-	URL                     string         `json:"url"`
-	DialTarget              string         `json:"dial_target"`
-	HostHeader              string         `json:"host_header"`
-	TLSServerName           string         `json:"tls_server_name,omitempty"`
-	Status                  string         `json:"status"`
-	DurationMS              int64          `json:"duration_ms"`
-	StatusCode              int            `json:"status_code,omitempty"`
-	HTTPStatus              string         `json:"http_status,omitempty"`
-	Location                string         `json:"location,omitempty"`
-	Server                  string         `json:"server,omitempty"`
-	ContentType             string         `json:"content_type,omitempty"`
-	Redirects               []ProxyHTTPHop `json:"redirects,omitempty"`
-	CrossHostRedirectStopped bool          `json:"cross_host_redirect_stopped,omitempty"`
-	RedirectLimitReached    bool           `json:"redirect_limit_reached,omitempty"`
-	Error                   string         `json:"error,omitempty"`
+	URL                      string         `json:"url"`
+	DialTarget               string         `json:"dial_target"`
+	HostHeader               string         `json:"host_header"`
+	TLSServerName            string         `json:"tls_server_name,omitempty"`
+	Status                   string         `json:"status"`
+	DurationMS               int64          `json:"duration_ms"`
+	StatusCode               int            `json:"status_code,omitempty"`
+	HTTPStatus               string         `json:"http_status,omitempty"`
+	Location                 string         `json:"location,omitempty"`
+	Server                   string         `json:"server,omitempty"`
+	ContentType              string         `json:"content_type,omitempty"`
+	Redirects                []ProxyHTTPHop `json:"redirects,omitempty"`
+	CrossHostRedirectStopped bool           `json:"cross_host_redirect_stopped,omitempty"`
+	RedirectLimitReached     bool           `json:"redirect_limit_reached,omitempty"`
+	Error                    string         `json:"error,omitempty"`
 }
 
 type ProxyStory struct {
-	PublicURL             string          `json:"public_url"`
-	UpstreamURL           string          `json:"upstream_url"`
-	PublicTarget          string          `json:"public_target"`
-	UpstreamTarget        string          `json:"upstream_target"`
-	StartedAt             time.Time       `json:"started_at"`
-	Status                string          `json:"status"`
-	Conclusion            string          `json:"conclusion"`
-	FirstProblem          string          `json:"first_problem,omitempty"`
-	PublicDiagnosis       Diagnosis       `json:"public_diagnosis"`
-	UpstreamDiagnosis     Diagnosis       `json:"upstream_diagnosis"`
-	PublicHTTP            *ProxyHTTPProbe `json:"public_http,omitempty"`
-	UpstreamNativeHTTP    *ProxyHTTPProbe `json:"upstream_native_http,omitempty"`
-	UpstreamPublicHostHTTP *ProxyHTTPProbe `json:"upstream_public_host_http,omitempty"`
-	Stages                []ProxyStoryStage `json:"stages"`
+	PublicURL              string            `json:"public_url"`
+	UpstreamURL            string            `json:"upstream_url"`
+	PublicTarget           string            `json:"public_target"`
+	UpstreamTarget         string            `json:"upstream_target"`
+	StartedAt              time.Time         `json:"started_at"`
+	Status                 string            `json:"status"`
+	Conclusion             string            `json:"conclusion"`
+	FirstProblem           string            `json:"first_problem,omitempty"`
+	PublicDiagnosis        Diagnosis         `json:"public_diagnosis"`
+	UpstreamDiagnosis      Diagnosis         `json:"upstream_diagnosis"`
+	PublicHTTP             *ProxyHTTPProbe   `json:"public_http,omitempty"`
+	UpstreamNativeHTTP     *ProxyHTTPProbe   `json:"upstream_native_http,omitempty"`
+	UpstreamPublicHostHTTP *ProxyHTTPProbe   `json:"upstream_public_host_http,omitempty"`
+	Stages                 []ProxyStoryStage `json:"stages"`
 }
 
 var proxyStoryDiagnose = Diagnose
@@ -454,11 +454,11 @@ func proxyTLSStage(id, group, title string, diagnosis Diagnosis, nativeHTTP, for
 
 	if forwardedHTTP != nil && nativeVerified != forwardedVerified {
 		return ProxyStoryStage{
-			ID:      id,
-			Group:   group,
-			Title:   title,
-			Status:  "warn",
-			Summary: "TLS behavior changes when the public Host/SNI is used against the upstream address",
+			ID:       id,
+			Group:    group,
+			Title:    title,
+			Status:   "warn",
+			Summary:  "TLS behavior changes when the public Host/SNI is used against the upstream address",
 			Evidence: append(evidence, proxyTLSDiagnosticEvidence(tlsEvidence)...),
 		}
 	}
