@@ -2,13 +2,11 @@
 
 Last updated: 2026-09-18
 
-## Stable/public — v1.0.0; live/recovery — v0.9.0
+## Stable / public / live / recovery state — v1.0.0
 
-The owner explicitly approved v1.0.0 publication and the accepted release/production/recovery sequence.
+Stable/public/live/recovery are aligned on:
 
-Stable/public release:
-
-`v1.0.0`
+`v1.0.0` / `mjmalleo/hostsleuth:1.0.0`
 
 Exact published source:
 
@@ -29,33 +27,37 @@ Both resolve to verified OCI index:
 
 Independent public verification passed for the exact GitHub tag, native amd64/arm64 binaries + SHA256SUMS, published binary version, and Docker Hub amd64/arm64 manifests.
 
-Live Arcane production remains on the known-good rollback release:
+Live Arcane acceptance confirmed:
 
-`mjmalleo/hostsleuth:0.9.0`
+- `/api/about` = `v1.0.0`;
+- snapshot schema 4 / Docker mode;
+- running container image `mjmalleo/hostsleuth:1.0.0`;
+- all 100 retained events, including pre-upgrade history;
+- v1 security headers and served-asset budgets;
+- live Admin Console deep-link/accessibility and narrow-viewport no-overflow acceptance;
+- M15 Docker permission boundary;
+- real M16 SMTP STARTTLS negotiation;
+- real M17 certificate-rollout MATCH;
+- LAN Action API HTTP 403;
+- loopback `service.restart` and `service.reload` capabilities both `enabled=false` / `available=false`.
 
-The live endpoint still reports v0.9.0 / schema 4 / Docker mode before the production redeploy.
+`OMV-Docker-Rebuild` PR #11 merged at:
 
-Recovery `main` also remains pinned to:
+`44d6a30e580e2b333841f14eade2e10cca4b5ba5`
 
-`mjmalleo/hostsleuth:0.9.0`
-
-Recovery PR #11 is staged from commit:
-
-`a4016c88a921db5aff9e249bc4dfe004e2889310`
-
-and changes only the recovery image pin to `mjmalleo/hostsleuth:1.0.0`. It must remain unmerged until live v1.0.0 acceptance passes.
+Recovery `main` now pins `mjmalleo/hostsleuth:1.0.0`, with `CURRENT-SETUP.md` recording the same live acceptance.
 
 Publication record: `docs/history/V1.0.0-PUBLICATION.md`.
 
-Known-good rollback record: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`.
+Production/recovery record: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`.
 
-Next gate: update only the existing Arcane-managed `hostsleuth` image from `0.9.0` to `1.0.0`, redeploy, run the full live acceptance checklist, then merge recovery PR #11 only if acceptance passes.
+The v1.0.0 release/production/recovery sequence is complete. No additional feature milestone or Safe Action family is automatically approved.
 
 ## v1.0 Readiness / Hardening — COMPLETE / PUBLISHED IN v1.0.0
 
 The owner-approved feature-free readiness cycle is complete and is now published in stable v1.0.0.
 
-Production and recovery remain on v0.9.0 until the separately gated live acceptance and recovery-alignment steps complete.
+The separately gated v1.0.0 live acceptance and recovery-alignment steps are complete; production and recovery are aligned on v1.0.0.
 
 Readiness slice 1:
 
@@ -130,7 +132,7 @@ PR #68 squash-merged to `main` at:
 
 The owner approved publication. v1.0.0 is now published and independently verified from exact accepted source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f` under release workflow `35358798799`.
 
-Production/recovery remain deliberately on v0.9.0 while the Arcane live-acceptance gate is pending. Recovery PR #11 is staged but unmerged.
+Live v1.0.0 acceptance passed and recovery PR #11 merged at `44d6a30e580e2b333841f14eade2e10cca4b5ba5`. Stable/public/live/recovery are aligned on v1.0.0.
 
 ## Product identity
 
