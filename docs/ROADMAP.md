@@ -353,13 +353,38 @@ PR #51 passed test/format/vet/build, Docker smoke including the proxy-story API,
 
 Full closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
-## 21. Publish stable v0.8.0 — ACTIVE NEXT STEP
+## 21. Publish stable v0.8.0 — COMPLETE
 
-Publish v0.8.0 only from the exact accepted docs-inclusive `main` source after this closeout documentation merges. Independently verify native assets/checksums, `hostsleuth proxy`, and public multi-platform Docker tags before production rollout.
+Stable `v0.8.0` was published from exact accepted source:
 
-Production and disaster recovery remain on v0.7.0 until the separately gated rollout passes.
+`28b8d88ec018782353840dee8528d765c4056e89`
 
-## 22. M15 — Deployment / Permissions Story — APPROVED
+Release workflow run `35294912224` completed successfully.
+
+Independent verification confirmed:
+
+- native amd64/arm64 assets match `SHA256SUMS`;
+- amd64 execution reports `v0.8.0 (28b8d88ec018)`;
+- public `hostsleuth proxy` command is present and invalid public URL input fails closed;
+- public `0.8.0` and `latest` share OCI index `sha256:152255f44e451995767cd40b64b99879feb0ed0ae28a4fddfb4a269a55fc11df`;
+- linux/amd64 and linux/arm64 manifests are present.
+
+Full record: `docs/history/V0.8.0-PUBLICATION.md`.
+
+## 22. Production / recovery v0.8.0 alignment — ACTIVE NEXT STEP
+
+Stable/public are v0.8.0 while live Arcane production and disaster recovery remain on v0.7.0.
+
+Ordered rollout:
+
+1. stage the recovery image pin to `mjmalleo/hostsleuth:0.8.0` without merging ahead of production;
+2. redeploy the existing authenticated Arcane-managed project;
+3. verify live version/schema/mode, retained state/events, LAN reachability, and Safe Actions boundary;
+4. exercise Proxy Path / Admin Console v2 against live production;
+5. merge recovery only after live acceptance;
+6. record final v0.8.0 alignment.
+
+## 23. M15 — Deployment / Permissions Story — APPROVED
 
 Goal:
 
@@ -378,7 +403,7 @@ Bounded direction:
 
 UI adds a searchable evidence table and permission-chain story.
 
-## 23. M16 — STARTTLS / Mail Service Story — APPROVED
+## 24. M16 — STARTTLS / Mail Service Story — APPROVED
 
 Goal:
 
@@ -402,7 +427,7 @@ Evidence:
 
 No credentials, mail submission, mailbox access, or message contents.
 
-## 24. M17 — Certificate Rollout Verification — APPROVED
+## 25. M17 — Certificate Rollout Verification — APPROVED
 
 Goal:
 
@@ -415,7 +440,7 @@ Bounded direction:
 - deterministic endpoint matrix;
 - no renewal, install, reload, private-key reads, or ACME management.
 
-## 25. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
+## 26. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
 
 One additional action is approved in principle, but the exact action is **not** pre-approved.
 

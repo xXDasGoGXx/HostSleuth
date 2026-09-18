@@ -49,7 +49,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.7.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.8.0`.
 
 ### Docker Compose
 
@@ -65,7 +65,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.7.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.8.0 docker compose up -d
 ```
 
 ### Docker run
@@ -440,7 +440,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v0.7.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v0.8.0 ./scripts/install.sh
 ```
 
 ## Build from source
@@ -500,7 +500,7 @@ HostSleuth does **not** automatically restart services, modify firewall rules, r
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, M11 Optional Safe Actions, and the Redacted Evidence Bundle are complete.
 
-Stable `v0.7.0` is the current published native/Docker release and includes M13 DNS Detective + Admin Console v1.
+Stable `v0.8.0` is the current published native/Docker release and includes M14 Reverse Proxy / Upstream Story + Admin Console v2.
 
 The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.7.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.7.0, schema 4 / Docker mode, retained pre-upgrade events, the loopback-only/default-disabled Safe Actions boundary, live DNS Detective behavior, and the Admin Console v1 UI.
 
@@ -508,7 +508,7 @@ M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6
 
 M13 DNS Detective + Admin Console v1 is complete on `main`, published in stable v0.7.0, independently verified, and live in production/recovery.
 
-M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete on `main`; PR #51 passed the full CI matrix and squash-merged at `135a73ffb333c1e4ac5135f93db7bac3dac5cdae`. Stable/live v0.7.0 does **not** contain M14 yet; publication and rollout remain separate gated steps.
+M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete on `main`, published in stable v0.8.0, and independently verified. Live OMV production and disaster recovery remain on v0.7.0 until the separately gated v0.8.0 rollout passes.
 
 The owner-approved forward roadmap continues after M14 through Deployment / Permissions Story, STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
 

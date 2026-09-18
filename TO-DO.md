@@ -56,12 +56,13 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v0.7.0 production/recovery alignment: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`
 - M14 design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
 - M14 closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
+- v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v0.7.0` / `mjmalleo/hostsleuth:0.7.0`. Docker `latest` resolves to the same verified v0.7.0 OCI index.
+Stable/public are now `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`; Docker `latest` resolves to the same verified v0.8.0 OCI index. Live/recovery remain aligned on `mjmalleo/hostsleuth:0.7.0` until the separate v0.8.0 rollout passes.
 
-## Active milestone — M14 Reverse Proxy / Upstream Story + Admin Console v2
+## Active next step — production / recovery v0.8.0 alignment
 
 - [x] Write bounded M14 design and HTTP safety boundary.
 - [x] Implement public→upstream path core with deterministic stage ordering.
@@ -79,9 +80,12 @@ Stable/public/live/recovery are aligned on `v0.7.0` / `mjmalleo/hostsleuth:0.7.0
 - [x] Open M14 PR #51 after the branch remained locally green.
 - [x] Require full GitHub CI on exact head `e7737c3342c628d80bf17a3b60a2cc5b4ead48c0`; all jobs passed.
 - [x] Squash-merge M14 PR #51 to `main` at `135a73ffb333c1e4ac5135f93db7bac3dac5cdae`.
-- [ ] Publish stable v0.8.0 from the exact accepted docs-inclusive source.
-- [ ] Independently verify native assets/checksums, `hostsleuth proxy`, and the multi-platform Docker image.
-- [ ] Roll live/recovery to v0.8.0 only after publication verification.
+- [x] Publish stable v0.8.0 from exact source `28b8d88ec018782353840dee8528d765c4056e89`.
+- [x] Independently verify native assets/checksums, `hostsleuth proxy` validation, and the multi-platform Docker image.
+- [ ] Stage recovery image pin at 0.8.0 without merging ahead of production.
+- [ ] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.8.0`.
+- [ ] Verify live v0.8.0, retained state/events, Safe Actions boundary, Proxy Path, and Admin Console v2.
+- [ ] Merge recovery alignment only after production acceptance.
 
 ## Guardrails
 

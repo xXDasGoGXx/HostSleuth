@@ -11,42 +11,40 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 
 Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform, browser shell, or automatic-remediation engine.
 
-## Stable / public state — v0.7.0
+## Stable / public state — v0.8.0
 
 Stable public release:
 
-`v0.7.0`
+`v0.8.0`
 
 Exact published source:
 
-`236002106afd6aa042fd131c0edc0f3455b9cfdf`
+`28b8d88ec018782353840dee8528d765c4056e89`
 
 Release workflow:
 
-`35292714676` — success
+`35294912224` — success
 
 Published Docker tags:
 
-- `mjmalleo/hostsleuth:0.7.0`
+- `mjmalleo/hostsleuth:0.8.0`
 - `mjmalleo/hostsleuth:latest`
 
 Both resolve to verified OCI index:
 
-`sha256:3663e8c483b67de72f3a0e26fd80e9e3686319d9b2bafe602979cd790e2ce2bb`
+`sha256:152255f44e451995767cd40b64b99879feb0ed0ae28a4fddfb4a269a55fc11df`
 
-Independent verification passed for native checksums/execution, the M13 `hostsleuth dns` command and validation boundary, and linux/amd64 + linux/arm64 Docker manifests.
+Independent verification passed for native checksums/execution, the M14 `hostsleuth proxy` command validation path, and linux/amd64 + linux/arm64 Docker manifests.
 
-Full publication record: `docs/history/V0.7.0-PUBLICATION.md`.
+Full publication record: `docs/history/V0.8.0-PUBLICATION.md`.
 
-## Stable / public / live / recovery state — v0.7.0
+## Live / disaster-recovery state — still v0.7.0
 
-Stable/public, the live Arcane-managed deployment, and `xXDasGoGXx/OMV-Docker-Rebuild` disaster recovery are aligned on:
+The existing Arcane-managed production deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition remain pinned to:
 
-`v0.7.0` / `mjmalleo/hostsleuth:0.7.0`
+`mjmalleo/hostsleuth:0.7.0`
 
-Live acceptance confirmed version/schema/mode, retained pre-upgrade events, DNS Detective, Admin Console v1, and the Safe Actions loopback/default-disabled boundaries. Recovery PR #7 merged at `80e7c7c08b5905c7fbad158e4b11e6e4b4ced1f9`.
-
-Full production/recovery record: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`.
+Publication of v0.8.0 is not proof of production rollout.
 
 ## Redacted Evidence Bundle — complete, published, and live
 
@@ -167,9 +165,9 @@ Design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
 Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
-## Active next step — publish v0.8.0
+## Active next step — production / recovery v0.8.0 alignment
 
-M14 source is complete on `main`. After this closeout documentation merges, publish stable v0.8.0 from the exact accepted docs-inclusive source and independently verify native assets, `hostsleuth proxy`, and the multi-platform Docker image. Production/recovery remain on v0.7.0 until the separately verified v0.8.0 rollout.
+Stage the disaster-recovery image pin at 0.8.0 without merging ahead of production. Then redeploy the existing authenticated Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.8.0`. Verify live version/schema/mode, retained state/events, Safe Actions boundary, Proxy Path behavior, and Admin Console v2. Merge recovery alignment only after live acceptance passes.
 
 Do not restart a broad audit on continuation; use this handoff.
 
