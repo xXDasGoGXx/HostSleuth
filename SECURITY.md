@@ -5,16 +5,17 @@ HostSleuth is early-stage software that inventories local system state. Treat it
 ## Current security posture
 
 - HostSleuth remains read-only by default. Optional Safe Actions require explicit enablement and an explicit target allowlist.
-- The web interface binds to `127.0.0.1:8787` by default.
+- The web interface binds to `127.0.0.1:8787` by default and sends a restrictive Content Security Policy, anti-framing, no-referrer, no-sniff, and browser permissions headers.
 - Non-loopback exposure is not recommended until authentication is implemented.
 - Snapshot, event, and action-audit files are created with owner-only permissions where supported.
+- The native release installer verifies the selected architecture binary against the release `SHA256SUMS` before installing it.
 - Automatic repair/remediation remains out of scope. M11/M18 actions are explicit operator requests, never automatic responses to a diagnosis.
 - The supported Docker Compose deployment does not use unrestricted privileged mode, drops all Linux capabilities, enables `no-new-privileges`, and uses a read-only container filesystem.
 - Docker mode deliberately reports systemd and host-filesystem evidence as unavailable instead of mounting broad host control surfaces to recreate native visibility.
 
 ## M11 / M18 Optional Safe Actions boundary
 
-Development source exposes exactly two fixed native systemd actions:
+The current stable/native source exposes exactly two fixed native systemd actions:
 
 - `service.restart` from M11;
 - `service.reload` from M18.

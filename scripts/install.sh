@@ -11,7 +11,7 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-for cmd in curl install systemctl; do
+for cmd in curl cut grep install sha256sum systemctl; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "required command not found: $cmd" >&2
     exit 1
@@ -28,18 +28,32 @@ case "$(uname -m)" in
 esac
 
 VERSION="${HOSTSLEUTH_VERSION:-latest}"
+ASSET="hostsleuth-linux-${ARCH}"
 if [ "$VERSION" = "latest" ]; then
-  RELEASE_URL="https://github.com/${REPO}/releases/latest/download/hostsleuth-linux-${ARCH}"
+  RELEASE_BASE="https://github.com/${REPO}/releases/latest/download"
 else
-  RELEASE_URL="https://github.com/${REPO}/releases/download/${VERSION}/hostsleuth-linux-${ARCH}"
+  RELEASE_BASE="https://github.com/${REPO}/releases/download/${VERSION}"
 fi
 
-TMP="$(mktemp)"
-trap 'rm -f "$TMP"' EXIT INT TERM
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT INT TERM
+ASSET_PATH="${TMP_DIR}/${ASSET}"
+SUMS_PATH="${TMP_DIR}/SHA256SUMS"
 
 echo "Downloading HostSleuth (${ARCH}, ${VERSION})..."
-curl -fL --retry 3 --proto '=https' --tlsv1.2 "$RELEASE_URL" -o "$TMP"
-install -m 0755 "$TMP" "${INSTALL_DIR}/hostsleuth"
+curl -fL --retry 3 --proto '=https' --tlsv1.2 "${RELEASE_BASE}/${ASSET}" -o "$ASSET_PATH"
+curl -fL --retry 3 --proto '=https' --tlsv1.2 "${RELEASE_BASE}/SHA256SUMS" -o "$SUMS_PATH"
+
+EXPECTED="$(grep "  ${ASSET}\$" "$SUMS_PATH" | cut -d' ' -f1)"
+if [ -z "$EXPECTED" ] || [ "${#EXPECTED}" -ne 64 ]; then
+  echo "release checksum for ${ASSET} is missing or invalid" >&2
+  exit 1
+fi
+
+echo "Verifying release checksum..."
+printf '%s  %s\n' "$EXPECTED" "$ASSET" | (cd "$TMP_DIR" && sha256sum -c -)
+
+install -m 0755 "$ASSET_PATH" "${INSTALL_DIR}/hostsleuth"
 install -d -m 0700 "$STATE_DIR"
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)

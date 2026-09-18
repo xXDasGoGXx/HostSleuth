@@ -8,7 +8,7 @@ HostSleuth records meaningful Linux state changes and performs deterministic, ev
 
 Native Linux is the recommended deployment because it gives HostSleuth the fullest view of the machine.
 
-Requirements: Linux with systemd. Go is **not** required when installing a release.
+Requirements: Linux with systemd. Go is **not** required when installing a release. The release installer downloads `SHA256SUMS` and verifies the architecture-specific binary before installing it.
 
 ```bash
 git clone https://github.com/xXDasGoGXx/HostSleuth.git
@@ -49,7 +49,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.8.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.9.0`.
 
 ### Docker Compose
 
@@ -509,6 +509,8 @@ hostsleuth version
 sudo HOSTSLEUTH_VERSION=v0.9.0 ./scripts/install.sh
 ```
 
+The installer fetches both the selected native binary and that release's `SHA256SUMS`. Installation stops before replacing `/usr/local/bin/hostsleuth` if the expected architecture checksum is missing or does not verify.
+
 ## Build from source
 
 Requirements: Linux and Go 1.24+.
@@ -578,7 +580,7 @@ M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certi
 
 The owner-approved fixed native `service.reload` action remains native-only and independently allowlisted. Docker mode exposes neither native systemd action.
 
-A feature-free **v1.0 Readiness / Hardening** cycle is now active. The first slice adds persisted-state durability regression coverage, Admin Console tab/tabpanel keyboard/accessibility semantics, reduced-motion/focus handling, responsive browser acceptance, and explicit served-asset budgets. Stable/public/live/recovery remain v0.9.0 until readiness is accepted and a separate v1.0.0 publication decision is made.
+A feature-free **v1.0 Readiness / Hardening** cycle is now active. The accepted first slice adds persisted-state durability regression coverage, Admin Console tab/tabpanel keyboard/accessibility semantics, reduced-motion/focus handling, responsive browser acceptance, and explicit served-asset budgets. The second slice hardens native release installation with SHA-256 verification and adds restrictive browser security headers plus disposable native-install CI acceptance. Stable/public/live/recovery remain v0.9.0 until readiness is accepted and a separate v1.0.0 publication decision is made.
 
 See [`docs/design/V1.0-READINESS.md`](docs/design/V1.0-READINESS.md) for the readiness gates and [`docs/ROADMAP.md`](docs/ROADMAP.md) for product guardrails.
 
