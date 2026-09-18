@@ -11,11 +11,11 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 
 Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform, browser shell, or automatic-remediation engine.
 
-## Stable / public state — v0.8.0
+## Stable / public / live / recovery state — v0.8.0
 
-Stable public release:
+Stable/public, the live Arcane-managed deployment, and `xXDasGoGXx/OMV-Docker-Rebuild` disaster recovery are aligned on:
 
-`v0.8.0`
+`v0.8.0` / `mjmalleo/hostsleuth:0.8.0`
 
 Exact published source:
 
@@ -34,17 +34,15 @@ Both resolve to verified OCI index:
 
 `sha256:152255f44e451995767cd40b64b99879feb0ed0ae28a4fddfb4a269a55fc11df`
 
-Independent verification passed for native checksums/execution, the M14 `hostsleuth proxy` command validation path, and linux/amd64 + linux/arm64 Docker manifests.
+Live acceptance confirmed v0.8.0, schema 4 / Docker mode, retained pre-upgrade events, the Safe Actions loopback/default-disabled boundary, a passing live M14 Proxy Path, and Admin Console v2 in the actual live DOM.
+
+Recovery PR #8 merged at:
+
+`290e7e6a6781ad29cbc7c8296d00877fb8489fd0`
 
 Full publication record: `docs/history/V0.8.0-PUBLICATION.md`.
 
-## Live / disaster-recovery state — still v0.7.0
-
-The existing Arcane-managed production deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition remain pinned to:
-
-`mjmalleo/hostsleuth:0.7.0`
-
-Publication of v0.8.0 is not proof of production rollout.
+Full production/recovery record: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`.
 
 ## Redacted Evidence Bundle — complete, published, and live
 
@@ -134,7 +132,7 @@ Disposable HTTP acceptance passed. Real resolver comparison also demonstrated re
 
 Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-## M14 — Reverse Proxy / Upstream Story + Admin Console v2 — SOURCE COMPLETE
+## M14 — Reverse Proxy / Upstream Story + Admin Console v2 — COMPLETE AND LIVE
 
 PR #51 passed the full GitHub CI matrix and squash-merged to `main` at:
 
@@ -165,9 +163,24 @@ Design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
 Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
-## Active next step — production / recovery v0.8.0 alignment
+## Active next step — M15 Deployment / Permissions Story
 
-Stage the disaster-recovery image pin at 0.8.0 without merging ahead of production. Then redeploy the existing authenticated Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.8.0`. Verify live version/schema/mode, retained state/events, Safe Actions boundary, Proxy Path behavior, and Admin Console v2. Merge recovery alignment only after live acceptance passes.
+v0.8.0 publication, live acceptance, and disaster-recovery alignment are complete.
+
+Begin M15 from the approved roadmap. The bounded product question is:
+
+> The process is running; why can it not use this path/socket/port?
+
+Initial M15 scope remains:
+
+- native service identity, UID/GID, working directory, and executable identity;
+- one explicit user-supplied path;
+- ownership/mode plus parent-directory traversal chain;
+- deterministic read/write/execute/traverse reasoning;
+- relevant Docker bind-mount metadata when available;
+- no recursive filesystem crawl;
+- no file contents;
+- searchable evidence and a visual permission-chain story in the Admin Console.
 
 Do not restart a broad audit on continuation; use this handoff.
 
