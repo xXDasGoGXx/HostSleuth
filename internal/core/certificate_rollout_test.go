@@ -2,6 +2,9 @@ package core
 
 import (
 	"context"
+	"crypto/tls"
+	"net"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -177,6 +180,68 @@ func TestCertificateRolloutStopsWhenReferenceCertificateIsUnavailable(t *testing
 	if story.Status != "unknown" || story.FirstProblem != "expected-reference" || calls != 1 {
 		t.Fatalf("unexpected story/calls: story=%#v calls=%d", story, calls)
 	}
+}
+
+func TestCertificateRolloutRealTLSFixtureDetectsDifferentServedCertificate(t *testing.T) {
+	old := certificateRolloutTLSProbe
+	certificateRolloutTLSProbe = probeTLS
+	defer func() { certificateRolloutTLSProbe = old }()
+
+	now := time.Now().UTC()
+	certAPEM, keyAPEM, certA := makeTestCertificate(t, "localhost", now.Add(-time.Hour), now.Add(24*time.Hour))
+	certBPEM, keyBPEM, _ := makeTestCertificate(t, "localhost", now.Add(-time.Hour), now.Add(24*time.Hour))
+
+	targetA, closeA := startCertificateRolloutTLSServer(t, certAPEM, keyAPEM)
+	defer closeA()
+	targetB, closeB := startCertificateRolloutTLSServer(t, certBPEM, keyBPEM)
+	defer closeB()
+
+	expected := certificateEvidence(certA, now).SHA256Fingerprint
+	story, err := BuildCertificateRolloutStory(t.Context(), expected, "", []string{targetA, targetB})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if story.Status != "fail" || story.FirstProblem != targetB {
+		t.Fatalf("unexpected real-TLS story: %#v", story)
+	}
+	if story.Endpoints[0].MatchStatus != "match" || story.Endpoints[1].MatchStatus != "mismatch" {
+		t.Fatalf("unexpected real-TLS matches: %#v", story.Endpoints)
+	}
+	if story.Endpoints[0].TLS == nil || story.Endpoints[0].TLS.HandshakeStatus != "pass" {
+		t.Fatalf("expected first real TLS handshake to pass: %#v", story.Endpoints[0])
+	}
+}
+
+func startCertificateRolloutTLSServer(t *testing.T, certPEM, keyPEM []byte) (string, func()) {
+	t.Helper()
+	pair, err := tls.X509KeyPair(certPEM, keyPEM)
+	if err != nil {
+		t.Fatal(err)
+	}
+	listener, err := tls.Listen("tcp", "127.0.0.1:0", &tls.Config{Certificates: []tls.Certificate{pair}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		conn, err := listener.Accept()
+		if err != nil {
+			return
+		}
+		defer conn.Close()
+		if tlsConn, ok := conn.(*tls.Conn); ok {
+			_ = tlsConn.Handshake()
+		}
+	}()
+
+	port := strconv.Itoa(listener.Addr().(*net.TCPAddr).Port)
+	target := net.JoinHostPort("localhost", port)
+	cleanup := func() {
+		_ = listener.Close()
+		<-done
+	}
+	return target, cleanup
 }
 
 func rolloutTLSEvidence(fingerprint, hostnameStatus, trustStatus string) *TLSEvidence {
