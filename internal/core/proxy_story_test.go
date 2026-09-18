@@ -73,7 +73,7 @@ func TestInspectProxyPublicHTTPStopsCrossHostRedirect(t *testing.T) {
 	}))
 	defer source.Close()
 
-	parsed, err := normalizeProxyStoryURL(source.URL + "/start")
+	sourceURL := strings.Replace(source.URL, "127.0.0.1", "localhost", 1)\n\tparsed, err := normalizeProxyStoryURL(sourceURL + "/start")
 	if err != nil {
 		t.Fatal(err)
 	}
