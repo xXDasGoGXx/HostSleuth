@@ -50,14 +50,33 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M12 closeout: `docs/history/M12-EXPECTED-ENDPOINT-CONTRACTS.md`
 - v0.6.0 publication: `docs/history/V0.6.0-PUBLICATION.md`
 - v0.6.0 production/recovery alignment: `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md`
+- M13 design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`
 
 ## Current state
 
 Stable/public/live/recovery are aligned on `v0.6.0` / `mjmalleo/hostsleuth:0.6.0`. Docker `latest` resolves to the same verified v0.6.0 OCI index.
 
-## Current milestone boundary
+## Active milestone — M13 DNS Detective + Admin Console v1
 
-All v0.6.0 source, publication, live-production, and disaster-recovery gates are complete. No new feature milestone is active until the owner selects one.
+Owner approved M13-M18 plus continuous UI/UX and engineering polish.
+
+- [x] Promote the approved M13-M18 direction into the canonical roadmap.
+- [x] Write the bounded M13 DNS Detective / Admin Console v1 design.
+- [x] Implement DNS Detective core comparison engine.
+- [x] Add `hostsleuth dns` CLI and `GET /api/dns-detective`.
+- [x] Add dedicated DNS Detective Web UI.
+- [x] Add Admin Console v1 shell: desktop nav rail, global target bar, recent targets, density control, keyboard focus shortcut, responsive fallback.
+- [x] Add CI cancellation for obsolete PR runs and cover M13 JS/Docker smoke.
+- [x] Local Go 1.24.13 format/vet/test/build and JavaScript syntax checks.
+- [x] Disposable API/UI acceptance against the M13 build.
+- [x] Real resolver comparison proved agreement with one explicit local resolver and a timeout from another, producing resolver-specific evidence rather than a generic DNS failure.
+- [x] Final branch audit / closeout record.
+- [ ] Open M13 PR only after the exact branch remains locally green.
+- [ ] Require full GitHub CI on the exact PR head.
+- [ ] Merge M13 to `main`.
+- [ ] Publish and independently verify stable v0.7.0.
+- [ ] Roll live/recovery to v0.7.0 only after publication verification.
+
 
 ## Guardrails
 

@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -29,14 +33,20 @@ jobs:
           node --check cmd/hostsleuth/web/incident_lens.js
           node --check cmd/hostsleuth/web/reboot_story.js
           node --check cmd/hostsleuth/web/workbench.js
+          node --check cmd/hostsleuth/web/endpoint_contract.js
+          node --check cmd/hostsleuth/web/dns_detective.js
           node --check cmd/hostsleuth/web/actions.js
+          node --check cmd/hostsleuth/web/admin_console.js
           cat \
             cmd/hostsleuth/web/app.js \
             cmd/hostsleuth/web/service_story.js \
             cmd/hostsleuth/web/incident_lens.js \
             cmd/hostsleuth/web/reboot_story.js \
             cmd/hostsleuth/web/workbench.js \
+            cmd/hostsleuth/web/endpoint_contract.js \
+            cmd/hostsleuth/web/dns_detective.js \
             cmd/hostsleuth/web/actions.js \
+            cmd/hostsleuth/web/admin_console.js \
             > /tmp/hostsleuth-served-app.js
           node --check /tmp/hostsleuth-served-app.js
       - name: Build
@@ -212,7 +222,11 @@ jobs:
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'HOSTSLEUTH WORKBENCH'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'REBOOT STORY'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'OPTIONAL SAFE ACTIONS'
+          curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'EXPECTED ENDPOINT CONTRACT'
+          curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'DNS DETECTIVE'
+          curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'Quick target'
           curl -fsS http://127.0.0.1:8787/api/reboot-story > /tmp/hostsleuth-reboot-story.json
+          curl -fsS 'http://127.0.0.1:8787/api/dns-detective?name=localhost' > /tmp/hostsleuth-dns-detective.json
           curl -fsS http://127.0.0.1:8787/api/actions > /tmp/hostsleuth-actions.json
           curl -fsS 'http://127.0.0.1:8787/api/diagnose?target=127.0.0.1:8787' > /tmp/hostsleuth-diagnosis.json
           curl -fsS --get --data-urlencode 'path=/host/etc/os-release' 'http://127.0.0.1:8787/api/workbench/file' > /tmp/hostsleuth-workbench-file.json
@@ -228,6 +242,11 @@ jobs:
           assert reboot_story.get('boot_id'), reboot_story
           assert reboot_story.get('boot_started_at'), reboot_story
           assert reboot_story.get('cause_assessment'), reboot_story
+
+          dns = json.loads(Path('/tmp/hostsleuth-dns-detective.json').read_text())
+          assert dns.get('status') == 'single', dns
+          assert dns.get('resolvers', [{}])[0].get('label') == 'system', dns
+          assert dns.get('resolvers', [{}])[0].get('status') == 'pass', dns
 
           file_evidence = json.loads(Path('/tmp/hostsleuth-workbench-file.json').read_text())
           assert len(file_evidence.get('sha256', '')) == 64, file_evidence

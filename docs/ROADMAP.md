@@ -215,15 +215,169 @@ Recovery alignment PR #6 merged at:
 
 Full record: `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md`.
 
-## Research backlog — not automatically scheduled
+## 16. Admin-grade roadmap — OWNER APPROVED
 
-The detailed research artifact remains:
+The owner explicitly approved the following direction after v0.6.0:
 
-`docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md`
+- DNS Detective / split-view resolver comparison;
+- Reverse Proxy / Upstream Story;
+- Deployment / Permissions Story;
+- STARTTLS / Mail Service Story;
+- Certificate Rollout Verification;
+- one additional narrowly scoped Safe Action after a fresh threat/privilege review;
+- continuous UI/UX and engineering polish so HostSleuth feels like a purpose-built admin troubleshooting console.
 
-Remaining promising differentiated questions include resolver/delegation/split-view DNS mismatches, reverse-proxy/upstream problems, permissions/ownership/deployment-path reasoning, STARTTLS inspection, certificate rollout verification, and only narrowly justified future actions using the M11 security model.
+The product standard is: **collapse the multi-tool troubleshooting sequence an experienced admin normally reconstructs by hand into one deterministic evidence story.**
 
-Research remains design input only; it does not silently become implementation scope.
+UI/UX is now a cross-cutting implementation track rather than end-of-project polish.
+
+Detailed forward design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
+
+## 17. M13 — DNS Detective + Admin Console v1 — ACTIVE
+
+Goal:
+
+> Which DNS view is this host actually seeing, which resolver disagrees, and is the difference consistent with split-view DNS?
+
+Bounded implementation:
+
+- always inspect the system resolver;
+- optionally compare up to four explicitly supplied resolver IPs;
+- custom resolver Web/API inputs are IP-only and DNS port 53 only;
+- normalized A/AAAA plus canonical CNAME evidence for names;
+- PTR evidence for IP inputs;
+- per-resolver duration and bounded error evidence;
+- address-scope classification: loopback/private/link-local/global/other;
+- bounded runtime `/etc/resolv.conf` context;
+- deterministic `agree`, `diverge`, `partial`, or `single` result;
+- private/local vs global disagreement may be described as **consistent with** split-view DNS, never asserted as configuration fact without direct evidence;
+- CLI `hostsleuth dns`;
+- `GET /api/dns-detective`;
+- dedicated DNS Detective Web UI.
+
+Privacy boundary:
+
+- no hidden public-resolver lookup;
+- a hostname is sent only to the system resolver and custom resolver IPs the operator explicitly supplies;
+- no DNS configuration changes, zone transfers, updates, polling, alerts, or remediation.
+
+### Admin Console v1 — ships with M13
+
+- sticky left navigation rail on desktop;
+- global Quick Target bar;
+- Diagnose / Expectations / DNS routing from one input;
+- recent targets stored browser-local only;
+- comfortable/compact density toggle stored browser-local only;
+- `/` keyboard shortcut to focus the global target bar;
+- wider evidence workspace and stronger semantic hierarchy;
+- responsive horizontal navigation on smaller screens;
+- reduced-motion support;
+- no decorative monitoring graphs.
+
+Release target after source acceptance: `v0.7.0`.
+
+## 18. M14 — Reverse Proxy / Upstream Story — APPROVED NEXT
+
+Goal:
+
+> DNS and 443 are fine; where does the request path actually break?
+
+Bounded direction:
+
+- explicit public-facing endpoint plus expected upstream endpoint;
+- deterministic path story:
+  DNS -> route/TCP -> proxy listener -> served TLS/HTTP -> upstream DNS/route/TCP -> upstream TLS/HTTP;
+- redirect, Host/SNI, listener, and Docker publication evidence where available;
+- first proven failure highlighted visually;
+- no arbitrary proxy configuration ingestion in v1;
+- no proxy edits/reloads.
+
+Admin Console v2 adds a visual request-path story and bounded evidence-copy controls.
+
+## 19. M15 — Deployment / Permissions Story — APPROVED
+
+Goal:
+
+> The process is running; why can it not use this path/socket/port?
+
+Bounded direction:
+
+- native service identity;
+- UID/GID;
+- working directory and executable identity;
+- one explicit user-supplied path;
+- ownership/mode plus parent-directory traversal chain;
+- deterministic read/write/execute/traverse reasoning;
+- relevant Docker bind-mount metadata when available;
+- no recursive filesystem crawl and no file contents.
+
+UI adds a searchable evidence table and permission-chain story.
+
+## 20. M16 — STARTTLS / Mail Service Story — APPROVED
+
+Goal:
+
+> The SMTP/IMAP port is open; did STARTTLS actually negotiate correctly?
+
+Initial protocol scope:
+
+- SMTP STARTTLS;
+- IMAP STARTTLS;
+- POP3 STARTTLS only if the same bounded model remains clean.
+
+Evidence:
+
+- greeting;
+- advertised STARTTLS capability;
+- negotiation stage;
+- TLS version/cipher;
+- served certificate;
+- hostname/trust/expiry evidence;
+- first protocol stage that failed.
+
+No credentials, mail submission, mailbox access, or message contents.
+
+## 21. M17 — Certificate Rollout Verification — APPROVED
+
+Goal:
+
+> I renewed/replaced the certificate; which endpoint is still serving the old one?
+
+Bounded direction:
+
+- compare one expected certificate fingerprint/file or reference endpoint against multiple explicit endpoints;
+- served fingerprint, identity/SAN, validity, hostname/trust, and match/mismatch;
+- deterministic endpoint matrix;
+- no renewal, install, reload, private-key reads, or ACME management.
+
+## 22. M18 — Safe Actions II — APPROVED WITH SECURITY GATE
+
+One additional action is approved in principle, but the exact action is **not** pre-approved.
+
+Before implementation:
+
+1. compare concrete high-value candidates;
+2. choose exactly one;
+3. write a fresh threat model and privilege-cost analysis;
+4. preserve explicit enablement, allowlist, deterministic preview, exact confirmation, durable pre-execution audit, bounded execution, and postcondition verification;
+5. do not weaken the Docker security posture merely to make the action easy.
+
+No generic command runner or generic service/container controller.
+
+## Continuous polish / quality track — APPROVED
+
+Bounded non-feature improvements may proceed between milestones:
+
+- CI concurrency/cancellation for obsolete PR runs;
+- stronger DNS/proxy/TLS integration fixtures;
+- keyboard/accessibility regression checks;
+- responsive UI acceptance;
+- public-safe screenshots matching the current console;
+- copy-to-clipboard for bounded evidence blocks;
+- consistent status vocabulary across all stories;
+- stable deep links where useful;
+- browser-local recent targets/preferences only;
+- performance budget for initial UI load and large retained-event rendering.
 
 ## Guardrails that remain in force
 
@@ -234,10 +388,10 @@ Do not drift into:
 - time-series graphing/monitoring platform behavior;
 - arbitrary web terminal or command execution;
 - generic package/firewall/configuration administration;
-- AI-generated causal claims;
+- AI-generated causal claims presented as evidence;
 - automatic remediation;
 - broad privilege expansion simply to make features easier.
 
-Do not add a raw/unredacted evidence mode, raw journal export, arbitrary file inclusion, cloud upload, automatic sharing, or new Safe Action family without a separate explicit design decision.
+Do not add a raw/unredacted evidence mode, raw journal export, arbitrary file inclusion, hidden cloud upload/telemetry, automatic sharing, or new Safe Action family without a separate explicit design decision.
 
 HostSleuth should feel powerful because it connects deterministic evidence into answers people actually need, not because it exposes every system control in a browser.
