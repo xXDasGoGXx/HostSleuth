@@ -396,5 +396,5 @@ func runServe(args []string) {
 	})
 
 	log.Printf("HostSleuth %s listening on http://%s", versionDisplay(), *listen)
-	log.Fatal(http.ListenAndServe(*listen, mux))
+	log.Fatal(http.ListenAndServe(*listen, withSecurityHeaders(mux)))
 }
