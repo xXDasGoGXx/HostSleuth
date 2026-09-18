@@ -557,13 +557,22 @@ Required readiness gates are defined in:
 
 `docs/design/V1.0-READINESS.md`
 
-The first readiness slice covers:
+Accepted first readiness slice:
 
 - persisted-state compatibility across legacy/current snapshot, event, and action-audit writes;
 - keyboard/accessibility semantics for static and dynamically injected Admin Console views;
 - visible focus and reduced-motion behavior;
 - responsive/browser acceptance;
 - explicit served-asset performance budgets.
+
+PR #66 passed full CI and merged to `main` at `771b923c06d38ac528804468effbe56ffd4c8f78`.
+
+Second readiness slice in validation:
+
+- verify the native release binary against release `SHA256SUMS` before installation;
+- add a disposable CI native-install acceptance using the published v0.9.0 release;
+- add restrictive browser security headers to all Web/API responses;
+- permanently verify those headers in Docker smoke.
 
 Stable/public/live/recovery remain v0.9.0 during readiness work. v1.0.0 publication and rollout are separate gates after readiness source acceptance.
 
