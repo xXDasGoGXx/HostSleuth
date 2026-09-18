@@ -37,6 +37,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M12 CLI/API/Web UI integration with ordered Expected-vs-Observed checks and first-mismatch reporting.
 - [x] M12 local Go 1.24.13 format/vet/test/build plus disposable HTTP/UI acceptance.
 - [x] M15 — Deployment / Permissions Story source implementation, native/HTTP acceptance, full CI, and PR #55 merge.
+- [x] M16 — STARTTLS / Mail Service Story source implementation, protocol/HTTP acceptance, full CI, and PR #57 merge.
 
 ## Records
 
@@ -59,6 +60,8 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M14 closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
 - M15 design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`
 - M15 closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`
+- M16 design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`
+- M16 closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 
@@ -66,31 +69,29 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 
 Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`. Docker `latest` resolves to the same verified v0.8.0 OCI index.
 
-## Active next step — M16 STARTTLS / Mail Service Story
+## Active next step — M17 Certificate Rollout Verification
 
-M15 source closeout is complete:
+M16 source closeout is complete:
 
-- [x] Bounded M15 design/privacy boundary.
-- [x] Permission/path core and UID/GID/group/capability reasoning.
-- [x] CLI/API/Permissions Web UI.
-- [x] Searchable evidence and visual permission-chain UX.
-- [x] Native pass/fail acceptance and disposable HTTP/UI acceptance.
-- [x] Full GitHub CI on exact PR #55 head `78bd31d8cdb34f9f5e592e57f14f2e8537e79b41`.
-- [x] Squash-merge PR #55 to `main` at `d64bb387c8f9efcf5dcb9f814f54b519ee231205`.
-- [x] M15 closeout and source documentation alignment.
-
-Begin only the approved M16 scope:
-
-- [x] Write bounded STARTTLS / Mail Service Story design and protocol-safety boundary.
-- [x] Implement SMTP STARTTLS evidence stages.
-- [x] Implement IMAP STARTTLS evidence stages.
-- [x] Include POP3 STLS within the same bounded pre-authentication model.
-- [x] Add TLS/certificate identity/trust/expiry evidence without credentials or mailbox access.
-- [x] Add CLI/API/dedicated STARTTLS UI and focused protocol fixtures.
+- [x] Bounded M16 protocol/security design.
+- [x] SMTP STARTTLS, IMAP STARTTLS, and POP3 STLS deterministic evidence stages.
+- [x] Shared TLS/certificate identity/trust/expiry evidence.
+- [x] CLI/API/dedicated STARTTLS Admin Console view.
+- [x] Focused protocol parser and upgrade fixtures.
 - [x] Local Go 1.24.13 full-test/race/vet/build, all Web JS syntax, and diff validation.
 - [x] Disposable SMTP CLI/API/UI acceptance with real TLS upgrade.
-- [ ] Push the focused M16 branch and require full GitHub CI on the exact PR head.
-- [ ] Write M16 closeout record and source documentation alignment only after CI/merge acceptance.
+- [x] Full GitHub CI on exact PR #57 head `579fff79889d5ab0c3430135d3f5ceba4dc28400`.
+- [x] Squash-merge PR #57 to `main` at `e5663d5883acdd2d859ff57b39a447c0018790b3`.
+- [x] M16 closeout and source documentation alignment.
+
+Begin only the approved M17 scope:
+
+- [ ] Write bounded Certificate Rollout Verification design and safety boundary.
+- [ ] Define exactly one expected certificate source: fingerprint/file or explicit reference endpoint.
+- [ ] Compare against multiple explicit endpoints with served fingerprint/identity/SAN/validity/hostname/trust evidence.
+- [ ] Build deterministic endpoint match/mismatch matrix.
+- [ ] Add CLI/API/UI and focused fixtures only after the comparison model is deterministic.
+- [ ] Preserve no-renewal/no-install/no-reload/no-private-key/no-ACME boundary.
 
 ## Guardrails
 
