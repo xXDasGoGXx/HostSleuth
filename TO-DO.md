@@ -52,12 +52,13 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v0.6.0 production/recovery alignment: `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md`
 - M13 design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`
 - M13 closeout: `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`
+- v0.7.0 publication: `docs/history/V0.7.0-PUBLICATION.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v0.6.0` / `mjmalleo/hostsleuth:0.6.0`. Docker `latest` resolves to the same verified v0.6.0 OCI index.
+Stable/public are now `v0.7.0` / `mjmalleo/hostsleuth:0.7.0`; Docker `latest` resolves to the same verified v0.7.0 OCI index. Live/recovery remain aligned on `mjmalleo/hostsleuth:0.6.0` until the separate v0.7.0 rollout passes.
 
-## Active milestone — M13 DNS Detective + Admin Console v1
+## Active next step — production / recovery v0.7.0 alignment
 
 Owner approved M13-M18 plus continuous UI/UX and engineering polish.
 
@@ -75,9 +76,12 @@ Owner approved M13-M18 plus continuous UI/UX and engineering polish.
 - [x] Open M13 PR #47 only after the exact branch remained locally green.
 - [x] Require full GitHub CI on exact head `4d5d8f857e362217028efbdedb20e020f7a85d48`; all jobs passed.
 - [x] Squash-merge M13 PR #47 to `main` at `182a27384a090f5538bb6d76a0c4dd917ce63932`.
-- [ ] Publish stable v0.7.0 from the exact accepted docs-inclusive source.
-- [ ] Independently verify native assets/checksums, `hostsleuth dns`, and the multi-platform Docker image.
-- [ ] Roll live/recovery to v0.7.0 only after publication verification.
+- [x] Publish stable v0.7.0 from exact source `236002106afd6aa042fd131c0edc0f3455b9cfdf`.
+- [x] Independently verify native assets/checksums, `hostsleuth dns`, resolver validation, and the multi-platform Docker image.
+- [ ] Stage recovery image pin at 0.7.0 without merging ahead of production.
+- [ ] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.7.0`.
+- [ ] Verify live v0.7.0, retained state/events, Safe Actions boundary, DNS Detective, and Admin Console UI.
+- [ ] Merge recovery alignment only after production acceptance.
 
 
 ## Guardrails
