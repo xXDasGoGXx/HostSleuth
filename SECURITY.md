@@ -44,6 +44,29 @@ DNS Detective returns normalized answer metadata, lookup duration, bounded looku
 
 Because a deliberately LAN-bound HostSleuth instance exposes read-only Diagnose and DNS Detective endpoints to clients that can already reach that UI, direct LAN exposure should still be treated as trusted-network access. The safer default remains loopback plus SSH tunneling.
 
+## M14 Reverse Proxy / Upstream Story boundary
+
+M14 adds bounded read-only HTTP request-path inspection for one explicitly supplied public URL and one explicitly supplied expected upstream URL.
+
+The probe surface is intentionally narrow:
+
+- HTTP method is HEAD only;
+- no request body is sent and no response body is returned;
+- URLs containing embedded credentials are refused;
+- HostSleuth sends no cookies, Authorization header, or arbitrary operator-supplied request headers;
+- environment HTTP proxy settings are not used;
+- public same-host redirects may be followed only up to a small fixed limit;
+- a redirect to a different hostname is recorded but not followed;
+- upstream redirects are recorded but never followed;
+- URL and Location query strings are omitted/redacted in returned evidence;
+- selected response metadata is bounded to status, Location, Server, Content-Type, and duration.
+
+When public and upstream hostnames differ, M14 may make a second request to the same explicitly supplied upstream dial target using the public hostname as HTTP Host and TLS SNI. That identity is derived only from the explicit public URL; M14 does not expose a generic custom-header field.
+
+M14 does not parse proxy configuration, discover upstreams, scan networks, perform authentication flows, use body-bearing HTTP methods, poll/monitor endpoints, edit DNS/proxy/container/service configuration, reload/restart anything, or remediate automatically.
+
+The M14 Web/API surface is part of the normal read-only troubleshooting UI rather than the loopback-only Workbench. Therefore, a deliberately LAN-bound HostSleuth deployment should be treated as trusted-network access: clients that can reach the UI can ask the HostSleuth host to perform these bounded probes against explicit URLs. The safer default remains loopback-only access or a trusted local tunnel.
+
 ## Redacted Evidence Bundle boundary
 
 The Redacted Evidence Bundle is a local, operator-triggered support export. It is not a backup, forensic image, remote collection mechanism, or automatic sharing feature.

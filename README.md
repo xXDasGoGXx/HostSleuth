@@ -233,6 +233,37 @@ M13 also introduces Admin Console v1: desktop navigation rail, global Quick Targ
 
 Full design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
+### Reverse Proxy / Upstream Story — development source
+
+M14 adds a bounded read-only request-path story for the admin question: **the public endpoint answers, so where does the proxy/upstream path actually break?**
+
+Give HostSleuth the public URL and the upstream you expect behind it:
+
+```bash
+hostsleuth proxy \
+  --upstream http://192.0.2.40:8080/ \
+  https://app.example.com/
+```
+
+HostSleuth evaluates the public and upstream paths separately across DNS, route/TCP, TLS when applicable, and HTTP response metadata. When the public hostname differs from the upstream hostname, it also probes the same explicit upstream address using the public HTTP Host and TLS SNI. That comparison can expose virtual-host/SNI-sensitive behavior without reading proxy configuration.
+
+M14's HTTP probes are deliberately narrow:
+
+- HEAD only;
+- no request or response bodies;
+- no credentials, cookies, Authorization, or arbitrary custom headers;
+- no environment proxy;
+- bounded same-host redirects on the public URL;
+- cross-host redirects are recorded but not followed;
+- upstream redirects are recorded but never followed;
+- query strings are redacted from returned URL/Location evidence.
+
+HTTP 4xx is reported as a warning because the path answered but the application/policy rejected the request; HTTP 5xx is a failure. A 405 explicitly explains the HEAD-only boundary rather than silently retrying with GET.
+
+The Web UI adds a visual **Proxy Path** view with first-problem highlighting, expandable stage evidence, native-vs-public Host/SNI comparison, bounded evidence copy, and Admin Console v2 Quick Target routing.
+
+Full design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
+
 ### Service Story — native Linux
 
 M7 adds a read-only service story inside the existing Diagnose workflow. Select a systemd unit and optionally the `host:port` you expect it to provide. HostSleuth can correlate:
@@ -348,6 +379,14 @@ Compare DNS resolver views:
 
 ```bash
 hostsleuth dns --resolver local=192.0.2.53 --resolver public=1.1.1.1 example.com
+```
+
+Trace a public endpoint to its expected upstream:
+
+```bash
+hostsleuth proxy \
+  --upstream http://192.0.2.40:8080/ \
+  https://app.example.com/
 ```
 
 Build a native systemd service story, optionally with its expected endpoint:
@@ -469,7 +508,9 @@ M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6
 
 M13 DNS Detective + Admin Console v1 is complete on `main`, published in stable v0.7.0, independently verified, and live in production/recovery.
 
-The owner-approved forward roadmap now continues through Reverse Proxy / Upstream Story, Deployment / Permissions Story, STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
+M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete in development source on branch `m14-reverse-proxy-upstream-story` and has passed local format/vet/full-test/race-test/build plus disposable CLI/API/UI/headless-browser acceptance. Stable/live v0.7.0 does **not** contain M14 yet; PR, publication, and rollout remain separate gated steps.
+
+The owner-approved forward roadmap continues after M14 through Deployment / Permissions Story, STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -501,6 +542,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md` — M13 implementation and acceptance closeout.
 - `docs/history/V0.7.0-PUBLICATION.md` — v0.7.0 publication and independent verification record.
 - `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md` — v0.7.0 live/recovery rollout and acceptance record.
+- `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md` — M14 request-path semantics and HTTP/security boundary.
+- `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md` — M14 implementation and local acceptance closeout.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
