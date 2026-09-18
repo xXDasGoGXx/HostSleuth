@@ -596,9 +596,15 @@ Readiness closeout PR #68 passed the complete six-job CI matrix on exact head `2
 
 The owner approved publication. Stable/public v1.0.0 was published from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`; release workflow `35358798799` succeeded and public native/Docker artifacts were independently verified.
 
-Live Arcane production and recovery `main` remain on v0.9.0 during the production-acceptance gate. Recovery PR #11 stages only the image pin to `mjmalleo/hostsleuth:1.0.0` and remains intentionally unmerged until live acceptance passes.
+Live Arcane v1.0.0 then passed the complete acceptance checklist. Recovery PR #11 merged at `44d6a30e580e2b333841f14eade2e10cca4b5ba5`, and recovery `main` now pins `mjmalleo/hostsleuth:1.0.0`.
+
+Stable/public/live/recovery are aligned on v1.0.0.
 
 Publication record: `docs/history/V1.0.0-PUBLICATION.md`.
+
+Production/recovery record: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`.
+
+No additional feature milestone or Safe Action family is approved automatically.
 
 ## Continuous polish / quality track — APPROVED
 

@@ -572,7 +572,7 @@ Stable `v1.0.0` is the current published native/Docker release, published from e
 
 Docker `mjmalleo/hostsleuth:1.0.0` and `latest` resolve to OCI index `sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`.
 
-The live OMV Arcane/Docker deployment and recovery `main` remain on the known-good `mjmalleo/hostsleuth:0.9.0` while the v1.0.0 production-acceptance gate is pending. `OMV-Docker-Rebuild` PR #11 stages only the recovery image pin to `mjmalleo/hostsleuth:1.0.0` and remains unmerged until live v1.0.0 acceptance passes.
+The live OMV Arcane/Docker deployment and `OMV-Docker-Rebuild` recovery definition are aligned on `mjmalleo/hostsleuth:1.0.0`. Live acceptance confirmed v1.0.0, schema 4 / Docker mode, the running 1.0.0 image, all 100 retained events, v1 security headers and asset budgets, live Admin Console accessibility/responsive behavior, real M16 STARTTLS and M17 certificate-rollout execution, M15's Docker boundary, LAN Action API rejection, and both fixed native actions disabled/unavailable in Docker mode.
 
 M12 Expected Endpoint Contracts, M13 DNS Detective + Admin Console v1, and M14 Reverse Proxy / Upstream Story + Admin Console v2 remain published and live from earlier releases.
 
@@ -580,7 +580,7 @@ M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certi
 
 The owner-approved fixed native `service.reload` action remains native-only and independently allowlisted. Docker mode exposes neither native systemd action.
 
-The feature-free **v1.0 Readiness / Hardening** cycle is complete and published in v1.0.0. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers. Stable/public are v1.0.0; live/recovery remain v0.9.0 until production acceptance and recovery alignment complete.
+The feature-free **v1.0 Readiness / Hardening** cycle is complete, published, live, and recovery-aligned in v1.0.0. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers.
 
 See [`docs/design/V1.0-READINESS.md`](docs/design/V1.0-READINESS.md) for the readiness gates, [`docs/design/V1.0-RELEASE-CHECKLIST.md`](docs/design/V1.0-RELEASE-CHECKLIST.md) for publication/rollback ordering, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for product guardrails.
 
@@ -599,6 +599,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/design/V1.0-READINESS.md` — feature-free v1.0 hardening gates and release-readiness contract.
 - `docs/design/V1.0-RELEASE-CHECKLIST.md` — exact v1.0 publication, live acceptance, recovery-alignment, and rollback checklist.
 - `docs/history/V1.0-READINESS.md` — v1.0 technical readiness acceptance closeout.
+- `docs/history/V1.0.0-PUBLICATION.md` — v1.0.0 publication and independent verification record.
+- `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md` — v1.0.0 live/recovery rollout and acceptance record.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
 - `docs/history/M10-REBOOT-STORY.md` — completed M10 implementation and acceptance record.
 - `docs/history/M11-OPTIONAL-SAFE-ACTIONS.md` — completed M11 security model and acceptance record.
