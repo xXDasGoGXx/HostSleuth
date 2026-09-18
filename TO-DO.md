@@ -87,10 +87,14 @@ Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0
 - [x] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.8.0`.
 - [x] Verify live v0.8.0, retained pre-upgrade state/events, Safe Actions boundary, Proxy Path, and Admin Console v2.
 - [x] Merge recovery alignment PR #8 at `290e7e6a6781ad29cbc7c8296d00877fb8489fd0` after production acceptance.
-- [ ] Write bounded M15 Deployment / Permissions Story design and privacy/security boundary.
-- [ ] Implement typed permission/path evidence and deterministic access reasoning.
-- [ ] Add CLI/API/Web UI permission-chain workflow.
-- [ ] Add focused integration fixtures and Admin Console UX for dense permission evidence.
+- [x] Write bounded M15 Deployment / Permissions Story design and privacy/security boundary.
+- [x] Implement typed permission/path evidence and deterministic access reasoning.
+- [x] Add CLI/API/Web UI permission-chain workflow.
+- [x] Add focused permission fixtures and Admin Console UX for dense permission evidence.
+- [x] Local Go 1.24.13 format/full-test/race-test/vet/build and Web JS validation.
+- [ ] Push the focused M15 branch and require full GitHub CI on the exact PR head.
+- [ ] Perform bounded native acceptance with one passing and one failing permission chain.
+- [ ] Write M15 closeout record and update README/roadmap/handoff only after acceptance.
 
 ## Guardrails
 
