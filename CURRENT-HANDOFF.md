@@ -2,9 +2,9 @@
 
 Last updated: 2026-09-17
 
-## Stable / public / live / recovery state — v0.9.0 publication in progress
+## Stable / public / live / recovery state — v0.9.0
 
-Stable/public has advanced to:
+Stable/public/live/recovery are aligned on:
 
 `v0.9.0` / `mjmalleo/hostsleuth:0.9.0`
 
@@ -25,17 +25,27 @@ Both resolve to verified OCI index:
 
 `sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`
 
-Independent public verification passed for the GitHub tag, amd64/arm64 release binaries + SHA256SUMS, the published binary version, and Docker Hub's multi-architecture manifests.
+Independent public verification passed for the GitHub tag, native amd64/arm64 binaries + SHA256SUMS, published binary version, and Docker Hub multi-architecture manifests.
 
-The live Arcane-managed deployment and `xXDasGoGXx/OMV-Docker-Rebuild` recovery pin remain on:
+Live Arcane acceptance confirmed:
 
-`v0.8.0` / `mjmalleo/hostsleuth:0.8.0`
+- `/api/about` = `v0.9.0`;
+- snapshot schema 4 / Docker mode;
+- running container image `mjmalleo/hostsleuth:0.9.0`;
+- all 100 retained events, including pre-upgrade history;
+- live M15 Permissions surface with Docker-native service identity correctly unavailable;
+- real M16 SMTP STARTTLS negotiation through TLS/certificate/trust;
+- real M17 certificate rollout comparison with a healthy MATCH;
+- LAN Action Web/API still HTTP 403;
+- loopback `service.restart` and `service.reload` capabilities both `enabled=false` / `available=false` in Docker mode.
 
-That is intentional until production v0.9.0 acceptance passes. v0.8.0 remains the known-good rollback image.
+`OMV-Docker-Rebuild` PR #10 merged at:
+
+`813b7a8b76bfd987e97c534c76faf879c510bdec`
 
 Publication record: `docs/history/V0.9.0-PUBLICATION.md`.
 
-Current live/recovery baseline: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`.
+Production/recovery record: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`.
 
 ## Product identity
 
@@ -204,7 +214,7 @@ Design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
 Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
-Stable/public/live/recovery remain aligned on v0.8.0. M15 is development source on `main`; it has not been published or deployed.
+M15 is published, live, and recovery-aligned in v0.9.0.
 
 ## M16 — STARTTLS / Mail Service Story — SOURCE COMPLETE
 
@@ -240,7 +250,7 @@ Design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
 Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
-Stable/public/live/recovery remain aligned on v0.8.0. M16 is development source on `main`; it has not been published or deployed.
+M16 is published, live, and recovery-aligned in v0.9.0.
 
 ## M17 — Certificate Rollout Verification — SOURCE COMPLETE
 
@@ -279,7 +289,7 @@ Design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
 Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
-Stable/public/live/recovery remain aligned on v0.8.0. M17 is development source on `main`; it has not been published or deployed.
+M17 is published, live, and recovery-aligned in v0.9.0.
 
 ## M18 — Safe Actions II — SOURCE COMPLETE
 
@@ -323,7 +333,7 @@ Design/security review: `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`.
 
 Closeout: `docs/history/M18-SAFE-ACTIONS-II.md`.
 
-Stable/public/live/recovery remain aligned on v0.8.0. M18 is development source on `main`; it has not been published or deployed.
+M18 is published, live, and recovery-aligned in v0.9.0.
 
 ## Approved roadmap status
 

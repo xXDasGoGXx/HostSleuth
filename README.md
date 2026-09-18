@@ -264,7 +264,7 @@ The Web UI adds a visual **Proxy Path** view with first-problem highlighting, ex
 
 Full design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
-### Deployment / Permissions Story — development source
+### Deployment / Permissions Story — stable v0.9.0
 
 M15 adds a bounded read-only permission story for the admin question: **the process is running; why can it not use this path or Unix-domain socket?**
 
@@ -284,7 +284,7 @@ Full design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
 Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
-### STARTTLS / Mail Service Story — development source
+### STARTTLS / Mail Service Story — stable v0.9.0
 
 M16 adds a bounded read-only pre-authentication mail TLS story for the question: **the mail port is open; did STARTTLS actually negotiate correctly?**
 
@@ -304,7 +304,7 @@ Full design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
 Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
-### Certificate Rollout Verification — development source
+### Certificate Rollout Verification — stable v0.9.0
 
 M17 adds a bounded read-only certificate rollout story for the question: **I renewed or replaced a certificate; which explicit endpoint is still serving a different one?**
 
@@ -375,7 +375,7 @@ Reboot Story:
 
 Reboot Story does not reboot, shut down, restart, reload, repair, or otherwise modify the host.
 
-### Optional Safe Actions — native Linux development source
+### Optional Safe Actions — native Linux
 
 M11 introduced one deliberately narrow state-changing action, `service.restart`. M18 adds exactly one more under a separate security review: `service.reload`.
 
@@ -560,7 +560,7 @@ HostSleuth is intentionally:
 - loopback-only by default for sensitive Web/API operations;
 - explicit rather than automatic about its narrowly fixed native Safe Actions.
 
-HostSleuth does **not** automatically restart or reload services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reboot/shut down the host, manage ACME accounts, handle private keys, or reconfigure the host. Development source exposes only two fixed state-changing capabilities: independently allowlisted native `service.restart` and `service.reload`. Docker mode exposes neither action.
+HostSleuth does **not** automatically restart or reload services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reboot/shut down the host, manage ACME accounts, handle private keys, or reconfigure the host. Native mode exposes only two fixed state-changing capabilities: independently allowlisted `service.restart` and `service.reload`. Docker mode exposes neither action.
 
 ## Current stage
 
@@ -570,7 +570,7 @@ Stable `v0.9.0` is the current published native/Docker release, published from e
 
 Docker `mjmalleo/hostsleuth:0.9.0` and `latest` resolve to OCI index `sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`.
 
-The live OMV Arcane/Docker deployment and `OMV-Docker-Rebuild` recovery definition remain on known-good `mjmalleo/hostsleuth:0.8.0` until the explicit v0.9.0 live acceptance/recovery-alignment step completes.
+The live OMV Arcane/Docker deployment and `OMV-Docker-Rebuild` recovery definition are aligned on `mjmalleo/hostsleuth:0.9.0`. Live acceptance confirmed v0.9.0, schema 4 / Docker mode, the running 0.9.0 image, all 100 retained events, real M16 STARTTLS and M17 certificate-rollout execution, M15's Docker boundary, LAN Action API rejection, and both fixed native actions disabled/unavailable in Docker mode.
 
 M12 Expected Endpoint Contracts, M13 DNS Detective + Admin Console v1, and M14 Reverse Proxy / Upstream Story + Admin Console v2 remain published and live from earlier releases.
 
@@ -621,6 +621,7 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/V0.8.0-PUBLICATION.md` — v0.8.0 publication and independent verification record.
 - `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
 - `docs/history/V0.9.0-PUBLICATION.md` — v0.9.0 publication and independent verification record.
+- `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md` — v0.9.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
