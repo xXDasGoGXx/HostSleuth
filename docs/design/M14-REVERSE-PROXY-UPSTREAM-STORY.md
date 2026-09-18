@@ -1,6 +1,6 @@
 # M14 — Reverse Proxy / Upstream Story + Admin Console v2
 
-Status: active design and implementation.
+Status: implemented and locally accepted; PR/CI/release remain separate gates.
 
 ## Admin question
 
