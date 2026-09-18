@@ -1,6 +1,6 @@
 # M14 — Reverse Proxy / Upstream Story + Admin Console v2 Closeout
 
-Status: source implementation complete and locally accepted on branch `m14-reverse-proxy-upstream-story`. Publication and production rollout remain separate gates.
+Status: source implementation complete and merged on 2026-09-17. Publication and production rollout remain separate gates.
 
 ## Delivered — Reverse Proxy / Upstream Story
 
@@ -180,6 +180,25 @@ Permanent CI was extended to:
 - include them in combined served JavaScript validation;
 - assert Proxy Path and Quick Target markers in Docker smoke;
 - run a self-contained Docker-mode proxy-story API acceptance.
+
+## Merge acceptance
+
+PR #51 ran on exact head:
+
+`e7737c3342c628d80bf17a3b60a2cc5b4ead48c0`
+
+The full GitHub CI matrix passed:
+
+- format/vet/test/native build;
+- Proxy Path/Admin Console v2 served-JavaScript syntax;
+- Docker smoke including a self-contained proxy-story API call;
+- native Safe Actions real-systemd smoke;
+- linux/amd64 image build;
+- linux/arm64 image build.
+
+PR #51 then squash-merged to `main` at:
+
+`135a73ffb333c1e4ac5135f93db7bac3dac5cdae`
 
 ## Release boundary
 
