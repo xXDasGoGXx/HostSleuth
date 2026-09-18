@@ -75,7 +75,7 @@ Stable/public/live/recovery are aligned on `v0.7.0` / `mjmalleo/hostsleuth:0.7.0
 - [x] Local Go 1.24.13 format/vet/full-test/race-test/build and Web JS validation.
 - [x] Disposable CLI/API/UI/headless-browser acceptance.
 - [x] Write M14 closeout record.
-- [ ] Final exact-head branch audit.
+- [x] Final exact-head branch audit passed on `a093f733e5df0909f8632db9c0ad4a287768101e`.
 - [ ] Open M14 PR only after the branch remains locally green.
 - [ ] Require full GitHub CI on the exact PR head.
 - [ ] Merge M14 to `main`.
