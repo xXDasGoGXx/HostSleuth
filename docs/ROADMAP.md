@@ -296,20 +296,30 @@ Independent verification confirmed:
 
 Full record: `docs/history/V0.7.0-PUBLICATION.md`.
 
-## 19. Production / recovery v0.7.0 alignment — ACTIVE NEXT STEP
+## 19. Production / recovery v0.7.0 alignment — COMPLETE
 
-Stable/public are v0.7.0 while live Arcane production and disaster recovery remain on v0.6.0.
+The live Arcane-managed deployment and `xXDasGoGXx/OMV-Docker-Rebuild` recovery definition are aligned on:
 
-Ordered rollout:
+`mjmalleo/hostsleuth:0.7.0`
 
-1. stage the recovery image pin to `mjmalleo/hostsleuth:0.7.0` without merging ahead of production;
-2. redeploy the existing authenticated Arcane-managed project;
-3. verify live version/schema/mode, retained state/events, LAN reachability, and Safe Actions boundary;
-4. exercise DNS Detective and Admin Console v1 against live production;
-5. merge recovery only after live acceptance;
-6. record final v0.7.0 alignment.
+Live acceptance confirmed:
 
-## 20. M14 — Reverse Proxy / Upstream Story — APPROVED NEXT
+- `/api/about` = `v0.7.0`;
+- snapshot schema 4 / Docker mode;
+- live container image = `mjmalleo/hostsleuth:0.7.0`;
+- 100 retained events, including pre-upgrade history;
+- Action Web/API remains HTTP 403 from LAN;
+- loopback capability remains `enabled=false` / `available=false`;
+- DNS Detective returned `agree` with an explicitly supplied local resolver;
+- Admin Console and DNS Detective dynamic UI markers are present in live DOM.
+
+Recovery PR #7 merged at:
+
+`80e7c7c08b5905c7fbad158e4b11e6e4b4ced1f9`
+
+Full record: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`.
+
+## 20. M14 — Reverse Proxy / Upstream Story — ACTIVE NEXT
 
 Goal:
 

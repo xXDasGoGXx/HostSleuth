@@ -38,13 +38,15 @@ Independent verification passed for native checksums/execution, the M13 `hostsle
 
 Full publication record: `docs/history/V0.7.0-PUBLICATION.md`.
 
-## Live / disaster-recovery state — still v0.6.0
+## Stable / public / live / recovery state — v0.7.0
 
-The existing Arcane-managed production deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition remain pinned to:
+Stable/public, the live Arcane-managed deployment, and `xXDasGoGXx/OMV-Docker-Rebuild` disaster recovery are aligned on:
 
-`mjmalleo/hostsleuth:0.6.0`
+`v0.7.0` / `mjmalleo/hostsleuth:0.7.0`
 
-Publication of v0.7.0 is not proof of production rollout.
+Live acceptance confirmed version/schema/mode, retained pre-upgrade events, DNS Detective, Admin Console v1, and the Safe Actions loopback/default-disabled boundaries. Recovery PR #7 merged at `80e7c7c08b5905c7fbad158e4b11e6e4b4ced1f9`.
+
+Full production/recovery record: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`.
 
 ## Redacted Evidence Bundle — complete, published, and live
 
@@ -134,9 +136,9 @@ Disposable HTTP acceptance passed. Real resolver comparison also demonstrated re
 
 Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-## Active next step — production / recovery v0.7.0 alignment
+## Active next step — M14 Reverse Proxy / Upstream Story
 
-Stage the disaster-recovery image pin at 0.7.0 without merging ahead of production. Then redeploy the existing authenticated Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.7.0`. Verify live version/schema/mode, retained state/events, Safe Actions boundary, DNS Detective, and the Admin Console UI. Merge recovery alignment only after live acceptance passes.
+v0.7.0 publication, live production acceptance, and disaster-recovery alignment are complete. Begin M14 from the approved roadmap: deterministic public-endpoint to upstream request-path diagnosis plus Admin Console v2 visual path/story work. Do not restart a broad audit on continuation.
 
 Do not restart a broad audit on continuation; use this handoff.
 
