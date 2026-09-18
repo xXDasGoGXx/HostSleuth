@@ -371,20 +371,31 @@ Independent verification confirmed:
 
 Full record: `docs/history/V0.8.0-PUBLICATION.md`.
 
-## 22. Production / recovery v0.8.0 alignment — ACTIVE NEXT STEP
+## 22. Production / recovery v0.8.0 alignment — COMPLETE
 
-Stable/public are v0.8.0 while live Arcane production and disaster recovery remain on v0.7.0.
+The live Arcane-managed deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition are aligned on:
 
-Ordered rollout:
+`mjmalleo/hostsleuth:0.8.0`
 
-1. stage the recovery image pin to `mjmalleo/hostsleuth:0.8.0` without merging ahead of production;
-2. redeploy the existing authenticated Arcane-managed project;
-3. verify live version/schema/mode, retained state/events, LAN reachability, and Safe Actions boundary;
-4. exercise Proxy Path / Admin Console v2 against live production;
-5. merge recovery only after live acceptance;
-6. record final v0.8.0 alignment.
+Live acceptance confirmed:
 
-## 23. M15 — Deployment / Permissions Story — APPROVED
+- `/api/about` = `v0.8.0`;
+- snapshot schema 4 / Docker mode;
+- live container image = `mjmalleo/hostsleuth:0.8.0`;
+- 100 retained events, including pre-upgrade history;
+- Action Web/API remains HTTP 403 from LAN;
+- loopback action capability remains `enabled=false` / `available=false`;
+- a live Proxy Path from Arcane's LAN endpoint to its loopback upstream passed all tested public and upstream DNS/route/TCP/HTTP stages;
+- native upstream and public-Host variants both returned HTTP 200;
+- Proxy Path and Admin Console v2 dynamic UI markers are present in the live DOM.
+
+Recovery PR #8 merged at:
+
+`290e7e6a6781ad29cbc7c8296d00877fb8489fd0`
+
+Full record: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`.
+
+## 23. M15 — Deployment / Permissions Story — ACTIVE NEXT
 
 Goal:
 
