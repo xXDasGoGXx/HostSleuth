@@ -463,7 +463,7 @@ Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
 Stable/public/live/recovery remain on v0.8.0; M16 is development source until a separate publication/rollout decision.
 
-## 25. M17 — Certificate Rollout Verification — ACTIVE NEXT
+## 25. M17 — Certificate Rollout Verification — IMPLEMENTATION IN PROGRESS
 
 Goal:
 
