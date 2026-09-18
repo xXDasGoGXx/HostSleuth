@@ -233,7 +233,7 @@ M13 also introduces Admin Console v1: desktop navigation rail, global Quick Targ
 
 Full design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-### Reverse Proxy / Upstream Story — development source
+### Reverse Proxy / Upstream Story — stable v0.8.0
 
 M14 adds a bounded read-only request-path story for the admin question: **the public endpoint answers, so where does the proxy/upstream path actually break?**
 
@@ -502,15 +502,15 @@ M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic
 
 Stable `v0.8.0` is the current published native/Docker release and includes M14 Reverse Proxy / Upstream Story + Admin Console v2.
 
-The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.7.0` as of 2026-09-17. Post-redeploy acceptance confirmed v0.7.0, schema 4 / Docker mode, retained pre-upgrade events, the loopback-only/default-disabled Safe Actions boundary, live DNS Detective behavior, and the Admin Console v1 UI.
+The live OMV Arcane/Docker deployment and the `OMV-Docker-Rebuild` disaster-recovery definition are both aligned on `mjmalleo/hostsleuth:0.8.0` as of 2026-09-17 local time. Post-redeploy acceptance confirmed v0.8.0, schema 4 / Docker mode, retained pre-upgrade events, the loopback-only/default-disabled Safe Actions boundary, a passing live Proxy Path, and Admin Console v2.
 
 M12 Expected Endpoint Contracts is complete on `main`, published in stable `v0.6.0`, independently verified, and live in production.
 
 M13 DNS Detective + Admin Console v1 is complete on `main`, published in stable v0.7.0, independently verified, and live in production/recovery.
 
-M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete on `main`, published in stable v0.8.0, and independently verified. Live OMV production and disaster recovery remain on v0.7.0 until the separately gated v0.8.0 rollout passes.
+M14 Reverse Proxy / Upstream Story + Admin Console v2 is complete on `main`, published in stable v0.8.0, independently verified, and live in production/recovery.
 
-The owner-approved forward roadmap continues after M14 through Deployment / Permissions Story, STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
+The active next milestone is M15 Deployment / Permissions Story. The owner-approved roadmap then continues through STARTTLS / Mail Service Story, Certificate Rollout Verification, and one additional Safe Action only after a fresh security gate.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
@@ -544,6 +544,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md` — v0.7.0 live/recovery rollout and acceptance record.
 - `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md` — M14 request-path semantics and HTTP/security boundary.
 - `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md` — M14 implementation and local acceptance closeout.
+- `docs/history/V0.8.0-PUBLICATION.md` — v0.8.0 publication and independent verification record.
+- `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md` — v0.8.0 live/recovery rollout and acceptance record.
 - `docs/research/CONSUMER-OPPORTUNITY-LANDSCAPE.md` — sourced research input for differentiated future workflows; not active scope by itself.
 
 ## License
