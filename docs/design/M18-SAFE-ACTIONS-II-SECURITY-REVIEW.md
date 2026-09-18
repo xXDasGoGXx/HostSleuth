@@ -1,6 +1,6 @@
 # M18 — Safe Actions II Security Review
 
-Status: owner-approved implementation in progress. The owner explicitly approved exactly `service.reload` under this security contract.
+Status: owner-approved source implementation complete and merged. See `docs/history/M18-SAFE-ACTIONS-II.md` for acceptance details.
 
 ## Goal
 
@@ -465,4 +465,22 @@ Approved implementation scope:
 
 No other candidate from this review is approved for implementation.
 
-Stable/public/live/recovery remain on v0.8.0 throughout implementation and validation unless a separate publication/rollout decision is made.
+Source acceptance completed under this contract.
+
+PR #62 exact final head:
+
+`c46dd72ad806c688970244836ce26e3ca01eec88`
+
+CI run:
+
+`35309972305` — all jobs successful.
+
+Real disposable native systemd acceptance proved independent reload allowlisting, `CanReload=yes` gating, exact reload argv/confirmation, unchanged MainPID across reload, active postcondition, durable audit records, and cleanup.
+
+PR #62 squash-merged to `main` at:
+
+`cc9c9727fe19786eba03d0b7ef51c7fae7ac8ab1`
+
+Full closeout: `docs/history/M18-SAFE-ACTIONS-II.md`.
+
+Stable/public/live/recovery remain on v0.8.0 unless a separate publication/rollout decision is made.

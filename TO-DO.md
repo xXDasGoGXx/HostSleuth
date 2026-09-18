@@ -39,6 +39,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M15 — Deployment / Permissions Story source implementation, native/HTTP acceptance, full CI, and PR #55 merge.
 - [x] M16 — STARTTLS / Mail Service Story source implementation, protocol/HTTP acceptance, full CI, and PR #57 merge.
 - [x] M17 — Certificate Rollout Verification source implementation, real-TLS/native acceptance, full CI, and PR #59 merge.
+- [x] M18 — Safe Actions II with owner-approved fixed native `service.reload`, real native reload acceptance, full CI, and PR #62 merge.
 
 ## Records
 
@@ -66,6 +67,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M17 design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`
 - M17 closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`
 - M18 security review: `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`
+- M18 closeout: `docs/history/M18-SAFE-ACTIONS-II.md`
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 
@@ -73,32 +75,24 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 
 Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`. Docker `latest` resolves to the same verified v0.8.0 OCI index.
 
-## Active next step — M18 Safe Actions II — Implementation Validation
+## Current next step — owner decision required
 
-M18 security gate:
+M18 Safe Actions II is source-complete:
 
-- [x] Compare concrete high-value action candidates.
-- [x] Identify one preferred candidate: `service.reload`.
-- [x] Write the fresh threat model and privilege-cost analysis.
-- [x] Define the separate reload allowlist, fixed argv, preview, exact confirmation, pre-execution audit, execution bounds, and postcondition verification.
-- [x] Reject candidates that weaken Docker security or introduce manager-wide/generic control.
-- [x] Owner explicitly approved exactly `service.reload` under `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`.
-
-Approved implementation:
-
-- [x] Add fixed `service.reload` action ID only.
-- [x] Add independent `--allow-reload-service UNIT` policy and CLI/server flag.
-- [x] Require loaded + active + `CanReload=yes` before preview becomes executable.
-- [x] Use trusted absolute systemctl and fixed reload argv only.
-- [x] Preserve exact confirmation, durable pre-execution audit, bounded serialized execution, and active postcondition.
-- [x] Prove reload failure never falls back to restart.
-- [x] Keep Docker mode unavailable and preserve loopback-only Action Web/API.
-- [x] Update Actions UI for server-provided restart/reload capabilities.
-- [x] Extend native CI fixture for real reload acceptance and Docker smoke for disabled/unavailable reload.
+- [x] Complete candidate comparison, threat model, and privilege-cost review.
+- [x] Owner approves exactly `service.reload`.
+- [x] Implement independent reload allowlisting and fail-closed reload preconditions.
+- [x] Preserve fixed trusted argv, exact confirmation, durable pre-execution audit, bounded execution, and active postcondition.
+- [x] Prove reload cannot inherit restart permission and never falls back to restart.
+- [x] Preserve Docker unavailability and loopback-only Action Web/API.
+- [x] Extend Actions UI for the two fixed server-provided capabilities.
 - [x] Pass local Go 1.24.13 full-test/race/vet/build, JS syntax, and diff validation.
-- [ ] Pass full GitHub CI on the exact implementation PR head.
-- [ ] Merge only after exact-head CI is green.
-- [ ] Write M18 source closeout and align durable status.
+- [x] Pass full GitHub CI on exact PR #62 head `c46dd72ad806c688970244836ce26e3ca01eec88`.
+- [x] Pass real disposable native reload acceptance with unchanged MainPID and active postcondition.
+- [x] Squash-merge PR #62 to `main` at `cc9c9727fe19786eba03d0b7ef51c7fae7ac8ab1`.
+- [x] Write M18 source closeout and align durable status.
+
+The owner-approved roadmap through M18 is complete. Do not begin a new feature, publication, or production/recovery rollout without a separate owner decision.
 
 ## Guardrails
 
