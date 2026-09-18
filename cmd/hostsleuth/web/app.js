@@ -25,6 +25,33 @@ function text(el, value) {
   if (el) el.textContent = value ?? "";
 }
 
+function activeViewName() {
+  const active = document.querySelector("[data-view-panel].active");
+  return active?.dataset.viewPanel || "overview";
+}
+
+function syncViewAccessibility(name = activeViewName()) {
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    const view = button.dataset.view;
+    const active = view === name;
+    if (!button.id) button.id = `nav-${view}`;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-controls", `view-${view}`);
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
+  });
+
+  document.querySelectorAll("[data-view-panel]").forEach((panel) => {
+    const view = panel.dataset.viewPanel;
+    const active = view === name;
+    if (!panel.id) panel.id = `view-${view}`;
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", `nav-${view}`);
+    panel.setAttribute("aria-hidden", String(!active));
+    panel.hidden = !active;
+  });
+}
+
 function showView(name) {
   document.querySelectorAll("[data-view-panel]").forEach((panel) => {
     panel.classList.toggle("active", panel.dataset.viewPanel === name);
@@ -32,8 +59,38 @@ function showView(name) {
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.classList.toggle("active", button.dataset.view === name);
   });
+  syncViewAccessibility(name);
   window.location.hash = name;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+}
+
+function installNavigationAccessibility() {
+  const nav = document.querySelector(".nav-tabs");
+  if (!nav) return;
+
+  nav.setAttribute("role", "tablist");
+  nav.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    const tabs = [...nav.querySelectorAll("[data-view]")].filter((button) => !button.disabled);
+    if (!tabs.length) return;
+
+    const current = Math.max(0, tabs.indexOf(document.activeElement));
+    let next = current;
+    if (event.key === "ArrowLeft") next = (current - 1 + tabs.length) % tabs.length;
+    if (event.key === "ArrowRight") next = (current + 1) % tabs.length;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = tabs.length - 1;
+
+    event.preventDefault();
+    const target = tabs[next];
+    showView(target.dataset.view);
+    target.focus();
+  });
+
+  const observer = new MutationObserver(() => syncViewAccessibility(activeViewName()));
+  observer.observe(nav, { childList: true });
+  syncViewAccessibility(activeViewName());
 }
 
 function formatTime(value) {
@@ -624,9 +681,13 @@ byId("diagnoseForm").addEventListener("submit", (event) => {
   if (target) runDiagnosis(target);
 });
 
+installNavigationAccessibility();
+
 const initialView = window.location.hash.replace("#", "");
 if (["overview", "diagnose", "changes", "host"].includes(initialView)) {
   showView(initialView);
+} else {
+  syncViewAccessibility("overview");
 }
 
 loadAbout();
