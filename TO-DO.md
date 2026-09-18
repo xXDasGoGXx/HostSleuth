@@ -36,6 +36,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M12 — Expected Endpoint Contracts core evaluator with exact DNS, TCP, TLS, optional service, and optional container expectations.
 - [x] M12 CLI/API/Web UI integration with ordered Expected-vs-Observed checks and first-mismatch reporting.
 - [x] M12 local Go 1.24.13 format/vet/test/build plus disposable HTTP/UI acceptance.
+- [x] M15 — Deployment / Permissions Story source implementation, native/HTTP acceptance, full CI, and PR #55 merge.
 
 ## Records
 
@@ -56,6 +57,8 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v0.7.0 production/recovery alignment: `docs/history/V0.7.0-PRODUCTION-ALIGNMENT.md`
 - M14 design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
 - M14 closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
+- M15 design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`
+- M15 closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 
@@ -63,38 +66,27 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 
 Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`. Docker `latest` resolves to the same verified v0.8.0 OCI index.
 
-## Active next step — M15 Deployment / Permissions Story
+## Active next step — M16 STARTTLS / Mail Service Story
 
-- [x] Write bounded M14 design and HTTP safety boundary.
-- [x] Implement public→upstream path core with deterministic stage ordering.
-- [x] Compare native upstream behavior with public Host/SNI against the same explicit upstream.
-- [x] Add same-host redirect following, cross-host redirect stop, and query-string redaction.
-- [x] Add `hostsleuth proxy --upstream URL PUBLIC_URL`.
-- [x] Add `GET /api/proxy-story`.
-- [x] Add dedicated visual Proxy Path Web UI.
-- [x] Add Admin Console v2 Proxy quick-action and evidence-copy controls with LAN clipboard fallback.
-- [x] Extend permanent CI syntax/Docker smoke coverage for M14.
-- [x] Local Go 1.24.13 format/vet/full-test/race-test/build and Web JS validation.
-- [x] Disposable CLI/API/UI/headless-browser acceptance.
-- [x] Write M14 closeout record.
-- [x] Final exact-head branch audit passed on `a093f733e5df0909f8632db9c0ad4a287768101e`.
-- [x] Open M14 PR #51 after the branch remained locally green.
-- [x] Require full GitHub CI on exact head `e7737c3342c628d80bf17a3b60a2cc5b4ead48c0`; all jobs passed.
-- [x] Squash-merge M14 PR #51 to `main` at `135a73ffb333c1e4ac5135f93db7bac3dac5cdae`.
-- [x] Publish stable v0.8.0 from exact source `28b8d88ec018782353840dee8528d765c4056e89`.
-- [x] Independently verify native assets/checksums, `hostsleuth proxy` validation, and the multi-platform Docker image.
-- [x] Stage recovery image pin at 0.8.0 without merging ahead of production.
-- [x] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.8.0`.
-- [x] Verify live v0.8.0, retained pre-upgrade state/events, Safe Actions boundary, Proxy Path, and Admin Console v2.
-- [x] Merge recovery alignment PR #8 at `290e7e6a6781ad29cbc7c8296d00877fb8489fd0` after production acceptance.
-- [x] Write bounded M15 Deployment / Permissions Story design and privacy/security boundary.
-- [x] Implement typed permission/path evidence and deterministic access reasoning.
-- [x] Add CLI/API/Web UI permission-chain workflow.
-- [x] Add focused permission fixtures and Admin Console UX for dense permission evidence.
-- [x] Local Go 1.24.13 format/full-test/race-test/vet/build and Web JS validation.
-- [ ] Push the focused M15 branch and require full GitHub CI on the exact PR head.
-- [x] Perform bounded native acceptance with one passing (`ssh.service` → `/etc/ssh`) and one failing (`dbus.service` → `/root`) permission chain.
-- [ ] Write M15 closeout record and update README/roadmap/handoff only after acceptance.
+M15 source closeout is complete:
+
+- [x] Bounded M15 design/privacy boundary.
+- [x] Permission/path core and UID/GID/group/capability reasoning.
+- [x] CLI/API/Permissions Web UI.
+- [x] Searchable evidence and visual permission-chain UX.
+- [x] Native pass/fail acceptance and disposable HTTP/UI acceptance.
+- [x] Full GitHub CI on exact PR #55 head `78bd31d8cdb34f9f5e592e57f14f2e8537e79b41`.
+- [x] Squash-merge PR #55 to `main` at `d64bb387c8f9efcf5dcb9f814f54b519ee231205`.
+- [x] M15 closeout and source documentation alignment.
+
+Begin only the approved M16 scope:
+
+- [ ] Write bounded STARTTLS / Mail Service Story design and protocol-safety boundary.
+- [ ] Implement SMTP STARTTLS evidence stages.
+- [ ] Implement IMAP STARTTLS evidence stages.
+- [ ] Consider POP3 STARTTLS only if the same bounded model remains clean.
+- [ ] Add TLS/certificate identity/trust/expiry evidence without credentials or mailbox access.
+- [ ] Add CLI/API/UI and focused fixtures after the protocol core is deterministic.
 
 ## Guardrails
 
