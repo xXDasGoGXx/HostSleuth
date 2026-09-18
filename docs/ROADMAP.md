@@ -547,9 +547,9 @@ M18 is published, live, and recovery-aligned in stable v0.9.0.
 
 The owner-approved feature roadmap through M18 is complete. No additional feature milestone is approved.
 
-## v1.0 Readiness / Hardening — COMPLETE / OWNER PUBLICATION DECISION REQUIRED
+## v1.0 Readiness / Hardening — COMPLETE / PUBLISHED IN v1.0.0
 
-The owner-approved feature-free hardening cycle is complete pending the docs-only closeout CI/merge.
+The owner-approved feature-free hardening cycle is complete and published in stable v1.0.0.
 
 This is not M19 and added no troubleshooting story, Safe Action family, privilege surface, remediation feature, monitoring architecture, or cloud behavior.
 
@@ -594,7 +594,11 @@ Readiness closeout:
 
 Readiness closeout PR #68 passed the complete six-job CI matrix on exact head `2853f3a369a95817524935a93db6904d2ad3d31c` and squash-merged to `main` at `f93330755e229609f86add144a20d3ce2234cd04`.
 
-Stable/public/live/recovery remain v0.9.0. The next gate is an explicit owner decision on v1.0.0 publication.
+The owner approved publication. Stable/public v1.0.0 was published from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`; release workflow `35358798799` succeeded and public native/Docker artifacts were independently verified.
+
+Live Arcane production and recovery `main` remain on v0.9.0 during the production-acceptance gate. Recovery PR #11 stages only the image pin to `mjmalleo/hostsleuth:1.0.0` and remains intentionally unmerged until live acceptance passes.
+
+Publication record: `docs/history/V1.0.0-PUBLICATION.md`.
 
 ## Continuous polish / quality track — APPROVED
 
