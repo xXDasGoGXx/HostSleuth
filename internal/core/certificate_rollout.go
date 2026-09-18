@@ -54,7 +54,7 @@ type CertificateRolloutStory struct {
 	FirstProblem string                       `json:"first_problem,omitempty"`
 	Expected     CertificateRolloutExpected   `json:"expected"`
 	Endpoints    []CertificateRolloutEndpoint `json:"endpoints"`
-	Summary      CertificateRolloutSummary     `json:"summary"`
+	Summary      CertificateRolloutSummary    `json:"summary"`
 	ScopeNotes   []string                     `json:"scope_notes,omitempty"`
 }
 
