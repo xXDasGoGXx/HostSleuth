@@ -62,6 +62,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M15 closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`
 - M16 design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`
 - M16 closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`
+- M17 design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 
@@ -86,12 +87,17 @@ M16 source closeout is complete:
 
 Begin only the approved M17 scope:
 
-- [ ] Write bounded Certificate Rollout Verification design and safety boundary.
-- [ ] Define exactly one expected certificate source: fingerprint/file or explicit reference endpoint.
-- [ ] Compare against multiple explicit endpoints with served fingerprint/identity/SAN/validity/hostname/trust evidence.
-- [ ] Build deterministic endpoint match/mismatch matrix.
-- [ ] Add CLI/API/UI and focused fixtures only after the comparison model is deterministic.
-- [ ] Preserve no-renewal/no-install/no-reload/no-private-key/no-ACME boundary.
+- [x] Write bounded Certificate Rollout Verification design and safety boundary.
+- [x] Define exactly one expected source: SHA-256 fingerprint or explicit reference direct-TLS endpoint.
+- [x] Intentionally omit arbitrary certificate-file reads to preserve the no-private-key-read boundary.
+- [x] Compare up to 16 explicit endpoints with served fingerprint/identity/SAN/validity/hostname/trust evidence.
+- [x] Build deterministic endpoint MATCH / MISMATCH / UNKNOWN matrix with separate health status.
+- [x] Add CLI/API/dedicated Cert Rollout Admin Console view.
+- [x] Add focused decision fixtures and a real loopback TLS integration fixture.
+- [x] Extend permanent Web/Docker smoke coverage.
+- [ ] Require full GitHub CI on the exact M17 PR head.
+- [ ] Perform native/disposable OMV acceptance if the authorized execution connector returns before closeout.
+- [ ] Write M17 closeout record and source documentation alignment only after CI/merge acceptance.
 
 ## Guardrails
 
