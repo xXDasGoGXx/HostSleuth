@@ -73,25 +73,26 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 - v0.9.0 publication: `docs/history/V0.9.0-PUBLICATION.md`
+- v0.9.0 production/recovery alignment: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`
 
 ## Current state
 
-Stable/public is `v0.9.0` / `mjmalleo/hostsleuth:0.9.0`, published from exact source `b518ed901e2d3f4e95a9bb74ade37d7b3a156540`. Docker `0.9.0` and `latest` resolve to verified OCI index `sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`.
+Stable/public/live/recovery are aligned on `v0.9.0` / `mjmalleo/hostsleuth:0.9.0`, published from exact source `b518ed901e2d3f4e95a9bb74ade37d7b3a156540`. Docker `0.9.0` and `latest` resolve to verified OCI index `sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`.
 
-Live Arcane production and disaster recovery remain on known-good `v0.8.0` / `mjmalleo/hostsleuth:0.8.0` until live v0.9.0 acceptance succeeds.
-
-## Current next step — v0.9.0 production/recovery alignment
+## v0.9.0 production/recovery alignment
 
 - [x] Publish and independently verify v0.9.0.
-- [ ] Redeploy the Arcane-managed HostSleuth project from `mjmalleo/hostsleuth:0.8.0` to `mjmalleo/hostsleuth:0.9.0`.
-- [ ] Verify live version/schema/Docker mode and retained pre-upgrade history.
-- [ ] Verify M15 Permissions, M16 STARTTLS, M17 Cert Rollout UI/API surfaces are present live.
-- [ ] Verify Docker Safe Actions remain disabled/unavailable and LAN Action API remains HTTP 403.
-- [ ] Verify M18 did not expose native `service.reload` in Docker mode.
-- [ ] Merge the staged `OMV-Docker-Rebuild` v0.9.0 pin only after live acceptance.
-- [ ] Record final v0.9.0 production/recovery alignment.
+- [x] Redeploy the Arcane-managed HostSleuth project from `mjmalleo/hostsleuth:0.8.0` to `mjmalleo/hostsleuth:0.9.0`.
+- [x] Verify live `/api/about` = v0.9.0, schema 4 / Docker mode, running image 0.9.0, and all 100 retained events.
+- [x] Verify M15 Permissions is live and native service identity remains unavailable in Docker mode.
+- [x] Verify M16 with a real SMTP STARTTLS upgrade through TLS/certificate/trust.
+- [x] Verify M17 with a real healthy MATCH certificate-rollout comparison.
+- [x] Verify Docker Safe Actions remain disabled/unavailable and LAN Action API remains HTTP 403.
+- [x] Verify M18 `service.reload` is exposed only as a fixed disabled/unavailable capability in Docker mode.
+- [x] Merge `OMV-Docker-Rebuild` PR #10 only after live acceptance, at `813b7a8b76bfd987e97c534c76faf879c510bdec`.
+- [x] Record final v0.9.0 production/recovery alignment.
 
-The live redeploy must use the existing Arcane project-management path. Do not bypass Arcane authentication or raw-Docker safeguards.
+The owner-approved roadmap through M18 is now source-complete, published, live, and recovery-aligned. No additional feature milestone is automatically approved.
 
 ## Guardrails
 
