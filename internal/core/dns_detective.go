@@ -495,4 +495,3 @@ func dnsOptionAllowed(value string) bool {
 		return false
 	}
 }
-
