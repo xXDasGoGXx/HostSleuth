@@ -1,6 +1,6 @@
 # M18 — Safe Actions II Security Review
 
-Status: security review complete; one preferred candidate identified for owner approval. No M18 action implementation exists yet.
+Status: owner-approved implementation in progress. The owner explicitly approved exactly `service.reload` under this security contract.
 
 ## Goal
 
@@ -184,15 +184,13 @@ Assessment:
 
 Reject. Convenience is not worth weakening exact-effect semantics.
 
-## Preferred candidate
+## Approved candidate
 
-The review recommends exactly one candidate for owner approval:
+The owner explicitly approved exactly one M18 action:
 
     service.reload
 
-This is a recommendation, not implementation approval.
-
-No service.reload code should be merged until the owner explicitly approves this exact M18 action.
+Implementation must remain inside this document's security contract. No additional M18 action family is approved.
 
 ## Required implementation contract
 
@@ -447,16 +445,24 @@ Among the candidates reviewed, service.reload provides the strongest operational
 
 ## Decision gate
 
-Current recommendation:
+Owner decision:
 
-    service.reload
+    APPROVED: service.reload
 
-Implementation status:
+Approved implementation scope:
 
-    PENDING OWNER APPROVAL / NOT IMPLEMENTED
+- exactly service.reload;
+- independent reload allowlist;
+- native mode only;
+- loaded + active + CanReload=yes precondition;
+- fixed trusted systemctl reload argv;
+- exact RELOAD confirmation;
+- pre-execution audit;
+- bounded serialized execution;
+- no restart fallback;
+- ActiveState=active postcondition;
+- existing loopback-only Web/API boundary.
 
-Required owner decision before code begins:
+No other candidate from this review is approved for implementation.
 
-    Approve M18 implementation of exactly service.reload under this security contract.
-
-Stable/public/live/recovery remain on v0.8.0 throughout this review.
+Stable/public/live/recovery remain on v0.8.0 throughout implementation and validation unless a separate publication/rollout decision is made.
