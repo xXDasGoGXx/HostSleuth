@@ -241,6 +241,39 @@ jobs:
           sudo rm -f /etc/systemd/system/hostsleuth-m11-accept.service
           sudo systemctl daemon-reload
 
+  native-install-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install published v0.9.0 with current installer
+        run: sudo env HOSTSLEUTH_VERSION=v0.9.0 ./scripts/install.sh
+      - name: Verify installed release and service
+        run: |
+          set -eu
+          /usr/local/bin/hostsleuth version | grep -q '^v0.9.0'
+          sudo systemctl is-active --quiet hostsleuth.service
+          test "$(stat -c '%a' /var/lib/hostsleuth)" = "700"
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8787/api/about > /tmp/hostsleuth-install-about.json; then
+              break
+            fi
+            sleep 1
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          about = json.loads(Path('/tmp/hostsleuth-install-about.json').read_text())
+          assert about.get('version') == 'v0.9.0' or about.get('version') == '0.9.0', about
+          PY
+      - name: Remove disposable native installation
+        if: always()
+        run: |
+          sudo systemctl disable --now hostsleuth.service 2>/dev/null || true
+          sudo rm -f /etc/systemd/system/hostsleuth.service
+          sudo rm -f /usr/local/bin/hostsleuth
+          sudo rm -rf /var/lib/hostsleuth
+          sudo systemctl daemon-reload
+
   docker-build:
     runs-on: ubuntu-latest
     strategy:
@@ -303,6 +336,12 @@ jobs:
         run: |
           set -eu
           curl -fsS http://127.0.0.1:8787/ | grep -q 'HostSleuth'
+          headers="$(curl -fsSI http://127.0.0.1:8787/)"
+          printf '%s\n' "$headers" | grep -qi '^Content-Security-Policy: '
+          printf '%s\n' "$headers" | grep -qi '^Permissions-Policy: camera=(), microphone=(), geolocation=()'
+          printf '%s\n' "$headers" | grep -qi '^Referrer-Policy: no-referrer'
+          printf '%s\n' "$headers" | grep -qi '^X-Content-Type-Options: nosniff'
+          printf '%s\n' "$headers" | grep -qi '^X-Frame-Options: DENY'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'HOSTSLEUTH WORKBENCH'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'REBOOT STORY'
           curl -fsS http://127.0.0.1:8787/assets/app.js | grep -q 'OPTIONAL SAFE ACTIONS'
