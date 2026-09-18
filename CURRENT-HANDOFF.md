@@ -163,30 +163,62 @@ Design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
 Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
-## Active milestone — M15 Deployment / Permissions Story
+## M15 — Deployment / Permissions Story — SOURCE COMPLETE
 
-v0.8.0 publication, live acceptance, and disaster-recovery alignment are complete.
+PR #55 passed the complete GitHub CI matrix on exact head:
 
-M15 implementation is now in progress on a focused branch. Local Go 1.24.13 format/full-test/race-test/vet/build and JavaScript syntax validation pass. Bounded native acceptance also passed: `ssh.service` against `/etc/ssh` produced a permitted chain, while `dbus.service` against `/root` produced a deterministic mode-bit denial. PR/full CI are still required before M15 may be called complete.
+`78bd31d8cdb34f9f5e592e57f14f2e8537e79b41`
+
+CI run:
+
+`35302370815` — success
+
+PR #55 then squash-merged to `main` at:
+
+`d64bb387c8f9efcf5dcb9f814f54b519ee231205`
+
+Delivered:
+
+- one native systemd service plus one explicit absolute path/socket path;
+- observed PID, effective UID/GID, supplementary groups, working directory, executable, and effective capabilities;
+- exact parent-directory ownership/mode traversal chain;
+- deterministic read/write/execute/traverse/connect reasoning with owner/group/other class selection;
+- capability-aware UID 0 handling without assuming unconditional root bypass;
+- bounded relevant Docker bind-mount metadata when available;
+- `hostsleuth permissions --service UNIT /absolute/path`;
+- `GET /api/permissions-story`;
+- dedicated Permissions Web UI with identity cards, visual chain, and searchable evidence;
+- permanent Docker-mode CI coverage that requires native service identity to remain unavailable rather than crossing the container boundary.
+
+Local/native acceptance passed without host mutation:
+
+- `ssh.service` → `/etc/ssh`: permitted chain;
+- `dbus.service` → `/root`: deterministic failure at `read:/root`;
+- disposable HTTP/API/UI acceptance reproduced the failure and confirmed served Permissions assets.
+
+M15 reads no file contents, performs no recursive crawl, and adds no remediation or privilege.
 
 Design: `docs/design/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
-The bounded product question is:
+Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
-> The process is running; why can it not use this path/socket/port?
+Stable/public/live/recovery remain aligned on v0.8.0. M15 is development source on `main`; it has not been published or deployed.
 
-Initial M15 scope remains:
+## Active next step — M16 STARTTLS / Mail Service Story
 
-- native service identity, UID/GID, working directory, and executable identity;
-- one explicit user-supplied path;
-- ownership/mode plus parent-directory traversal chain;
-- deterministic read/write/execute/traverse reasoning;
-- relevant Docker bind-mount metadata when available;
-- no recursive filesystem crawl;
-- no file contents;
-- searchable evidence and a visual permission-chain story in the Admin Console.
+Use the approved roadmap scope only:
 
-Do not restart a broad audit on continuation; use this handoff.
+- SMTP STARTTLS;
+- IMAP STARTTLS;
+- POP3 STARTTLS only if the same bounded model remains clean;
+- greeting and advertised STARTTLS capability;
+- negotiation stage;
+- TLS version/cipher;
+- served certificate plus hostname/trust/expiry evidence;
+- first protocol stage that failed;
+- no credentials, mail submission, mailbox access, or message contents.
+
+Do not restart a broad audit on continuation; begin from M16 design and implementation.
 
 ## Guardrails
 
