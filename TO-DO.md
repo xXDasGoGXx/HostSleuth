@@ -69,7 +69,7 @@ Owner approved M13-M18 plus continuous UI/UX and engineering polish.
 - [x] Add CI cancellation for obsolete PR runs and cover M13 JS/Docker smoke.
 - [x] Local Go 1.24.13 format/vet/test/build and JavaScript syntax checks.
 - [x] Disposable API/UI acceptance against the M13 build.
-- [x] Real resolver comparison proved system + 192.168.3.5 agreement while 192.168.2.5 timed out, producing resolver-specific evidence rather than a generic DNS failure.
+- [x] Real resolver comparison proved agreement with one explicit local resolver and a timeout from another, producing resolver-specific evidence rather than a generic DNS failure.
 - [ ] Final branch audit / closeout record.
 - [ ] Open M13 PR only after the exact branch remains locally green.
 - [ ] Require full GitHub CI on the exact PR head.
