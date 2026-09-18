@@ -95,6 +95,24 @@ function renderActionAudit(container, audits) {
   });
 }
 
+function renderActionCapabilities(container, capabilities) {
+  container.replaceChildren();
+  (capabilities || []).forEach((capability) => {
+    const card = document.createElement("article");
+    card.className = "action-capability-item";
+    const title = document.createElement("strong");
+    title.textContent = capability.title || capability.action_id || "Safe Action";
+    card.append(title);
+    card.append(actionPairList([
+      ["Action", capability.action_id, true],
+      ["State", capability.available ? "available" : capability.enabled ? "enabled but unavailable" : "disabled"],
+      ["Reason", capability.reason],
+      ["Allowed targets", (capability.allowed_targets || []).join(", "), true],
+    ]));
+    container.append(card);
+  });
+}
+
 async function installActionsUI() {
   if (byId("view-actions")) return;
   const nav = document.querySelector(".nav-tabs");
@@ -116,15 +134,16 @@ async function installActionsUI() {
     <section class="panel section-panel action-intro">
       <p class="eyebrow">OPTIONAL SAFE ACTIONS</p>
       <h1>Small, allowlisted remedies with evidence before and after.</h1>
-      <p class="section-copy">Actions are disabled by default. This UI is loopback-only, accepts no arbitrary command, and requires a matching preview confirmation before a state change.</p>
+      <p class="section-copy">Actions are disabled by default. This UI is loopback-only, accepts no arbitrary command, and requires a matching preview confirmation before a state change. Restart and reload permissions are independently allowlisted.</p>
       <div id="actionCapability" class="action-capability"></div>
     </section>
     <div class="action-grid">
       <section class="panel section-panel action-card">
-        <p class="eyebrow">SERVICE.RESTART</p>
-        <h2>Restart one explicitly allowlisted systemd service.</h2>
-        <p class="section-copy">HostSleuth will preview the exact target and command, record an audit request, restart only that unit, then require ActiveState=active before reporting success.</p>
+        <p class="eyebrow">SAFE ACTION</p>
+        <h2 id="actionHeading">Select an explicitly allowlisted systemd action.</h2>
+        <p class="section-copy" id="actionDescription">HostSleuth will preview the exact target and command before any state change.</p>
         <form id="actionPreviewForm" class="action-form">
+          <label>Action<select id="actionID" required></select></label>
           <label>Allowlisted service<select id="actionTarget" required></select></label>
           <button id="actionPreviewButton" class="primary-button" type="submit">Preview action</button>
         </form>
@@ -145,13 +164,16 @@ async function installActionsUI() {
   main.append(section);
 
   const capabilityBox = byId("actionCapability");
+  const actionSelect = byId("actionID");
   const targetSelect = byId("actionTarget");
+  const previewButton = byId("actionPreviewButton");
   const previewResult = byId("actionPreviewResult");
   const confirmPanel = byId("actionConfirmPanel");
   const confirmationInput = byId("actionConfirmation");
   const runButton = byId("actionRunButton");
   const runResult = byId("actionRunResult");
   const auditBox = byId("actionAudit");
+  let capabilities = [];
   let activePreview = null;
 
   const loadAudit = async () => {
@@ -163,16 +185,28 @@ async function installActionsUI() {
     }
   };
 
-  try {
-    const capabilities = await actionRequest("/api/actions");
-    const capability = (capabilities || []).find((item) => item.action_id === "service.restart") || capabilities?.[0];
-    if (!capability) throw new Error("No action capabilities were returned.");
-    capabilityBox.replaceChildren(actionPairList([
-      ["State", capability.available ? "available" : capability.enabled ? "enabled but unavailable" : "disabled"],
-      ["Reason", capability.reason],
-      ["Allowed targets", (capability.allowed_targets || []).join(", "), true],
-    ]));
+  const selectedCapability = () => capabilities.find((item) => item.action_id === actionSelect.value);
+
+  const refreshActionSelection = () => {
+    const capability = selectedCapability();
     targetSelect.replaceChildren();
+    activePreview = null;
+    previewResult.classList.add("hidden");
+    confirmPanel.classList.add("hidden");
+    runResult.classList.add("hidden");
+    confirmationInput.value = "";
+    runButton.disabled = true;
+
+    if (!capability) {
+      text(byId("actionHeading"), "No Safe Action capability is available.");
+      text(byId("actionDescription"), "HostSleuth returned no fixed action definition.");
+      previewButton.disabled = true;
+      return;
+    }
+
+    text(byId("actionHeading"), capability.title || capability.action_id);
+    text(byId("actionDescription"), capability.description || "Preview the exact effect before execution.");
+
     (capability.allowed_targets || []).forEach((target) => {
       const option = document.createElement("option");
       option.value = target;
@@ -182,13 +216,29 @@ async function installActionsUI() {
     if (!(capability.allowed_targets || []).length) {
       const option = document.createElement("option");
       option.value = "";
-      option.textContent = "No services allowlisted";
+      option.textContent = "No services allowlisted for this action";
       targetSelect.append(option);
     }
-    byId("actionPreviewButton").disabled = !capability.available;
+    previewButton.disabled = !capability.available;
+  };
+
+  try {
+    capabilities = await actionRequest("/api/actions");
+    renderActionCapabilities(capabilityBox, capabilities);
+    actionSelect.replaceChildren();
+    capabilities.forEach((capability) => {
+      const option = document.createElement("option");
+      option.value = capability.action_id;
+      option.textContent = capability.action_id;
+      actionSelect.append(option);
+    });
+    if (!capabilities.length) throw new Error("No action capabilities were returned.");
+    actionSelect.addEventListener("change", refreshActionSelection);
+    refreshActionSelection();
   } catch (error) {
     capabilityBox.replaceChildren(makeEmpty(error.message || "Action API unavailable. If this UI is being accessed over the LAN, use an SSH tunnel for Optional Safe Actions."));
-    byId("actionPreviewButton").disabled = true;
+    previewButton.disabled = true;
+    actionSelect.replaceChildren();
     targetSelect.replaceChildren();
   }
 
@@ -201,7 +251,7 @@ async function installActionsUI() {
       const preview = await actionRequest("/api/actions/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action_id: "service.restart", target: targetSelect.value }),
+        body: JSON.stringify({ action_id: actionSelect.value, target: targetSelect.value }),
       });
       activePreview = preview;
       previewResult.classList.remove("hidden");

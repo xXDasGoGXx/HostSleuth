@@ -41,6 +41,25 @@ var actionServiceRuntimeLookup = func(ctx context.Context, unit string) (bounded
 		"--property=LoadState,ActiveState,SubState,UnitFileState,Result,MainPID,ControlGroup,ExecMainCode,ExecMainStatus")
 }
 
+var actionServiceReloadCapabilityLookup = func(ctx context.Context, unit string) (boundedCommandResult, error) {
+	command, err := actionSystemctlPath()
+	if err != nil {
+		return boundedCommandResult{}, err
+	}
+	lookupCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	return runBoundedCommand(lookupCtx, actionCommandOutputLimit, command, "show", unit, "--no-pager", "--property=CanReload", "--value")
+}
+
+func collectActionServiceCanReload(ctx context.Context, unit string) (bool, string, error) {
+	result, err := actionServiceReloadCapabilityLookup(ctx, unit)
+	value := strings.ToLower(strings.TrimSpace(result.Output))
+	if err != nil {
+		return false, value, err
+	}
+	return value == "yes", value, nil
+}
+
 func collectActionServiceRuntime(ctx context.Context, unit string) (*ServiceRuntimeEvidence, error) {
 	result, err := actionServiceRuntimeLookup(ctx, unit)
 	values := map[string]string{}

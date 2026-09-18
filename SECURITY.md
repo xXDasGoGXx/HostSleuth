@@ -8,21 +8,30 @@ HostSleuth is early-stage software that inventories local system state. Treat it
 - The web interface binds to `127.0.0.1:8787` by default.
 - Non-loopback exposure is not recommended until authentication is implemented.
 - Snapshot, event, and action-audit files are created with owner-only permissions where supported.
-- Automatic repair/remediation remains out of scope. M11 actions are explicit operator requests, never automatic responses to a diagnosis.
+- Automatic repair/remediation remains out of scope. M11/M18 actions are explicit operator requests, never automatic responses to a diagnosis.
 - The supported Docker Compose deployment does not use unrestricted privileged mode, drops all Linux capabilities, enables `no-new-privileges`, and uses a read-only container filesystem.
 - Docker mode deliberately reports systemd and host-filesystem evidence as unavailable instead of mounting broad host control surfaces to recreate native visibility.
 
-## M11 Optional Safe Actions boundary
+## M11 / M18 Optional Safe Actions boundary
 
-M11 introduces one deliberately narrow state-changing action in development source: `service.restart`.
+Development source exposes exactly two fixed native systemd actions:
 
-The action framework is disabled unless HostSleuth is started or invoked with `--enable-actions`. A systemd service must also be explicitly named with `--allow-restart-service UNIT`; no service is permitted by default. Allowlisted service names are normalized to `.service` and must pass a conservative unit-name validator.
+- `service.restart` from M11;
+- `service.reload` from M18.
 
-A restart requires a preview, an exact confirmation value from that preview, a durable pre-execution audit record, direct argv execution of `systemctl restart UNIT` without a shell, bounded before/after systemd evidence, and an observed `ActiveState=active` postcondition before HostSleuth reports success. Unknown action IDs, unlisted targets, unsafe unit names, missing confirmation, unavailable audit storage, and Docker deployment mode fail closed.
+The action framework is disabled unless HostSleuth is started or invoked with `--enable-actions`. Restart and reload use independent explicit allowlists: `--allow-restart-service UNIT` and `--allow-reload-service UNIT`. Permission for one action never grants permission for the other. No service is permitted by default. Allowlisted service names are normalized to `.service` and must pass the same conservative unit-name validator.
+
+Both actions require a deterministic preview, exact confirmation, a durable pre-execution audit record, trusted absolute `systemctl` argv without a shell, bounded execution/output, bounded before/after systemd evidence, serialized execution, and an observed `ActiveState=active` postcondition before HostSleuth reports success.
+
+`service.reload` has additional fail-closed requirements: the unit must already be active and trusted systemd evidence must report `CanReload=yes`. The command is exactly `systemctl reload UNIT`; there is no reload-or-restart helper and no fallback to restart. A successful reload result means the reload command succeeded and the unit remained active. It does not prove application-specific configuration semantics were applied.
+
+Unknown action IDs, unlisted targets, unsafe unit names, missing confirmation, unavailable audit storage, unavailable reload-capability evidence, and Docker deployment mode fail closed.
 
 The Action Web/API surface is loopback-only even if the read-only HostSleuth UI is deliberately bound to a LAN address. State-changing requests require JSON plus an explicit `X-HostSleuth-Action: confirm` header. Use the local browser workflow, an SSH tunnel, or the local CLI.
 
-M11 does not add arbitrary command execution, generic systemd control, package/firewall/file administration, writable Docker-socket control, or automatic remediation.
+M11/M18 do not add arbitrary command execution, generic systemd control, package/firewall/file administration, writable Docker-socket control, Docker/container mutation, or automatic remediation.
+
+M18 security review: `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`.
 
 ## Workbench boundary
 

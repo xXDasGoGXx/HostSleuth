@@ -279,59 +279,39 @@ Closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`.
 
 Stable/public/live/recovery remain aligned on v0.8.0. M17 is development source on `main`; it has not been published or deployed.
 
-## M18 — Safe Actions II — SECURITY REVIEW COMPLETE / OWNER DECISION REQUIRED
+## M18 — Safe Actions II — OWNER APPROVED / IMPLEMENTATION IN VALIDATION
 
-The fresh candidate/threat-model review is complete.
-
-Reviewed candidates:
-
-- `service.reload`;
-- `service.start`;
-- `service.stop`;
-- `service.reset-failed`;
-- container restart;
-- systemd manager `daemon-reload`;
-- `reload-or-restart`.
-
-Preferred candidate for owner approval:
-
-`service.reload`
-
-Why it is preferred:
-
-- it reuses the existing native systemd target/allowlist architecture;
-- it requires no new OS privilege mechanism because native HostSleuth already runs as root;
-- it avoids Docker mutation and manager-wide control;
-- it can apply supported configuration/certificate changes without the full process replacement of restart;
-- it can preserve M11's exact preview, confirmation, pre-audit, bounded execution, and postcondition model.
-
-Required boundary if approved:
-
-- fixed action ID `service.reload`;
-- dedicated `--allow-reload-service UNIT` allowlist, independent of restart allowlisting;
-- existing `--enable-actions` still required;
-- native mode only; Docker remains unavailable;
-- fixed trusted absolute `systemctl reload UNIT.service` argv only;
-- loaded + active + reload-capable precondition;
-- exact confirmation `RELOAD UNIT.service`;
-- no fallback to restart;
-- success requires command success plus post-action `ActiveState=active`;
-- do not claim application-specific configuration semantics were verified;
-- existing loopback-only Web/API, durable pre-execution audit, bounded output/timeout, serialization, and final audit remain mandatory.
-
-Rejected candidates either carry larger availability/manager/Docker blast radius or provide too little diagnostic value.
-
-Design/security review:
+The owner explicitly approved exactly `service.reload` under:
 
 `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`
 
-No M18 action code has been implemented.
+Implementation on the focused M18 branch now includes:
 
-Implementation is blocked pending explicit owner approval of exactly `service.reload` under this security contract.
+- fixed action ID `service.reload`;
+- dedicated `--allow-reload-service UNIT` allowlist independent of restart allowlisting;
+- existing `--enable-actions` global opt-in;
+- native mode only; Docker exposes neither native systemd action;
+- trusted absolute systemctl lookup only;
+- fixed `reload UNIT.service` argv with no shell or arbitrary arguments;
+- loaded + `ActiveState=active` + `CanReload=yes` fail-closed preconditions;
+- exact confirmation `RELOAD UNIT.service`;
+- durable requested audit before execution;
+- bounded serialized execution and bounded command output;
+- no reload-or-restart helper and no restart fallback;
+- postcondition requiring command success and `ActiveState=active`;
+- result wording that does not claim application-specific configuration semantics were verified;
+- existing loopback-only Action Web/API boundary;
+- Admin Console action selector exposing restart/reload only from server-provided capabilities and allowlists;
+- focused tests proving allowlist separation, reload capability gating, exact command/confirmation, audit behavior, active postcondition, Docker unavailability, and no restart fallback;
+- permanent CI extension for a real reload-capable disposable systemd unit.
+
+Local Go 1.24.13 validation currently passes full tests, core race tests, vet, native build, Action JavaScript syntax, and diff checks.
+
+No live OMV systemd service, container, certificate, DNS/proxy configuration, production deployment, or recovery definition has been changed.
 
 Stable/public/live/recovery remain on v0.8.0.
 
-Do not begin M18 action implementation until the owner approves this exact action.
+Next gate: exact-head PR CI including the real disposable systemd reload acceptance, then source closeout if green.
 
 ## Guardrails
 

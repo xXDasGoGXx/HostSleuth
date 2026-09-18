@@ -81,6 +81,7 @@ jobs:
           [Service]
           Type=simple
           ExecStart=/bin/sleep infinity
+          ExecReload=/bin/true
           EOF
           sudo systemctl daemon-reload
           sudo systemctl start hostsleuth-m11-accept.service
@@ -159,6 +160,79 @@ jobs:
           assert audits[0]['phase'] == 'denied' and audits[0]['status'] == 'denied', audits
           assert audits[1]['phase'] == 'requested' and audits[1]['status'] == 'requested', audits
           assert audits[2]['phase'] == 'completed' and audits[2]['status'] == 'success', audits
+          PY
+      - name: Verify independent allowlist and real reload
+        run: |
+          set -eu
+          state=/tmp/hostsleuth-m18-reload-state
+          sudo mkdir -p "$state"
+
+          sudo ./hostsleuth action preview \
+            --state-dir "$state" \
+            --enable-actions \
+            --allow-restart-service hostsleuth-m11-accept \
+            --id service.reload \
+            --target hostsleuth-m11-accept.service \
+            > /tmp/hostsleuth-m18-reload-denied-preview.json
+
+          sudo ./hostsleuth action preview \
+            --state-dir "$state" \
+            --enable-actions \
+            --allow-reload-service hostsleuth-m11-accept \
+            --id service.reload \
+            --target hostsleuth-m11-accept.service \
+            > /tmp/hostsleuth-m18-reload-preview.json
+
+          before_reload_pid=$(sudo systemctl show hostsleuth-m11-accept.service --property=MainPID --value)
+          test -n "$before_reload_pid"
+          test "$before_reload_pid" != "0"
+
+          sudo ./hostsleuth action run \
+            --state-dir "$state" \
+            --enable-actions \
+            --allow-reload-service hostsleuth-m11-accept \
+            --id service.reload \
+            --target hostsleuth-m11-accept.service \
+            --confirm 'RELOAD hostsleuth-m11-accept.service' \
+            > /tmp/hostsleuth-m18-reload-run.json
+
+          after_reload_pid=$(sudo systemctl show hostsleuth-m11-accept.service --property=MainPID --value)
+          test "$before_reload_pid" = "$after_reload_pid"
+          sudo systemctl is-active --quiet hostsleuth-m11-accept.service
+
+          sudo ./hostsleuth action audit \
+            --state-dir "$state" \
+            --limit 10 \
+            > /tmp/hostsleuth-m18-reload-audit.json
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          denied_preview = json.loads(Path('/tmp/hostsleuth-m18-reload-denied-preview.json').read_text())
+          assert denied_preview['available'] is False, denied_preview
+          assert denied_preview['allowed'] is False, denied_preview
+
+          preview = json.loads(Path('/tmp/hostsleuth-m18-reload-preview.json').read_text())
+          assert preview['available'] is True, preview
+          assert preview['allowed'] is True, preview
+          assert preview['confirmation'] == 'RELOAD hostsleuth-m11-accept.service', preview
+          assert preview['command'][0] in ('/usr/bin/systemctl', '/bin/systemctl'), preview
+          assert preview['command'][1:] == ['reload', 'hostsleuth-m11-accept.service'], preview
+          reload_check = next(item for item in preview['checks'] if item['name'] == 'reload-capability')
+          assert reload_check['status'] == 'pass', preview
+
+          result = json.loads(Path('/tmp/hostsleuth-m18-reload-run.json').read_text())
+          assert result['status'] == 'success', result
+          assert result['action_id'] == 'service.reload', result
+          assert result['before']['active_state'] == 'active', result
+          assert result['after']['active_state'] == 'active', result
+          assert 'reload command succeeded' in result['summary'], result
+
+          audits = json.loads(Path('/tmp/hostsleuth-m18-reload-audit.json').read_text())
+          assert len(audits) == 2, audits
+          assert audits[0]['phase'] == 'requested' and audits[0]['action_id'] == 'service.reload', audits
+          assert audits[1]['phase'] == 'completed' and audits[1]['status'] == 'success', audits
           PY
       - name: Remove disposable systemd service
         if: always()
@@ -298,9 +372,13 @@ jobs:
 
           actions = json.loads(Path('/tmp/hostsleuth-actions.json').read_text())
           restart = next(item for item in actions if item.get('action_id') == 'service.restart')
+          reload = next(item for item in actions if item.get('action_id') == 'service.reload')
           assert restart.get('enabled') is False, restart
           assert restart.get('available') is False, restart
           assert restart.get('allowed_targets') in (None, []), restart
+          assert reload.get('enabled') is False, reload
+          assert reload.get('available') is False, reload
+          assert reload.get('allowed_targets') in (None, []), reload
           PY
       - name: Show logs on failure
         if: failure()

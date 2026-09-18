@@ -221,10 +221,12 @@ func runServe(args []string) {
 	interval := fs.Duration("interval", 60*time.Second, "snapshot interval")
 	enableActions := fs.Bool("enable-actions", false, "explicitly enable optional safe actions")
 	allowedRestartServices := &stringListFlag{}
+	allowedReloadServices := &stringListFlag{}
 	fs.Var(allowedRestartServices, "allow-restart-service", "allow one systemd service for service.restart; repeat for additional services")
+	fs.Var(allowedReloadServices, "allow-reload-service", "allow one systemd service for service.reload; repeat for additional services")
 	_ = fs.Parse(args)
 	store := core.Store{Dir: *state}
-	actionPolicy, err := core.NewActionPolicy(*enableActions, *allowedRestartServices)
+	actionPolicy, err := core.NewActionPolicyWithReload(*enableActions, *allowedRestartServices, *allowedReloadServices)
 	if err != nil {
 		log.Fatal(err)
 	}

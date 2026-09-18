@@ -19,6 +19,7 @@ import (
 const (
 	actionSchemaVersion      = 1
 	actionServiceRestartID   = "service.restart"
+	actionServiceReloadID    = "service.reload"
 	actionCommandOutputLimit = 8 * 1024
 	actionExecutionTimeout   = 10 * time.Second
 )
@@ -28,6 +29,7 @@ var safeActionServiceUnitPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.@
 type ActionPolicy struct {
 	Enabled                bool            `json:"enabled"`
 	AllowedRestartServices map[string]bool `json:"allowed_restart_services,omitempty"`
+	AllowedReloadServices  map[string]bool `json:"allowed_reload_services,omitempty"`
 }
 
 type ActionCapability struct {
@@ -95,14 +97,39 @@ var actionServiceRestart = func(ctx context.Context, unit string) (boundedComman
 	return runBoundedCommand(actionCtx, actionCommandOutputLimit, command, "restart", unit)
 }
 
+var actionServiceReload = func(ctx context.Context, unit string) (boundedCommandResult, error) {
+	command, err := actionSystemctlPath()
+	if err != nil {
+		return boundedCommandResult{}, err
+	}
+	actionCtx, cancel := context.WithTimeout(ctx, actionExecutionTimeout)
+	defer cancel()
+	return runBoundedCommand(actionCtx, actionCommandOutputLimit, command, "reload", unit)
+}
+
 func NewActionPolicy(enabled bool, allowedRestartServices []string) (ActionPolicy, error) {
-	policy := ActionPolicy{Enabled: enabled, AllowedRestartServices: map[string]bool{}}
+	return NewActionPolicyWithReload(enabled, allowedRestartServices, nil)
+}
+
+func NewActionPolicyWithReload(enabled bool, allowedRestartServices, allowedReloadServices []string) (ActionPolicy, error) {
+	policy := ActionPolicy{
+		Enabled:                enabled,
+		AllowedRestartServices: map[string]bool{},
+		AllowedReloadServices:  map[string]bool{},
+	}
 	for _, raw := range allowedRestartServices {
 		unit := normalizeServiceUnit(raw)
 		if !validActionServiceUnit(unit) {
-			return ActionPolicy{}, fmt.Errorf("invalid allowlisted systemd service %q", raw)
+			return ActionPolicy{}, fmt.Errorf("invalid restart-allowlisted systemd service %q", raw)
 		}
 		policy.AllowedRestartServices[unit] = true
+	}
+	for _, raw := range allowedReloadServices {
+		unit := normalizeServiceUnit(raw)
+		if !validActionServiceUnit(unit) {
+			return ActionPolicy{}, fmt.Errorf("invalid reload-allowlisted systemd service %q", raw)
+		}
+		policy.AllowedReloadServices[unit] = true
 	}
 	return policy, nil
 }
@@ -111,29 +138,58 @@ func validActionServiceUnit(unit string) bool {
 	return safeActionServiceUnitPattern.MatchString(strings.TrimSpace(unit))
 }
 
-func (m *ActionManager) Capabilities(mode string) []ActionCapability {
-	targets := make([]string, 0, len(m.Policy.AllowedRestartServices))
-	for target := range m.Policy.AllowedRestartServices {
+func actionAllowedTargets(values map[string]bool) []string {
+	targets := make([]string, 0, len(values))
+	for target := range values {
 		targets = append(targets, target)
 	}
 	sort.Strings(targets)
+	return targets
+}
+
+func actionCapability(enabled bool, mode, actionID, title, description, emptyReason string, targets []string) ActionCapability {
 	capability := ActionCapability{
-		ActionID:       actionServiceRestartID,
-		Title:          "Restart allowlisted service",
-		Description:    "Restart one explicitly allowlisted systemd service and verify that it returns active.",
-		Enabled:        m.Policy.Enabled,
-		Available:      m.Policy.Enabled && strings.TrimSpace(mode) != dockerDeploymentMode && len(targets) > 0,
+		ActionID:       actionID,
+		Title:          title,
+		Description:    description,
+		Enabled:        enabled,
+		Available:      enabled && strings.TrimSpace(mode) != dockerDeploymentMode && len(targets) > 0,
 		AllowedTargets: targets,
 	}
 	switch {
-	case !m.Policy.Enabled:
+	case !enabled:
 		capability.Reason = "actions are disabled; start HostSleuth with --enable-actions to opt in"
 	case strings.TrimSpace(mode) == dockerDeploymentMode:
 		capability.Reason = "systemd service actions are unavailable in Docker deployment mode"
 	case len(targets) == 0:
-		capability.Reason = "no restart services are allowlisted"
+		capability.Reason = emptyReason
 	}
-	return []ActionCapability{capability}
+	return capability
+}
+
+func (m *ActionManager) Capabilities(mode string) []ActionCapability {
+	restartTargets := actionAllowedTargets(m.Policy.AllowedRestartServices)
+	reloadTargets := actionAllowedTargets(m.Policy.AllowedReloadServices)
+	return []ActionCapability{
+		actionCapability(
+			m.Policy.Enabled,
+			mode,
+			actionServiceRestartID,
+			"Restart allowlisted service",
+			"Restart one explicitly allowlisted systemd service and verify that it returns active.",
+			"no restart services are allowlisted",
+			restartTargets,
+		),
+		actionCapability(
+			m.Policy.Enabled,
+			mode,
+			actionServiceReloadID,
+			"Reload allowlisted service",
+			"Reload one explicitly allowlisted, active, reload-capable systemd service without restart fallback.",
+			"no reload services are allowlisted",
+			reloadTargets,
+		),
+	}
 }
 
 func (m *ActionManager) Preview(ctx context.Context, actionID, target, mode string) ActionPreview {
@@ -143,7 +199,7 @@ func (m *ActionManager) Preview(ctx context.Context, actionID, target, mode stri
 		Target:        normalizeServiceUnit(target),
 		Enabled:       m.Policy.Enabled,
 	}
-	if preview.ActionID != actionServiceRestartID {
+	if preview.ActionID != actionServiceRestartID && preview.ActionID != actionServiceReloadID {
 		preview.Checks = append(preview.Checks, Check{Name: "action-id", Status: "fail", Evidence: "unknown action ID"})
 		return preview
 	}
@@ -152,24 +208,47 @@ func (m *ActionManager) Preview(ctx context.Context, actionID, target, mode stri
 		return preview
 	}
 	if strings.TrimSpace(mode) == dockerDeploymentMode {
-		preview.Checks = append(preview.Checks, Check{Name: "action-mode", Status: "fail", Evidence: "service restart is unavailable in Docker deployment mode"})
+		preview.Checks = append(preview.Checks, Check{Name: "action-mode", Status: "fail", Evidence: "systemd service actions are unavailable in Docker deployment mode"})
 		return preview
 	}
 	if !validActionServiceUnit(preview.Target) {
 		preview.Checks = append(preview.Checks, Check{Name: "action-target", Status: "fail", Evidence: "target is not a valid conservative systemd .service unit name"})
 		return preview
 	}
-	if !m.Policy.AllowedRestartServices[preview.Target] {
-		preview.Checks = append(preview.Checks, Check{Name: "action-policy", Status: "fail", Evidence: "target is not explicitly allowlisted for restart"})
+
+	var (
+		allowed          bool
+		policyEvidence   string
+		commandVerb      string
+		confirmationVerb string
+		effect           string
+	)
+	switch preview.ActionID {
+	case actionServiceRestartID:
+		allowed = m.Policy.AllowedRestartServices[preview.Target]
+		policyEvidence = "target is explicitly allowlisted for service.restart"
+		commandVerb = "restart"
+		confirmationVerb = "RESTART"
+		effect = "Restart only the allowlisted systemd unit " + preview.Target + " and verify ActiveState=active afterward."
+	case actionServiceReloadID:
+		allowed = m.Policy.AllowedReloadServices[preview.Target]
+		policyEvidence = "target is explicitly allowlisted for service.reload"
+		commandVerb = "reload"
+		confirmationVerb = "RELOAD"
+		effect = "Reload only the allowlisted systemd unit " + preview.Target + " and verify ActiveState=active afterward; never fall back to restart."
+	}
+	if !allowed {
+		preview.Checks = append(preview.Checks, Check{Name: "action-policy", Status: "fail", Evidence: "target is not explicitly allowlisted for " + preview.ActionID})
 		return preview
 	}
+
 	command, commandErr := actionSystemctlPath()
 	if commandErr != nil {
 		preview.Checks = append(preview.Checks, Check{Name: "action-command", Status: "fail", Evidence: boundedEvidence(commandErr.Error(), 384)})
 		return preview
 	}
 	preview.Allowed = true
-	preview.Checks = append(preview.Checks, Check{Name: "action-policy", Status: "pass", Evidence: "target is explicitly allowlisted for service.restart"})
+	preview.Checks = append(preview.Checks, Check{Name: "action-policy", Status: "pass", Evidence: policyEvidence})
 
 	before, err := collectActionServiceRuntime(ctx, preview.Target)
 	preview.Before = before
@@ -187,15 +266,45 @@ func (m *ActionManager) Preview(ctx context.Context, actionID, target, mode stri
 		preview.Checks = append(preview.Checks, Check{Name: "action-precondition", Status: "fail", Evidence: "allowlisted systemd unit is not installed"})
 		return preview
 	}
+	if preview.ActionID == actionServiceReloadID && before.ActiveState != "active" {
+		preview.Checks = append(preview.Checks, Check{
+			Name:     "action-precondition",
+			Status:   "fail",
+			Evidence: "service.reload requires the allowlisted unit to be active before reload",
+		})
+		return preview
+	}
 	preview.Checks = append(preview.Checks, Check{
 		Name:   "action-precondition",
 		Status: "pass",
 		Evidence: fmt.Sprintf("load=%s active=%s sub=%s result=%s",
 			fallback(before.LoadState, "unknown"), fallback(before.ActiveState, "unknown"), fallback(before.SubState, "unknown"), fallback(before.Result, "unknown")),
 	})
-	preview.Command = []string{command, "restart", preview.Target}
-	preview.Effect = "Restart only the allowlisted systemd unit " + preview.Target + " and verify ActiveState=active afterward."
-	preview.Confirmation = "RESTART " + preview.Target
+
+	if preview.ActionID == actionServiceReloadID {
+		canReload, raw, reloadErr := collectActionServiceCanReload(ctx, preview.Target)
+		if reloadErr != nil {
+			preview.Checks = append(preview.Checks, Check{
+				Name:     "reload-capability",
+				Status:   "fail",
+				Evidence: "systemd reload capability evidence is unavailable: " + boundedEvidence(reloadErr.Error(), 384),
+			})
+			return preview
+		}
+		if !canReload {
+			preview.Checks = append(preview.Checks, Check{
+				Name:     "reload-capability",
+				Status:   "fail",
+				Evidence: "systemd does not report CanReload=yes (observed " + fallback(raw, "unknown") + ")",
+			})
+			return preview
+		}
+		preview.Checks = append(preview.Checks, Check{Name: "reload-capability", Status: "pass", Evidence: "systemd reports CanReload=yes"})
+	}
+
+	preview.Command = []string{command, commandVerb, preview.Target}
+	preview.Effect = effect
+	preview.Confirmation = confirmationVerb + " " + preview.Target
 	preview.Available = true
 	return preview
 }
@@ -249,20 +358,34 @@ func (m *ActionManager) Run(ctx context.Context, actionID, target, confirmation,
 		return result, fmt.Errorf("refusing action without durable audit log: %w", err)
 	}
 
-	commandResult, commandErr := actionServiceRestart(ctx, result.Target)
+	var commandResult boundedCommandResult
+	var commandErr error
+	actionName := ""
+	switch result.ActionID {
+	case actionServiceRestartID:
+		actionName = "restart"
+		commandResult, commandErr = actionServiceRestart(ctx, result.Target)
+	case actionServiceReloadID:
+		actionName = "reload"
+		commandResult, commandErr = actionServiceReload(ctx, result.Target)
+	default:
+		commandErr = errors.New("unknown action ID after successful preview")
+	}
 	result.CommandOutput = boundedEvidence(strings.TrimSpace(commandResult.Output), actionCommandOutputLimit)
 	after, afterErr := collectActionServiceRuntime(ctx, result.Target)
 	result.After = after
 
 	switch {
 	case commandErr != nil:
-		finish("failed", "systemd restart command failed: "+boundedEvidence(commandErr.Error(), 384))
+		finish("failed", "systemd "+actionName+" command failed: "+boundedEvidence(commandErr.Error(), 384))
 	case afterErr != nil && after == nil:
-		finish("failed", "restart returned but postcondition evidence is unavailable: "+boundedEvidence(afterErr.Error(), 384))
+		finish("failed", actionName+" returned but postcondition evidence is unavailable: "+boundedEvidence(afterErr.Error(), 384))
 	case after == nil:
-		finish("failed", "restart returned but postcondition evidence is unavailable")
+		finish("failed", actionName+" returned but postcondition evidence is unavailable")
 	case after.ActiveState != "active":
-		finish("failed", "restart did not satisfy the required postcondition ActiveState=active")
+		finish("failed", actionName+" did not satisfy the required postcondition ActiveState=active")
+	case result.ActionID == actionServiceReloadID:
+		finish("success", "allowlisted service reload command succeeded and postcondition ActiveState=active was verified")
 	default:
 		finish("success", "allowlisted service restarted and postcondition ActiveState=active was verified")
 	}

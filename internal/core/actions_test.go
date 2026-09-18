@@ -245,3 +245,232 @@ func TestActionCommandFailureIsRecordedAsFailure(t *testing.T) {
 		t.Fatalf("expected before and after evidence, got %d runtime calls", runtimeCalls)
 	}
 }
+
+func withReloadActionMocks(t *testing.T, runtime func(context.Context, string) (boundedCommandResult, error), canReload func(context.Context, string) (boundedCommandResult, error), reload func(context.Context, string) (boundedCommandResult, error)) {
+	t.Helper()
+	oldRuntime := actionServiceRuntimeLookup
+	oldCanReload := actionServiceReloadCapabilityLookup
+	oldReload := actionServiceReload
+	oldRestart := actionServiceRestart
+	oldPath := actionSystemctlPath
+	actionServiceRuntimeLookup = runtime
+	actionServiceReloadCapabilityLookup = canReload
+	actionServiceReload = reload
+	actionServiceRestart = func(context.Context, string) (boundedCommandResult, error) {
+		t.Fatal("restart must never be used as reload fallback")
+		return boundedCommandResult{}, nil
+	}
+	actionSystemctlPath = func() (string, error) { return "/usr/bin/systemctl", nil }
+	t.Cleanup(func() {
+		actionServiceRuntimeLookup = oldRuntime
+		actionServiceReloadCapabilityLookup = oldCanReload
+		actionServiceReload = oldReload
+		actionServiceRestart = oldRestart
+		actionSystemctlPath = oldPath
+	})
+}
+
+func enabledReloadActionManager(t *testing.T, dir string) *ActionManager {
+	t.Helper()
+	policy, err := NewActionPolicyWithReload(true, nil, []string{"demo"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &ActionManager{Policy: policy, Store: Store{Dir: dir}}
+}
+
+func TestActionPolicyKeepsRestartAndReloadAllowlistsIndependent(t *testing.T) {
+	policy, err := NewActionPolicyWithReload(true, []string{"restart-only"}, []string{"reload-only"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !policy.AllowedRestartServices["restart-only.service"] || policy.AllowedRestartServices["reload-only.service"] {
+		t.Fatalf("unexpected restart allowlist: %+v", policy.AllowedRestartServices)
+	}
+	if !policy.AllowedReloadServices["reload-only.service"] || policy.AllowedReloadServices["restart-only.service"] {
+		t.Fatalf("unexpected reload allowlist: %+v", policy.AllowedReloadServices)
+	}
+	if _, err := NewActionPolicyWithReload(true, nil, []string{"demo.service;restart"}); err == nil {
+		t.Fatal("unsafe reload allowlist target was accepted")
+	}
+}
+
+func TestActionCapabilitiesExposeReloadSeparately(t *testing.T) {
+	policy, err := NewActionPolicyWithReload(true, []string{"restart-only"}, []string{"reload-only"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	caps := (&ActionManager{Policy: policy}).Capabilities("native")
+	if len(caps) != 2 {
+		t.Fatalf("capabilities=%+v", caps)
+	}
+	if caps[0].ActionID != actionServiceRestartID || len(caps[0].AllowedTargets) != 1 || caps[0].AllowedTargets[0] != "restart-only.service" {
+		t.Fatalf("unexpected restart capability: %+v", caps[0])
+	}
+	if caps[1].ActionID != actionServiceReloadID || len(caps[1].AllowedTargets) != 1 || caps[1].AllowedTargets[0] != "reload-only.service" {
+		t.Fatalf("unexpected reload capability: %+v", caps[1])
+	}
+	for _, cap := range (&ActionManager{Policy: policy}).Capabilities(dockerDeploymentMode) {
+		if cap.Available {
+			t.Fatalf("Docker action unexpectedly available: %+v", cap)
+		}
+	}
+}
+
+func TestReloadDoesNotInheritRestartAllowlist(t *testing.T) {
+	policy, err := NewActionPolicyWithReload(true, []string{"demo"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manager := &ActionManager{Policy: policy, Store: Store{Dir: t.TempDir()}}
+	preview := manager.Preview(context.Background(), actionServiceReloadID, "demo", "native")
+	if preview.Available || preview.Allowed {
+		t.Fatalf("reload inherited restart allowlist: %+v", preview)
+	}
+	if len(preview.Checks) == 0 || !strings.Contains(preview.Checks[0].Evidence, "service.reload") {
+		t.Fatalf("reload denial did not identify the independent allowlist: %+v", preview.Checks)
+	}
+}
+
+func TestReloadPreviewRequiresActiveReloadCapableUnit(t *testing.T) {
+	withReloadActionMocks(t,
+		func(context.Context, string) (boundedCommandResult, error) {
+			return boundedCommandResult{Output: "LoadState=loaded\nActiveState=active\nSubState=running\nResult=success\n"}, nil
+		},
+		func(context.Context, string) (boundedCommandResult, error) {
+			return boundedCommandResult{Output: "yes\n"}, nil
+		},
+		func(context.Context, string) (boundedCommandResult, error) {
+			t.Fatal("reload must not execute during preview")
+			return boundedCommandResult{}, nil
+		},
+	)
+	preview := enabledReloadActionManager(t, t.TempDir()).Preview(context.Background(), actionServiceReloadID, "demo", "native")
+	if !preview.Available || !preview.Allowed {
+		t.Fatalf("reload preview unavailable: %+v", preview)
+	}
+	if preview.Confirmation != "RELOAD demo.service" {
+		t.Fatalf("confirmation=%q", preview.Confirmation)
+	}
+	if got := strings.Join(preview.Command, " "); got != "/usr/bin/systemctl reload demo.service" {
+		t.Fatalf("command=%q", got)
+	}
+	if !strings.Contains(preview.Effect, "never fall back to restart") {
+		t.Fatalf("effect does not preserve no-fallback boundary: %q", preview.Effect)
+	}
+}
+
+func TestReloadPreviewRejectsInactiveUnitBeforeCapabilityProbe(t *testing.T) {
+	capabilityCalls := 0
+	withReloadActionMocks(t,
+		func(context.Context, string) (boundedCommandResult, error) {
+			return boundedCommandResult{Output: "LoadState=loaded\nActiveState=inactive\nSubState=dead\n"}, nil
+		},
+		func(context.Context, string) (boundedCommandResult, error) {
+			capabilityCalls++
+			return boundedCommandResult{Output: "yes\n"}, nil
+		},
+		func(context.Context, string) (boundedCommandResult, error) {
+			t.Fatal("reload must not execute")
+			return boundedCommandResult{}, nil
+		},
+	)
+	preview := enabledReloadActionManager(t, t.TempDir()).Preview(context.Background(), actionServiceReloadID, "demo", "native")
+	if preview.Available || !preview.Allowed {
+		t.Fatalf("inactive reload preview=%+v", preview)
+	}
+	if capabilityCalls != 0 {
+		t.Fatalf("reload capability probed despite inactive precondition: %d", capabilityCalls)
+	}
+}
+
+func TestReloadPreviewFailsClosedWhenCanReloadIsNotYes(t *testing.T) {
+	withReloadActionMocks(t,
+		func(context.Context, string) (boundedCommandResult, error) {
+			return boundedCommandResult{Output: "LoadState=loaded\nActiveState=active\nSubState=running\n"}, nil
+		},
+		func(context.Context, string) (boundedCommandResult, error) {
+			return boundedCommandResult{Output: "no\n"}, nil
+		},
+		func(context.Context, string) (boundedCommandResult, error) {
+			t.Fatal("reload must not execute")
+			return boundedCommandResult{}, nil
+		},
+	)
+	preview := enabledReloadActionManager(t, t.TempDir()).Preview(context.Background(), actionServiceReloadID, "demo", "native")
+	if preview.Available || !preview.Allowed {
+		t.Fatalf("non-reloadable unit became available: %+v", preview)
+	}
+	found := false
+	for _, check := range preview.Checks {
+		if check.Name == "reload-capability" && check.Status == "fail" && strings.Contains(check.Evidence, "CanReload=yes") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("missing fail-closed reload capability evidence: %+v", preview.Checks)
+	}
+}
+
+func TestReloadRunUsesExactActionAndVerifiesActivePostcondition(t *testing.T) {
+	runtimeCalls := 0
+	reloadedUnit := ""
+	withReloadActionMocks(t,
+		func(_ context.Context, unit string) (boundedCommandResult, error) {
+			if unit != "demo.service" {
+				t.Fatalf("unexpected runtime unit %q", unit)
+			}
+			runtimeCalls++
+			return boundedCommandResult{Output: "LoadState=loaded\nActiveState=active\nSubState=running\nResult=success\n"}, nil
+		},
+		func(_ context.Context, unit string) (boundedCommandResult, error) {
+			if unit != "demo.service" {
+				t.Fatalf("unexpected capability unit %q", unit)
+			}
+			return boundedCommandResult{Output: "yes\n"}, nil
+		},
+		func(_ context.Context, unit string) (boundedCommandResult, error) {
+			reloadedUnit = unit
+			return boundedCommandResult{}, nil
+		},
+	)
+	manager := enabledReloadActionManager(t, t.TempDir())
+	result, err := manager.Run(context.Background(), actionServiceReloadID, "demo", "RELOAD demo.service", "native")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "success" || reloadedUnit != "demo.service" || runtimeCalls != 2 {
+		t.Fatalf("unexpected reload result: result=%+v unit=%q runtimeCalls=%d", result, reloadedUnit, runtimeCalls)
+	}
+	if !strings.Contains(result.Summary, "reload command succeeded") || strings.Contains(strings.ToLower(result.Summary), "configuration applied") {
+		t.Fatalf("reload result overclaims semantics: %q", result.Summary)
+	}
+	audits, err := manager.Store.ReadActionAudits(10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(audits) != 2 || audits[0].ActionID != actionServiceReloadID || audits[0].Phase != "requested" || audits[1].Phase != "completed" || audits[1].Status != "success" {
+		t.Fatalf("unexpected reload audit trail: %+v", audits)
+	}
+}
+
+func TestReloadFailureNeverFallsBackToRestart(t *testing.T) {
+	withReloadActionMocks(t,
+		func(context.Context, string) (boundedCommandResult, error) {
+			return boundedCommandResult{Output: "LoadState=loaded\nActiveState=active\nSubState=running\n"}, nil
+		},
+		func(context.Context, string) (boundedCommandResult, error) {
+			return boundedCommandResult{Output: "yes\n"}, nil
+		},
+		func(context.Context, string) (boundedCommandResult, error) {
+			return boundedCommandResult{Output: "reload failed"}, errors.New("exit status 1")
+		},
+	)
+	result, err := enabledReloadActionManager(t, t.TempDir()).Run(context.Background(), actionServiceReloadID, "demo", "RELOAD demo.service", "native")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "failed" || !strings.Contains(result.Summary, "reload command failed") {
+		t.Fatalf("unexpected reload failure: %+v", result)
+	}
+}

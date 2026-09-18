@@ -27,32 +27,32 @@ func runAction(args []string) {
 	}
 	switch args[0] {
 	case "list":
-		fs, state, enabled, allowed := actionFlagSet("action list")
+		fs, state, enabled, allowedRestart, allowedReload := actionFlagSet("action list")
 		_ = fs.Parse(args[1:])
-		manager := actionManagerFromFlags(*state, *enabled, *allowed)
+		manager := actionManagerFromFlags(*state, *enabled, *allowedRestart, *allowedReload)
 		writeActionJSON(manager.Capabilities(actionMode()))
 	case "preview":
-		fs, state, enabled, allowed := actionFlagSet("action preview")
-		id := fs.String("id", "service.restart", "fixed action ID")
+		fs, state, enabled, allowedRestart, allowedReload := actionFlagSet("action preview")
+		id := fs.String("id", "service.restart", "fixed action ID: service.restart or service.reload")
 		target := fs.String("target", "", "action target")
 		_ = fs.Parse(args[1:])
 		if strings.TrimSpace(*target) == "" {
 			log.Fatal("action preview requires --target")
 		}
-		manager := actionManagerFromFlags(*state, *enabled, *allowed)
+		manager := actionManagerFromFlags(*state, *enabled, *allowedRestart, *allowedReload)
 		ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 		defer cancel()
 		writeActionJSON(manager.Preview(ctx, *id, *target, actionMode()))
 	case "run":
-		fs, state, enabled, allowed := actionFlagSet("action run")
-		id := fs.String("id", "service.restart", "fixed action ID")
+		fs, state, enabled, allowedRestart, allowedReload := actionFlagSet("action run")
+		id := fs.String("id", "service.restart", "fixed action ID: service.restart or service.reload")
 		target := fs.String("target", "", "action target")
 		confirm := fs.String("confirm", "", "exact confirmation value returned by preview")
 		_ = fs.Parse(args[1:])
 		if strings.TrimSpace(*target) == "" {
 			log.Fatal("action run requires --target")
 		}
-		manager := actionManagerFromFlags(*state, *enabled, *allowed)
+		manager := actionManagerFromFlags(*state, *enabled, *allowedRestart, *allowedReload)
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 		result, err := manager.Run(ctx, *id, *target, *confirm, actionMode())
@@ -78,17 +78,19 @@ func runAction(args []string) {
 	}
 }
 
-func actionFlagSet(name string) (*flag.FlagSet, *string, *bool, *stringListFlag) {
+func actionFlagSet(name string) (*flag.FlagSet, *string, *bool, *stringListFlag, *stringListFlag) {
 	fs := flag.NewFlagSet(name, flag.ExitOnError)
 	state := fs.String("state-dir", defaultStateDir(), "state directory")
 	enabled := fs.Bool("enable-actions", false, "explicitly enable optional safe actions")
-	allowed := &stringListFlag{}
-	fs.Var(allowed, "allow-restart-service", "allow one systemd service for service.restart; repeat for additional services")
-	return fs, state, enabled, allowed
+	allowedRestart := &stringListFlag{}
+	allowedReload := &stringListFlag{}
+	fs.Var(allowedRestart, "allow-restart-service", "allow one systemd service for service.restart; repeat for additional services")
+	fs.Var(allowedReload, "allow-reload-service", "allow one systemd service for service.reload; repeat for additional services")
+	return fs, state, enabled, allowedRestart, allowedReload
 }
 
-func actionManagerFromFlags(state string, enabled bool, allowed []string) *core.ActionManager {
-	policy, err := core.NewActionPolicy(enabled, allowed)
+func actionManagerFromFlags(state string, enabled bool, allowedRestart, allowedReload []string) *core.ActionManager {
+	policy, err := core.NewActionPolicyWithReload(enabled, allowedRestart, allowedReload)
 	if err != nil {
 		log.Fatal(err)
 	}
