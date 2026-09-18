@@ -375,34 +375,39 @@ Reboot Story:
 
 Reboot Story does not reboot, shut down, restart, reload, repair, or otherwise modify the host.
 
-### Optional Safe Actions — native Linux
+### Optional Safe Actions — native Linux development source
 
-M11 adds one deliberately narrow state-changing action: restart an explicitly allowlisted systemd service and verify that it returns active.
+M11 introduced one deliberately narrow state-changing action, `service.restart`. M18 adds exactly one more under a separate security review: `service.reload`.
 
-Safe Actions are **disabled by default**. Enabling them requires both an explicit action opt-in and an explicit per-service allowlist. There is no arbitrary command, script, shell, generic service-control field, or automatic remediation path.
+Safe Actions are **disabled by default**. Enabling them requires explicit global opt-in plus a separate per-action service allowlist. Restart permission does not imply reload permission, and reload permission does not imply restart permission. There is no arbitrary command, script, shell, generic service-control field, reload-or-restart fallback, or automatic remediation path.
 
-Example local CLI workflow:
+Restart preview:
 
 ```bash
 hostsleuth action preview \
   --enable-actions \
   --allow-restart-service nginx \
+  --id service.restart \
   --target nginx.service
 ```
 
-The preview returns the exact effect, trusted `systemctl` argv, and an exact confirmation value. Execution requires that exact value:
+Reload preview:
 
 ```bash
-hostsleuth action run \
+hostsleuth action preview \
   --enable-actions \
-  --allow-restart-service nginx \
-  --target nginx.service \
-  --confirm 'RESTART nginx.service'
+  --allow-reload-service nginx \
+  --id service.reload \
+  --target nginx.service
 ```
 
-HostSleuth writes durable audit evidence before execution, bounds command time/output, collects before/after systemd evidence, and only reports success after observing `ActiveState=active`.
+A reload is eligible only when the explicit target is loaded, currently active, independently reload-allowlisted, and systemd reports `CanReload=yes`. Its exact confirmation is `RELOAD UNIT.service`, and HostSleuth executes only the trusted absolute `systemctl reload UNIT.service` argv. If reload is unsupported or fails, HostSleuth reports failure and never falls back to restart.
 
-The Action Web/API surface is loopback-only. State-changing Web requests require JSON and `X-HostSleuth-Action: confirm`. Docker mode reports native systemd restart unavailable, so the supported Docker deployment does not gain host service-control capability.
+Both fixed actions require an exact preview confirmation, durable audit evidence before execution, bounded command time/output, serialized execution, and bounded before/after systemd evidence. Success requires an observed `ActiveState=active` postcondition. For `service.reload`, success means only that the reload command succeeded and the service remained active; it does not claim application-specific configuration semantics were verified.
+
+The Action Web/API surface remains loopback-only. State-changing Web requests require JSON and `X-HostSleuth-Action: confirm`. Docker mode reports both native systemd actions unavailable, so the supported Docker deployment gains no host service-control capability.
+
+M18 security contract: `docs/design/M18-SAFE-ACTIONS-II-SECURITY-REVIEW.md`.
 
 ### Redacted Evidence Bundle — stable v0.5.0
 
@@ -553,9 +558,9 @@ HostSleuth is intentionally:
 - read-only by default;
 - deterministic before explanatory;
 - loopback-only by default for sensitive Web/API operations;
-- explicit rather than automatic about the one optional native Safe Action.
+- explicit rather than automatic about its narrowly fixed native Safe Actions.
 
-HostSleuth does **not** automatically restart services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reboot/shut down the host, manage ACME accounts, handle private keys, or reconfigure the host. Its only state-changing capability is the explicitly enabled, explicitly allowlisted native `service.restart` action described above.
+HostSleuth does **not** automatically restart or reload services, modify firewall rules, repair containers, install/remove/update packages, edit configuration, renew/install certificates, reboot/shut down the host, manage ACME accounts, handle private keys, or reconfigure the host. Development source exposes only two fixed state-changing capabilities: independently allowlisted native `service.restart` and `service.reload`. Docker mode exposes neither action.
 
 ## Current stage
 
@@ -577,7 +582,7 @@ M16 STARTTLS / Mail Service Story is complete on `main` as development source. I
 
 M17 Certificate Rollout Verification is complete on `main` as development source. It is not yet part of the published/live/recovery v0.8.0 release.
 
-M18 Safe Actions II has completed its required candidate/threat-model review. The review recommends exactly `service.reload` under a separate allowlist and the existing M11 confirmation/audit boundary, but no M18 action code is implemented and owner approval is required before implementation.
+M18 Safe Actions II passed its required candidate/threat-model review, and the owner explicitly approved exactly `service.reload` under the documented separate-allowlist/native-only security contract. Implementation is being validated as development source; it is not part of the published/live/recovery v0.8.0 release.
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the exact approved order and guardrails.
 
