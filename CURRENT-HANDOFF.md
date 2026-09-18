@@ -11,33 +11,40 @@ HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:
 
 Keep it evidence-first, local-first, single-host first, and deliberately small. It is not a generic monitoring platform, browser shell, or automatic-remediation engine.
 
-## Stable / public / live / recovery state — v0.6.0
+## Stable / public state — v0.7.0
 
-Stable release, live Arcane production, and disaster recovery are now aligned on:
+Stable public release:
 
-`v0.6.0` / `mjmalleo/hostsleuth:0.6.0`
+`v0.7.0`
 
 Exact published source:
 
-`fcb08be51ae3da8cd20dc3929cf9d736b15f170c`
+`236002106afd6aa042fd131c0edc0f3455b9cfdf`
 
 Release workflow:
 
-`35284864117` — success
+`35292714676` — success
 
-Verified public OCI index:
+Published Docker tags:
 
-`sha256:6b9f90209f477ba8213d9c4bf7db7996d6c52d2caae2cfce405822df8bc8ef2a`
+- `mjmalleo/hostsleuth:0.7.0`
+- `mjmalleo/hostsleuth:latest`
 
-Live acceptance confirmed v0.6.0, schema 4 / Docker mode, retained pre-upgrade history, the M12 Expectations UI/API, a passing live Expected Endpoint Contract, and the LAN HTTP 403 boundary for Safe Actions.
+Both resolve to verified OCI index:
 
-`OMV-Docker-Rebuild` recovery alignment PR #6 merged at:
+`sha256:3663e8c483b67de72f3a0e26fd80e9e3686319d9b2bafe602979cd790e2ce2bb`
 
-`f78abbe5742c315d73cf85709ebfeba620311429`
+Independent verification passed for native checksums/execution, the M13 `hostsleuth dns` command and validation boundary, and linux/amd64 + linux/arm64 Docker manifests.
 
-Full publication record: `docs/history/V0.6.0-PUBLICATION.md`.
+Full publication record: `docs/history/V0.7.0-PUBLICATION.md`.
 
-Full production/recovery record: `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md`.
+## Live / disaster-recovery state — still v0.6.0
+
+The existing Arcane-managed production deployment and `xXDasGoGXx/OMV-Docker-Rebuild` disaster-recovery definition remain pinned to:
+
+`mjmalleo/hostsleuth:0.6.0`
+
+Publication of v0.7.0 is not proof of production rollout.
 
 ## Redacted Evidence Bundle — complete, published, and live
 
@@ -127,9 +134,9 @@ Disposable HTTP acceptance passed. Real resolver comparison also demonstrated re
 
 Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-## Active next step — publish v0.7.0
+## Active next step — production / recovery v0.7.0 alignment
 
-M13 source is complete on `main`. After this closeout documentation merges, publish stable v0.7.0 from that exact accepted source and independently verify native assets, the `hostsleuth dns` command, and the multi-platform Docker image. Production/recovery remain on v0.6.0 until the separately verified v0.7.0 rollout.
+Stage the disaster-recovery image pin at 0.7.0 without merging ahead of production. Then redeploy the existing authenticated Arcane-managed HostSleuth project to `mjmalleo/hostsleuth:0.7.0`. Verify live version/schema/mode, retained state/events, Safe Actions boundary, DNS Detective, and the Admin Console UI. Merge recovery alignment only after live acceptance passes.
 
 Do not restart a broad audit on continuation; use this handoff.
 
