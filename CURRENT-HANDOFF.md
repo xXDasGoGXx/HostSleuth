@@ -123,7 +123,7 @@ Implemented on the branch:
 
 Local validation passed with Go 1.24.13: gofmt, vet, full tests, native build, and JavaScript syntax.
 
-Disposable HTTP acceptance passed. Real resolver comparison also demonstrated resolver-specific behavior: system DNS and `192.168.3.5` agreed for the test name while `192.168.2.5` timed out; HostSleuth reported partial resolver evidence rather than collapsing that into a generic DNS error.
+Disposable HTTP acceptance passed. Real resolver comparison also demonstrated resolver-specific behavior: the system resolver and one explicitly supplied local resolver agreed for the test name while another local resolver timed out; HostSleuth reported partial resolver evidence rather than collapsing that into a generic DNS error.
 
 Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
