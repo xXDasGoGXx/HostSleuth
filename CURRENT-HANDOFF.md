@@ -204,11 +204,21 @@ Closeout: `docs/history/M15-DEPLOYMENT-PERMISSIONS-STORY.md`.
 
 Stable/public/live/recovery remain aligned on v0.8.0. M15 is development source on `main`; it has not been published or deployed.
 
-## Active milestone — M16 STARTTLS / Mail Service Story
+## M16 — STARTTLS / Mail Service Story — SOURCE COMPLETE
 
-M16 implementation is now complete locally on a focused branch; PR/full CI are still required before source closeout.
+PR #57 passed the full GitHub CI matrix on exact head:
 
-Delivered on the branch:
+`579fff79889d5ab0c3430135d3f5ceba4dc28400`
+
+CI run:
+
+`35303552155` — success
+
+PR #57 then squash-merged to `main` at:
+
+`e5663d5883acdd2d859ff57b39a447c0018790b3`
+
+Delivered:
 
 - SMTP STARTTLS, IMAP STARTTLS, and POP3 STLS within one bounded pre-authentication model;
 - deterministic TCP → greeting → capability → upgrade → TLS → certificate validity → hostname → trust stages;
@@ -218,17 +228,29 @@ Delivered on the branch:
 - `hostsleuth starttls --protocol smtp|imap|pop3 host:port`;
 - `GET /api/starttls-story`;
 - dedicated STARTTLS Admin Console view;
-- permanent JavaScript/Docker-smoke coverage for the new interface and input boundary.
+- permanent JavaScript/Docker-smoke coverage for the new interface and invalid-input boundary.
 
-Local Go 1.24.13 full tests, core race tests, vet, native build, all Web JavaScript syntax checks, and `git diff --check` pass.
+Local Go 1.24.13 full tests, core race tests, vet, native build, all Web JavaScript syntax checks, and `git diff --check` passed.
 
-Disposable SMTP acceptance also passed through both the built CLI and served API/UI: STARTTLS was advertised and accepted, TLS negotiated successfully, the localhost certificate hostname matched, and the deliberately self-signed fixture correctly failed trust as the first problem.
+Disposable SMTP CLI/API/UI acceptance passed with a real STARTTLS upgrade: TCP, greeting, capability, upgrade, TLS, certificate validity, and hostname passed; the deliberately self-signed fixture correctly failed trust as the first problem. The disposable processes were stopped afterward.
 
 Design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
-Stable/public/live/recovery remain on v0.8.0. No release or deployment work is part of this implementation gate.
+Closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`.
 
-Do not restart a broad audit on continuation; finish the focused M16 PR/CI gate.
+Stable/public/live/recovery remain aligned on v0.8.0. M16 is development source on `main`; it has not been published or deployed.
+
+## Active next step — M17 Certificate Rollout Verification
+
+Use only the approved bounded direction:
+
+- one expected certificate fingerprint/file or one explicit reference endpoint;
+- multiple explicit endpoints to compare;
+- served fingerprint, certificate identity/SAN, validity, hostname/trust, and match/mismatch evidence;
+- deterministic endpoint matrix;
+- no certificate renewal, installation, reload, private-key reads, or ACME management.
+
+Do not restart a broad audit on continuation; begin from M17 design and implementation.
 
 ## Guardrails
 
