@@ -51,6 +51,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v0.6.0 publication: `docs/history/V0.6.0-PUBLICATION.md`
 - v0.6.0 production/recovery alignment: `docs/history/V0.6.0-PRODUCTION-ALIGNMENT.md`
 - M13 design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`
+- M13 closeout: `docs/history/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`
 
 ## Current state
 
@@ -71,10 +72,11 @@ Owner approved M13-M18 plus continuous UI/UX and engineering polish.
 - [x] Disposable API/UI acceptance against the M13 build.
 - [x] Real resolver comparison proved agreement with one explicit local resolver and a timeout from another, producing resolver-specific evidence rather than a generic DNS failure.
 - [x] Final branch audit / closeout record.
-- [ ] Open M13 PR only after the exact branch remains locally green.
-- [ ] Require full GitHub CI on the exact PR head.
-- [ ] Merge M13 to `main`.
-- [ ] Publish and independently verify stable v0.7.0.
+- [x] Open M13 PR #47 only after the exact branch remained locally green.
+- [x] Require full GitHub CI on exact head `4d5d8f857e362217028efbdedb20e020f7a85d48`; all jobs passed.
+- [x] Squash-merge M13 PR #47 to `main` at `182a27384a090f5538bb6d76a0c4dd917ce63932`.
+- [ ] Publish stable v0.7.0 from the exact accepted docs-inclusive source.
+- [ ] Independently verify native assets/checksums, `hostsleuth dns`, and the multi-platform Docker image.
 - [ ] Roll live/recovery to v0.7.0 only after publication verification.
 
 
