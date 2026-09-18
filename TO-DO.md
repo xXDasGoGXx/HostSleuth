@@ -38,6 +38,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M12 local Go 1.24.13 format/vet/test/build plus disposable HTTP/UI acceptance.
 - [x] M15 — Deployment / Permissions Story source implementation, native/HTTP acceptance, full CI, and PR #55 merge.
 - [x] M16 — STARTTLS / Mail Service Story source implementation, protocol/HTTP acceptance, full CI, and PR #57 merge.
+- [x] M17 — Certificate Rollout Verification source implementation, real-TLS/native acceptance, full CI, and PR #59 merge.
 
 ## Records
 
@@ -63,6 +64,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M16 design: `docs/design/M16-STARTTLS-MAIL-SERVICE-STORY.md`
 - M16 closeout: `docs/history/M16-STARTTLS-MAIL-SERVICE-STORY.md`
 - M17 design: `docs/design/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`
+- M17 closeout: `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md`
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 
@@ -70,34 +72,31 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 
 Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`. Docker `latest` resolves to the same verified v0.8.0 OCI index.
 
-## Active next step — M17 Certificate Rollout Verification
+## Active next step — M18 Safe Actions II — Security Review
 
-M16 source closeout is complete:
+M17 source closeout is complete:
 
-- [x] Bounded M16 protocol/security design.
-- [x] SMTP STARTTLS, IMAP STARTTLS, and POP3 STLS deterministic evidence stages.
-- [x] Shared TLS/certificate identity/trust/expiry evidence.
-- [x] CLI/API/dedicated STARTTLS Admin Console view.
-- [x] Focused protocol parser and upgrade fixtures.
-- [x] Local Go 1.24.13 full-test/race/vet/build, all Web JS syntax, and diff validation.
-- [x] Disposable SMTP CLI/API/UI acceptance with real TLS upgrade.
-- [x] Full GitHub CI on exact PR #57 head `579fff79889d5ab0c3430135d3f5ceba4dc28400`.
-- [x] Squash-merge PR #57 to `main` at `e5663d5883acdd2d859ff57b39a447c0018790b3`.
-- [x] M16 closeout and source documentation alignment.
+- [x] Bounded M17 rollout-verification/security design.
+- [x] SHA-256 fingerprint or explicit reference endpoint as the single expected source.
+- [x] Arbitrary certificate-file reads intentionally omitted to preserve the no-private-key-read boundary.
+- [x] Up to 16 explicit direct-TLS endpoints with deterministic MATCH / MISMATCH / UNKNOWN.
+- [x] Separate validity / hostname / trust health evidence.
+- [x] CLI/API/dedicated Cert Rollout Admin Console matrix.
+- [x] Focused decision tests and real loopback TLS mismatch fixture.
+- [x] Full GitHub CI on exact PR #59 head `32f0ad2dc3211e5af38a643a5d2f38081d440645`.
+- [x] Native exact-head Go 1.24.13 format/test/race/vet/build/JS/diff validation.
+- [x] Disposable fingerprint-source and reference-source CLI/API/UI acceptance with two different certificates.
+- [x] Squash-merge PR #59 to `main` at `f12bbd8aacb9689bb31d5b9b6535479882cb6ce6`.
+- [x] M17 closeout and source documentation alignment.
 
-Begin only the approved M17 scope:
+Begin M18 only with the required security gate:
 
-- [x] Write bounded Certificate Rollout Verification design and safety boundary.
-- [x] Define exactly one expected source: SHA-256 fingerprint or explicit reference direct-TLS endpoint.
-- [x] Intentionally omit arbitrary certificate-file reads to preserve the no-private-key-read boundary.
-- [x] Compare up to 16 explicit endpoints with served fingerprint/identity/SAN/validity/hostname/trust evidence.
-- [x] Build deterministic endpoint MATCH / MISMATCH / UNKNOWN matrix with separate health status.
-- [x] Add CLI/API/dedicated Cert Rollout Admin Console view.
-- [x] Add focused decision fixtures and a real loopback TLS integration fixture.
-- [x] Extend permanent Web/Docker smoke coverage.
-- [ ] Require full GitHub CI on the exact M17 PR head.
-- [ ] Perform native/disposable OMV acceptance if the authorized execution connector returns before closeout.
-- [ ] Write M17 closeout record and source documentation alignment only after CI/merge acceptance.
+- [ ] Compare concrete high-value action candidates.
+- [ ] Select exactly one candidate; do not pre-approve implementation before comparison.
+- [ ] Write a fresh threat model and privilege-cost analysis for that one action.
+- [ ] Define exact allowlist, fixed command shape, preview, exact confirmation, pre-execution audit, execution bounds, and postcondition verification.
+- [ ] Reject any candidate that requires weakening Docker security or introducing a generic privileged command/controller surface.
+- [ ] Only after the security review is accepted, implement the one selected action.
 
 ## Guardrails
 
