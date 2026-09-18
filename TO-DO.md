@@ -57,12 +57,13 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - M14 design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
 - M14 closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`
 - v0.8.0 publication: `docs/history/V0.8.0-PUBLICATION.md`
+- v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 
 ## Current state
 
-Stable/public are now `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`; Docker `latest` resolves to the same verified v0.8.0 OCI index. Live/recovery remain aligned on `mjmalleo/hostsleuth:0.7.0` until the separate v0.8.0 rollout passes.
+Stable/public/live/recovery are aligned on `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`. Docker `latest` resolves to the same verified v0.8.0 OCI index.
 
-## Active next step — production / recovery v0.8.0 alignment
+## Active next step — M15 Deployment / Permissions Story
 
 - [x] Write bounded M14 design and HTTP safety boundary.
 - [x] Implement public→upstream path core with deterministic stage ordering.
@@ -82,10 +83,14 @@ Stable/public are now `v0.8.0` / `mjmalleo/hostsleuth:0.8.0`; Docker `latest` re
 - [x] Squash-merge M14 PR #51 to `main` at `135a73ffb333c1e4ac5135f93db7bac3dac5cdae`.
 - [x] Publish stable v0.8.0 from exact source `28b8d88ec018782353840dee8528d765c4056e89`.
 - [x] Independently verify native assets/checksums, `hostsleuth proxy` validation, and the multi-platform Docker image.
-- [ ] Stage recovery image pin at 0.8.0 without merging ahead of production.
-- [ ] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.8.0`.
-- [ ] Verify live v0.8.0, retained state/events, Safe Actions boundary, Proxy Path, and Admin Console v2.
-- [ ] Merge recovery alignment only after production acceptance.
+- [x] Stage recovery image pin at 0.8.0 without merging ahead of production.
+- [x] Redeploy live Arcane production to `mjmalleo/hostsleuth:0.8.0`.
+- [x] Verify live v0.8.0, retained pre-upgrade state/events, Safe Actions boundary, Proxy Path, and Admin Console v2.
+- [x] Merge recovery alignment PR #8 at `290e7e6a6781ad29cbc7c8296d00877fb8489fd0` after production acceptance.
+- [ ] Write bounded M15 Deployment / Permissions Story design and privacy/security boundary.
+- [ ] Implement typed permission/path evidence and deterministic access reasoning.
+- [ ] Add CLI/API/Web UI permission-chain workflow.
+- [ ] Add focused integration fixtures and Admin Console UX for dense permission evidence.
 
 ## Guardrails
 
