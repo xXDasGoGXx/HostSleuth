@@ -136,11 +136,13 @@ Disposable HTTP acceptance passed. Real resolver comparison also demonstrated re
 
 Design: `docs/design/M13-DNS-DETECTIVE-ADMIN-CONSOLE.md`.
 
-## M14 — Reverse Proxy / Upstream Story + Admin Console v2
+## M14 — Reverse Proxy / Upstream Story + Admin Console v2 — SOURCE COMPLETE
 
-Implementation is complete on branch `m14-reverse-proxy-upstream-story` and has passed local acceptance.
+PR #51 passed the full GitHub CI matrix and squash-merged to `main` at:
 
-Delivered on the branch:
+`135a73ffb333c1e4ac5135f93db7bac3dac5cdae`.
+
+Delivered:
 
 - explicit public HTTP/HTTPS URL plus explicit expected upstream URL;
 - deterministic public DNS/route/TCP/TLS/HTTP and upstream DNS/route/TCP/TLS/HTTP stages;
@@ -165,9 +167,9 @@ Design: `docs/design/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
 Closeout: `docs/history/M14-REVERSE-PROXY-UPSTREAM-STORY.md`.
 
-## Active next step
+## Active next step — publish v0.8.0
 
-Exact-head local audit passed on `a093f733e5df0909f8632db9c0ad4a287768101e`. Open the M14 PR next and require the full GitHub CI matrix before merge. Stable/public/live/recovery remain on v0.7.0 until a later independently verified v0.8.0 publication and rollout.
+M14 source is complete on `main`. After this closeout documentation merges, publish stable v0.8.0 from the exact accepted docs-inclusive source and independently verify native assets, `hostsleuth proxy`, and the multi-platform Docker image. Production/recovery remain on v0.7.0 until the separately verified v0.8.0 rollout.
 
 Do not restart a broad audit on continuation; use this handoff.
 
