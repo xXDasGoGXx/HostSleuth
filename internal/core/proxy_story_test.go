@@ -170,3 +170,29 @@ func TestProxyHTTPStatusClasses(t *testing.T) {
 		}
 	}
 }
+
+
+func TestProxyPublicHostHeaderIPv6(t *testing.T) {
+	parsed, err := normalizeProxyStoryURL("https://[2001:db8::10]/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := proxyPublicHostHeader(parsed); got != "[2001:db8::10]" {
+		t.Fatalf("unexpected IPv6 Host header: %q", got)
+	}
+}
+
+func TestSanitizeProxyLocationRedactsQuery(t *testing.T) {
+	base, _ := normalizeProxyStoryURL("https://example.com/start")
+	got := sanitizeProxyLocation("/login?token=secret", base)
+	if got != "https://example.com/login?[redacted]" {
+		t.Fatalf("unexpected sanitized Location: %q", got)
+	}
+}
+
+func TestProxyHTTPMethodNotAllowedExplainsHEADBoundary(t *testing.T) {
+	status, summary := proxyHTTPStatusClass(http.StatusMethodNotAllowed)
+	if status != "warn" || !strings.Contains(summary, "HEAD") {
+		t.Fatalf("unexpected 405 classification: %s %s", status, summary)
+	}
+}
