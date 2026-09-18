@@ -47,6 +47,34 @@ Publication record: `docs/history/V0.9.0-PUBLICATION.md`.
 
 Production/recovery record: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`.
 
+## Active milestone — v1.0 Readiness / Hardening
+
+The owner approved a feature-free v1.0 readiness cycle.
+
+Baseline remains stable/public/live/recovery v0.9.0.
+
+First readiness slice implemented on the focused branch:
+
+- persisted-state compatibility regression proving legacy snapshot/event/action-audit history survives a current schema write;
+- full tab/tabpanel semantics across static and dynamically injected console views;
+- ArrowLeft / ArrowRight / Home / End keyboard navigation;
+- visible keyboard focus and reduced-motion handling;
+- polite live snapshot-state updates;
+- explicit HTML/CSS/JavaScript asset budgets;
+- structural responsive/accessibility regression tests.
+
+Local Go 1.24.13 full tests, core race tests, vet, native build, JavaScript syntax, and diff checks pass.
+
+Disposable assembled-console acceptance with headless Google Chrome also passed. A narrow viewport below the mobile breakpoint had no horizontal document overflow, and a Cert Rollout deep link exposed the correct selected tab/panel with accessibility semantics. All temporary acceptance processes were stopped afterward.
+
+Design/readiness contract:
+
+`docs/design/V1.0-READINESS.md`
+
+This milestone adds no new troubleshooting story, Safe Action family, privilege, monitoring architecture, or remediation feature.
+
+Next gate: focused PR + exact-head full CI. v1.0.0 publication remains a separate decision after readiness source acceptance.
+
 ## Product identity
 
 HostSleuth is a small, local-first Linux troubleshooting tool with two jobs:

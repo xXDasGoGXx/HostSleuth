@@ -74,6 +74,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v0.8.0 production/recovery alignment: `docs/history/V0.8.0-PRODUCTION-ALIGNMENT.md`
 - v0.9.0 publication: `docs/history/V0.9.0-PUBLICATION.md`
 - v0.9.0 production/recovery alignment: `docs/history/V0.9.0-PRODUCTION-ALIGNMENT.md`
+- v1.0 readiness contract: `docs/design/V1.0-READINESS.md`
 
 ## Current state
 
@@ -93,6 +94,27 @@ Stable/public/live/recovery are aligned on `v0.9.0` / `mjmalleo/hostsleuth:0.9.0
 - [x] Record final v0.9.0 production/recovery alignment.
 
 The owner-approved roadmap through M18 is now source-complete, published, live, and recovery-aligned. No additional feature milestone is automatically approved.
+
+## Active next step — v1.0 Readiness / Hardening
+
+Feature-free readiness scope:
+
+- [x] Define bounded v1.0 readiness contract and explicit non-goals.
+- [x] Add legacy persisted-state durability regression across current snapshot/event/action-audit writes.
+- [x] Add dynamic tab/tabpanel semantics across the Admin Console.
+- [x] Add ArrowLeft / ArrowRight / Home / End tab navigation.
+- [x] Add visible keyboard focus and reduced-motion behavior.
+- [x] Add snapshot live-region semantics.
+- [x] Add exact served HTML/CSS/JavaScript asset budgets.
+- [x] Add structural responsive/accessibility regression coverage.
+- [x] Pass local full tests, core race tests, vet, native build, JavaScript syntax, and diff checks.
+- [x] Pass disposable headless-Chrome deep-link/accessibility and narrow-viewport no-overflow acceptance.
+- [ ] Pass full GitHub CI on the exact readiness PR head.
+- [ ] Review remaining v1 release gates after this first readiness slice; do not add feature scope.
+- [ ] Write v1 readiness closeout only when all required hardening gates are accepted.
+- [ ] Publish v1.0.0 only after a separate publication decision.
+
+Stable/public/live/recovery remain v0.9.0 during readiness work.
 
 ## Guardrails
 

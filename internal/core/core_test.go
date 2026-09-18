@@ -305,3 +305,110 @@ func TestStoreAddsEventSchemaVersion(t *testing.T) {
 		t.Fatalf("unexpected events: %#v", events)
 	}
 }
+
+func TestLegacyPersistedStateSurvivesCurrentVersionWrite(t *testing.T) {
+	dir := t.TempDir()
+	store := Store{Dir: dir}
+	oldAt := time.Date(2025, 12, 1, 10, 0, 0, 0, time.UTC)
+	newAt := oldAt.Add(24 * time.Hour)
+
+	legacySnapshot := `{
+  "schema_version": 1,
+  "captured_at": "2025-12-01T10:00:00Z",
+  "host": {
+    "hostname": "legacy-host",
+    "os": "Legacy Linux",
+    "kernel": "6.1.0",
+    "architecture": "amd64"
+  },
+  "listeners": [
+    {"protocol":"tcp","address":"127.0.0.1:8787","process":"hostsleuth"}
+  ]
+}`
+	if err := os.WriteFile(store.SnapshotPath(), []byte(legacySnapshot), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	legacyEvent := `{"schema_version":1,"at":"2025-12-01T10:00:00Z","category":"system","severity":"info","summary":"legacy event retained"}` + "\n"
+	if err := os.WriteFile(store.EventsPath(), []byte(legacyEvent), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	legacyAudit := `{"schema_version":1,"at":"2025-12-01T10:00:00Z","phase":"completed","action_id":"service.restart","target":"legacy.service","status":"success","summary":"legacy audit retained"}` + "\n"
+	if err := os.WriteFile(store.ActionsPath(), []byte(legacyAudit), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	previous, err := store.LoadSnapshot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if previous.SchemaVersion != 1 || previous.Host.Hostname != "legacy-host" || len(previous.Listeners) != 1 {
+		t.Fatalf("legacy snapshot did not load intact: %#v", previous)
+	}
+
+	current := previous
+	current.SchemaVersion = snapshotSchemaVersion
+	current.CapturedAt = newAt
+	current.Mode = dockerDeploymentMode
+	current.Host.BootID = "current-boot"
+	current.Host.BootStartedAt = newAt.Add(-time.Hour)
+	if err := store.SaveSnapshot(current); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AppendEvents([]Event{{
+		At:       newAt,
+		Category: "system",
+		Severity: "info",
+		Summary:  "current event appended",
+	}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AppendActionAudit(ActionAudit{
+		At:       newAt,
+		Phase:    "completed",
+		ActionID: actionServiceReloadID,
+		Target:   "current.service",
+		Status:   "success",
+		Summary:  "current audit appended",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	gotSnapshot, err := store.LoadSnapshot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotSnapshot.SchemaVersion != snapshotSchemaVersion || gotSnapshot.Host.Hostname != "legacy-host" || gotSnapshot.Mode != dockerDeploymentMode {
+		t.Fatalf("current snapshot write lost compatible state: %#v", gotSnapshot)
+	}
+	if !gotSnapshot.CapturedAt.Equal(newAt) || gotSnapshot.Host.BootID != "current-boot" {
+		t.Fatalf("current snapshot fields were not persisted: %#v", gotSnapshot)
+	}
+
+	events, err := store.ReadEvents(10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(events) != 2 {
+		t.Fatalf("expected legacy + current events, got %#v", events)
+	}
+	if events[0].Summary != "legacy event retained" || !events[0].At.Equal(oldAt) {
+		t.Fatalf("legacy event was not retained: %#v", events)
+	}
+	if events[1].Summary != "current event appended" || events[1].SchemaVersion != 1 {
+		t.Fatalf("current event append was not preserved: %#v", events)
+	}
+
+	audits, err := store.ReadActionAudits(10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(audits) != 2 {
+		t.Fatalf("expected legacy + current audits, got %#v", audits)
+	}
+	if audits[0].Summary != "legacy audit retained" || audits[0].ActionID != actionServiceRestartID {
+		t.Fatalf("legacy audit was not retained: %#v", audits)
+	}
+	if audits[1].Summary != "current audit appended" || audits[1].ActionID != actionServiceReloadID {
+		t.Fatalf("current audit append was not preserved: %#v", audits)
+	}
+}

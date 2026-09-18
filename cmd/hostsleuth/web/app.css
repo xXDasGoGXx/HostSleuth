@@ -37,6 +37,13 @@ button, input { font: inherit; }
 button { color: inherit; }
 code { color: #bdeeff; }
 
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+[role="tabpanel"][hidden] { display: none !important; }
+
 .app-shell { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 42px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .brand { display: inline-flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
@@ -262,6 +269,15 @@ footer { padding: 28px 4px 0; color: #61748c; font-size: .73rem; text-align: cen
   .host-grid { grid-template-columns: 1fr; }
   .hero { align-items: flex-start; flex-direction: column; }
   .hero-actions { justify-content: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }
 
 @media (max-width: 620px) {
