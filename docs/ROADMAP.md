@@ -543,9 +543,29 @@ Closeout:
 
 `docs/history/M18-SAFE-ACTIONS-II.md`
 
-Stable/public/live/recovery remain on v0.8.0; M18 is development source until a separate publication/rollout decision.
+M18 is published, live, and recovery-aligned in stable v0.9.0.
 
-The owner-approved source roadmap through M18 is complete. No additional feature milestone is approved.
+The owner-approved feature roadmap through M18 is complete. No additional feature milestone is approved.
+
+## v1.0 Readiness / Hardening — ACTIVE, FEATURE-FREE
+
+The owner approved a bounded hardening cycle before any v1.0.0 publication decision.
+
+This is not M19 and must not add a new troubleshooting story, Safe Action family, privilege surface, remediation feature, monitoring architecture, or cloud behavior.
+
+Required readiness gates are defined in:
+
+`docs/design/V1.0-READINESS.md`
+
+The first readiness slice covers:
+
+- persisted-state compatibility across legacy/current snapshot, event, and action-audit writes;
+- keyboard/accessibility semantics for static and dynamically injected Admin Console views;
+- visible focus and reduced-motion behavior;
+- responsive/browser acceptance;
+- explicit served-asset performance budgets.
+
+Stable/public/live/recovery remain v0.9.0 during readiness work. v1.0.0 publication and rollout are separate gates after readiness source acceptance.
 
 ## Continuous polish / quality track — APPROVED
 
