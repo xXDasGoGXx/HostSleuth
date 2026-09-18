@@ -1,6 +1,6 @@
 # M17 — Certificate Rollout Verification
 
-Status: implementation in progress.
+Status: source implementation complete and merged. See `docs/history/M17-CERTIFICATE-ROLLOUT-VERIFICATION.md` for acceptance details.
 
 ## Product question
 
@@ -166,21 +166,33 @@ M17 does not:
 
 All endpoint activity is read-only direct TLS negotiation against explicit targets.
 
-## Validation plan
+## Validation status
 
-Required before source closeout:
+Source acceptance passed:
 
-- fingerprint normalization tests;
-- exact-one-source validation;
+- fingerprint normalization and exact-one-source tests;
 - endpoint count/deduplication/host:port validation;
 - reference-source establishment and failure behavior;
 - deterministic match/mismatch/unknown comparison;
 - separation of fingerprint match from certificate-health failure;
 - CLI/API invalid-input boundary;
-- Admin Console JavaScript syntax;
+- real loopback TLS fixture with two different certificates;
+- Admin Console JavaScript syntax and served-bundle coverage;
 - full Go test/vet/build and core race test;
 - Docker UI/API smoke;
-- exact-head GitHub CI;
-- native/disposable acceptance if the authorized host execution connector is available.
+- native exact-head validation on the OMV host;
+- disposable fingerprint-source and reference-source CLI/API/UI acceptance.
+
+PR #59 final exact head:
+
+`32f0ad2dc3211e5af38a643a5d2f38081d440645`
+
+CI run:
+
+`35308369829` — all jobs successful.
+
+PR #59 squash-merged to `main` at:
+
+`f12bbd8aacb9689bb31d5b9b6535479882cb6ce6`
 
 Publication, production rollout, recovery alignment, certificate changes, and live service changes remain separate gates.
