@@ -42,6 +42,9 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] M18 — Safe Actions II with owner-approved fixed native `service.reload`, real native reload acceptance, full CI, and PR #62 merge.
 - [x] Publish stable `v0.9.0` from exact source `b518ed901e2d3f4e95a9bb74ade37d7b3a156540`.
 - [x] Independently verify v0.9.0 native amd64/arm64 assets, SHA256SUMS, Docker `0.9.0` + `latest`, and multi-arch manifests.
+- [x] Complete the feature-free v1.0 readiness/hardening cycle.
+- [x] Publish and independently verify stable `v1.0.0` from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`.
+- [x] Align live production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:1.0.0`.
 
 ## Records
 
@@ -77,25 +80,12 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v1.0 readiness contract: `docs/design/V1.0-READINESS.md`
 - v1.0 release/rollback checklist: `docs/design/V1.0-RELEASE-CHECKLIST.md`
 - v1.0 readiness closeout: `docs/history/V1.0-READINESS.md`
+- v1.0.0 publication: `docs/history/V1.0.0-PUBLICATION.md`
+- v1.0.0 production/recovery alignment: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v0.9.0` / `mjmalleo/hostsleuth:0.9.0`, published from exact source `b518ed901e2d3f4e95a9bb74ade37d7b3a156540`. Docker `0.9.0` and `latest` resolve to verified OCI index `sha256:c99f417419b864756d246232602a8f0fb31067fc11324430a59baec65d62dc5b`.
-
-## v0.9.0 production/recovery alignment
-
-- [x] Publish and independently verify v0.9.0.
-- [x] Redeploy the Arcane-managed HostSleuth project from `mjmalleo/hostsleuth:0.8.0` to `mjmalleo/hostsleuth:0.9.0`.
-- [x] Verify live `/api/about` = v0.9.0, schema 4 / Docker mode, running image 0.9.0, and all 100 retained events.
-- [x] Verify M15 Permissions is live and native service identity remains unavailable in Docker mode.
-- [x] Verify M16 with a real SMTP STARTTLS upgrade through TLS/certificate/trust.
-- [x] Verify M17 with a real healthy MATCH certificate-rollout comparison.
-- [x] Verify Docker Safe Actions remain disabled/unavailable and LAN Action API remains HTTP 403.
-- [x] Verify M18 `service.reload` is exposed only as a fixed disabled/unavailable capability in Docker mode.
-- [x] Merge `OMV-Docker-Rebuild` PR #10 only after live acceptance, at `813b7a8b76bfd987e97c534c76faf879c510bdec`.
-- [x] Record final v0.9.0 production/recovery alignment.
-
-The owner-approved roadmap through M18 is now source-complete, published, live, and recovery-aligned. No additional feature milestone is automatically approved.
+Stable/public/live/recovery are aligned on `v1.0.0` / `mjmalleo/hostsleuth:1.0.0`, published from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`. Docker `1.0.0` and `latest` resolve to verified OCI index `sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`.
 
 ## v1.0.0 production / recovery alignment — COMPLETE
 
