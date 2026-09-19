@@ -51,6 +51,8 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
+The Docker Hub storefront is version-controlled in `docker/DOCKERHUB.md` and synchronized automatically after reviewed metadata changes land on `main`.
+
 `latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `1.0.0`.
 
 ### Docker Compose
@@ -596,6 +598,11 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 
 - `README.md` — product definition, usage, and current scope.
 - `CURRENT-HANDOFF.md` — current project state and next task.
+- `docs/OPERATIONS.md` — operational architecture, credentials-by-name, deployment, and rebuild/recovery map.
+- `ops/project.yaml` — machine-readable project/integration inventory.
+- `ops/README.md` — reusable operations-registry convention for this and future repositories.
+- `docker/DOCKERHUB.md` — canonical Docker Hub Overview source.
+- `docker/DOCKERHUB-SHORT.txt` — canonical Docker Hub short-description source.
 - `TO-DO.md` — active checklist and product decisions.
 - `docs/ROADMAP.md` — owner-approved ordered product roadmap.
 - `docs/design/V1.0-READINESS.md` — feature-free v1.0 hardening gates and release-readiness contract.
