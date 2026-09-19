@@ -1,0 +1,56 @@
+name: Sync Docker Hub metadata
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docker/DOCKERHUB.md'
+      - 'docker/DOCKERHUB-SHORT.txt'
+      - '.github/workflows/dockerhub-description.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Docker Hub metadata
+        id: metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SHORT="$(tr -d '\r\n' < docker/DOCKERHUB-SHORT.txt)"
+          SHORT_BYTES="$(printf '%s' "$SHORT" | wc -c | tr -d ' ')"
+          OVERVIEW_BYTES="$(wc -c < docker/DOCKERHUB.md | tr -d ' ')"
+
+          if [[ -z "$SHORT" ]]; then
+            echo "Docker Hub short description is empty" >&2
+            exit 1
+          fi
+
+          if (( SHORT_BYTES > 100 )); then
+            echo "Docker Hub short description is ${SHORT_BYTES} bytes; limit is 100" >&2
+            exit 1
+          fi
+
+          if (( OVERVIEW_BYTES > 25000 )); then
+            echo "Docker Hub overview is ${OVERVIEW_BYTES} bytes; limit is 25000" >&2
+            exit 1
+          fi
+
+          echo "short=$SHORT" >> "$GITHUB_OUTPUT"
+
+      - name: Update Docker Hub description and overview
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5
+        with:
+          username: mjmalleo
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: mjmalleo/hostsleuth
+          short-description: ${{ steps.metadata.outputs.short }}
+          readme-filepath: ./docker/DOCKERHUB.md
