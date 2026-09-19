@@ -4,11 +4,13 @@
 
 HostSleuth records meaningful Linux state changes and performs deterministic, evidence-backed `host:port` diagnosis. It does not require a cloud account, external database, API key, or AI model.
 
+**Release:** [latest stable release](https://github.com/xXDasGoGXx/HostSleuth/releases/latest) · Native Linux and Docker images are published for amd64 and arm64.
+
 ## Quick start — recommended native install
 
 Native Linux is the recommended deployment because it gives HostSleuth the fullest view of the machine.
 
-Requirements: Linux with systemd. Go is **not** required when installing a release. The release installer downloads `SHA256SUMS` and verifies the architecture-specific binary before installing it.
+Requirements: Linux with systemd. Go is **not** required when installing a release. By default, the installer selects the latest published GitHub release, downloads its `SHA256SUMS`, and verifies the architecture-specific binary before installing it. Set `HOSTSLEUTH_VERSION` only when you intentionally want to pin a specific release.
 
 ```bash
 git clone https://github.com/xXDasGoGXx/HostSleuth.git
@@ -49,7 +51,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `0.9.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `1.0.0`.
 
 ### Docker Compose
 
@@ -65,7 +67,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:0.8.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:1.0.0 docker compose up -d
 ```
 
 ### Docker run
@@ -125,7 +127,7 @@ Docker mode can observe host networking/listeners and Docker container metadata,
 - firewall evidence may be unavailable without elevated network-administration privileges;
 - remote/served TLS certificate evidence remains available because it comes from the diagnosed endpoint itself;
 - Incident Lens and Reboot Story can still show whichever retained event categories the Docker deployment actually records, without pretending unavailable native evidence exists;
-- M11 native systemd Safe Actions are unavailable in Docker mode;
+- M11/M18 native systemd Safe Actions are unavailable in Docker mode;
 - native installation remains the recommended choice when full host visibility or optional Safe Actions matter.
 
 The Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is inherently powerful even when its bind path is mounted read-only. HostSleuth uses it only for read-only inventory commands, but only run this deployment on a host where you trust the HostSleuth container and image source.
