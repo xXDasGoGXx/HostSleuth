@@ -73,7 +73,7 @@ automation:
     trigger: Docker Hub metadata files changed on main, or manual dispatch
     purpose: Keep Docker Hub short description and Overview synchronized from Git.
     credentials:
-      - DOCKERHUB_TOKEN
+      - DOCKERHUB_METADATA_TOKEN
     external_action:
       repository: peter-evans/dockerhub-description
       version: v5
@@ -86,8 +86,16 @@ credentials:
     secret_value_in_git: false
     purposes:
       - publish Docker images
-      - update Docker Hub repository metadata
     recovery: Reissue/rotate at Docker Hub and replace the GitHub Actions secret with the same name.
+
+  - name: DOCKERHUB_METADATA_TOKEN
+    provider: Docker Hub
+    stored_as: GitHub Actions secret
+    secret_value_in_git: false
+    purposes:
+      - update Docker Hub repository metadata
+    permissions_note: Dedicated PAT used only by the metadata sync; the pinned action documents read/write/delete scope for Docker Hub's legacy description endpoint.
+    recovery: Reissue/rotate a dedicated metadata PAT and replace the GitHub Actions secret with the same name.
 
 deployment:
   recommended_mode: native_linux

@@ -112,7 +112,9 @@ Trigger:
 - manual `workflow_dispatch`.
 
 Credentials:
-- reuses GitHub Actions secret `DOCKERHUB_TOKEN`.
+- GitHub Actions secret: `DOCKERHUB_METADATA_TOKEN`.
+- this is intentionally separate from `DOCKERHUB_TOKEN`, which remains dedicated to image publication.
+- the pinned metadata action documents that Docker Hub's legacy repository-description endpoint requires a PAT with `read/write/delete` scope.
 
 Implementation:
 - validates Docker Hub's 100-byte short-description limit;
@@ -122,10 +124,11 @@ Implementation:
 
 If it fails:
 1. inspect the workflow log;
-2. confirm `DOCKERHUB_TOKEN` still exists and has repository write permission;
-3. confirm the Docker Hub repository is still `mjmalleo/hostsleuth`;
-4. confirm metadata files satisfy size limits;
-5. rerun only after the cause is understood.
+2. confirm `DOCKERHUB_METADATA_TOKEN` exists;
+3. confirm the dedicated PAT has the permissions required by the pinned metadata action for Docker Hub's legacy endpoint;
+4. confirm the Docker Hub repository is still `mjmalleo/hostsleuth`;
+5. confirm metadata files satisfy size limits;
+6. rerun only after the cause is understood.
 
 ## Credentials registry
 
@@ -133,7 +136,8 @@ Secret values are intentionally excluded.
 
 | Credential | Stored at | Used by | Purpose |
 | --- | --- | --- | --- |
-| `DOCKERHUB_TOKEN` | GitHub Actions secret for HostSleuth | release workflow; Docker Hub metadata workflow | publish images and update Docker Hub repository metadata |
+| `DOCKERHUB_TOKEN` | GitHub Actions secret for HostSleuth | release workflow | publish stable Docker images |
+| `DOCKERHUB_METADATA_TOKEN` | GitHub Actions secret for HostSleuth | Docker Hub metadata workflow | update Docker Hub short description and Overview |
 | GitHub workflow token | supplied automatically by GitHub Actions | release workflow | create GitHub release/tag and attach artifacts |
 
 Recovery rule:
@@ -271,7 +275,7 @@ The canonical text is already in:
 - `docker/DOCKERHUB-SHORT.txt`;
 - `docker/DOCKERHUB.md`.
 
-Once `DOCKERHUB_TOKEN` exists as a valid GitHub Actions secret, manually dispatch **Sync Docker Hub metadata** or make a reviewed metadata change on `main`.
+Once `DOCKERHUB_METADATA_TOKEN` exists as a valid dedicated GitHub Actions secret, manually dispatch **Sync Docker Hub metadata** or make a reviewed metadata change on `main`.
 
 ### 6. Recover live deployment
 

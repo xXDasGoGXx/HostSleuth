@@ -46,11 +46,24 @@ jobs:
 
           echo "short=$SHORT" >> "$GITHUB_OUTPUT"
 
+      - name: Verify dedicated Docker Hub metadata credential exists
+        shell: bash
+        env:
+          DOCKERHUB_METADATA_TOKEN: ${{ secrets.DOCKERHUB_METADATA_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$DOCKERHUB_METADATA_TOKEN" ]]; then
+            echo "DOCKERHUB_METADATA_TOKEN is not configured." >&2
+            echo "Create a dedicated Docker Hub PAT for metadata updates and store it as this GitHub Actions secret." >&2
+            echo "The pinned dockerhub-description action requires a PAT with read/write/delete scope for Docker Hub's legacy metadata endpoint." >&2
+            exit 1
+          fi
+
       - name: Update Docker Hub description and overview
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5
         with:
           username: mjmalleo
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_METADATA_TOKEN }}
           repository: mjmalleo/hostsleuth
           short-description: ${{ steps.metadata.outputs.short }}
           readme-filepath: ./docker/DOCKERHUB.md
