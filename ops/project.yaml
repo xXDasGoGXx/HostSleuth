@@ -1,0 +1,124 @@
+schema_version: 1
+
+project:
+  id: hostsleuth
+  name: HostSleuth
+  repository: https://github.com/xXDasGoGXx/HostSleuth
+  visibility: public
+  lifecycle: production
+  purpose: Local-first Linux change recorder and deterministic root-cause diagnostics.
+  license: MIT
+
+current_state:
+  stable_release: v1.0.0
+  stable_source_commit: 27971e67ad7ea875d83f5925a83c1991b0eb2b0f
+  canonical_handoff: CURRENT-HANDOFF.md
+  human_operations_map: docs/OPERATIONS.md
+
+sources_of_truth:
+  code:
+    branch: main
+  product_usage:
+    file: README.md
+  security:
+    file: SECURITY.md
+  current_state:
+    file: CURRENT-HANDOFF.md
+  operational_recovery:
+    file: docs/OPERATIONS.md
+  docker_hub_overview:
+    file: docker/DOCKERHUB.md
+  docker_hub_short_description:
+    file: docker/DOCKERHUB-SHORT.txt
+  historical_records:
+    directory: docs/history
+
+distribution:
+  - id: github_releases
+    type: github_release
+    location: https://github.com/xXDasGoGXx/HostSleuth/releases
+    publishes:
+      - linux_amd64_binary
+      - linux_arm64_binary
+      - SHA256SUMS
+    workflow: .github/workflows/release.yml
+
+  - id: docker_hub
+    type: container_registry
+    location: https://hub.docker.com/r/mjmalleo/hostsleuth
+    image: mjmalleo/hostsleuth
+    architectures:
+      - linux/amd64
+      - linux/arm64
+    tag_policy:
+      latest: newest verified stable release
+      numeric: pinned stable release
+      main: not published automatically
+    workflow: .github/workflows/release.yml
+
+automation:
+  - id: ci
+    file: .github/workflows/ci.yml
+    purpose: Validate source, native actions, installer, Docker behavior, and UI/runtime regressions.
+
+  - id: stable_release
+    file: .github/workflows/release.yml
+    trigger: push to release/vX.Y.Z
+    purpose: Publish GitHub release assets and stable multi-platform Docker images.
+    credentials:
+      - DOCKERHUB_TOKEN
+
+  - id: dockerhub_metadata_sync
+    file: .github/workflows/dockerhub-description.yml
+    trigger: Docker Hub metadata files changed on main, or manual dispatch
+    purpose: Keep Docker Hub short description and Overview synchronized from Git.
+    credentials:
+      - DOCKERHUB_TOKEN
+    external_action:
+      repository: peter-evans/dockerhub-description
+      version: v5
+      pinned_commit: 1b9a80c056b620d92cedb9d9b5a223409c68ddfa
+
+credentials:
+  - name: DOCKERHUB_TOKEN
+    provider: Docker Hub
+    stored_as: GitHub Actions secret
+    secret_value_in_git: false
+    purposes:
+      - publish Docker images
+      - update Docker Hub repository metadata
+    recovery: Reissue/rotate at Docker Hub and replace the GitHub Actions secret with the same name.
+
+deployment:
+  recommended_mode: native_linux
+  supported_modes:
+    - native_linux
+    - docker
+  web_default_bind: 127.0.0.1:8787
+  production:
+    platform: Arcane-managed Docker
+    image: mjmalleo/hostsleuth:1.0.0
+    exact_acceptance_record: docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md
+
+recovery:
+  repository: https://github.com/xXDasGoGXx/OMV-Docker-Rebuild
+  current_image_pin: mjmalleo/hostsleuth:1.0.0
+  policy: Recovery must not be moved ahead of live production acceptance.
+
+security_boundaries:
+  - No credential values are stored in repository documentation or inventory.
+  - Docker mode exposes no native systemd Safe Actions.
+  - Docker Hub latest tracks stable releases rather than main.
+  - Release publication, live acceptance, and recovery alignment are separate gates.
+  - Historical release records are not rewritten to look current.
+
+documentation_policy:
+  external_integration_requires:
+    - purpose
+    - configuration_location
+    - trigger
+    - named_credentials
+    - dependencies
+    - validation
+    - rollback_or_recreation
+    - security_boundary
