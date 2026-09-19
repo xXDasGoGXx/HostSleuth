@@ -1,6 +1,6 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-09-18
+Last updated: 2026-09-19
 
 ## Stable / public / live / recovery state — v1.0.0
 
@@ -52,6 +52,20 @@ Publication record: `docs/history/V1.0.0-PUBLICATION.md`.
 Production/recovery record: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`.
 
 The v1.0.0 release/production/recovery sequence is complete. No additional feature milestone or Safe Action family is automatically approved.
+
+## Docker Hub storefront metadata automation
+
+Docker Hub storefront metadata is now source-controlled separately from image publication:
+
+- short description: `docker/DOCKERHUB-SHORT.txt`;
+- Overview: `docker/DOCKERHUB.md`;
+- sync workflow: `.github/workflows/dockerhub-description.yml`;
+- dedicated GitHub Actions secret: `DOCKERHUB_METADATA_TOKEN`.
+
+`DOCKERHUB_TOKEN` remains dedicated to image publication and must not be broadened or reused for storefront metadata.
+
+The metadata workflow is operationally separate from the completed v1.0.0 release/production alignment. Its remaining owner action is tracked in issue #75: provide/validate the dedicated Docker Hub metadata PAT and confirm a successful manual metadata sync. Until that gate passes, the Git-tracked storefront files are authoritative but automated Docker Hub metadata synchronization is not considered fully commissioned.
+
 
 ## v1.0 Readiness / Hardening — COMPLETE / PUBLISHED IN v1.0.0
 
