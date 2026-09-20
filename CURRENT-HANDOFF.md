@@ -53,18 +53,19 @@ Production/recovery record: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`.
 
 The v1.0.0 release/production/recovery sequence is complete. No additional feature milestone or Safe Action family is automatically approved.
 
-## Docker Hub storefront metadata automation
+## Docker Hub storefront metadata
 
-Docker Hub storefront metadata is now source-controlled separately from image publication:
+Docker Hub storefront copy is version-controlled separately from image publication:
 
 - short description: `docker/DOCKERHUB-SHORT.txt`;
-- Overview: `docker/DOCKERHUB.md`;
-- sync workflow: `.github/workflows/dockerhub-description.yml`;
-- dedicated GitHub Actions secret: `DOCKERHUB_METADATA_TOKEN`.
+- Overview source: `docker/DOCKERHUB.md`;
+- optional manual sync workflow: `.github/workflows/dockerhub-description.yml`.
 
-`DOCKERHUB_TOKEN` remains dedicated to image publication and must not be broadened or reused for storefront metadata.
+During the 2026-09-19 reconciliation, Docker Hub's public short description was read anonymously and the Git-tracked short-description source was aligned to that exact public value.
 
-The metadata workflow is operationally separate from the completed v1.0.0 release/production alignment. Its remaining owner action is tracked in issue #75: provide/validate the dedicated Docker Hub metadata PAT and confirm a successful manual metadata sync. Until that gate passes, the Git-tracked storefront files are authoritative but automated Docker Hub metadata synchronization is not considered fully commissioned.
+Automatic metadata synchronization is **not an active commissioning requirement**. The workflow is manual-only and retained as optional future automation. If the owner later wants automatic provider-side metadata publishing, commission a dedicated `DOCKERHUB_METADATA_TOKEN` at that time. `DOCKERHUB_TOKEN` remains dedicated to image publication and must not be broadened or reused.
+
+HostSleuth v1.0.0 source/release/live/recovery alignment is complete independently of that optional future automation.
 
 
 ## v1.0 Readiness / Hardening — COMPLETE / PUBLISHED IN v1.0.0
