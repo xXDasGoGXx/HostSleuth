@@ -1,13 +1,6 @@
 name: Sync Docker Hub metadata
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'docker/DOCKERHUB.md'
-      - 'docker/DOCKERHUB-SHORT.txt'
-      - '.github/workflows/dockerhub-description.yml'
   workflow_dispatch:
 
 permissions:
@@ -54,7 +47,8 @@ jobs:
           set -euo pipefail
           if [[ -z "$DOCKERHUB_METADATA_TOKEN" ]]; then
             echo "DOCKERHUB_METADATA_TOKEN is not configured." >&2
-            echo "Create a dedicated Docker Hub PAT for metadata updates and store it as this GitHub Actions secret." >&2
+            echo "This workflow is optional/manual future automation; normal image publication is unaffected." >&2
+            echo "If deliberately enabled later, create a dedicated Docker Hub PAT for metadata updates and store it as this GitHub Actions secret." >&2
             echo "The pinned dockerhub-description action requires a PAT with read/write/delete scope for Docker Hub's legacy metadata endpoint." >&2
             exit 1
           fi
