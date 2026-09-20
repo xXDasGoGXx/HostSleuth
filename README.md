@@ -51,7 +51,7 @@ The supported public image is:
 mjmalleo/hostsleuth
 ```
 
-The Docker Hub storefront source is version-controlled in `docker/DOCKERHUB.md`. Automated metadata sync is prepared in GitHub Actions but remains separately gated by issue #75 until the dedicated `DOCKERHUB_METADATA_TOKEN` is commissioned; image publication itself is already working.
+The Docker Hub storefront copy is version-controlled under `docker/`. The public short description is aligned with the Git-tracked source. A manual-only metadata-sync workflow is retained as optional future automation; it is not required for image publication or normal operation.
 
 `latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `1.0.0`.
 
