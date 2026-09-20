@@ -70,9 +70,10 @@ automation:
 
   - id: dockerhub_metadata_sync
     file: .github/workflows/dockerhub-description.yml
-    trigger: Docker Hub metadata files changed on main, or manual dispatch
-    purpose: Keep Docker Hub short description and Overview synchronized from Git.
-    credentials:
+    trigger: manual dispatch only
+    status: optional_future_automation_not_required_for_current_operation
+    purpose: Optional future provider-side synchronization of Docker Hub short description and Overview from Git.
+    credentials_when_enabled:
       - DOCKERHUB_METADATA_TOKEN
     external_action:
       repository: peter-evans/dockerhub-description
@@ -90,12 +91,13 @@ credentials:
 
   - name: DOCKERHUB_METADATA_TOKEN
     provider: Docker Hub
-    stored_as: GitHub Actions secret
+    status: not_required_unless_optional_metadata_sync_is_enabled_later
+    stored_as: GitHub Actions secret when commissioned
     secret_value_in_git: false
     purposes:
-      - update Docker Hub repository metadata
-    permissions_note: Dedicated PAT used only by the metadata sync; the pinned action documents read/write/delete scope for Docker Hub's legacy description endpoint.
-    recovery: Reissue/rotate a dedicated metadata PAT and replace the GitHub Actions secret with the same name.
+      - optional future Docker Hub repository metadata synchronization
+    permissions_note: If enabled later, use a dedicated PAT only for metadata sync; do not reuse the image-publication token.
+    recovery: Reissue/rotate only if this optional automation is deliberately enabled.
 
 deployment:
   recommended_mode: native_linux
