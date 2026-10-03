@@ -1,6 +1,7 @@
 const state = {
   snapshot: null,
   events: [],
+  lastDiagnosis: null,
 };
 
 const checkNames = {
@@ -23,6 +24,33 @@ function byId(id) {
 
 function text(el, value) {
   if (el) el.textContent = value ?? "";
+}
+
+async function copyBoundedText(payload) {
+  const value = String(payload || "").slice(0, 12000);
+  if (!value) throw new Error("nothing to copy");
+
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return;
+    } catch (_) {
+      // LAN HTTP may not expose the secure Clipboard API; use the local fallback.
+    }
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  document.body.append(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  const copied = document.execCommand("copy");
+  textarea.remove();
+  if (!copied) throw new Error("copy command was refused");
 }
 
 function activeViewName() {
@@ -563,6 +591,7 @@ function renderDiagnosisContext() {
 }
 
 function renderDiagnosis(diagnosis) {
+  state.lastDiagnosis = diagnosis;
   byId("diagnosisError").classList.add("hidden");
   const result = byId("diagnosisResult");
   result.classList.remove("hidden");
@@ -602,6 +631,31 @@ function renderDiagnosis(diagnosis) {
     details.append(summary, evidence);
     list.append(details);
   });
+}
+
+function diagnosisEvidenceSummary(diagnosis) {
+  const lines = [
+    "HostSleuth Diagnose",
+    `Target: ${diagnosis?.target || "unknown"}`,
+    `Conclusion: ${diagnosis?.conclusion || "unknown"}`,
+    `Confidence: ${diagnosis?.confidence || "unknown"}`,
+    "",
+  ];
+  (diagnosis?.checks || []).forEach((check) => {
+    lines.push(`[${String(check.status || "unknown").toUpperCase()}] ${checkNames[check.name] || check.name || "Check"}: ${check.evidence || ""}`);
+  });
+  return lines.join("\n");
+}
+
+async function copyDiagnosisEvidence() {
+  const status = byId("diagnosisCopyStatus");
+  try {
+    await copyBoundedText(diagnosisEvidenceSummary(state.lastDiagnosis));
+    text(status, "Copied.");
+  } catch (_) {
+    text(status, "Clipboard unavailable.");
+  }
+  window.setTimeout(() => text(status, ""), 2500);
 }
 
 async function loadAbout() {
@@ -674,6 +728,8 @@ document.querySelectorAll("[data-view]").forEach((button) => {
 document.querySelectorAll("[data-open-view]").forEach((button) => {
   button.addEventListener("click", () => showView(button.dataset.openView));
 });
+
+byId("diagnosisCopyEvidence")?.addEventListener("click", copyDiagnosisEvidence);
 
 byId("diagnoseForm").addEventListener("submit", (event) => {
   event.preventDefault();
