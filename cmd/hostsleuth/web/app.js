@@ -175,6 +175,55 @@ function isRecent(value, hours) {
   return Date.now() - date.getTime() <= hours * 60 * 60 * 1000;
 }
 
+function endpointParts(raw) {
+  const value = String(raw || "").trim();
+  if (!value) return { host: "", port: "" };
+  if (value.startsWith("[")) {
+    const end = value.indexOf("]");
+    if (end > 1) {
+      return {
+        host: value.slice(1, end),
+        port: value.slice(end + 1).replace(/^:/, ""),
+      };
+    }
+  }
+  const split = value.lastIndexOf(":");
+  if (split > 0 && value.indexOf(":") === split) {
+    return { host: value.slice(0, split), port: value.slice(split + 1) };
+  }
+  return { host: value, port: "" };
+}
+
+function openDiagnosisForTarget(target) {
+  if (!target) return;
+  const input = byId("diagnoseTarget");
+  if (input) input.value = target;
+  if (window.hostSleuthRememberTarget) window.hostSleuthRememberTarget(target);
+  showView("diagnose");
+  runDiagnosis(target);
+}
+
+function openDNSForTarget(target) {
+  if (!target) return;
+  const parts = endpointParts(target);
+  const name = byId("dnsDetectiveName");
+  const port = byId("dnsDetectivePort");
+  if (name) name.value = parts.host;
+  if (port && parts.port) port.value = parts.port;
+  if (window.hostSleuthRememberTarget) window.hostSleuthRememberTarget(target);
+  showView("dns");
+  if (name) name.focus();
+}
+
+function openContractForTarget(target) {
+  if (!target) return;
+  const input = byId("contractTarget");
+  if (input) input.value = target;
+  if (window.hostSleuthRememberTarget) window.hostSleuthRememberTarget(target);
+  showView("contracts");
+  if (input) input.focus();
+}
+
 function listenerScope(address) {
   const value = String(address || "").toLowerCase();
   if (value.includes("127.0.0.1:") || value.includes("[::1]:") || value.startsWith("::1:")) {
@@ -762,6 +811,8 @@ document.querySelectorAll("[data-open-view]").forEach((button) => {
 });
 
 byId("diagnosisCopyEvidence")?.addEventListener("click", copyDiagnosisEvidence);
+byId("diagnosisToDNS")?.addEventListener("click", () => openDNSForTarget(state.lastDiagnosis?.target));
+byId("diagnosisToContract")?.addEventListener("click", () => openContractForTarget(state.lastDiagnosis?.target));
 
 byId("diagnoseForm").addEventListener("submit", (event) => {
   event.preventDefault();
