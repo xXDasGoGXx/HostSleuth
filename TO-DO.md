@@ -45,6 +45,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Complete the feature-free v1.0 readiness/hardening cycle.
 - [x] Publish and independently verify stable `v1.0.0` from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`.
 - [x] Align live production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:1.0.0`.
+- [x] Complete the bounded feature-free post-v1 Admin Console polish train (PRs #77–#84), ending at accepted `main` `b443a2a4ea484544c670212b29e169c43b7d5c38`.
 
 ## Records
 
@@ -87,6 +88,8 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 
 Stable/public/live/recovery are aligned on `v1.0.0` / `mjmalleo/hostsleuth:1.0.0`, published from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`. Docker `1.0.0` and `latest` resolve to verified OCI index `sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`.
 
+Accepted `main` is intentionally ahead of v1.0.0 with unreleased, feature-free Admin Console polish through PR #84 at `b443a2a4ea484544c670212b29e169c43b7d5c38`. That polish is not yet published, deployed, or recovery-aligned.
+
 ## v1.0.0 production / recovery alignment — COMPLETE
 
 - [x] Complete all bounded v1 readiness gates and closeout.
@@ -106,7 +109,7 @@ Stable/public/live/recovery are aligned on v1.0.0.
 
 ## Next decision
 
-No additional feature milestone or Safe Action family is currently approved. New feature work, a new release cycle, or another privileged action requires a separate owner decision.
+No additional feature milestone or Safe Action family is currently approved. Packaging the accepted post-v1 UI polish into a new release, beginning new feature work, or adding another privileged action each requires a separate owner decision.
 
 ## Guardrails
 
