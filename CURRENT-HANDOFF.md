@@ -1,6 +1,6 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-09-19
+Last updated: 2026-10-02
 
 ## Stable / public / live / recovery state — v1.0.0
 
@@ -52,6 +52,33 @@ Publication record: `docs/history/V1.0.0-PUBLICATION.md`.
 Production/recovery record: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`.
 
 The v1.0.0 release/production/recovery sequence is complete. No additional feature milestone or Safe Action family is automatically approved.
+
+## Unreleased post-v1 UI/UX polish on `main` — 2026-10-02
+
+`main` intentionally contains owner-approved, feature-free Admin Console polish beyond the exact v1.0.0 release source.
+
+Current accepted `main` after the polish train:
+
+`b443a2a4ea484544c670212b29e169c43b7d5c38`
+
+This source is **not** a new stable release and has **not** been deployed to production or copied into recovery. Stable/public/live/recovery remain v1.0.0 exactly as recorded above.
+
+Merged bounded missions:
+
+- PR #77 — problem-first Overview launcher and normal URL support in Quick Target;
+- PR #78 — anchored Incident Lens and Reboot Story timelines;
+- PR #79 — bounded copy summaries for Diagnose, Incident Lens, and Reboot Story;
+- PR #80 — consistent generic PASS / WARNING / FAILED / UNKNOWN presentation and first-attention wording;
+- PR #81 — compact responsive host identity/current-state rail;
+- PR #82 — continue-investigating handoffs between existing deterministic workflows;
+- PR #83 — actionable Overview attention strip using only already-computed evidence;
+- PR #84 — bounded copy-summary coverage for DNS, STARTTLS, Permissions, Expected Endpoint Contracts, and Certificate Rollout.
+
+Every mission used the existing repository CI once as its acceptance gate and passed the complete six-job matrix before merge.
+
+The entire polish train is front-end-only in product behavior: no collector, API, persisted schema/state, Evidence Bundle format, privilege, Safe Action family, monitoring/polling architecture, production deployment, recovery definition, or release artifact changed.
+
+The next owner-gated decision is whether/when to package this accepted `main` polish into a future release. No new feature milestone or privileged action is implied by these merges.
 
 ## Docker Hub storefront metadata
 
