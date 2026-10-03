@@ -2,9 +2,92 @@
 .incident-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.9rem; }
 .incident-submit { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; margin-top: 0.9rem; }
 .incident-window-meta { margin: 0.4rem 0 1rem; }
-.incident-event-list { display: grid; gap: 0.65rem; }
-.incident-event { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem; background: var(--surface-soft); }
-.incident-event strong, .incident-event span { display: block; }
-.incident-event span { margin-top: 0.2rem; color: var(--muted); font-size: 0.86rem; }
+
+.incident-event-list {
+  position: relative;
+  display: grid;
+  gap: .5rem;
+  padding-left: .2rem;
+}
+
+.incident-event-list::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--line);
+}
+
+.incident-event,
+.incident-anchor {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 21px minmax(0, 1fr);
+  gap: .7rem;
+  align-items: start;
+}
+
+.incident-event {
+  padding: .72rem .8rem .72rem 0;
+  border: 1px solid var(--line);
+  border-left: 0;
+  border-radius: 0 12px 12px 0;
+  background: var(--surface-soft);
+}
+
+.incident-timeline-marker,
+.incident-anchor-marker {
+  width: 9px;
+  height: 9px;
+  margin: .35rem 0 0 6px;
+  border-radius: 50%;
+  background: #687d96;
+  box-shadow: 0 0 0 4px var(--surface-soft);
+}
+
+.incident-event.warning .incident-timeline-marker {
+  background: var(--warn);
+}
+
+.incident-event strong,
+.incident-event span,
+.incident-anchor strong,
+.incident-anchor span {
+  display: block;
+}
+
+.incident-event span,
+.incident-anchor span {
+  margin-top: .2rem;
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.incident-anchor {
+  padding: .4rem 0;
+  color: var(--text);
+}
+
+.incident-anchor-marker {
+  width: 13px;
+  height: 13px;
+  margin-left: 4px;
+  background: var(--accent-strong);
+  box-shadow: 0 0 0 4px rgba(33,184,243,.12);
+}
+
+.incident-anchor strong {
+  color: var(--accent-strong);
+  font-size: .78rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
 .incident-event-anchor { margin-left: auto; font-size: 0.78rem; }
-@media (max-width: 720px) { .incident-fields { grid-template-columns: 1fr; } }
+
+@media (max-width: 720px) {
+  .incident-fields { grid-template-columns: 1fr; }
+}

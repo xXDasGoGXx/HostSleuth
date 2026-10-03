@@ -60,7 +60,7 @@ function installRebootStoryUI() {
 
       <div class="diagnosis-context-grid reboot-story-events-grid">
         <div>
-          <p class="subsection-label">Post-boot problem events</p>
+          <p class="subsection-label">Reboot timeline</p>
           <div id="rebootProblemEvents" class="mini-event-list"></div>
         </div>
         <aside class="context-card">
@@ -81,22 +81,70 @@ function installRebootStoryUI() {
   byId("rebootStoryButton").addEventListener("click", runRebootStory);
 }
 
-function renderRebootEventList(container, events, emptyText) {
+function rebootRelativeTime(value, bootStartedAt) {
+  const at = Date.parse(value);
+  const boot = Date.parse(bootStartedAt);
+  if (!Number.isFinite(at) || !Number.isFinite(boot)) return "";
+  const seconds = Math.round((at - boot) / 1000);
+  if (Math.abs(seconds) < 30) return "at boot time";
+  const minutes = Math.max(1, Math.round(Math.abs(seconds) / 60));
+  return seconds < 0 ? `${minutes}m before boot` : `${minutes}m after boot`;
+}
+
+function appendRebootAnchor(container, bootStartedAt) {
+  const row = document.createElement("div");
+  row.className = "reboot-anchor";
+  const marker = document.createElement("span");
+  marker.className = "reboot-anchor-marker";
+  const label = document.createElement("div");
+  const strong = document.createElement("strong");
+  strong.textContent = "Boot started";
+  const time = document.createElement("span");
+  time.textContent = bootStartedAt ? formatTime(bootStartedAt) : "Boot start unavailable";
+  label.append(strong, time);
+  row.append(marker, label);
+  container.append(row);
+}
+
+function renderRebootEventList(container, events, emptyText, bootStartedAt = null, showAnchor = false) {
   container.replaceChildren();
   if (!events?.length) {
+    if (showAnchor) appendRebootAnchor(container, bootStartedAt);
     container.append(makeEmpty(emptyText));
     return;
   }
+
+  let anchorInserted = false;
+  const bootMs = Date.parse(bootStartedAt);
   events.forEach((event) => {
+    const eventMs = Date.parse(event.at);
+    if (showAnchor && !anchorInserted && Number.isFinite(bootMs) && Number.isFinite(eventMs) && eventMs >= bootMs) {
+      appendRebootAnchor(container, bootStartedAt);
+      anchorInserted = true;
+    }
+
     const item = document.createElement("div");
-    item.className = "mini-event";
+    item.className = `reboot-event ${event.severity || ""}`;
+
+    const marker = document.createElement("span");
+    marker.className = "reboot-timeline-marker";
+
+    const body = document.createElement("div");
     const summary = document.createElement("strong");
     summary.textContent = event.summary || "Recorded change";
     const meta = document.createElement("span");
-    meta.textContent = `${event.category || "change"} · ${formatTime(event.at)}`;
-    item.append(summary, meta);
+    meta.textContent = [
+      event.category || "change",
+      formatTime(event.at),
+      bootStartedAt ? rebootRelativeTime(event.at, bootStartedAt) : "",
+    ].filter(Boolean).join(" · ");
+    body.append(summary, meta);
+
+    item.append(marker, body);
     container.append(item);
   });
+
+  if (showAnchor && !anchorInserted) appendRebootAnchor(container, bootStartedAt);
 }
 
 function renderBootJournalEvidence(container, evidence, previous) {
@@ -180,8 +228,10 @@ function renderRebootStory(story) {
 
   renderBootJournalEvidence(byId("rebootPreviousBoot"), story.previous_boot, true);
   renderBootJournalEvidence(byId("rebootCurrentBoot"), story.current_boot, false);
-  renderRebootEventList(byId("rebootProblemEvents"), story.problem_events || [], "No warning service/listener/container events were retained after boot inside the bounded window.");
-  renderRebootEventList(byId("rebootContextEvents"), story.context_events || [], "No retained package, kernel/system, or configuration changes were found inside the boot window.");
+  const timelineEvents = [...(story.problem_events || [])].sort((a, b) => new Date(a.at) - new Date(b.at));
+  const contextEvents = [...(story.context_events || [])].sort((a, b) => new Date(a.at) - new Date(b.at));
+  renderRebootEventList(byId("rebootProblemEvents"), timelineEvents, "No warning service/listener/container events were retained after boot inside the bounded window.", story.boot_started_at, true);
+  renderRebootEventList(byId("rebootContextEvents"), contextEvents, "No retained package, kernel/system, or configuration changes were found inside the boot window.", story.boot_started_at, false);
 }
 
 async function runRebootStory() {
