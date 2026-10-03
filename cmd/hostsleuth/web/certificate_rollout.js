@@ -57,7 +57,7 @@
           <div>
             <p class="eyebrow">ROLLOUT VERDICT</p>
             <h2 id="certificateRolloutConclusion">Certificate rollout evaluated</h2>
-            <p class="cert-rollout-first-problem" id="certificateRolloutFirstProblem"></p>
+            <p class="cert-rollout-first-problem result-attention" id="certificateRolloutFirstProblem"></p>
           </div>
           <span class="confidence-badge cert-rollout-verdict" id="certificateRolloutStatus"></span>
         </div>
@@ -176,11 +176,11 @@
     text(byId("certificateRolloutConclusion"), story.conclusion || "Certificate rollout evaluated");
     text(
       byId("certificateRolloutFirstProblem"),
-      story.first_problem ? `First problem: ${story.first_problem}` : "Every endpoint matched the expected certificate and passed certificate health checks."
+      story.first_problem ? `First thing needing attention: ${story.first_problem}` : "No tested item needs attention."
     );
 
     const badge = byId("certificateRolloutStatus");
-    badge.textContent = status.toUpperCase();
+    badge.textContent = genericStatusLabel(status);
     badge.className = `confidence-badge cert-rollout-verdict ${status}`;
 
     renderCertificateRolloutSummary(story.summary || {});
@@ -217,7 +217,7 @@
       expected.source === "reference" ? `Reference: ${expected.value || "—"}` : "Expected SHA-256 fingerprint"
     );
     const status = byId("certificateRolloutExpectedStatus");
-    status.textContent = String(expected.status || "unknown").toUpperCase();
+    status.textContent = genericStatusLabel(expected.status);
     status.className = `cert-rollout-source-status ${expected.status || "unknown"}`;
 
     const grid = byId("certificateRolloutExpectedGrid");
@@ -260,7 +260,7 @@
       const values = [
         row.target || "—",
         String(row.match_status || "unknown").toUpperCase(),
-        String(row.status || "unknown").toUpperCase(),
+        genericStatusLabel(row.status),
         cert.subject || "—",
         cert.valid_until || "—",
         tls.hostname_status || "—",
