@@ -1,4 +1,6 @@
 (() => {
+  let lastContractEvaluation = null;
+
   function contractInit() {
     if (document.querySelector('[data-view="contracts"]')) return;
 
@@ -74,7 +76,9 @@
         </div>
         <div class="contract-checks" id="contractChecks"></div>
         <div class="contract-result-actions">
+          <button class="secondary-button" id="contractCopyEvidence" type="button">Copy evidence summary</button>
           <button class="secondary-button" id="contractDiagnose" type="button">Open full diagnosis</button>
+          <span class="copy-status" id="contractCopyStatus" aria-live="polite"></span>
         </div>
       </section>
 
@@ -133,6 +137,8 @@
       }
     });
 
+    byId("contractCopyEvidence").addEventListener("click", copyContractEvidence);
+
     byId("contractDiagnose").addEventListener("click", () => {
       const target = byId("contractTarget").value.trim();
       if (!target) return;
@@ -144,7 +150,44 @@
     if (window.location.hash === "#contracts") showView("contracts");
   }
 
+  function contractEvidenceSummary(evaluation) {
+    const lines = [
+      "HostSleuth Expected Endpoint Contract",
+      `Target: ${evaluation?.contract?.target || "unknown"}`,
+      `Verdict: ${genericStatusLabel(evaluation?.status)}`,
+      `Conclusion: ${evaluation?.conclusion || "unknown"}`,
+      evaluation?.first_mismatch ? `First thing needing attention: ${evaluation.first_mismatch}` : "No tested item needs attention.",
+      "",
+      "Checks:",
+    ];
+    const checks = evaluation?.checks || [];
+    if (!checks.length) {
+      lines.push("- none returned");
+    } else {
+      checks.forEach((check) => {
+        lines.push(
+          `- [${genericStatusLabel(check.status)}] ${check.name || "expectation"}`,
+          `  Expected: ${check.expectation || "—"}`,
+          `  Observed: ${check.observed || "—"}`
+        );
+      });
+    }
+    return lines.join("\n");
+  }
+
+  async function copyContractEvidence() {
+    const status = byId("contractCopyStatus");
+    try {
+      await copyBoundedText(contractEvidenceSummary(lastContractEvaluation));
+      text(status, "Copied.");
+    } catch (_) {
+      text(status, "Clipboard unavailable.");
+    }
+    window.setTimeout(() => text(status, ""), 2500);
+  }
+
   function renderContractEvaluation(evaluation) {
+    lastContractEvaluation = evaluation;
     const result = byId("contractResult");
     const error = byId("contractError");
     error.classList.add("hidden");
