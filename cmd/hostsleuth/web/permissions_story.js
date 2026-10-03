@@ -50,6 +50,7 @@
             <p class="eyebrow">PERMISSION VERDICT</p>
             <h2 id="permissionConclusion">Permission chain evaluated</h2>
             <p class="muted" id="permissionTarget"></p>
+            <p class="result-attention" id="permissionFirstProblem"></p>
           </div>
           <span class="confidence-badge permission-verdict" id="permissionStatus"></span>
         </div>
@@ -133,8 +134,14 @@
     const status = story.status || "unknown";
     text(byId("permissionConclusion"), story.conclusion || "Permission chain evaluated");
     text(byId("permissionTarget"), `${story.service || "service"} · ${story.requested_path || "path"}${story.resolved_path && story.resolved_path !== story.requested_path ? ` → ${story.resolved_path}` : ""}`);
+    text(
+      byId("permissionFirstProblem"),
+      story.first_problem
+        ? `First thing needing attention: ${permissionProblemLabel(story.first_problem)}`
+        : "No tested item needs attention."
+    );
     const badge = byId("permissionStatus");
-    badge.textContent = status.toUpperCase();
+    badge.textContent = genericStatusLabel(status);
     badge.className = `confidence-badge permission-verdict ${status}`;
 
     renderPermissionIdentity(story.identity || {});
@@ -143,6 +150,19 @@
     renderPermissionMounts(story.docker_bind_mounts || []);
     renderPermissionScope(story.scope_notes || []);
     byId("permissionStoryResult").classList.remove("hidden");
+  }
+
+  function permissionProblemLabel(value) {
+    const problem = String(value || "");
+    if (problem === "service-identity") return "Service identity";
+    if (problem === "input") return "Input";
+    const split = problem.indexOf(":");
+    if (split > 0) {
+      const operation = problem.slice(0, split);
+      const path = problem.slice(split + 1);
+      return `${operation} · ${path}`;
+    }
+    return problem || "Unknown";
   }
 
   function renderPermissionIdentity(identity) {
@@ -189,7 +209,7 @@
       path.textContent = node.path;
       const badge = document.createElement("span");
       badge.className = `permission-node-badge ${state}`;
-      badge.textContent = state.toUpperCase();
+      badge.textContent = genericStatusLabel(state);
       top.append(path, badge);
 
       const meta = document.createElement("p");
@@ -202,7 +222,7 @@
       related.forEach((decision) => {
         const chip = document.createElement("span");
         chip.className = `permission-op ${decision.status || "unknown"}`;
-        chip.textContent = `${decision.operation}: ${decision.status}`;
+        chip.textContent = `${decision.operation}: ${genericStatusLabel(decision.status)}`;
         ops.append(chip);
       });
       card.append(top, meta, ops);
@@ -237,7 +257,7 @@
           code.textContent = value;
           cell.append(code);
         } else {
-          cell.textContent = value;
+          cell.textContent = index === 2 ? genericStatusLabel(value) : value;
         }
         if (index === 2) cell.className = `permission-status-cell ${item.status || "unknown"}`;
         row.append(cell);

@@ -26,6 +26,15 @@ function text(el, value) {
   if (el) el.textContent = value ?? "";
 }
 
+function genericStatusLabel(value) {
+  const status = String(value || "unknown").toLowerCase();
+  if (status === "pass") return "PASS";
+  if (status === "warn" || status === "warning") return "WARNING";
+  if (status === "fail" || status === "failed") return "FAILED";
+  if (status === "unknown") return "UNKNOWN";
+  return String(value || "unknown").toUpperCase();
+}
+
 async function copyBoundedText(payload) {
   const value = String(payload || "").slice(0, 12000);
   if (!value) throw new Error("nothing to copy");
@@ -539,10 +548,10 @@ function diagnosisTitle(diagnosis) {
 
 function stageStatus(checks, names) {
   const relevant = checks.filter((check) => names.includes(check.name));
-  if (!relevant.length) return { key: "unknown", label: "not needed" };
-  if (relevant.some((check) => check.status === "fail")) return { key: "fail", label: "failed" };
-  if (relevant.some((check) => check.status === "pass")) return { key: "pass", label: "passed" };
-  return { key: "unknown", label: "unknown" };
+  if (!relevant.length) return { key: "unknown", label: "NOT NEEDED" };
+  if (relevant.some((check) => check.status === "fail")) return { key: "fail", label: genericStatusLabel("fail") };
+  if (relevant.some((check) => check.status === "pass")) return { key: "pass", label: genericStatusLabel("pass") };
+  return { key: "unknown", label: genericStatusLabel("unknown") };
 }
 
 function renderDiagnosisPath(diagnosis) {
@@ -621,7 +630,7 @@ function renderDiagnosis(diagnosis) {
     name.textContent = checkNames[check.name] || check.name || "Check";
     const statusText = document.createElement("span");
     statusText.className = "check-status";
-    statusText.textContent = status;
+    statusText.textContent = genericStatusLabel(status);
     summary.append(icon, name, statusText);
 
     const evidence = document.createElement("p");
@@ -642,7 +651,7 @@ function diagnosisEvidenceSummary(diagnosis) {
     "",
   ];
   (diagnosis?.checks || []).forEach((check) => {
-    lines.push(`[${String(check.status || "unknown").toUpperCase()}] ${checkNames[check.name] || check.name || "Check"}: ${check.evidence || ""}`);
+    lines.push(`[${genericStatusLabel(check.status)}] ${checkNames[check.name] || check.name || "Check"}: ${check.evidence || ""}`);
   });
   return lines.join("\n");
 }

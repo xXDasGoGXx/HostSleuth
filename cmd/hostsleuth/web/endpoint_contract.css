@@ -93,7 +93,7 @@
 
 .contract-check-status.unknown,
 .contract-status.unknown {
-  color: #fcd34d;
+  color: var(--muted);
 }
 
 .contract-expected,
