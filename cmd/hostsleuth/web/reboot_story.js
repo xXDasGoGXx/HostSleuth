@@ -1,3 +1,5 @@
+let lastRebootStory = null;
+
 function installRebootStoryUI() {
   if (byId("view-reboot")) return;
   const nav = document.querySelector(".nav-tabs");
@@ -37,6 +39,11 @@ function installRebootStoryUI() {
           <p class="context-note" id="rebootStoryContext"></p>
         </div>
         <span class="confidence-badge" id="rebootStoryConfidence"></span>
+      </div>
+
+      <div class="result-actions">
+        <button class="secondary-button" id="rebootCopyEvidence" type="button">Copy evidence summary</button>
+        <span class="copy-status" id="rebootCopyStatus" aria-live="polite"></span>
       </div>
 
       <div class="reboot-story-grid">
@@ -79,6 +86,7 @@ function installRebootStoryUI() {
   `;
   main.append(section);
   byId("rebootStoryButton").addEventListener("click", runRebootStory);
+  byId("rebootCopyEvidence").addEventListener("click", copyRebootEvidence);
 }
 
 function rebootRelativeTime(value, bootStartedAt) {
@@ -198,6 +206,7 @@ function renderRecoveryIssues(container, issues) {
 }
 
 function renderRebootStory(story) {
+  lastRebootStory = story;
   byId("rebootStoryError").classList.add("hidden");
   byId("rebootStoryResult").classList.remove("hidden");
   text(byId("rebootStoryConclusion"), story.conclusion || "Reboot story complete");
@@ -232,6 +241,75 @@ function renderRebootStory(story) {
   const contextEvents = [...(story.context_events || [])].sort((a, b) => new Date(a.at) - new Date(b.at));
   renderRebootEventList(byId("rebootProblemEvents"), timelineEvents, "No warning service/listener/container events were retained after boot inside the bounded window.", story.boot_started_at, true);
   renderRebootEventList(byId("rebootContextEvents"), contextEvents, "No retained package, kernel/system, or configuration changes were found inside the boot window.", story.boot_started_at, false);
+}
+
+function rebootEvidenceSummary(story) {
+  const lines = [
+    "HostSleuth Reboot Story",
+    `Boot started: ${story?.boot_started_at ? formatTime(story.boot_started_at) : "unavailable"}`,
+    story?.boot_id ? `Boot ID: ${String(story.boot_id).slice(0, 12)}` : "",
+    `Conclusion: ${story?.conclusion || "unknown"}`,
+    `Confidence: ${story?.confidence || "unknown"}`,
+    `Assessment: ${story?.cause_assessment || "No reboot cause is claimed."}`,
+    story?.context_note || "Boot-time proximity is context, not causation.",
+    "",
+    `Previous boot: ${story?.previous_boot?.status || "unknown"} · ${story?.previous_boot?.assessment || ""}`,
+    `Current boot: ${story?.current_boot?.status || "unknown"} · ${story?.current_boot?.assessment || ""}`,
+    "",
+    "Unrecovered items:",
+  ].filter(Boolean);
+
+  const issues = story?.recovery_issues || [];
+  if (!issues.length) {
+    lines.push("- none confirmed");
+  } else {
+    issues.forEach((issue) => {
+      lines.push(`- ${issue.kind || "recovery"} · ${issue.name || "unknown"} · ${issue.current_state || "unknown"}`);
+    });
+  }
+
+  lines.push("", "Failed services:");
+  const failed = story?.failed_services || [];
+  if (!failed.length) {
+    lines.push("- none observed");
+  } else {
+    failed.forEach((service) => {
+      lines.push(`- ${service.name || "service"} · ${service.active || "unknown"}/${service.sub || "unknown"}`);
+    });
+  }
+
+  lines.push("", "Post-boot problem events:");
+  const problems = story?.problem_events || [];
+  if (!problems.length) {
+    lines.push("- none retained");
+  } else {
+    problems.forEach((event) => {
+      lines.push(`- ${formatTime(event.at)} · ${event.category || "change"} · ${event.summary || "Recorded change"}`);
+    });
+  }
+
+  lines.push("", "Nearby package/kernel/configuration context:");
+  const context = story?.context_events || [];
+  if (!context.length) {
+    lines.push("- none retained");
+  } else {
+    context.forEach((event) => {
+      lines.push(`- ${formatTime(event.at)} · ${event.category || "change"} · ${event.summary || "Recorded change"}`);
+    });
+  }
+
+  return lines.join("\n");
+}
+
+async function copyRebootEvidence() {
+  const status = byId("rebootCopyStatus");
+  try {
+    await copyBoundedText(rebootEvidenceSummary(lastRebootStory));
+    text(status, "Copied.");
+  } catch (_) {
+    text(status, "Clipboard unavailable.");
+  }
+  window.setTimeout(() => text(status, ""), 2500);
 }
 
 async function runRebootStory() {
