@@ -17,7 +17,7 @@
           <kbd>/</kbd>
         </div>
         <div class="command-input-row">
-          <input id="globalTarget" autocomplete="off" spellcheck="false" placeholder="host-or-ip:port">
+          <input id="globalTarget" autocomplete="off" spellcheck="false" placeholder="hostname, URL, or host:port">
           <button class="command-action primary" id="globalDiagnose" type="button">Diagnose</button>
           <button class="command-action" id="globalExpect" type="button">Expect</button>
           <button class="command-action" id="globalDNS" type="button">DNS</button>
@@ -65,17 +65,22 @@
       return;
     }
 
+    const normalized = normalizeQuickTarget(raw);
+    if (!normalized) {
+      byId("globalTarget").focus();
+      return;
+    }
+
     if (view === "dns") {
-      const host = hostPart(raw);
       const dnsInput = byId("dnsDetectiveName");
-      if (dnsInput) dnsInput.value = host;
+      if (dnsInput) dnsInput.value = normalized.host;
       showView("dns");
       if (dnsInput) dnsInput.focus();
       rememberTarget(raw);
       return;
     }
 
-    const target = endpointTarget(raw);
+    const target = normalized.endpoint;
     byId("globalTarget").value = target;
     rememberTarget(target);
 
@@ -92,10 +97,39 @@
     if (contract) contract.focus();
   }
 
+  function normalizeQuickTarget(raw) {
+    raw = String(raw || "").trim();
+    if (!raw) return null;
+
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        if (!parsed.hostname) return null;
+        const port = parsed.port || (parsed.protocol === "http:" ? "80" : "443");
+        return {
+          host: parsed.hostname,
+          endpoint: formatEndpoint(parsed.hostname, port),
+        };
+      } catch (_) {
+        return null;
+      }
+    }
+
+    return {
+      host: hostPart(raw),
+      endpoint: endpointTarget(raw),
+    };
+  }
+
   function endpointTarget(raw) {
     if (hasPort(raw)) return raw;
     if (raw.includes(":") && !raw.startsWith("[")) return `[${raw}]:443`;
     return `${raw}:443`;
+  }
+
+  function formatEndpoint(host, port) {
+    const displayHost = host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
+    return `${displayHost}:${port}`;
   }
 
   function hasPort(raw) {
