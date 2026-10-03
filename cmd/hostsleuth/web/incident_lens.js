@@ -1,3 +1,5 @@
+let lastIncidentLens = null;
+
 function incidentLocalValue(value) {
   const date = value ? new Date(value) : new Date();
   if (Number.isNaN(date.getTime())) return "";
@@ -41,6 +43,10 @@ function installIncidentLensUI() {
           <p class="section-copy" id="incidentContextNote"></p>
         </div>
       </div>
+      <div class="result-actions">
+        <button class="secondary-button" id="incidentCopyEvidence" type="button">Copy evidence summary</button>
+        <span class="copy-status" id="incidentCopyStatus" aria-live="polite"></span>
+      </div>
       <div class="diagnosis-context-grid">
         <div>
           <p class="subsection-label">Incident timeline</p>
@@ -67,6 +73,7 @@ function installIncidentLensUI() {
     event.preventDefault();
     runIncidentLens(byId("incidentAnchor").value, byId("incidentTarget").value.trim());
   });
+  byId("incidentCopyEvidence").addEventListener("click", copyIncidentEvidence);
 }
 
 function openIncidentLensAt(value, target = "") {
@@ -142,6 +149,7 @@ function appendIncidentAnchor(container, anchor) {
 }
 
 function renderIncidentLens(lens) {
+  lastIncidentLens = lens;
   byId("incidentLensError").classList.add("hidden");
   byId("incidentLensResult").classList.remove("hidden");
   text(byId("incidentConclusion"), lens.conclusion || "Incident window");
@@ -201,6 +209,48 @@ function renderIncidentLens(lens) {
   confidence.className = "muted";
   confidence.textContent = `${lens.current_endpoint.confidence || "unknown"} confidence · ${lens.target || "endpoint"}`;
   endpoint.append(note, conclusion, confidence);
+}
+
+function incidentEvidenceSummary(lens) {
+  const lines = [
+    "HostSleuth Incident Lens",
+    `Window: ${formatTime(lens?.window_start)} -> ${formatTime(lens?.window_end)}`,
+    `Anchor: ${formatTime(lens?.anchor_at)}`,
+    `Conclusion: ${lens?.conclusion || "unknown"}`,
+    lens?.context_note || "Temporal proximity is context, not causation.",
+  ];
+
+  if (lens?.target) {
+    lines.push(
+      "",
+      `Current endpoint: ${lens.target}`,
+      `Captured: ${formatTime(lens.endpoint_captured_at)}`,
+      `Endpoint conclusion: ${lens.current_endpoint?.conclusion || "unavailable"}`,
+      `Endpoint confidence: ${lens.current_endpoint?.confidence || "unknown"}`,
+    );
+  }
+
+  lines.push("", "Retained changes:");
+  const events = lens?.events || [];
+  if (!events.length) {
+    lines.push("- none in bounded window");
+  } else {
+    events.forEach((event) => {
+      lines.push(`- [${String(event.severity || "info").toUpperCase()}] ${formatTime(event.at)} · ${event.category || "change"} · ${event.summary || "Recorded change"}`);
+    });
+  }
+  return lines.join("\n");
+}
+
+async function copyIncidentEvidence() {
+  const status = byId("incidentCopyStatus");
+  try {
+    await copyBoundedText(incidentEvidenceSummary(lastIncidentLens));
+    text(status, "Copied.");
+  } catch (_) {
+    text(status, "Clipboard unavailable.");
+  }
+  window.setTimeout(() => text(status, ""), 2500);
 }
 
 async function runIncidentLens(localAnchor, target) {
