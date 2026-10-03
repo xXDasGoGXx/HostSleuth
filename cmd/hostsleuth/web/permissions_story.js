@@ -55,6 +55,11 @@
           <span class="confidence-badge permission-verdict" id="permissionStatus"></span>
         </div>
 
+        <div class="result-actions">
+          <button class="secondary-button" id="permissionCopyEvidence" type="button">Copy evidence summary</button>
+          <span class="copy-status" id="permissionCopyStatus" aria-live="polite"></span>
+        </div>
+
         <div class="permission-identity-grid" id="permissionIdentity"></div>
 
         <div class="permission-section-head">
@@ -99,6 +104,7 @@
     main.append(view);
 
     byId("permissionStoryForm").addEventListener("submit", runPermissionStory);
+    byId("permissionCopyEvidence").addEventListener("click", copyPermissionEvidence);
     byId("permissionSearch").addEventListener("input", () => renderPermissionEvidence(lastPermissionStory));
     if (window.location.hash === "#permissions") showView("permissions");
   }
@@ -128,6 +134,55 @@
       button.disabled = false;
       button.textContent = "Trace permission chain";
     }
+  }
+
+  function permissionEvidenceSummary(story) {
+    const lines = [
+      "HostSleuth Permissions Story",
+      `Service: ${story?.service || "unknown"}`,
+      `Requested path: ${story?.requested_path || "unknown"}`,
+      story?.resolved_path && story.resolved_path !== story.requested_path ? `Resolved path: ${story.resolved_path}` : "",
+      `Verdict: ${genericStatusLabel(story?.status)}`,
+      `Conclusion: ${story?.conclusion || "unknown"}`,
+      story?.first_problem ? `First thing needing attention: ${permissionProblemLabel(story.first_problem)}` : "No tested item needs attention.",
+      "",
+    ].filter(Boolean);
+
+    if (story?.identity) {
+      lines.push(
+        `PID: ${story.identity.pid || "—"}`,
+        `UID/GID: ${story.identity.uid ?? "—"}/${story.identity.gid ?? "—"}`,
+        `Configured identity: ${[story.identity.configured_user, story.identity.configured_group].filter(Boolean).join(":") || "—"}`,
+        ""
+      );
+    }
+
+    lines.push("Permission decisions:");
+    const decisions = story?.decisions || [];
+    if (!decisions.length) {
+      lines.push("- none returned");
+    } else {
+      decisions.forEach((decision) => {
+        lines.push(`- [${genericStatusLabel(decision.status)}] ${decision.operation || "operation"} · ${decision.path || "path"} · ${decision.evidence || ""}`);
+      });
+    }
+
+    if ((story?.docker_bind_mounts || []).length) {
+      lines.push("", "Relevant Docker bind mounts:");
+      story.docker_bind_mounts.forEach((mount) => lines.push(`- ${mount.container || "container"} · ${mount.source || "—"} -> ${mount.destination || "—"} · ${mount.read_write ? "rw" : "ro"}`));
+    }
+    return lines.join("\n");
+  }
+
+  async function copyPermissionEvidence() {
+    const status = byId("permissionCopyStatus");
+    try {
+      await copyBoundedText(permissionEvidenceSummary(lastPermissionStory));
+      text(status, "Copied.");
+    } catch (_) {
+      text(status, "Clipboard unavailable.");
+    }
+    window.setTimeout(() => text(status, ""), 2500);
   }
 
   function renderPermissionStory(story) {
