@@ -43,7 +43,7 @@ function installIncidentLensUI() {
       </div>
       <div class="diagnosis-context-grid">
         <div>
-          <p class="subsection-label">Retained changes in window</p>
+          <p class="subsection-label">Incident timeline</p>
           <div id="incidentEvents" class="incident-event-list"></div>
         </div>
         <aside class="context-card" id="incidentEndpointCard">
@@ -116,6 +116,31 @@ renderDiagnosis = function renderDiagnosisWithIncidentLens(diagnosis) {
   heading.append(button);
 };
 
+function incidentRelativeTime(value, anchor) {
+  const at = Date.parse(value);
+  const anchorAt = Date.parse(anchor);
+  if (!Number.isFinite(at) || !Number.isFinite(anchorAt)) return "";
+  const seconds = Math.round((at - anchorAt) / 1000);
+  if (Math.abs(seconds) < 30) return "at incident time";
+  const minutes = Math.max(1, Math.round(Math.abs(seconds) / 60));
+  return seconds < 0 ? `${minutes}m before` : `${minutes}m after`;
+}
+
+function appendIncidentAnchor(container, anchor) {
+  const row = document.createElement("div");
+  row.className = "incident-anchor";
+  const marker = document.createElement("span");
+  marker.className = "incident-anchor-marker";
+  const label = document.createElement("div");
+  const strong = document.createElement("strong");
+  strong.textContent = "Incident time";
+  const time = document.createElement("span");
+  time.textContent = formatTime(anchor);
+  label.append(strong, time);
+  row.append(marker, label);
+  container.append(row);
+}
+
 function renderIncidentLens(lens) {
   byId("incidentLensError").classList.add("hidden");
   byId("incidentLensResult").classList.remove("hidden");
@@ -127,18 +152,38 @@ function renderIncidentLens(lens) {
   events.replaceChildren();
   const retained = lens.events || [];
   if (!retained.length) {
+    appendIncidentAnchor(events, lens.anchor_at);
     events.append(makeEmpty("No retained host changes were recorded inside this bounded window."));
   } else {
+    let anchorInserted = false;
+    const anchorMs = Date.parse(lens.anchor_at);
     retained.forEach((event) => {
+      const eventMs = Date.parse(event.at);
+      if (!anchorInserted && Number.isFinite(anchorMs) && Number.isFinite(eventMs) && eventMs >= anchorMs) {
+        appendIncidentAnchor(events, lens.anchor_at);
+        anchorInserted = true;
+      }
+
       const row = document.createElement("article");
-      row.className = "incident-event";
+      row.className = `incident-event ${event.severity || ""}`;
+
+      const marker = document.createElement("span");
+      marker.className = "incident-timeline-marker";
+
+      const body = document.createElement("div");
       const summary = document.createElement("strong");
       summary.textContent = event.summary || "Recorded change";
       const meta = document.createElement("span");
-      meta.textContent = `${event.category || "change"} · ${formatTime(event.at)}`;
-      row.append(summary, meta);
+      meta.textContent = [
+        event.category || "change",
+        formatTime(event.at),
+        incidentRelativeTime(event.at, lens.anchor_at),
+      ].filter(Boolean).join(" · ");
+      body.append(summary, meta);
+      row.append(marker, body);
       events.append(row);
     });
+    if (!anchorInserted) appendIncidentAnchor(events, lens.anchor_at);
   }
 
   const endpoint = byId("incidentEndpoint");
