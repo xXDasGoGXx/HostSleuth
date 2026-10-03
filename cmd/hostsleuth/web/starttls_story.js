@@ -55,7 +55,7 @@
             <p class="eyebrow">MAIL TLS VERDICT</p>
             <h2 id="startTLSConclusion">STARTTLS evaluated</h2>
             <p class="muted" id="startTLSTargetSummary"></p>
-            <p class="starttls-first-problem" id="startTLSFirstProblem"></p>
+            <p class="starttls-first-problem result-attention" id="startTLSFirstProblem"></p>
           </div>
           <span class="confidence-badge starttls-verdict" id="startTLSStatus"></span>
         </div>
@@ -148,12 +148,12 @@
     text(
       byId("startTLSFirstProblem"),
       story.first_problem
-        ? `First proven problem: ${startTLSStageTitle(story, story.first_problem)}`
-        : "Every tested STARTTLS and certificate gate passed."
+        ? `First thing needing attention: ${startTLSStageTitle(story, story.first_problem)}`
+        : "No tested item needs attention."
     );
 
     const badge = byId("startTLSStatus");
-    badge.textContent = status.toUpperCase();
+    badge.textContent = genericStatusLabel(status);
     badge.className = `confidence-badge starttls-verdict ${status}`;
 
     renderStartTLSFlow(story.stages || [], story.first_problem || "");
@@ -184,7 +184,7 @@
       title.textContent = stage.title || stage.id || "Stage";
       const state = document.createElement("span");
       state.className = `starttls-stage-badge ${stage.status || "unknown"}`;
-      state.textContent = String(stage.status || "unknown").toUpperCase();
+      state.textContent = genericStatusLabel(stage.status);
       head.append(step, title, state);
 
       const summary = document.createElement("p");
