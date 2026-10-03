@@ -61,8 +61,10 @@
         </div>
 
         <div class="result-actions" aria-label="Continue investigating this mail endpoint">
+          <button class="secondary-button" id="startTLSCopyEvidence" type="button">Copy evidence summary</button>
           <button class="secondary-button" id="startTLSToDiagnose" type="button">Diagnose endpoint</button>
           <button class="secondary-button" id="startTLSToDNS" type="button">Check DNS views</button>
+          <span class="copy-status" id="startTLSCopyStatus" aria-live="polite"></span>
         </div>
 
         <div class="starttls-flow" id="startTLSFlow"></div>
@@ -115,6 +117,7 @@
     main.append(view);
 
     byId("startTLSStoryForm").addEventListener("submit", runStartTLSStory);
+    byId("startTLSCopyEvidence").addEventListener("click", copyStartTLSEvidence);
     byId("startTLSToDiagnose").addEventListener("click", () => openDiagnosisForTarget(lastStartTLSStory?.target));
     byId("startTLSToDNS").addEventListener("click", () => openDNSForTarget(lastStartTLSStory?.target));
     if (window.location.hash === "#starttls") showView("starttls");
@@ -146,6 +149,55 @@
       button.disabled = false;
       button.textContent = "Trace STARTTLS";
     }
+  }
+
+  function startTLSEvidenceSummary(story) {
+    const lines = [
+      "HostSleuth STARTTLS Story",
+      `Protocol: ${String(story?.protocol || "unknown").toUpperCase()}`,
+      `Target: ${story?.target || "unknown"}`,
+      `Verdict: ${genericStatusLabel(story?.status)}`,
+      `Conclusion: ${story?.conclusion || "unknown"}`,
+      story?.first_problem ? `First thing needing attention: ${startTLSStageTitle(story, story.first_problem)}` : "No tested item needs attention.",
+      "",
+      `Greeting: ${story?.greeting || "—"}`,
+      `Upgrade advertised: ${story?.starttls_advertised ? "yes" : "no"}`,
+      `Upgrade response: ${story?.upgrade_response || "—"}`,
+    ];
+    const tls = story?.tls;
+    if (tls) {
+      lines.push(
+        "",
+        `TLS: ${genericStatusLabel(tls.handshake_status)} · ${tls.protocol || "—"} · ${tls.cipher_suite || "—"}`,
+        `Hostname: ${genericStatusLabel(tls.hostname_status)}`,
+        `Trust: ${genericStatusLabel(tls.trust_status)}`
+      );
+      if (tls.certificate) {
+        lines.push(
+          `Certificate subject: ${tls.certificate.subject || "—"}`,
+          `Issuer: ${tls.certificate.issuer || "—"}`,
+          `Valid until: ${tls.certificate.valid_until || "—"}`,
+          `SHA-256: ${tls.certificate.sha256_fingerprint || "—"}`
+        );
+      }
+    }
+    lines.push("", "Stages:");
+    (story?.stages || []).forEach((stage) => {
+      lines.push(`[${genericStatusLabel(stage.status)}] ${stage.title || stage.id || "Stage"}: ${stage.summary || ""}`);
+      (stage.evidence || []).forEach((item) => lines.push(`  - ${item}`));
+    });
+    return lines.join("\n");
+  }
+
+  async function copyStartTLSEvidence() {
+    const status = byId("startTLSCopyStatus");
+    try {
+      await copyBoundedText(startTLSEvidenceSummary(lastStartTLSStory));
+      text(status, "Copied.");
+    } catch (_) {
+      text(status, "Clipboard unavailable.");
+    }
+    window.setTimeout(() => text(status, ""), 2500);
   }
 
   function renderStartTLSStory(story) {

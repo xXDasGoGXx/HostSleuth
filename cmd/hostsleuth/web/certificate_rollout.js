@@ -62,6 +62,11 @@
           <span class="confidence-badge cert-rollout-verdict" id="certificateRolloutStatus"></span>
         </div>
 
+        <div class="result-actions">
+          <button class="secondary-button" id="certificateRolloutCopyEvidence" type="button">Copy evidence summary</button>
+          <span class="copy-status" id="certificateRolloutCopyStatus" aria-live="polite"></span>
+        </div>
+
         <div class="cert-rollout-summary" id="certificateRolloutSummary"></div>
 
         <section class="cert-rollout-expected-card">
@@ -115,6 +120,7 @@
 
     byId("certificateRolloutSource").addEventListener("change", updateCertificateRolloutSourceUI);
     byId("certificateRolloutForm").addEventListener("submit", runCertificateRollout);
+    byId("certificateRolloutCopyEvidence").addEventListener("click", copyCertificateRolloutEvidence);
     updateCertificateRolloutSourceUI();
     if (window.location.hash === "#cert-rollout") showView("cert-rollout");
   }
@@ -169,6 +175,48 @@
       button.disabled = false;
       button.textContent = "Verify rollout";
     }
+  }
+
+  function certificateRolloutEvidenceSummary(story) {
+    const lines = [
+      "HostSleuth Certificate Rollout",
+      `Verdict: ${genericStatusLabel(story?.status)}`,
+      `Conclusion: ${story?.conclusion || "unknown"}`,
+      story?.first_problem ? `First thing needing attention: ${story.first_problem}` : "No tested item needs attention.",
+      "",
+      `Expected source: ${story?.expected?.source || "unknown"}`,
+      `Expected fingerprint: ${story?.expected?.fingerprint || "—"}`,
+      "",
+      "Endpoints:",
+    ];
+    const rows = story?.endpoints || [];
+    if (!rows.length) {
+      lines.push("- none returned");
+    } else {
+      rows.forEach((row) => {
+        const cert = row.certificate || {};
+        const tls = row.tls || {};
+        lines.push(
+          `- ${row.target || "endpoint"} · rollout ${String(row.match_status || "unknown").toUpperCase()} · health ${genericStatusLabel(row.status)}`,
+          `  Subject: ${cert.subject || "—"}`,
+          `  Expires: ${cert.valid_until || "—"} · hostname ${genericStatusLabel(tls.hostname_status)} · trust ${genericStatusLabel(tls.trust_status)}`,
+          `  SHA-256: ${cert.sha256_fingerprint || "—"}`
+        );
+        if (row.problem) lines.push(`  Problem: ${row.problem}`);
+      });
+    }
+    return lines.join("\n");
+  }
+
+  async function copyCertificateRolloutEvidence() {
+    const status = byId("certificateRolloutCopyStatus");
+    try {
+      await copyBoundedText(certificateRolloutEvidenceSummary(lastCertificateRollout));
+      text(status, "Copied.");
+    } catch (_) {
+      text(status, "Clipboard unavailable.");
+    }
+    window.setTimeout(() => text(status, ""), 2500);
   }
 
   function renderCertificateRollout(story) {
