@@ -278,6 +278,108 @@ footer {
   font-size: .75rem;
 }
 
+.mission-launcher {
+  margin-bottom: 14px;
+  padding: 20px;
+  border-color: rgba(71, 116, 153, .46);
+  background:
+    radial-gradient(circle at top right, rgba(33,184,243,.07), transparent 34%),
+    rgba(8,18,31,.78);
+}
+
+.mission-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.mission-heading h2 {
+  margin-bottom: 5px;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.mission-card {
+  min-width: 0;
+  min-height: 126px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "icon title"
+    "icon copy";
+  align-content: center;
+  column-gap: 11px;
+  row-gap: 5px;
+  padding: 14px;
+  border: 1px solid rgba(64, 90, 122, .58);
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgba(13,29,48,.92), rgba(8,19,33,.92));
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mission-card:hover {
+  border-color: rgba(103,212,255,.48);
+  background: linear-gradient(180deg, rgba(17,39,63,.96), rgba(10,23,39,.96));
+  transform: translateY(-1px);
+}
+
+.mission-card strong {
+  grid-area: title;
+  align-self: end;
+  font-size: .9rem;
+}
+
+.mission-card > span:last-child {
+  grid-area: copy;
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.42;
+}
+
+.mission-icon {
+  grid-area: icon;
+  align-self: center;
+  justify-self: center;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(103,212,255,.18);
+  border-radius: 10px;
+  background: rgba(33,184,243,.07);
+  color: #a8e7ff;
+  font: 850 .7rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.mission-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.mission-links button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 5px 7px;
+  cursor: pointer;
+  font-weight: 720;
+  font-size: .76rem;
+}
+
+.mission-links button:hover {
+  color: var(--accent-strong);
+}
+
 html[data-density="compact"] .section-panel,
 html[data-density="compact"] .diagnose-panel,
 html[data-density="compact"] .diagnosis-result {
@@ -360,6 +462,19 @@ summary:focus-visible {
 }
 
 @media (max-width: 720px) {
+  .mission-launcher {
+    padding: 16px;
+  }
+
+  .mission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-card {
+    min-height: 0;
+  }
+
+
   .command-deck {
     position: static;
     grid-template-columns: 1fr;
