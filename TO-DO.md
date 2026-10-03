@@ -46,6 +46,8 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Publish and independently verify stable `v1.0.0` from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`.
 - [x] Align live production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:1.0.0`.
 - [x] Complete the bounded feature-free post-v1 Admin Console polish train (PRs #77–#84), ending at accepted `main` `b443a2a4ea484544c670212b29e169c43b7d5c38`.
+- [x] Publish and independently verify stable `v1.0.1` from exact source `9d95392882814e1c9f17643fe2664e6faaf15481`.
+- [x] Align live Arcane production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:1.0.1`.
 
 ## Records
 
@@ -83,12 +85,16 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v1.0 readiness closeout: `docs/history/V1.0-READINESS.md`
 - v1.0.0 publication: `docs/history/V1.0.0-PUBLICATION.md`
 - v1.0.0 production/recovery alignment: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`
+- v1.0.1 publication: `docs/history/V1.0.1-PUBLICATION.md`
+- v1.0.1 production/recovery alignment: `docs/history/V1.0.1-PRODUCTION-ALIGNMENT.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v1.0.0` / `mjmalleo/hostsleuth:1.0.0`, published from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f`. Docker `1.0.0` and `latest` resolve to verified OCI index `sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`.
+Stable/public/live/recovery are aligned on `v1.0.1` / `mjmalleo/hostsleuth:1.0.1`, published from exact source `9d95392882814e1c9f17643fe2664e6faaf15481`.
 
-Accepted `main` is intentionally ahead of v1.0.0 with unreleased, feature-free Admin Console polish through PR #84 at `b443a2a4ea484544c670212b29e169c43b7d5c38`. That polish is not yet published, deployed, or recovery-aligned.
+Docker `1.0.1` and `latest` resolve to verified OCI index `sha256:ae747aac332d953eed7826f27ee67548d8295da2638cd553461804c4ebbefe36`.
+
+The feature-free post-v1 Admin Console polish is now published, live, and recovery-aligned.
 
 ## v1.0.0 production / recovery alignment — COMPLETE
 
@@ -105,11 +111,26 @@ Accepted `main` is intentionally ahead of v1.0.0 with unreleased, feature-free A
 - [x] Verify recovery `main` pins `mjmalleo/hostsleuth:1.0.0`.
 - [x] Record final v1.0.0 production/recovery alignment.
 
-Stable/public/live/recovery are aligned on v1.0.0.
+Stable/public/live/recovery were aligned on v1.0.0 before the v1.0.1 patch cycle.
+
+## v1.0.1 production / recovery alignment — COMPLETE
+
+- [x] Owner approves packaging the accepted post-v1 UI polish as a patch release.
+- [x] Publish `v1.0.1` from exact source `9d95392882814e1c9f17643fe2664e6faaf15481`.
+- [x] Release workflow `37104898586` succeeds.
+- [x] Independently verify tag, native checksums/version, and Docker multi-architecture artifacts.
+- [x] Verify Docker `1.0.1` and `latest` share OCI index `sha256:ae747aac332d953eed7826f27ee67548d8295da2638cd553461804c4ebbefe36`.
+- [x] Stage recovery PR #109 without merging ahead of production.
+- [x] Redeploy only the existing Arcane `hostsleuth` service image from `1.0.0` to `1.0.1`.
+- [x] Pass bounded live identity/state/UI/security/STARTTLS/Action-boundary acceptance.
+- [x] Merge recovery PR #109 at `b2a88aeeec72342fc79fd29b574c541523b3b859`.
+- [x] Verify recovery `main` pins `mjmalleo/hostsleuth:1.0.1`.
+
+Stable/public/live/recovery are aligned on v1.0.1.
 
 ## Next decision
 
-No additional feature milestone or Safe Action family is currently approved. Packaging the accepted post-v1 UI polish into a new release, beginning new feature work, or adding another privileged action each requires a separate owner decision.
+No additional feature milestone or Safe Action family is currently approved. The v1.0.1 patch release is complete; beginning new feature work or adding another privileged action requires a separate owner decision.
 
 ## Guardrails
 
