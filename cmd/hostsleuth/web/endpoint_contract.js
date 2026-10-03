@@ -68,7 +68,7 @@
             <p class="eyebrow">EXPECTED VS OBSERVED</p>
             <h2 id="contractConclusion">Contract evaluated</h2>
             <p class="muted" id="contractResultTarget"></p>
-            <p class="section-copy" id="contractFirstMismatch"></p>
+            <p class="result-attention" id="contractFirstMismatch"></p>
           </div>
           <span class="confidence-badge" id="contractStatus"></span>
         </div>
@@ -154,12 +154,12 @@
     text(
       byId("contractFirstMismatch"),
       evaluation.first_mismatch
-        ? `First unresolved expectation: ${evaluation.first_mismatch}`
-        : "Every requested expectation is currently satisfied."
+        ? `First thing needing attention: ${evaluation.first_mismatch}`
+        : "No tested item needs attention."
     );
 
     const status = byId("contractStatus");
-    status.textContent = String(evaluation.status || "unknown").toUpperCase();
+    status.textContent = genericStatusLabel(evaluation.status);
     status.className = `confidence-badge contract-status ${evaluation.status || "unknown"}`;
 
     const checks = byId("contractChecks");
@@ -176,7 +176,7 @@
 
       const badge = document.createElement("span");
       badge.className = `contract-check-status ${check.status || "unknown"}`;
-      badge.textContent = String(check.status || "unknown").toUpperCase();
+      badge.textContent = genericStatusLabel(check.status);
       head.append(name, badge);
 
       const expected = document.createElement("p");
