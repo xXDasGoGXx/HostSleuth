@@ -53,7 +53,7 @@
             <p class="eyebrow">REQUEST PATH VERDICT</p>
             <h2 id="proxyStoryConclusion">Request path evaluated</h2>
             <p class="muted" id="proxyStoryTargets"></p>
-            <p class="proxy-first-problem" id="proxyStoryFirstProblem"></p>
+            <p class="proxy-first-problem result-attention" id="proxyStoryFirstProblem"></p>
           </div>
           <span class="confidence-badge proxy-verdict" id="proxyStoryStatus"></span>
         </div>
@@ -136,13 +136,13 @@
     text(
       byId("proxyStoryFirstProblem"),
       story.first_problem
-        ? `First item needing attention: ${proxyStageTitle(story, story.first_problem)}`
-        : "Every tested request-path gate passed."
+        ? `First thing needing attention: ${proxyStageTitle(story, story.first_problem)}`
+        : "No tested item needs attention."
     );
 
     const status = byId("proxyStoryStatus");
     const value = story.status || "unknown";
-    status.textContent = value.toUpperCase();
+    status.textContent = genericStatusLabel(value);
     status.className = `confidence-badge proxy-verdict ${value}`;
 
     renderProxyFlow(story.stages || [], story.first_problem || "");
@@ -170,7 +170,7 @@
       title.textContent = stage.title || stage.id || "Stage";
       const badge = document.createElement("span");
       badge.className = `proxy-stage-badge ${stage.status || "unknown"}`;
-      badge.textContent = String(stage.status || "unknown").toUpperCase();
+      badge.textContent = genericStatusLabel(stage.status);
       head.append(step, title, badge);
 
       const summary = document.createElement("p");
@@ -237,7 +237,7 @@
     const title = document.createElement("strong");
     title.textContent = label;
     const badge = document.createElement("span");
-    badge.textContent = classification.toUpperCase();
+    badge.textContent = genericStatusLabel(classification);
     badge.className = `proxy-stage-badge ${classification}`;
     head.append(title, badge);
 
@@ -295,11 +295,11 @@
       "HostSleuth Reverse Proxy / Upstream Story",
       `Public: ${lastProxyStory.public_url || "—"}`,
       `Upstream: ${lastProxyStory.upstream_url || "—"}`,
-      `Verdict: ${String(lastProxyStory.status || "unknown").toUpperCase()} — ${lastProxyStory.conclusion || ""}`,
+      `Verdict: ${genericStatusLabel(lastProxyStory.status)} — ${lastProxyStory.conclusion || ""}`,
       "",
     ];
     (lastProxyStory.stages || []).forEach((stage) => {
-      lines.push(`[${String(stage.status || "unknown").toUpperCase()}] ${stage.title}: ${stage.summary || ""}`);
+      lines.push(`[${genericStatusLabel(stage.status)}] ${stage.title}: ${stage.summary || ""}`);
       (stage.evidence || []).forEach((evidence) => lines.push(`  - ${evidence}`));
     });
     const payload = lines.join("\n").slice(0, 12000);
