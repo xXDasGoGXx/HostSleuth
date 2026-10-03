@@ -125,7 +125,7 @@ function renderServiceStory(story) {
     name.textContent = checkNames[check.name] || check.name || "Check";
     const statusText = document.createElement("span");
     statusText.className = "check-status";
-    statusText.textContent = status;
+    statusText.textContent = genericStatusLabel(status);
     summary.append(icon, name, statusText);
 
     const evidence = document.createElement("p");
