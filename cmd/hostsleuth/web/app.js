@@ -472,12 +472,20 @@ function renderFilesystems(filesystems, dockerMode = false) {
 
 function renderAttention({ dockerMode, failedServices, exposedListeners, recentChanges }) {
   const strip = byId("attentionStrip");
+  const action = byId("attentionAction");
   strip.classList.remove("problem", "caution");
+
+  const setAction = (label, view) => {
+    if (!action) return;
+    action.textContent = label;
+    action.dataset.targetView = view;
+  };
 
   if (!dockerMode && failedServices > 0) {
     strip.classList.add("problem");
     text(byId("attentionTitle"), `${failedServices} failed ${failedServices === 1 ? "service" : "services"} need attention`);
     text(byId("attentionDetail"), "HostSleuth can use failed-service evidence during local reachability diagnosis.");
+    setAction("Inspect services", "diagnose");
     return;
   }
 
@@ -485,6 +493,7 @@ function renderAttention({ dockerMode, failedServices, exposedListeners, recentC
     strip.classList.add("caution");
     text(byId("attentionTitle"), `${recentChanges} meaningful ${recentChanges === 1 ? "change" : "changes"} in 24h while ${exposedListeners} sockets listen beyond loopback`);
     text(byId("attentionDetail"), "This is context, not an alarm. The timeline and reachability surface show exactly what HostSleuth observed.");
+    setAction("Review changes", "changes");
     return;
   }
 
@@ -492,17 +501,20 @@ function renderAttention({ dockerMode, failedServices, exposedListeners, recentC
     strip.classList.add("caution");
     text(byId("attentionTitle"), `${recentChanges} meaningful ${recentChanges === 1 ? "change" : "changes"} recorded in the last 24 hours`);
     text(byId("attentionDetail"), "Open Changes to see the newest differences first; routine Docker uptime churn is suppressed.");
+    setAction("Open changes", "changes");
     return;
   }
 
   if (exposedListeners > 0) {
     text(byId("attentionTitle"), `${exposedListeners} listening ${exposedListeners === 1 ? "socket is" : "sockets are"} bound beyond loopback`);
     text(byId("attentionDetail"), "That is not proof of remote reachability. Routing and firewall state still matter; diagnose any endpoint to test the path.");
+    setAction("Inspect listeners", "host");
     return;
   }
 
   text(byId("attentionTitle"), "No obvious local issue stands out in the current evidence");
   text(byId("attentionDetail"), "The latest snapshot has no failed native services, recent changes, or listeners beyond loopback that HostSleuth can currently see.");
+  setAction("Diagnose a target", "diagnose");
 }
 
 function renderHostIdentity(snapshot) {
@@ -808,6 +820,11 @@ document.querySelectorAll("[data-view]").forEach((button) => {
 
 document.querySelectorAll("[data-open-view]").forEach((button) => {
   button.addEventListener("click", () => showView(button.dataset.openView));
+});
+
+byId("attentionAction")?.addEventListener("click", () => {
+  const view = byId("attentionAction")?.dataset.targetView;
+  if (view) showView(view);
 });
 
 byId("diagnosisCopyEvidence")?.addEventListener("click", copyDiagnosisEvidence);
