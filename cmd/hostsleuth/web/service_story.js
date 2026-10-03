@@ -1,3 +1,5 @@
+let lastServiceStory = null;
+
 Object.assign(checkNames, {
   "service-runtime": "Systemd runtime",
   "service-journal": "Recent service journal",
@@ -47,6 +49,10 @@ function installServiceStoryUI() {
         </div>
         <span class="confidence-badge" id="serviceStoryConfidence"></span>
       </div>
+      <div class="result-actions" aria-label="Continue investigating this service">
+        <button class="secondary-button" id="serviceStoryDiagnose" type="button">Diagnose expected endpoint</button>
+        <button class="secondary-button" id="serviceStoryIncident" type="button">Inspect nearby changes</button>
+      </div>
       <div class="diagnosis-context-grid service-story-grid">
         <div>
           <p class="subsection-label">Evidence</p>
@@ -73,6 +79,13 @@ function installServiceStoryUI() {
     const target = byId("serviceStoryTarget").value.trim();
     if (unit) runServiceStory(unit, target);
   });
+  byId("serviceStoryDiagnose").addEventListener("click", () => {
+    if (lastServiceStory?.target) openDiagnosisForTarget(lastServiceStory.target);
+  });
+  byId("serviceStoryIncident").addEventListener("click", () => {
+    if (typeof openIncidentLensAt !== "function" || !lastServiceStory) return;
+    openIncidentLensAt(lastServiceStory.started_at || new Date(), lastServiceStory.target || "");
+  });
 
   loadServiceOptions();
 }
@@ -98,6 +111,7 @@ async function loadServiceOptions() {
 }
 
 function renderServiceStory(story) {
+  lastServiceStory = story;
   byId("serviceStoryError").classList.add("hidden");
   const result = byId("serviceStoryResult");
   result.classList.remove("hidden");
@@ -106,6 +120,8 @@ function renderServiceStory(story) {
   text(byId("serviceStorySubject"), [story.service || "", story.target || ""].filter(Boolean).join(" · "));
   text(byId("serviceStoryExplanation"), "HostSleuth correlated current systemd, listener/process ownership, endpoint evidence, and retained host changes without claiming nearby events caused the problem.");
   text(byId("serviceStoryConfidence"), `${story.confidence || "unknown"} confidence`);
+  byId("serviceStoryDiagnose").disabled = !story.target;
+  byId("serviceStoryIncident").disabled = typeof openIncidentLensAt !== "function";
 
   const checks = byId("serviceStoryChecks");
   checks.replaceChildren();
