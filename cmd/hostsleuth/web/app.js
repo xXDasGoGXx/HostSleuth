@@ -1,6 +1,7 @@
 const state = {
   snapshot: null,
   events: [],
+  about: null,
   lastDiagnosis: null,
 };
 
@@ -455,6 +456,25 @@ function renderAttention({ dockerMode, failedServices, exposedListeners, recentC
   text(byId("attentionDetail"), "The latest snapshot has no failed native services, recent changes, or listeners beyond loopback that HostSleuth can currently see.");
 }
 
+function renderHostIdentity(snapshot) {
+  if (!snapshot) return;
+  const host = snapshot.host || {};
+  const dockerMode = snapshot.mode === "docker";
+  text(byId("identityHost"), host.hostname || "Unknown");
+  text(byId("identityMode"), dockerMode ? "Docker" : "Native Linux");
+  text(byId("identityOS"), host.os || "Unknown");
+  text(byId("identityBootAge"), host.uptime || (host.boot_started_at ? `Since ${formatTime(host.boot_started_at)}` : "Unknown"));
+  text(byId("identitySnapshot"), relativeSnapshotTime(snapshot.captured_at).replace(/^Snapshot\s+/i, ""));
+  const version = state.about?.version || "";
+  const revision = state.about?.revision || "";
+  text(byId("identityVersion"), [version || "Unknown", revision ? revision.slice(0, 8) : ""].filter(Boolean).join(" · "));
+
+  const boot = byId("identityBootAge");
+  if (boot && host.boot_started_at) boot.title = `Boot started ${formatTime(host.boot_started_at)}`;
+  const snap = byId("identitySnapshot");
+  if (snap && snapshot.captured_at) snap.title = `Captured ${formatTime(snapshot.captured_at)}`;
+}
+
 function renderHost(snapshot) {
   const host = snapshot.host || {};
   const dockerMode = snapshot.mode === "docker";
@@ -470,6 +490,7 @@ function renderHost(snapshot) {
   text(byId("hostName"), host.hostname || "This host");
   text(byId("hostDetailName"), host.hostname || "Host details");
   text(byId("deploymentBadge"), dockerMode ? "Docker view" : "Native view");
+  renderHostIdentity(snapshot);
 
   const summaryParts = [host.os, host.kernel ? `kernel ${host.kernel}` : ""];
   text(byId("hostSummary"), summaryParts.filter(Boolean).join(" · ") || "Host snapshot loaded.");
@@ -672,9 +693,11 @@ async function loadAbout() {
     const response = await fetch("/api/about", { cache: "no-store" });
     if (!response.ok) return;
     const about = await response.json();
+    state.about = about;
     const version = about.version || "";
     const revision = about.revision || "";
     text(byId("appVersion"), [version, revision ? `(${revision})` : ""].filter(Boolean).join(" "));
+    if (state.snapshot) renderHostIdentity(state.snapshot);
   } catch (_) {
     // Build information is useful but must never block the dashboard.
   }
