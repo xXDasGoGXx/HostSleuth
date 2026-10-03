@@ -57,6 +57,53 @@
           </div>
         </section>
 
+        <section class="mission-launcher panel" aria-labelledby="missionLauncherTitle">
+          <div class="mission-heading">
+            <div>
+              <p class="eyebrow">START WITH THE PROBLEM</p>
+              <h2 id="missionLauncherTitle">What are you trying to figure out?</h2>
+              <p class="section-copy">Choose the question that matches the symptom. HostSleuth opens the existing evidence workflow; it does not guess a cause.</p>
+            </div>
+          </div>
+          <div class="mission-grid">
+            <button class="mission-card" type="button" data-open-view="diagnose">
+              <span class="mission-icon" aria-hidden="true">↗</span>
+              <strong>I can’t reach something</strong>
+              <span>Trace route, TCP, listener and local ownership evidence.</span>
+            </button>
+            <button class="mission-card" type="button" data-open-view="proxy">
+              <span class="mission-icon" aria-hidden="true">⇄</span>
+              <strong>A website or proxy is wrong</strong>
+              <span>Follow the public request to the expected upstream.</span>
+            </button>
+            <button class="mission-card" type="button" data-open-view="dns">
+              <span class="mission-icon" aria-hidden="true">DNS</span>
+              <strong>DNS looks wrong</strong>
+              <span>Compare the system resolver with resolvers you choose.</span>
+            </button>
+            <button class="mission-card" type="button" data-open-view="starttls">
+              <span class="mission-icon" aria-hidden="true">TLS</span>
+              <strong>Mail TLS is acting up</strong>
+              <span>Check SMTP, IMAP or POP3 upgrade and certificate evidence.</span>
+            </button>
+            <button class="mission-card" type="button" data-open-view="cert-rollout">
+              <span class="mission-icon" aria-hidden="true">◇</span>
+              <strong>A certificate changed</strong>
+              <span>Verify which endpoints are serving the expected identity.</span>
+            </button>
+            <button class="mission-card" type="button" data-open-view="permissions">
+              <span class="mission-icon" aria-hidden="true">/</span>
+              <strong>A service can’t use a path</strong>
+              <span>Explain service identity and the permission traversal chain.</span>
+            </button>
+          </div>
+          <div class="mission-links" aria-label="More troubleshooting starting points">
+            <button type="button" data-open-view="changes">What changed?</button>
+            <button type="button" data-open-view="reboot">What happened around a reboot?</button>
+            <button type="button" data-open-view="workbench">Open the Workbench</button>
+          </div>
+        </section>
+
         <div class="signal-grid" aria-label="Current host signals">
           <article class="signal-card">
             <span class="signal-label">Reachability surface</span>
