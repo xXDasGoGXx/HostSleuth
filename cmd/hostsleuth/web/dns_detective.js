@@ -1,4 +1,5 @@
 (() => {
+  let lastDNSDetective = null;
   const DNS_RESOLVER_STORAGE = "hostsleuth.dns.resolvers.v1";
 
   function dnsInit() {
@@ -82,8 +83,10 @@
         </section>
 
         <div class="dns-handoff-actions">
+          <button class="secondary-button" id="dnsCopyEvidence" type="button">Copy evidence summary</button>
           <button class="secondary-button" id="dnsToDiagnose" type="button">Diagnose endpoint</button>
           <button class="secondary-button" id="dnsToContract" type="button">Build expectation</button>
+          <span class="copy-status" id="dnsCopyStatus" aria-live="polite"></span>
         </div>
       </section>
 
@@ -100,6 +103,7 @@
 
     byId("dnsAddResolver").addEventListener("click", () => addDNSResolverRow(""));
     byId("dnsDetectiveForm").addEventListener("submit", runDNSDetective);
+    byId("dnsCopyEvidence").addEventListener("click", copyDNSEvidence);
     byId("dnsToDiagnose").addEventListener("click", () => dnsHandoff("diagnose"));
     byId("dnsToContract").addEventListener("click", () => dnsHandoff("contracts"));
 
@@ -195,6 +199,7 @@
   }
 
   function renderDNSDetective(data) {
+    lastDNSDetective = data;
     text(byId("dnsDetectiveConclusion"), data.conclusion || "DNS comparison complete");
     text(byId("dnsDetectiveTarget"), data.name || "");
 
@@ -337,6 +342,39 @@
       item.append(key, value);
       facts.append(item);
     });
+  }
+
+  function dnsEvidenceSummary(data) {
+    const lines = [
+      "HostSleuth DNS Detective",
+      `Name: ${data?.name || "unknown"}`,
+      `Verdict: ${String(data?.status || "partial").toUpperCase()}`,
+      `Conclusion: ${data?.conclusion || "unknown"}`,
+      "",
+    ];
+    (data?.resolvers || []).forEach((resolver) => {
+      lines.push(`${resolver.label || "resolver"} · ${resolver.server || "system"} · ${genericStatusLabel(resolver.status || "unknown")}`);
+      if (resolver.error) lines.push(`  Error: ${resolver.error}`);
+      (resolver.addresses || []).forEach((address) => lines.push(`  ${address.address || ""} · ${address.family || "IP"} · ${address.scope || "other"}`));
+      (resolver.ptr || []).forEach((ptr) => lines.push(`  PTR ${ptr}`));
+      if (resolver.cname) lines.push(`  CNAME ${resolver.cname}`);
+    });
+    if ((data?.differences || []).length) {
+      lines.push("", "Resolver differences:");
+      data.differences.forEach((difference) => lines.push(`- ${difference.resolver || "resolver"} · ${difference.kind || "answer"} · baseline ${difference.baseline || "—"} · observed ${difference.observed || "—"}`));
+    }
+    return lines.join("\n");
+  }
+
+  async function copyDNSEvidence() {
+    const status = byId("dnsCopyStatus");
+    try {
+      await copyBoundedText(dnsEvidenceSummary(lastDNSDetective));
+      text(status, "Copied.");
+    } catch (_) {
+      text(status, "Clipboard unavailable.");
+    }
+    window.setTimeout(() => text(status, ""), 2500);
   }
 
   function dnsHandoff(view) {
