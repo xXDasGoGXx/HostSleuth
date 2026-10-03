@@ -172,7 +172,7 @@ h2 { margin-bottom: 6px; font-size: 1.24rem; }
 .text-button { padding: 8px 0; background: transparent; color: var(--accent); font-weight: 750; }
 .text-button:hover { color: #c7f2ff; }
 
-.attention-strip { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; margin-top: 14px; padding: 17px 20px; }
+.attention-strip { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; margin-top: 14px; padding: 17px 20px; }
 .attention-icon { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #335171; border-radius: 50%; color: var(--accent); background: var(--accent-soft); font-size: 1.15rem; }
 .attention-strip .eyebrow { margin-bottom: 4px; }
 .attention-strip strong { display: block; font-size: .98rem; }
@@ -181,6 +181,7 @@ h2 { margin-bottom: 6px; font-size: 1.24rem; }
 .attention-strip.problem .attention-icon { color: var(--bad); border-color: rgba(255, 159, 159, .45); background: rgba(255, 159, 159, .08); }
 .attention-strip.caution { border-color: rgba(248, 213, 120, .34); }
 .attention-strip.caution .attention-icon { color: var(--warn); border-color: rgba(248, 213, 120, .40); background: rgba(248, 213, 120, .08); }
+.attention-action { white-space: nowrap; }
 
 .signal-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
 .signal-card { min-height: 118px; padding: 17px; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(180deg, #0c192a, #0a1524); }
@@ -328,7 +329,8 @@ footer { padding: 28px 4px 0; color: #61748c; font-size: .73rem; text-align: cen
   .hero, .section-panel, .diagnose-panel, .diagnosis-result { padding: 18px; }
   .hero-actions { width: 100%; }
   .hero-actions button { flex: 1 1 100%; }
-  .attention-strip { padding: 15px; }
+  .attention-strip { grid-template-columns: auto minmax(0, 1fr); padding: 15px; }
+  .attention-action { grid-column: 1 / -1; width: 100%; }
   .signal-grid { gap: 9px; }
   .signal-card { min-height: 108px; padding: 14px; }
   .input-row { grid-template-columns: 1fr; }
