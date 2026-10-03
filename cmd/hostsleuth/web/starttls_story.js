@@ -60,6 +60,11 @@
           <span class="confidence-badge starttls-verdict" id="startTLSStatus"></span>
         </div>
 
+        <div class="result-actions" aria-label="Continue investigating this mail endpoint">
+          <button class="secondary-button" id="startTLSToDiagnose" type="button">Diagnose endpoint</button>
+          <button class="secondary-button" id="startTLSToDNS" type="button">Check DNS views</button>
+        </div>
+
         <div class="starttls-flow" id="startTLSFlow"></div>
 
         <div class="starttls-evidence-grid">
@@ -110,6 +115,8 @@
     main.append(view);
 
     byId("startTLSStoryForm").addEventListener("submit", runStartTLSStory);
+    byId("startTLSToDiagnose").addEventListener("click", () => openDiagnosisForTarget(lastStartTLSStory?.target));
+    byId("startTLSToDNS").addEventListener("click", () => openDNSForTarget(lastStartTLSStory?.target));
     if (window.location.hash === "#starttls") showView("starttls");
   }
 
