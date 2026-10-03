@@ -165,6 +165,8 @@ h2 { margin-bottom: 6px; font-size: 1.24rem; }
 .section-panel, .diagnose-panel, .diagnosis-result { padding: 24px; margin-top: 14px; }
 .overview-grid .section-panel { margin-top: 0; }
 .section-heading, .diagnosis-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.result-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.copy-status { color: var(--muted); font-size: .76rem; }
 
 .surface-list { display: grid; gap: 8px; margin-top: 18px; }
 .surface-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 13px; border: 1px solid var(--line-soft); border-radius: 12px; background: #091524; }
