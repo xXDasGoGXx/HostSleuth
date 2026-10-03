@@ -1,84 +1,59 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-10-02
+Last updated: 2026-10-03
 
-## Stable / public / live / recovery state — v1.0.0
+## Stable / public / live / recovery state — v1.0.1
 
 Stable/public/live/recovery are aligned on:
 
-`v1.0.0` / `mjmalleo/hostsleuth:1.0.0`
+`v1.0.1` / `mjmalleo/hostsleuth:1.0.1`
 
 Exact published source:
 
-`27971e67ad7ea875d83f5925a83c1991b0eb2b0f`
+`9d95392882814e1c9f17643fe2664e6faaf15481`
 
 Release workflow:
 
-`35358798799` — success
+`37104898586` — success
 
 Published Docker tags:
 
-- `mjmalleo/hostsleuth:1.0.0`
+- `mjmalleo/hostsleuth:1.0.1`
 - `mjmalleo/hostsleuth:latest`
 
 Both resolve to verified OCI index:
 
-`sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`
+`sha256:ae747aac332d953eed7826f27ee67548d8295da2638cd553461804c4ebbefe36`
 
 Independent public verification passed for the exact GitHub tag, native amd64/arm64 binaries + SHA256SUMS, published binary version, and Docker Hub amd64/arm64 manifests.
 
+v1.0.1 packages the owner-approved feature-free Admin Console polish from PRs #77–#84. It changes presentation and workflow ergonomics only; no collector, API contract, persisted schema/state, Evidence Bundle format, Safe Action family, privilege, monitoring/polling architecture, or remediation behavior changed.
+
 Live Arcane acceptance confirmed:
 
-- `/api/about` = `v1.0.0`;
+- `/api/about` = `v1.0.1`;
 - snapshot schema 4 / Docker mode;
-- running container image `mjmalleo/hostsleuth:1.0.0`;
+- running container image `mjmalleo/hostsleuth:1.0.1`;
 - all 100 retained events, including pre-upgrade history;
-- v1 security headers and served-asset budgets;
-- live Admin Console deep-link/accessibility and narrow-viewport no-overflow acceptance;
-- M15 Docker permission boundary;
-- real M16 SMTP STARTTLS negotiation;
-- real M17 certificate-rollout MATCH;
-- LAN Action API HTTP 403;
-- loopback `service.restart` and `service.reload` capabilities both `enabled=false` / `available=false`.
+- host networking, host PID/UTS, read-only rootfs, `cap_drop: ALL`, and `no-new-privileges` preserved;
+- v1 security headers preserved;
+- v1.0.1 UI controls are present in the served Admin Console bundle;
+- live Diagnose to `192.168.2.181:8787` = reachable / high confidence;
+- real SMTP STARTTLS passed TCP, greeting, capability, upgrade, TLS, certificate validity, and trust; hostname failed only because the acceptance target intentionally used the numeric IP;
+- LAN Action API = HTTP 403;
+- loopback `service.restart` and `service.reload` capabilities both remain `enabled=false` / `available=false`.
 
-`OMV-Docker-Rebuild` PR #11 merged at:
+`OMV-Docker-Rebuild` recovery PR #109 merged at:
 
-`44d6a30e580e2b333841f14eade2e10cca4b5ba5`
+`b2a88aeeec72342fc79fd29b574c541523b3b859`
 
-Recovery `main` now pins `mjmalleo/hostsleuth:1.0.0`, with `CURRENT-SETUP.md` recording the same live acceptance.
+Recovery `main` now pins `mjmalleo/hostsleuth:1.0.1`, with its current setup and operating snapshot recording the same live acceptance.
 
-Publication record: `docs/history/V1.0.0-PUBLICATION.md`.
+Publication record: `docs/history/V1.0.1-PUBLICATION.md`.
 
-Production/recovery record: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`.
+Production/recovery record: `docs/history/V1.0.1-PRODUCTION-ALIGNMENT.md`.
 
-The v1.0.0 release/production/recovery sequence is complete. No additional feature milestone or Safe Action family is automatically approved.
-
-## Unreleased post-v1 UI/UX polish on `main` — 2026-10-02
-
-`main` intentionally contains owner-approved, feature-free Admin Console polish beyond the exact v1.0.0 release source.
-
-Current accepted `main` after the polish train:
-
-`b443a2a4ea484544c670212b29e169c43b7d5c38`
-
-This source is **not** a new stable release and has **not** been deployed to production or copied into recovery. Stable/public/live/recovery remain v1.0.0 exactly as recorded above.
-
-Merged bounded missions:
-
-- PR #77 — problem-first Overview launcher and normal URL support in Quick Target;
-- PR #78 — anchored Incident Lens and Reboot Story timelines;
-- PR #79 — bounded copy summaries for Diagnose, Incident Lens, and Reboot Story;
-- PR #80 — consistent generic PASS / WARNING / FAILED / UNKNOWN presentation and first-attention wording;
-- PR #81 — compact responsive host identity/current-state rail;
-- PR #82 — continue-investigating handoffs between existing deterministic workflows;
-- PR #83 — actionable Overview attention strip using only already-computed evidence;
-- PR #84 — bounded copy-summary coverage for DNS, STARTTLS, Permissions, Expected Endpoint Contracts, and Certificate Rollout.
-
-Every mission used the existing repository CI once as its acceptance gate and passed the complete six-job matrix before merge.
-
-The entire polish train is front-end-only in product behavior: no collector, API, persisted schema/state, Evidence Bundle format, privilege, Safe Action family, monitoring/polling architecture, production deployment, recovery definition, or release artifact changed.
-
-The next owner-gated decision is whether/when to package this accepted `main` polish into a future release. No new feature milestone or privileged action is implied by these merges.
+The v1.0.1 publication/production/recovery sequence is complete. No additional feature milestone or Safe Action family is automatically approved.
 
 ## Docker Hub storefront metadata
 
@@ -92,7 +67,7 @@ During the 2026-09-19 reconciliation, Docker Hub's public short description was 
 
 Automatic metadata synchronization is **not an active commissioning requirement**. The workflow is manual-only and retained as optional future automation. If the owner later wants automatic provider-side metadata publishing, commission a dedicated `DOCKERHUB_METADATA_TOKEN` at that time. `DOCKERHUB_TOKEN` remains dedicated to image publication and must not be broadened or reused.
 
-HostSleuth v1.0.0 source/release/live/recovery alignment is complete independently of that optional future automation.
+HostSleuth v1.0.1 source/release/live/recovery alignment is complete independently of that optional future automation.
 
 
 ## v1.0 Readiness / Hardening — COMPLETE / PUBLISHED IN v1.0.0
