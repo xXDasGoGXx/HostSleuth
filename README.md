@@ -53,7 +53,7 @@ mjmalleo/hostsleuth
 
 The Docker Hub storefront copy is version-controlled under `docker/`. The public short description is aligned with the Git-tracked source. A manual-only metadata-sync workflow is retained as optional future automation; it is not required for image publication or normal operation.
 
-`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `1.0.0`.
+`latest` represents the newest stable release. Stable releases also receive an explicit numeric tag such as `1.0.1`.
 
 ### Docker Compose
 
@@ -69,7 +69,7 @@ docker compose up -d
 To pin the current stable release instead of `latest`:
 
 ```bash
-HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:1.0.0 docker compose up -d
+HOSTSLEUTH_IMAGE=mjmalleo/hostsleuth:1.0.1 docker compose up -d
 ```
 
 ### Docker run
@@ -510,7 +510,7 @@ hostsleuth version
 ## Install a specific release
 
 ```bash
-sudo HOSTSLEUTH_VERSION=v1.0.0 ./scripts/install.sh
+sudo HOSTSLEUTH_VERSION=v1.0.1 ./scripts/install.sh
 ```
 
 The installer fetches both the selected native binary and that release's `SHA256SUMS`. Installation stops before replacing `/usr/local/bin/hostsleuth` if the expected architecture checksum is missing or does not verify.
@@ -572,19 +572,19 @@ HostSleuth does **not** automatically restart or reload services, modify firewal
 
 M0 repository foundation, M1 deployable single-host MVP, M2 deeper deterministic diagnosis, M3 Product Experience, M3.4 Public Container Distribution, M4 package-change timeline, M5 configuration fingerprinting, M6 Certificate Story / TLS Detective, M7 Service Story, M8 Incident Lens, M9 HostSleuth Workbench, M10 Reboot Story, M11 Optional Safe Actions, and the Redacted Evidence Bundle are complete.
 
-Stable `v1.0.0` is the current published native/Docker release, published from exact source `27971e67ad7ea875d83f5925a83c1991b0eb2b0f` and independently verified.
+Stable `v1.0.1` is the current published native/Docker release, published on 2026-10-03 from exact source `9d95392882814e1c9f17643fe2664e6faaf15481` and independently verified. It packages feature-free Admin Console polish (PRs #77–#84) on top of v1.0.0; no collector, API contract, persisted schema, Evidence Bundle format, Safe Action or privilege changed.
 
-Docker `mjmalleo/hostsleuth:1.0.0` and `latest` resolve to OCI index `sha256:aff5482b4c81bd11261afae3d1793dd0a180b9dbf0ddcbc54714c33b99074917`.
+Docker `mjmalleo/hostsleuth:1.0.1` and `latest` resolve to OCI index `sha256:ae747aac332d953eed7826f27ee67548d8295da2638cd553461804c4ebbefe36`.
 
-The live OMV Arcane/Docker deployment and `OMV-Docker-Rebuild` recovery definition are aligned on `mjmalleo/hostsleuth:1.0.0`. Live acceptance confirmed v1.0.0, schema 4 / Docker mode, the running 1.0.0 image, all 100 retained events, v1 security headers and asset budgets, live Admin Console accessibility/responsive behavior, real M16 STARTTLS and M17 certificate-rollout execution, M15's Docker boundary, LAN Action API rejection, and both fixed native actions disabled/unavailable in Docker mode.
+The live OMV Arcane/Docker deployment and `OMV-Docker-Rebuild` recovery definition are aligned on `mjmalleo/hostsleuth:1.0.1` (re-confirmed 2026-10-14: the running container digest equals the published index, and the live compose file is byte-identical to recovery `main`). See `docs/history/V1.0.1-PRODUCTION-ALIGNMENT.md` for the live acceptance record.
 
 M12 Expected Endpoint Contracts, M13 DNS Detective + Admin Console v1, and M14 Reverse Proxy / Upstream Story + Admin Console v2 remain published and live from earlier releases.
 
-M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certificate Rollout Verification, and M18 Safe Actions II remain included in published stable v1.0.0.
+M15 Deployment / Permissions Story, M16 STARTTLS / Mail Service Story, M17 Certificate Rollout Verification, and M18 Safe Actions II remain included in published stable v1.0.x.
 
 The owner-approved fixed native `service.reload` action remains native-only and independently allowlisted. Docker mode exposes neither native systemd action.
 
-The feature-free **v1.0 Readiness / Hardening** cycle is complete, published, live, and recovery-aligned in v1.0.0. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers.
+The feature-free **v1.0 Readiness / Hardening** cycle is complete, published in v1.0.0 and carried forward unchanged in live v1.0.1. Accepted hardening covers persisted-state durability, real forward/rollback state compatibility, Admin Console keyboard/accessibility and responsive-browser acceptance, served-asset budgets, native release SHA-256 verification, disposable real native-install acceptance, and restrictive browser security headers.
 
 See [`docs/design/V1.0-READINESS.md`](docs/design/V1.0-READINESS.md) for the readiness gates, [`docs/design/V1.0-RELEASE-CHECKLIST.md`](docs/design/V1.0-RELEASE-CHECKLIST.md) for publication/rollback ordering, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for product guardrails.
 
@@ -608,6 +608,8 @@ It does not store configuration file contents as part of M5 fingerprinting, M6 d
 - `docs/design/V1.0-READINESS.md` — feature-free v1.0 hardening gates and release-readiness contract.
 - `docs/design/V1.0-RELEASE-CHECKLIST.md` — exact v1.0 publication, live acceptance, recovery-alignment, and rollback checklist.
 - `docs/history/V1.0-READINESS.md` — v1.0 technical readiness acceptance closeout.
+- `docs/history/V1.0.1-PUBLICATION.md` — v1.0.1 publication and independent verification record.
+- `docs/history/V1.0.1-PRODUCTION-ALIGNMENT.md` — v1.0.1 live/recovery rollout and acceptance record.
 - `docs/history/V1.0.0-PUBLICATION.md` — v1.0.0 publication and independent verification record.
 - `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md` — v1.0.0 live/recovery rollout and acceptance record.
 - `docs/history/DEVELOPMENT-HISTORY.md` — milestone and validation history.
