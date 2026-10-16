@@ -43,6 +43,7 @@ function installRebootStoryUI() {
 
       <div class="result-actions">
         <button class="secondary-button" id="rebootCopyEvidence" type="button">Copy evidence summary</button>
+        <button class="secondary-button share-button" id="rebootCopyEvidenceShare" type="button">Share redacted</button>
         <span class="copy-status" id="rebootCopyStatus" aria-live="polite"></span>
       </div>
 
@@ -87,6 +88,7 @@ function installRebootStoryUI() {
   main.append(section);
   byId("rebootStoryButton").addEventListener("click", runRebootStory);
   byId("rebootCopyEvidence").addEventListener("click", copyRebootEvidence);
+  byId("rebootCopyEvidenceShare").addEventListener("click", () => shareRedacted(() => rebootEvidenceSummary(lastRebootStory), "reboot"));
   // Opening the view answers the question; the button stays for a refresh.
   document.addEventListener("hostsleuth:view", (event) => {
     const button = byId("rebootStoryButton");

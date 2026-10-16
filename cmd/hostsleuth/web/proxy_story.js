@@ -76,6 +76,7 @@
 
         <div class="proxy-result-actions">
           <button class="secondary-button" id="proxyCopySummary" type="button">Copy evidence summary</button>
+          <button class="secondary-button share-button" id="proxyCopySummaryShare" type="button">Share redacted</button>
           <button class="secondary-button" id="proxyDiagnosePublic" type="button">Diagnose public endpoint</button>
           <button class="secondary-button" id="proxyDiagnoseUpstream" type="button">Diagnose upstream</button>
           <button class="secondary-button" id="proxyDNSPublic" type="button">DNS public host</button>
@@ -93,6 +94,7 @@
 
     byId("proxyStoryForm").addEventListener("submit", runProxyStory);
     byId("proxyCopySummary").addEventListener("click", copyProxySummary);
+    byId("proxyCopySummaryShare").addEventListener("click", () => shareRedacted(() => proxyEvidenceSummary(), "proxy"));
     byId("proxyDiagnosePublic").addEventListener("click", () => proxyDiagnose("public_target"));
     byId("proxyDiagnoseUpstream").addEventListener("click", () => proxyDiagnose("upstream_target"));
     byId("proxyDNSPublic").addEventListener("click", proxyDNSPublic);
@@ -289,8 +291,8 @@
     } catch (_) {}
   }
 
-  async function copyProxySummary() {
-    if (!lastProxyStory) return;
+  function proxyEvidenceSummary() {
+    if (!lastProxyStory) return "";
     const lines = [
       "HostSleuth Reverse Proxy / Upstream Story",
       `Public: ${lastProxyStory.public_url || "—"}`,
@@ -302,7 +304,12 @@
       lines.push(`[${genericStatusLabel(stage.status)}] ${stage.title}: ${stage.summary || ""}`);
       (stage.evidence || []).forEach((evidence) => lines.push(`  - ${evidence}`));
     });
-    const payload = lines.join("\n").slice(0, 12000);
+    return lines.join("\n");
+  }
+
+  async function copyProxySummary() {
+    if (!lastProxyStory) return;
+    const payload = proxyEvidenceSummary().slice(0, 12000);
     const status = byId("proxyCopyStatus");
     try {
       await writeProxyClipboard(payload);

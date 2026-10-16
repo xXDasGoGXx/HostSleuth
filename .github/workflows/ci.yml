@@ -42,6 +42,8 @@ jobs:
           node --check cmd/hostsleuth/web/actions.js
           node --check cmd/hostsleuth/web/admin_console.js
           node --check cmd/hostsleuth/web/admin_console_v2.js
+          node --check cmd/hostsleuth/web/share.js
+          node --check cmd/hostsleuth/web/container_story.js
           cat \
             cmd/hostsleuth/web/app.js \
             cmd/hostsleuth/web/service_story.js \
@@ -57,6 +59,8 @@ jobs:
             cmd/hostsleuth/web/actions.js \
             cmd/hostsleuth/web/admin_console.js \
             cmd/hostsleuth/web/admin_console_v2.js \
+            cmd/hostsleuth/web/share.js \
+            cmd/hostsleuth/web/container_story.js \
             > /tmp/hostsleuth-served-app.js
           node --check /tmp/hostsleuth-served-app.js
       - name: Build
@@ -423,6 +427,50 @@ jobs:
           assert reload.get('available') is False, reload
           assert reload.get('allowed_targets') in (None, []), reload
           PY
+      - name: Verify Container Story against real Docker evidence
+        run: |
+          set -eu
+          # A container that crashes every ~20s with exit code 3. HostSleuth
+          # must report each crash with Docker's reason, from its
+          # field-limited inspect and die/oom event log.
+          docker run -d --name hs-crashloop --restart always alpine:3.20 sh -c 'sleep 20; exit 3'
+          python3 - <<'PY'
+          import json, time, urllib.request
+          def get(path):
+              with urllib.request.urlopen("http://127.0.0.1:8787" + path, timeout=20) as r:
+                  return json.load(r)
+          deadline = time.time() + 240
+          while True:
+              events = get("/api/events")
+              crashes = [e for e in events if e["summary"].startswith("container restarted: hs-crashloop (crashed, exit code 3)")]
+              if crashes:
+                  break
+              if time.time() > deadline:
+                  raise SystemExit("no crash restart recorded: %r" % [e["summary"] for e in events][-20:])
+              time.sleep(10)
+          print("recorded:", crashes[0]["summary"])
+          snap = get("/api/snapshot")
+          me = [c for c in snap["containers"] if c["name"] == "hostsleuth"][0]
+          assert me.get("image_id", "").startswith("sha256:"), me
+          assert me.get("started_at"), me
+          for c in snap["containers"]:
+              for forbidden in ("env", "Env", "cmd", "mounts", "host_config"):
+                  assert forbidden not in c, (forbidden, c)
+          story = get("/api/container-story?name=hs-crashloop")
+          assert story["found"] and story["summary"]["crashes_7d"] >= 1, story
+          listing = get("/api/containers")
+          assert listing["containers"][0]["name"] == "hs-crashloop", listing["containers"][:2]
+          print("container story:", story["conclusion"])
+          PY
+          docker rm -f hs-crashloop
+      - name: Verify Share redacted endpoint
+        run: |
+          set -eu
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8787/api/share)" = 405
+          host="$(hostname)"
+          out="$(printf 'Diagnosis for %s:8787\nhostsleuth restarted\n' "$host" | curl -fsS -X POST --data-binary @- http://127.0.0.1:8787/api/share)"
+          printf '%s\n' "$out"
+          printf '%s' "$out" | python3 -c "import json,sys; t=json.load(sys.stdin)['text']; assert '$host' not in t and 'hostsleuth restarted' not in t and ':8787' in t, t"
       - name: Show logs on failure
         if: failure()
         run: docker compose logs hostsleuth

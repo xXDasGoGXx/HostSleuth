@@ -45,6 +45,7 @@ function installIncidentLensUI() {
       </div>
       <div class="result-actions">
         <button class="secondary-button" id="incidentCopyEvidence" type="button">Copy evidence summary</button>
+        <button class="secondary-button share-button" id="incidentCopyEvidenceShare" type="button">Share redacted</button>
         <span class="copy-status" id="incidentCopyStatus" aria-live="polite"></span>
       </div>
       <div class="diagnosis-context-grid">
@@ -74,6 +75,7 @@ function installIncidentLensUI() {
     runIncidentLens(byId("incidentAnchor").value, byId("incidentTarget").value.trim());
   });
   byId("incidentCopyEvidence").addEventListener("click", copyIncidentEvidence);
+  byId("incidentCopyEvidenceShare").addEventListener("click", () => shareRedacted(() => incidentEvidenceSummary(lastIncidentLens), "incident"));
 }
 
 function openIncidentLensAt(value, target = "") {

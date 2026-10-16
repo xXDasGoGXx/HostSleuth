@@ -77,6 +77,7 @@
         <div class="contract-checks" id="contractChecks"></div>
         <div class="contract-result-actions">
           <button class="secondary-button" id="contractCopyEvidence" type="button">Copy evidence summary</button>
+          <button class="secondary-button share-button" id="contractCopyEvidenceShare" type="button">Share redacted</button>
           <button class="secondary-button" id="contractDiagnose" type="button">Open full diagnosis</button>
           <span class="copy-status" id="contractCopyStatus" aria-live="polite"></span>
         </div>
@@ -138,6 +139,7 @@
     });
 
     byId("contractCopyEvidence").addEventListener("click", copyContractEvidence);
+    byId("contractCopyEvidenceShare").addEventListener("click", () => shareRedacted(() => contractEvidenceSummary(lastContractEvaluation), "expectation"));
 
     byId("contractDiagnose").addEventListener("click", () => {
       const target = byId("contractTarget").value.trim();

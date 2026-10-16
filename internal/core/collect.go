@@ -216,6 +216,7 @@ func collectContainers(ctx context.Context) []ContainerInfo {
 		}
 		out = append(out, c)
 	}
+	enrichContainers(ctx, out)
 	return out
 }
 

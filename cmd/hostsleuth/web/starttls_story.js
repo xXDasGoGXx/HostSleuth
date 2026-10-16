@@ -62,6 +62,7 @@
 
         <div class="result-actions" aria-label="Continue investigating this mail endpoint">
           <button class="secondary-button" id="startTLSCopyEvidence" type="button">Copy evidence summary</button>
+          <button class="secondary-button share-button" id="startTLSCopyEvidenceShare" type="button">Share redacted</button>
           <button class="secondary-button" id="startTLSToDiagnose" type="button">Diagnose endpoint</button>
           <button class="secondary-button" id="startTLSToDNS" type="button">Check DNS views</button>
           <span class="copy-status" id="startTLSCopyStatus" aria-live="polite"></span>
@@ -118,6 +119,7 @@
 
     byId("startTLSStoryForm").addEventListener("submit", runStartTLSStory);
     byId("startTLSCopyEvidence").addEventListener("click", copyStartTLSEvidence);
+    byId("startTLSCopyEvidenceShare").addEventListener("click", () => shareRedacted(() => startTLSEvidenceSummary(lastStartTLSStory), "starttls"));
     byId("startTLSToDiagnose").addEventListener("click", () => openDiagnosisForTarget(lastStartTLSStory?.target));
     byId("startTLSToDNS").addEventListener("click", () => openDNSForTarget(lastStartTLSStory?.target));
     if (window.location.hash === "#starttls") showView("starttls");

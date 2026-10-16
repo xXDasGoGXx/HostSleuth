@@ -57,6 +57,7 @@
 
         <div class="result-actions">
           <button class="secondary-button" id="permissionCopyEvidence" type="button">Copy evidence summary</button>
+          <button class="secondary-button share-button" id="permissionCopyEvidenceShare" type="button">Share redacted</button>
           <span class="copy-status" id="permissionCopyStatus" aria-live="polite"></span>
         </div>
 
@@ -105,6 +106,7 @@
 
     byId("permissionStoryForm").addEventListener("submit", runPermissionStory);
     byId("permissionCopyEvidence").addEventListener("click", copyPermissionEvidence);
+    byId("permissionCopyEvidenceShare").addEventListener("click", () => shareRedacted(() => permissionEvidenceSummary(lastPermissionStory), "permissions"));
     byId("permissionSearch").addEventListener("input", () => renderPermissionEvidence(lastPermissionStory));
     if (window.location.hash === "#permissions") showView("permissions");
   }

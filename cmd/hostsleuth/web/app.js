@@ -803,7 +803,7 @@ function renderAttention({ dockerMode, failedServices, exposedListeners, recentC
     const shown = names.slice(0, 3).join(", ") + (names.length > 3 ? ` and ${names.length - 3} more` : "");
     text(byId("attentionTitle"), `${troubledContainers.length} ${troubledContainers.length === 1 ? "container is" : "containers are"} not healthy: ${shown}`);
     text(byId("attentionDetail"), "Docker reports this right now. Changes shows when it started; Host evidence lists every container with problems first.");
-    setAction("Inspect containers", "host");
+    setAction("Inspect containers", "containers");
     return;
   }
 
@@ -1109,6 +1109,7 @@ async function loadDashboard() {
     renderHost(state.snapshot);
     renderEvents(byId("overviewEvents"), state.events, 5);
     renderChangesView();
+    document.dispatchEvent(new CustomEvent("hostsleuth:snapshot"));
   } catch (error) {
     snapshotState.classList.add("bad");
     snapshotState.lastElementChild.textContent = "Could not load host snapshot";
@@ -1157,6 +1158,7 @@ byId("attentionAction")?.addEventListener("click", () => {
 });
 
 byId("diagnosisCopyEvidence")?.addEventListener("click", copyDiagnosisEvidence);
+byId("diagnosisCopyEvidenceShare")?.addEventListener("click", () => shareRedacted(() => diagnosisEvidenceSummary(state.lastDiagnosis), "diagnosis"));
 byId("diagnosisToDNS")?.addEventListener("click", () => openDNSForTarget(state.lastDiagnosis?.target));
 byId("diagnosisToContract")?.addEventListener("click", () => openContractForTarget(state.lastDiagnosis?.target));
 

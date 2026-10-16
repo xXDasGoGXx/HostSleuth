@@ -50,6 +50,10 @@ func (r *evidenceRedactor) snapshot(in Snapshot) Snapshot {
 		out.Containers[i].Image = r.image(container.Image)
 		out.Containers[i].Status = r.freeform(container.Status)
 		out.Containers[i].Ports = r.freeform(container.Ports)
+		// Image digests are build fingerprints; versions and exit evidence
+		// are the useful, non-identifying part and are kept.
+		out.Containers[i].ImageID = r.alias("id", container.ImageID)
+		out.Containers[i].ImageVersion = r.freeform(container.ImageVersion)
 		networks := splitList(container.Networks)
 		for j, network := range networks {
 			if network != "bridge" && network != "host" && network != "none" {

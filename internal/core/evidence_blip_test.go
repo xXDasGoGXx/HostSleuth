@@ -72,3 +72,37 @@ func TestEvidenceBundleRedactsCollapsedListenerBlipSummaries(t *testing.T) {
 		t.Error("collapsed summary missing from bundle")
 	}
 }
+
+func TestEvidenceBundleRedactsContainerUpdateAndRestartEvents(t *testing.T) {
+	store := Store{Dir: t.TempDir()}
+	now := time.Date(2026, 10, 15, 22, 0, 0, 0, time.UTC)
+	if err := store.SaveSnapshot(Snapshot{
+		SchemaVersion: snapshotSchemaVersion, CapturedAt: now, Mode: dockerDeploymentMode,
+		Host: HostInfo{Hostname: "nas.internal.example"},
+		Containers: []ContainerInfo{{ID: "abcdef123456", Name: "family-photos", Image: "registry.internal.example/team/family-photos:latest",
+			Status: "Up 5 minutes", ImageID: "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", ImageVersion: "2.4.1", StartedAt: "2026-10-15T21:55:00Z"}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.AppendEvents([]Event{
+		{At: now.Add(-time.Hour), Category: "container", Severity: "info", Summary: "container updated: family-photos: registry.internal.example/team/family-photos:latest, version 2.4.0 → 2.4.1"},
+		{At: now.Add(-5 * time.Minute), Category: "container", Severity: "warning", Summary: "container restarted: family-photos (killed for running out of memory)"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	bundle, err := buildEvidenceBundle(store, "v-test", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := string(evidenceFileBytes(bundle.Files))
+	for _, secret := range []string{"family-photos", "registry.internal.example", "nas.internal.example", "0123456789abcdef"} {
+		if strings.Contains(out, secret) {
+			t.Errorf("evidence bundle leaked %q", secret)
+		}
+	}
+	for _, kept := range []string{"version 2.4.0 → 2.4.1", "killed for running out of memory", "2.4.1"} {
+		if !strings.Contains(out, kept) {
+			t.Errorf("useful evidence %q missing from bundle", kept)
+		}
+	}
+}

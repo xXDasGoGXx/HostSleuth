@@ -69,6 +69,28 @@ type ContainerInfo struct {
 	Status   string `json:"status"`
 	Ports    string `json:"ports,omitempty"`
 	Networks string `json:"networks,omitempty"`
+
+	// Runtime evidence from a field-limited `docker inspect`. Empty when
+	// Docker did not report it (or an older snapshot predates it); change
+	// detection only compares values present on both sides.
+	ImageID             string `json:"image_id,omitempty"`
+	ImageVersion        string `json:"image_version,omitempty"`
+	RestartCount        int    `json:"restart_count,omitempty"`
+	OOMKilled           bool   `json:"oom_killed,omitempty"`
+	ExitCode            int    `json:"exit_code,omitempty"`
+	StartedAt           string `json:"started_at,omitempty"`
+	FinishedAt          string `json:"finished_at,omitempty"`
+	HealthFailingStreak int    `json:"health_failing_streak,omitempty"`
+
+	// Exits Docker reported in the bounded window before this snapshot
+	// (`docker events`, die/oom only), oldest first.
+	RecentExits []ContainerExit `json:"recent_exits,omitempty"`
+}
+
+type ContainerExit struct {
+	At        time.Time `json:"at"`
+	ExitCode  int       `json:"exit_code"`
+	OOMKilled bool      `json:"oom_killed,omitempty"`
 }
 
 type PackageChange struct {
