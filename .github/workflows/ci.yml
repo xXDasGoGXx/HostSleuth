@@ -448,12 +448,18 @@ jobs:
                    "--filter", "event=die", "--format", "{{.TimeNano}} {{.Action}} {{.Actor.Attributes.name}} {{index .Actor.Attributes \"exitCode\"}}"],
                   capture_output=True, text=True, timeout=30)
               logs = subprocess.run(["docker", "logs", "--tail", "20", "hostsleuth"], capture_output=True, text=True, timeout=30)
+              import re
+              src = open("internal/core/container_inspect.go").read()
+              fmt = re.search(r"const dockerInspectFormat = `([^`]*)`", src).group(1)
+              ids = subprocess.run(["docker", "ps", "-aq"], capture_output=True, text=True).stdout.split()
+              inspect = subprocess.run(["docker", "inspect", "--format", fmt] + ids, capture_output=True, text=True, timeout=30)
               detail = "\n".join([
                   message,
                   "snapshot record: " + json.dumps(record)[:1500],
                   "recent events: " + json.dumps([e["summary"] for e in get("/api/events")][-12:])[:1500],
                   "runner docker events: " + (docker_view.stdout + docker_view.stderr)[-800:],
-                  "hostsleuth logs: " + (logs.stdout + logs.stderr)[-800:],
+                  "hostsleuth logs: " + (logs.stdout + logs.stderr)[-400:],
+                  "runner inspect rc=%d: %s" % (inspect.returncode, (inspect.stdout[:600] + " | " + inspect.stderr[-600:])),
               ])
               print(detail)
               print("::error title=Container Story check::" + detail.replace("%", "%25").replace("\r", "").replace("\n", "%0A"))
