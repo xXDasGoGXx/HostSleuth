@@ -1,8 +1,16 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-10-16 (v1.3.0)
+Last updated: 2026-10-16 (v1.4.0)
 
-## Stable / public / live / recovery state — v1.3.0
+## Stable / public / live / recovery state — v1.4.0
+
+Stable/public/live/recovery are aligned on `v1.4.0` / `mjmalleo/hostsleuth:1.4.0`, published from exact source `b8c3218b3502e568b2b3ab354808c30441a69d52` (PR #95) by release workflow `38933415430`.
+
+v1.4.0 (record: `docs/history/V1.4.0-REPLAY.md`): Replay is the home screen — containers drawn as a blueprint by compose project with bind-class connectors, a 7-day tape that rewinds the drawing, and one plain sentence per moment from fixed rules. New `GET /api/replay`, the `com.docker.compose.project` label in the field-limited inspect, self-hosted B612 fonts.
+
+Verified live 2026-10-16: assets match `SHA256SUMS`; amd64 reports `v1.4.0 (b8c3218b3502)`; OMV compose sync pulled `mjmalleo/hostsleuth:1.4.0` and came up healthy (backup `compose-backups/hostsleuth/20261016T164025Z.yaml`); live compose byte-identical to GitHub; `/api/about` = `v1.4.0` / `b8c3218b3502`; `/api/replay` on the real host: 25 containers in 9 compose stacks, 29 events, no LAN addresses; fonts served as `font/woff`; LAN Action API 403. Replay narrated the real week including the reboot onto 7.0.14-24-pve, the qbittorrent-vpn autoheal restart, and backblaze-snapshotter recovering "after 18 hours" once the owner applied the Arcane classification fix. Recovery: `OMV-Docker-Rebuild` PR #142 merged at `2a06ca4ee92d4b2d7f9c0722945f784490dacef9`; The Bridge synced to it.
+
+## Previous release — v1.3.0
 
 Stable/public/live/recovery are aligned on `v1.3.0` / `mjmalleo/hostsleuth:1.3.0`, published from exact source `c9dc7bc420c6a712608f43f717c1ce435b10178c` (PR #93) by release workflow `38849643515`.
 
