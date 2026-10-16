@@ -306,6 +306,7 @@ func runServe(args []string) {
 	appCSS, appJS = appendAdminConsoleAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleV2Assets(appCSS, appJS)
 	appCSS, appJS = appendContainerStoryAssets(appCSS, appJS)
+	appCSS, appJS = appendReplayAssets(appCSS, appJS)
 	appCSS, appJS = appendConsoleV3Assets(appCSS, appJS)
 
 	mux := http.NewServeMux()
@@ -394,6 +395,7 @@ func runServe(args []string) {
 	registerRebootStoryAPI(mux, store)
 	registerContainerStoryAPI(mux, store)
 	registerShareAPI(mux, store)
+	registerReplayAPI(mux, store)
 	registerEndpointContractAPI(mux, store)
 	registerDNSDetectiveAPI(mux)
 	registerProxyStoryAPI(mux, store)

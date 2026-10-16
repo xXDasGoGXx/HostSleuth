@@ -54,6 +54,7 @@ func (r *evidenceRedactor) snapshot(in Snapshot) Snapshot {
 		// are the useful, non-identifying part and are kept.
 		out.Containers[i].ImageID = r.alias("id", container.ImageID)
 		out.Containers[i].ImageVersion = r.freeform(container.ImageVersion)
+		out.Containers[i].ComposeProject = r.alias("network", container.ComposeProject)
 		networks := splitList(container.Networks)
 		for j, network := range networks {
 			if network != "bridge" && network != "host" && network != "none" {

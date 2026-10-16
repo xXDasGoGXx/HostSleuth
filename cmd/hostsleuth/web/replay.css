@@ -1,0 +1,136 @@
+/* Replay: the host drawn as an engineering sheet (cyanotype), rewindable
+   through its last week. Scoped to #view-replay so other views are unchanged. */
+@font-face { font-family: "B612"; src: url("/assets/fonts/b612-regular.woff") format("woff"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "B612"; src: url("/assets/fonts/b612-bold.woff") format("woff"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "B612 Mono"; src: url("/assets/fonts/b612mono-regular.woff") format("woff"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "B612 Mono"; src: url("/assets/fonts/b612mono-bold.woff") format("woff"); font-weight: 700; font-display: swap; }
+
+#view-replay {
+  --rp-paper: #15345f;
+  --rp-paper-2: #112b50;
+  --rp-ink: #eaf1ff;
+  --rp-ink-2: rgba(234, 241, 255, .68);
+  --rp-ink-3: rgba(234, 241, 255, .3);
+  --rp-grid: rgba(234, 241, 255, .065);
+  --rp-fault: #ff8c72;
+  --rp-fault-soft: rgba(255, 140, 114, .2);
+  --rp-rev: #ffd36b;
+  --rp-rev-soft: rgba(255, 211, 107, .16);
+  --rp-ui: "B612", "Segoe UI", system-ui, sans-serif;
+  --rp-mono: "B612 Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+#view-replay .rp-sheet {
+  display: grid; gap: 14px; padding: 18px 20px 22px;
+  background: var(--rp-paper); color: var(--rp-ink);
+  border: 1px solid var(--rp-ink-3); border-radius: 14px;
+  font-family: var(--rp-ui); font-size: 15px; line-height: 1.5;
+}
+#view-replay .rp-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+#view-replay .rp-mark { font-weight: 700; letter-spacing: .02em; }
+#view-replay .rp-mark span { color: var(--rp-ink-2); font-weight: 400; }
+#view-replay .rp-note { color: var(--rp-ink-2); font-size: .82rem; }
+#view-replay .rp-narration { display: grid; gap: 4px; min-height: 5.2em; }
+#view-replay .rp-when { font-variant-numeric: tabular-nums; font-size: .9rem; color: var(--rp-ink-2); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+#view-replay .rp-live { display: inline-flex; align-items: center; gap: 6px; padding: 1px 9px; border: 1px solid var(--rp-ink-3); border-radius: 999px; font-family: var(--rp-ui); font-size: .78rem; }
+#view-replay .rp-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--rp-ink-3); }
+#view-replay .rp-live.on::before { background: var(--rp-fault); box-shadow: 0 0 0 3px var(--rp-fault-soft); }
+#view-replay .rp-say { margin: 0; font-size: clamp(1.15rem, 2vw, 1.55rem); line-height: 1.3; font-weight: 700; max-width: 62ch; text-wrap: balance; color: var(--rp-ink); }
+#view-replay .rp-more { color: var(--rp-ink-2); font-size: .95rem; max-width: 80ch; }
+#view-replay .rp-more:empty { display: none; }
+#view-replay .rp-counts { color: var(--rp-ink-2); font-size: .9rem; }
+#view-replay .rp-counts b { color: var(--rp-ink); }
+#view-replay .rp-counts .bad { color: var(--rp-fault); }
+
+#view-replay .rp-drawing-wrap { overflow-x: auto; border: 1.5px solid var(--rp-ink-3); border-radius: 4px; }
+#view-replay #rpDrawing { display: block; width: 100%; min-width: 720px; height: auto; }
+#rpDrawing text { font-family: var(--rp-ui); fill: var(--rp-ink); }
+#rpDrawing .gridline { stroke: var(--rp-grid); stroke-width: 1; }
+#rpDrawing .frame { fill: none; stroke: var(--rp-ink-3); stroke-width: 1.5; }
+#rpDrawing .module { fill: none; stroke: var(--rp-ink-3); stroke-width: 1.2; stroke-dasharray: 6 5; }
+#rpDrawing .module-tag { font-size: 14px; fill: var(--rp-ink-2); }
+#rpDrawing .part rect.body { fill: var(--rp-paper); stroke: var(--rp-ink); stroke-width: 1.6; }
+#rpDrawing .part .name { font-size: 17px; font-weight: 700; }
+#rpDrawing .part .sub { font-size: 12.5px; fill: var(--rp-ink-2); }
+#rpDrawing .stub { stroke: var(--rp-ink); stroke-width: 1.6; }
+#rpDrawing .pin { fill: var(--rp-ink); }
+#rpDrawing .flag polygon { stroke: var(--rp-ink); stroke-width: 1.3; fill: var(--rp-paper); }
+#rpDrawing .flag text { font-size: 12.5px; font-family: var(--rp-mono); }
+#rpDrawing .flag.all polygon { fill: var(--rp-ink); }
+#rpDrawing .flag.all text { fill: var(--rp-paper); font-weight: 700; }
+#rpDrawing .flag.local polygon { stroke-dasharray: 3 3; }
+#rpDrawing .flag.host polygon { stroke-width: 3; }
+#rpDrawing .flag.none polygon { stroke-dasharray: 1 3; }
+#rpDrawing .flag.none text { fill: var(--rp-ink-2); }
+#rpDrawing .part { cursor: pointer; }
+#rpDrawing .part:focus { outline: none; }
+#rpDrawing .part:focus-visible rect.body, #rpDrawing .part.selected rect.body { stroke-width: 3.2; }
+#rpDrawing .selmark { display: none; fill: none; stroke: var(--rp-ink); stroke-width: 1; stroke-dasharray: 2 4; }
+#rpDrawing .part.selected .selmark { display: block; }
+#rpDrawing .part.down rect.body { stroke-dasharray: 7 5; }
+#rpDrawing .part.down .name, #rpDrawing .part.down .stub, #rpDrawing .part.down .flag { opacity: .45; }
+#rpDrawing .part.down .sub, #rpDrawing .part.unhealthy .sub { fill: var(--rp-fault); }
+#rpDrawing .part.unhealthy rect.body { fill: url(#rpHatch); stroke: var(--rp-fault); }
+#rpDrawing .part.starting .sub { fill: var(--rp-rev); }
+#rpDrawing .cut { stroke: var(--rp-fault); stroke-width: 2; }
+#rpDrawing .cloud { fill: var(--rp-rev-soft); stroke: var(--rp-rev); stroke-width: 1.6; }
+#rpDrawing .delta polygon { fill: var(--rp-paper); stroke: var(--rp-rev); stroke-width: 1.6; }
+#rpDrawing .delta text { font-size: 11px; font-weight: 700; fill: var(--rp-rev); font-family: var(--rp-mono); }
+#rpDrawing .hatch-line { stroke: var(--rp-fault); stroke-width: 1.4; opacity: .55; }
+#rpDrawing .legend-hatch { stroke: var(--rp-fault); stroke-width: 1.4; }
+#rpDrawing .legend .note { font-size: 12.5px; fill: var(--rp-ink-2); }
+#rpDrawing .tb rect { fill: none; stroke: var(--rp-ink); stroke-width: 1.5; }
+#rpDrawing .tb line { stroke: var(--rp-ink-3); stroke-width: 1; }
+#rpDrawing .tb .big { font-size: 22px; font-weight: 700; }
+#rpDrawing .tb .small { font-size: 12px; fill: var(--rp-ink-2); }
+#rpDrawing .tb .row { font-size: 12.5px; font-variant-numeric: tabular-nums; }
+#rpDrawing .tb .row.fault { fill: var(--rp-fault); }
+#rpDrawing.hl .flag { opacity: .25; }
+#rpDrawing.hl .flag.hit { opacity: 1; }
+#rpDrawing .stamp rect { fill: var(--rp-paper); stroke: var(--rp-fault); stroke-width: 2.5; }
+#rpDrawing .stamp text { fill: var(--rp-fault); font-size: 26px; font-weight: 700; letter-spacing: .08em; }
+
+#view-replay #rpTape { display: block; width: 100%; height: auto; cursor: ew-resize; touch-action: none; border-radius: 4px; }
+#view-replay #rpTape:focus-visible { outline: 2px solid var(--rp-ink); outline-offset: 3px; }
+#rpTape .base { stroke: var(--rp-ink); stroke-width: 1.5; }
+#rpTape .day { stroke: var(--rp-ink-3); stroke-width: 1; }
+#rpTape .daylabel { font-size: 12px; fill: var(--rp-ink-2); }
+#rpTape .ev-fault { stroke: var(--rp-fault); stroke-width: 2.4; }
+#rpTape .ev-rev { fill: var(--rp-rev); }
+#rpTape .ev-info { stroke: var(--rp-ink-2); stroke-width: 2; }
+#rpTape .ev-reboot { stroke: var(--rp-fault); stroke-width: 3; }
+#rpTape .reboot-label { font-family: var(--rp-mono); font-size: 11px; fill: var(--rp-fault); }
+#rpTape .attn { fill: var(--rp-fault); opacity: .55; }
+#rpTape .past { fill: var(--rp-ink); opacity: .05; }
+#rpTape .head { stroke: var(--rp-ink); stroke-width: 2.4; }
+#rpTape .knob { fill: var(--rp-ink); }
+#view-replay .rp-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#view-replay .rp-controls button, #view-replay .rp-detail button {
+  font: inherit; font-size: .9rem; color: var(--rp-ink); background: var(--rp-paper-2);
+  border: 1.5px solid var(--rp-ink-3); border-radius: 6px; padding: 7px 14px; cursor: pointer; min-height: 40px;
+}
+#view-replay .rp-controls button:hover, #view-replay .rp-detail button:hover { border-color: var(--rp-ink); }
+#view-replay .rp-controls button:focus-visible, #view-replay .rp-detail button:focus-visible { outline: 2px solid var(--rp-ink); outline-offset: 2px; }
+#view-replay .rp-controls button.primary { background: var(--rp-ink); color: var(--rp-paper); border-color: var(--rp-ink); font-weight: 700; }
+#view-replay .rp-controls button[aria-pressed="true"] { border-color: var(--rp-fault); color: var(--rp-fault); }
+#view-replay .rp-hint { color: var(--rp-ink-2); font-size: .82rem; margin-left: auto; }
+
+#view-replay .rp-detail { border-top: 1.5px solid var(--rp-ink-3); padding-top: 14px; display: grid; gap: 10px 22px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+#view-replay .rp-detail h2 { margin: 0; font-size: 1.35rem; color: var(--rp-ink); }
+#view-replay .rp-detail p { margin: 6px 0; color: var(--rp-ink); }
+#view-replay .rp-img { color: var(--rp-ink-2); font-size: .85rem; overflow-wrap: anywhere; }
+#view-replay .rp-state { font-weight: 700; }
+#view-replay .rp-state.bad { color: var(--rp-fault); }
+#view-replay .rp-week { max-width: 52ch; }
+#view-replay .rp-detail ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+#view-replay .rp-detail li { display: grid; grid-template-columns: 3.2em 8.8em minmax(0, 1fr); gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--rp-ink-3); font-size: .9rem; }
+#view-replay .rp-detail li .d { font-family: var(--rp-mono); color: var(--rp-rev); font-weight: 700; }
+#view-replay .rp-detail li .t { color: var(--rp-ink-2); font-variant-numeric: tabular-nums; }
+#view-replay .rp-detail li.later { opacity: .38; }
+#view-replay .rp-detail li.fault .w { color: var(--rp-fault); }
+#view-replay .rp-empty { color: var(--rp-ink-2); }
+@media (max-width: 760px) {
+  #view-replay .rp-sheet { padding: 14px 12px 18px; }
+  #view-replay .rp-detail { grid-template-columns: 1fr; }
+  #view-replay .rp-hint { margin-left: 0; width: 100%; }
+  #view-replay .rp-detail li { grid-template-columns: 2.6em 7.6em minmax(0, 1fr); }
+}

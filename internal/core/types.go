@@ -81,6 +81,7 @@ type ContainerInfo struct {
 	StartedAt           string `json:"started_at,omitempty"`
 	FinishedAt          string `json:"finished_at,omitempty"`
 	HealthFailingStreak int    `json:"health_failing_streak,omitempty"`
+	ComposeProject      string `json:"compose_project,omitempty"`
 
 	// Exits Docker reported in the bounded window before this snapshot
 	// (`docker events`, die/oom only), oldest first.

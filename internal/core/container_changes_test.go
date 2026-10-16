@@ -193,7 +193,7 @@ func TestDockerInspectFormatToleratesMissingOptionalKeys(t *testing.T) {
 	withHealth := map[string]any{
 		"Id": "def", "Image": "sha256:y", "RestartCount": float64(0),
 		"State":  map[string]any{"OOMKilled": true, "ExitCode": float64(137), "StartedAt": "s", "FinishedAt": "f", "Health": map[string]any{"Status": "unhealthy", "FailingStreak": float64(4)}},
-		"Config": map[string]any{"Labels": map[string]any{"org.opencontainers.image.version": "1.2.3"}},
+		"Config": map[string]any{"Labels": map[string]any{"org.opencontainers.image.version": "1.2.3", "com.docker.compose.project": "media"}},
 	}
 	for name, data := range map[string]map[string]any{"no health": noHealth, "health": withHealth} {
 		var b strings.Builder
@@ -205,10 +205,10 @@ func TestDockerInspectFormatToleratesMissingOptionalKeys(t *testing.T) {
 		if cs[0].ImageID == "" || cs[0].StartedAt == "" {
 			t.Fatalf("%s: output %q did not parse: %+v", name, b.String(), cs[0])
 		}
-		if name == "health" && (cs[0].HealthFailingStreak != 4 || cs[0].ImageVersion != "1.2.3" || !cs[0].OOMKilled || cs[0].ExitCode != 137) {
+		if name == "health" && (cs[0].HealthFailingStreak != 4 || cs[0].ImageVersion != "1.2.3" || !cs[0].OOMKilled || cs[0].ExitCode != 137 || cs[0].ComposeProject != "media") {
 			t.Fatalf("health fields: %+v", cs[0])
 		}
-		if name == "no health" && (cs[0].ImageVersion != "" || cs[0].RestartCount != 2) {
+		if name == "no health" && (cs[0].ImageVersion != "" || cs[0].RestartCount != 2 || cs[0].ComposeProject != "") {
 			t.Fatalf("no-health fields: %+v", cs[0])
 		}
 	}

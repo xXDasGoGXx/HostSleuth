@@ -34,6 +34,8 @@ func assembledWebAssetsForTest(t *testing.T) ([]byte, []byte, []byte) {
 	appCSS, appJS = appendActionAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleV2Assets(appCSS, appJS)
+	appCSS, appJS = appendContainerStoryAssets(appCSS, appJS)
+	appCSS, appJS = appendReplayAssets(appCSS, appJS)
 	appCSS, appJS = appendConsoleV3Assets(appCSS, appJS)
 	return indexHTML, appCSS, appJS
 }

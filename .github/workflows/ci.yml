@@ -44,6 +44,7 @@ jobs:
           node --check cmd/hostsleuth/web/admin_console_v2.js
           node --check cmd/hostsleuth/web/share.js
           node --check cmd/hostsleuth/web/container_story.js
+          node --check cmd/hostsleuth/web/replay.js
           cat \
             cmd/hostsleuth/web/app.js \
             cmd/hostsleuth/web/service_story.js \
@@ -61,6 +62,7 @@ jobs:
             cmd/hostsleuth/web/admin_console_v2.js \
             cmd/hostsleuth/web/share.js \
             cmd/hostsleuth/web/container_story.js \
+            cmd/hostsleuth/web/replay.js \
             > /tmp/hostsleuth-served-app.js
           node --check /tmp/hostsleuth-served-app.js
       - name: Build
