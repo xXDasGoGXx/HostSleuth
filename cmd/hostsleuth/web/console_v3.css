@@ -125,3 +125,15 @@ button.change-chip:focus-visible { outline: 2px solid var(--accent); outline-off
   text-align: left;
   margin: 4px 0 0;
 }
+
+/* Host listeners grouped by reach. */
+.surface-group { margin-top: 18px; }
+.surface-group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.surface-group-head strong { color: var(--text); font-size: .9rem; }
+.surface-group-head span { color: var(--muted); font-size: .8rem; }
+.surface-group > .surface-list { margin-top: 10px; }
+details.surface-group { border: 1px dashed var(--line); border-radius: 12px; padding: 10px 13px; }
+details.surface-group > summary { cursor: pointer; list-style-position: inside; }
+details.surface-group > summary strong { color: var(--muted); }
+details.surface-group[open] > summary strong { color: var(--text); }
+.stack-fold + .stack-fold { margin-top: 9px; }

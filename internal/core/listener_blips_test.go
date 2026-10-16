@@ -37,7 +37,7 @@ func TestCollapseListenerBlipsOnRecordedRebootTimeline(t *testing.T) {
 
 	got := CollapseListenerBlips(events)
 
-	var reboot, wave, redeploy, stillGone []Event
+	var reboot, wave, redeploy, stillGone, moved []Event
 	appeared, disappeared := 0, 0
 	for _, e := range got {
 		switch {
@@ -47,6 +47,8 @@ func TestCollapseListenerBlipsOnRecordedRebootTimeline(t *testing.T) {
 			wave = append(wave, e)
 		case e.Summary == "listener went away and was back within 61s: tcp 192.0.2.10:8787":
 			redeploy = append(redeploy, e)
+		case strings.HasPrefix(e.Summary, "after the host reboot, 2 dynamic-port listeners were replaced by new ports on the same address: tcp 127.0.0.1 "):
+			moved = append(moved, e)
 		case e.Summary == "listener disappeared: tcp 127.0.0.1:35099":
 			stillGone = append(stillGone, e)
 		case strings.HasPrefix(e.Summary, "listener appeared: "):
@@ -58,9 +60,14 @@ func TestCollapseListenerBlipsOnRecordedRebootTimeline(t *testing.T) {
 	if len(reboot) != 1 || len(wave) != 1 || len(redeploy) != 1 || len(stillGone) != 1 {
 		t.Fatalf("reboot=%d wave=%d redeploy=%d gone=%d\n%+v", len(reboot), len(wave), len(redeploy), len(stillGone), got)
 	}
-	// 8 random-port listeners did not return on the same port; 8 listeners
-	// appeared whose earlier disappearance lies outside the 100-event window.
-	if disappeared != 8 || appeared != 8 {
+	// 8 random-port listeners did not return on the same port. Two pair
+	// with new loopback ports on the same address; the rest have no partner
+	// inside this 100-event slice (their new ports were recorded earlier in
+	// the same snapshot, before the slice starts).
+	if len(moved) != 1 {
+		t.Fatalf("want one dynamic-port move summary, got %d\n%+v", len(moved), got)
+	}
+	if disappeared != 6 || appeared != 6 {
 		t.Fatalf("unpaired listener events: disappeared=%d appeared=%d", disappeared, appeared)
 	}
 	if wave[0].Severity != "info" || !wave[0].At.Equal(reboot[0].At) {
@@ -69,7 +76,7 @@ func TestCollapseListenerBlipsOnRecordedRebootTimeline(t *testing.T) {
 	if redeploy[0].Severity != "warning" || stillGone[0].Severity != "warning" {
 		t.Fatalf("blip without reboot and a lasting outage are warnings: %+v %+v", redeploy[0], stillGone[0])
 	}
-	if len(got) != 101-34*2+1-1 {
+	if len(got) != 101-34*2+1-1-2*2+1 {
 		t.Fatalf("collapsed to %d events", len(got))
 	}
 	for i := 1; i < len(got); i++ {
