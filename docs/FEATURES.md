@@ -3,6 +3,29 @@
 Back to the [README](../README.md). Every story is read-only unless it says otherwise.
 
 
+### Replay (home screen)
+
+Question answered:
+
+> What happened to this box this week—and what does it look like right now?
+
+Replay draws the containers as an engineering sheet: one box per container, grouped by compose project (the `com.docker.compose.project` label), each with a connector showing how it is reachable—bound to every address, one address, this host only, the host's network, or no network. Addresses are never sent to the browser, only the class and the port numbers.
+
+A tape below covers the last seven days of recorded changes. Drag it, step with **Previous/Next change**, or press **Play the week**, and the drawing redraws for that moment:
+
+- down or restarting containers are dashed with a cut connector;
+- containers failing their health check are hatched;
+- anything that changed in the 24 hours before the moment gets a revision cloud and a numbered Δ, listed in the title block;
+- the top line says what was happening in one plain sentence, built by fixed rules from the recorded events, never guessed.
+
+The rules recognise a host reboot (anchored at the boot time, with the kernel change when one was recorded), an all-container restart that fits a Docker restart (at least four containers and 60% of the health-checked ones entering *starting* in the same minute, away from a reboot), crashes with exit codes, clean stops, health failures and recoveries, containers that took over 30 minutes to become healthy, image updates and recreations, and package and configuration changes. When an autoheal container runs on the host, a quick restart after a health failure says so.
+
+Tap a container to see its week; **Open its Container Story** goes to the full Container Story. Tap a connector to highlight everything bound the same way. While on the latest moment, Replay refreshes every minute.
+
+API: `GET /api/replay`. The drawing uses the B612 typeface (SIL Open Font License, `/assets/fonts/OFL.txt`), served by HostSleuth itself; nothing loads from outside.
+
+![Replay](images/replay.png)
+
 ### Remember meaningful changes
 
 HostSleuth periodically captures useful local state including:

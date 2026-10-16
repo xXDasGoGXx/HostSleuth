@@ -15,7 +15,7 @@ import (
 // It must never select .Config.Env, .Config.Cmd, .Mounts or .HostConfig:
 // container configuration routinely carries passwords and tokens, and a
 // field-limited template keeps them out of process memory and snapshots.
-const dockerInspectFormat = `{{.Id}}{{"\t"}}{{.Image}}{{"\t"}}{{.RestartCount}}{{"\t"}}{{.State.OOMKilled}}{{"\t"}}{{.State.ExitCode}}{{"\t"}}{{.State.StartedAt}}{{"\t"}}{{.State.FinishedAt}}{{"\t"}}{{with index .State "Health"}}{{index . "FailingStreak"}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "org.opencontainers.image.version"}}{{end}}`
+const dockerInspectFormat = `{{.Id}}{{"\t"}}{{.Image}}{{"\t"}}{{.RestartCount}}{{"\t"}}{{.State.OOMKilled}}{{"\t"}}{{.State.ExitCode}}{{"\t"}}{{.State.StartedAt}}{{"\t"}}{{.State.FinishedAt}}{{"\t"}}{{with index .State "Health"}}{{index . "FailingStreak"}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "org.opencontainers.image.version"}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "com.docker.compose.project"}}{{end}}`
 
 // enrichContainers adds runtime evidence to containers listed by
 // `docker ps`. One `docker inspect` call covers every container; if it
@@ -128,6 +128,9 @@ func applyDockerInspect(containers []ContainerInfo, text string) {
 			c.FinishedAt = dockerTime(f[6])
 			c.HealthFailingStreak, _ = strconv.Atoi(strings.TrimSpace(f[7]))
 			c.ImageVersion = boundedLabel(f[8])
+			if len(f) > 9 {
+				c.ComposeProject = boundedLabel(f[9])
+			}
 			break
 		}
 	}

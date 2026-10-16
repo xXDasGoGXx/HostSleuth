@@ -269,5 +269,11 @@
     }
   }
 
+  // Other views (Replay) can open one container's story.
+  window.hostSleuthOpenContainer = (name) => {
+    showView("containers");
+    loadContainerStory(name);
+  };
+
   installContainerStoryUI();
 })();

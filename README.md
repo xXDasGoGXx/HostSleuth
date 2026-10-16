@@ -6,7 +6,9 @@ HostSleuth is a small, local-first troubleshooting console for a Linux host and 
 
 One binary or one container. No cloud account, no database, no agent fleet, no AI. When evidence is missing it says *unknown* instead of guessing.
 
-![HostSleuth overview: host story, what deserves attention, and quick targets](docs/images/overview.png)
+![Replay: the host's containers drawn as an engineering sheet, with a 7-day tape to rewind](docs/images/replay.png)
+
+The home screen is **Replay**: your containers drawn as a blueprint, grouped by compose project, with what each one exposes (every address, one address, this host only, the host's network, no network). Drag the tape at the bottom and the drawing rewinds through the last seven days—containers go dashed when they were down, hatched when failing their health check, clouded when they changed—while one plain sentence says what was happening at that moment. Press **Play the week** to watch it.
 
 **Release:** [latest stable](https://github.com/xXDasGoGXx/HostSleuth/releases/latest) · native Linux and Docker (`mjmalleo/hostsleuth`) for amd64 and arm64.
 
@@ -14,6 +16,7 @@ One binary or one container. No cloud account, no database, no agent fleet, no A
 
 | You ask | HostSleuth shows |
 | --- | --- |
+| **What happened to this box this week?** | Replay: rewind the drawing to any moment. *"All 8 containers with a health check restarted at the same moment. That pattern fits a Docker restart."* |
 | **Why can't I reach `nas:8443`?** | DNS → route → TCP → local listener → Docker publication → TLS, with the first failure called out: *"Docker publishes the port but TCP still failed: nextcloud (unhealthy)"*. |
 | **Why does this container keep restarting?** | Every restart with Docker's own reason—crash and exit code, out-of-memory kill, clean stop—plus health changes and which of its ports went down with it. |
 | **Did that update break it?** | Image updates as they happen: *"jellyfin updated 10.10.2 → 10.10.3"*, next to what changed right after. Works for `:latest` too. |
@@ -32,6 +35,10 @@ One binary or one container. No cloud account, no database, no agent fleet, no A
 <tr>
 <td width="50%"><img src="docs/images/changes.png" alt="Changes: meaningful changes with filters and day headings"><br><sub><b>Changes</b> — reboots, updates, restarts and health, without socket noise.</sub></td>
 <td width="50%"><img src="docs/images/share.png" alt="Share redacted dialog with aliased evidence"><br><sub><b>Share redacted</b> — paste-ready for a forum or an issue.</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/images/overview.png" alt="Overview: host story, what deserves attention, and quick targets"><br><sub><b>Overview</b> — host story, what deserves attention, and quick targets.</sub></td>
+<td width="50%"></td>
 </tr>
 </table>
 
