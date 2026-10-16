@@ -48,6 +48,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Complete the bounded feature-free post-v1 Admin Console polish train (PRs #77–#84), ending at accepted `main` `b443a2a4ea484544c670212b29e169c43b7d5c38`.
 - [x] Publish and independently verify stable `v1.0.1` from exact source `9d95392882814e1c9f17643fe2664e6faaf15481`.
 - [x] Align live Arcane production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:1.0.1`.
+- [x] v1.1.0 event-timeline quality + build revision (PR #88), published from `e2eecd68aaa236b730b43268696eb836106afd0e`, live on OMV, recovery PR #138.
 
 ## Records
 
@@ -87,10 +88,13 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v1.0.0 production/recovery alignment: `docs/history/V1.0.0-PRODUCTION-ALIGNMENT.md`
 - v1.0.1 publication: `docs/history/V1.0.1-PUBLICATION.md`
 - v1.0.1 production/recovery alignment: `docs/history/V1.0.1-PRODUCTION-ALIGNMENT.md`
+- v1.1.0 event-timeline quality, publication and live: `docs/history/V1.1.0-EVENT-TIMELINE-QUALITY.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v1.0.1` / `mjmalleo/hostsleuth:1.0.1`, published from exact source `9d95392882814e1c9f17643fe2664e6faaf15481`.
+Stable/public/live/recovery are aligned on `v1.1.0` / `mjmalleo/hostsleuth:1.1.0`, published from exact source `e2eecd68aaa236b730b43268696eb836106afd0e`.
+
+Candidate next: collapse a reboot's returning-listener wave into one summary event (not started).
 
 Docker `1.0.1` and `latest` resolve to verified OCI index `sha256:ae747aac332d953eed7826f27ee67548d8295da2638cd553461804c4ebbefe36`.
 

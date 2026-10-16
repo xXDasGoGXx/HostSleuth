@@ -1,8 +1,27 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-10-03
+Last updated: 2026-10-15
 
-## Stable / public / live / recovery state — v1.0.1
+## Stable / public / live / recovery state — v1.1.0
+
+Stable/public/live/recovery are aligned on `v1.1.0` / `mjmalleo/hostsleuth:1.1.0`, published from exact source `e2eecd68aaa236b730b43268696eb836106afd0e` (PR #88) by release workflow `38840544147`.
+
+v1.1.0 makes the change timeline meaningful and restores build traceability:
+
+- link-local/multicast sockets, per-interface discovery binds and ephemeral UDP client sockets are kept as Snapshot evidence but no longer recorded as changes; churn recorded by older versions is skipped on read; raw view via `events --all` / `/api/events?all=1`;
+- `events.jsonl` compacts past 4 MiB to the newest 5,000 meaningful events;
+- `/api/about` and `version` report the build revision in container builds (Docker smoke asserts it);
+- HTTP server header/read/idle timeouts.
+
+No schema, record format, API shape, Evidence Bundle, Safe Action or privilege change. Rollback to 1.0.1 reads the same files.
+
+Verified 2026-10-15: native amd64/arm64 assets match `SHA256SUMS`; amd64 reports `v1.1.0 (e2eecd68aaa2)`; OMV pulled `mjmalleo/hostsleuth:1.1.0` from Docker Hub through the HomeCommander-Claude compose sync (healthy); live `/api/about` = `v1.1.0` / `e2eecd68aaa2`; schema 4 / Docker mode; LAN Action API 403; security headers present. Live timeline before: 94 of 100 events were churn. After: zero churn; container-health history visible again. Recovery: `OMV-Docker-Rebuild` PR #138 merged at `18f7f5e615fb1f6d3e6c5d4327eb878f88cc74f4`.
+
+Open observation: after a reboot, real service listeners returning (about 85 on OMV) still fill most of the 100-event window. Collapsing a reboot's listener wave into one summary event is the natural next improvement; it is not implemented.
+
+Record: `docs/history/V1.1.0-EVENT-TIMELINE-QUALITY.md`.
+
+## Previous state — v1.0.1
 
 Stable/public/live/recovery are aligned on:
 
