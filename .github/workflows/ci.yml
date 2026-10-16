@@ -299,7 +299,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build the image users will consume
-        run: docker build --build-arg VERSION=0.1.0-ci -t hostsleuth:ci .
+        run: docker build --build-arg VERSION=0.1.0-ci --build-arg REVISION=${{ github.sha }} -t hostsleuth:ci .
       - name: Start supported Compose deployment from image
         env:
           HOSTSLEUTH_IMAGE: hostsleuth:ci
@@ -324,6 +324,8 @@ jobs:
 
           about = json.loads(Path('/tmp/hostsleuth-about.json').read_text())
           assert about.get('version') == '0.1.0-ci', about
+          import os
+          assert about.get('revision') == os.environ['GITHUB_SHA'][:12], about
 
           snapshot = json.loads(Path('/tmp/hostsleuth-snapshot.json').read_text())
           assert snapshot.get('mode') == 'docker', snapshot
@@ -336,6 +338,8 @@ jobs:
         run: |
           set -eu
           curl -fsS http://127.0.0.1:8787/ | grep -q 'HostSleuth'
+          curl -fsS http://127.0.0.1:8787/api/events | python3 -c 'import json,sys; assert isinstance(json.load(sys.stdin), list)'
+          curl -fsS 'http://127.0.0.1:8787/api/events?all=1' | python3 -c 'import json,sys; assert isinstance(json.load(sys.stdin), list)'
           headers="$(curl -fsSI http://127.0.0.1:8787/)"
           printf '%s\n' "$headers" | grep -qi '^Content-Security-Policy: '
           printf '%s\n' "$headers" | grep -qi '^Permissions-Policy: camera=(), microphone=(), geolocation=()'

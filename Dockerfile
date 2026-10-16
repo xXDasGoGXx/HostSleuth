@@ -11,8 +11,9 @@ COPY internal ./internal
 ARG TARGETOS
 ARG TARGETARCH
 ARG VERSION=0.1.0-dev
+ARG REVISION=
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
-    go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" \
+    go build -trimpath -ldflags "-s -w -X main.version=${VERSION} -X main.revision=${REVISION}" \
     -o /out/hostsleuth ./cmd/hostsleuth
 
 FROM alpine:3.24

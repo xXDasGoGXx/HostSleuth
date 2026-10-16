@@ -18,6 +18,11 @@ import (
 
 var version = "0.1.0-dev"
 
+// revision is set at build time with -ldflags "-X main.revision=<commit>".
+// Container builds exclude .git, so the Go toolchain cannot embed VCS
+// information there; the explicit value keeps /api/about traceable.
+var revision = ""
+
 //go:embed web/index.html web/app.css web/app.js
 var webAssets embed.FS
 
@@ -73,6 +78,12 @@ func usage() {
 }
 
 func buildRevision() string {
+	if revision != "" {
+		if len(revision) > 12 {
+			return revision[:12]
+		}
+		return revision
+	}
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
 		return ""
@@ -205,8 +216,14 @@ func runEvents(args []string) {
 	fs := flag.NewFlagSet("events", flag.ExitOnError)
 	state := fs.String("state-dir", defaultStateDir(), "state directory")
 	limit := fs.Int("limit", 50, "maximum recent events")
+	all := fs.Bool("all", false, "include routine listener churn (link-local, multicast, discovery and ephemeral UDP sockets)")
 	_ = fs.Parse(args)
-	events, err := (core.Store{Dir: *state}).ReadEvents(*limit)
+	store := core.Store{Dir: *state}
+	read := store.ReadEvents
+	if *all {
+		read = store.ReadAllEvents
+	}
+	events, err := read(*limit)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -306,7 +323,11 @@ func runServe(args []string) {
 	})
 	mux.HandleFunc("/api/events", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		e, err := store.ReadEvents(100)
+		read := store.ReadEvents
+		if r.URL.Query().Get("all") == "1" {
+			read = store.ReadAllEvents
+		}
+		e, err := read(100)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -396,5 +417,18 @@ func runServe(args []string) {
 	})
 
 	log.Printf("HostSleuth %s listening on http://%s", versionDisplay(), *listen)
-	log.Fatal(http.ListenAndServe(*listen, withSecurityHeaders(mux)))
+	log.Fatal(newHTTPServer(*listen, withSecurityHeaders(mux)).ListenAndServe())
+}
+
+// newHTTPServer bounds slow or idle clients. Diagnosis stories can take
+// tens of seconds, so responses are not given a write deadline.
+func newHTTPServer(addr string, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              addr,
+		Handler:           handler,
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		MaxHeaderBytes:    64 << 10,
+	}
 }

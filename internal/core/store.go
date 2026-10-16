@@ -2,12 +2,28 @@ package core
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
+
+// Event timeline retention. The timeline is append-only JSON lines and is
+// read in full whenever the UI or a story needs recent history, so it must
+// not grow without bound. When the file passes eventFileCompactBytes it is
+// rewritten atomically with routine listener churn removed and only the
+// newest eventFileKeep events retained.
+const (
+	eventFileCompactBytes = 4 << 20
+	eventFileKeep         = 5000
+)
+
+// eventMu serializes timeline writes within one process (scheduled
+// snapshots and compaction).
+var eventMu sync.Mutex
 
 type Store struct{ Dir string }
 
@@ -56,11 +72,12 @@ func (s Store) AppendEvents(events []Event) error {
 	if err := s.ensure(); err != nil {
 		return err
 	}
+	eventMu.Lock()
+	defer eventMu.Unlock()
 	f, err := os.OpenFile(s.EventsPath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 	enc := json.NewEncoder(f)
 	for _, e := range events {
 		if e.SchemaVersion == 0 {
@@ -70,13 +87,73 @@ func (s Store) AppendEvents(events []Event) error {
 			e.At = time.Now().UTC()
 		}
 		if err := enc.Encode(e); err != nil {
+			_ = f.Close()
 			return err
 		}
 	}
-	return nil
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return s.compactEventsIfLarge()
 }
 
+// compactEventsIfLarge must be called with eventMu held.
+func (s Store) compactEventsIfLarge() error {
+	info, err := os.Stat(s.EventsPath())
+	if err != nil || info.Size() <= eventFileCompactBytes {
+		return nil
+	}
+	events, err := s.readEventFile()
+	if err != nil {
+		return err
+	}
+	events = MeaningfulEvents(events)
+	if len(events) > eventFileKeep {
+		events = events[len(events)-eventFileKeep:]
+	}
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	for _, e := range events {
+		if err := enc.Encode(e); err != nil {
+			return err
+		}
+	}
+	tmp := s.EventsPath() + ".tmp"
+	if err := os.WriteFile(tmp, buf.Bytes(), 0o600); err != nil {
+		return err
+	}
+	return os.Rename(tmp, s.EventsPath())
+}
+
+// ReadEvents returns the newest `limit` meaningful events, oldest first.
+// Routine listener churn recorded by earlier versions is skipped before
+// the limit is applied, so it can never crowd out real history.
 func (s Store) ReadEvents(limit int) ([]Event, error) {
+	events, err := s.readEventFile()
+	if err != nil {
+		return nil, err
+	}
+	return newestEvents(MeaningfulEvents(events), limit), nil
+}
+
+// ReadAllEvents returns the newest `limit` recorded events including
+// routine listener churn, for operators who want the raw timeline.
+func (s Store) ReadAllEvents(limit int) ([]Event, error) {
+	events, err := s.readEventFile()
+	if err != nil {
+		return nil, err
+	}
+	return newestEvents(events, limit), nil
+}
+
+func newestEvents(events []Event, limit int) []Event {
+	if limit > 0 && len(events) > limit {
+		events = events[len(events)-limit:]
+	}
+	return events
+}
+
+func (s Store) readEventFile() ([]Event, error) {
 	f, err := os.Open(s.EventsPath())
 	if errors.Is(err, os.ErrNotExist) {
 		return []Event{}, nil
@@ -85,8 +162,9 @@ func (s Store) ReadEvents(limit int) ([]Event, error) {
 		return nil, err
 	}
 	defer f.Close()
-	var events []Event
+	events := []Event{}
 	scanner := bufio.NewScanner(f)
+	scanner.Buffer(make([]byte, 0, 64*1024), 1<<20)
 	for scanner.Scan() {
 		var e Event
 		if json.Unmarshal(scanner.Bytes(), &e) == nil {
@@ -95,9 +173,6 @@ func (s Store) ReadEvents(limit int) ([]Event, error) {
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
-	}
-	if limit > 0 && len(events) > limit {
-		events = events[len(events)-limit:]
 	}
 	return events, nil
 }
