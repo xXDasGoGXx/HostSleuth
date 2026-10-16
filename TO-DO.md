@@ -49,6 +49,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Publish and independently verify stable `v1.0.1` from exact source `9d95392882814e1c9f17643fe2664e6faaf15481`.
 - [x] Align live Arcane production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:1.0.1`.
 - [x] v1.1.0 event-timeline quality + build revision (PR #88), published from `e2eecd68aaa236b730b43268696eb836106afd0e`, live on OMV, recovery PR #138.
+- [x] v1.2.0 reboot-wave folding, Reboot Story dynamic-port fix and console rework (PRs #90, #91), published from `91d31eafc9957a0a655a229200c4bfb7199d6e4a`, live on OMV, recovery PR #139.
 
 ## Records
 
@@ -89,12 +90,13 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v1.0.1 publication: `docs/history/V1.0.1-PUBLICATION.md`
 - v1.0.1 production/recovery alignment: `docs/history/V1.0.1-PRODUCTION-ALIGNMENT.md`
 - v1.1.0 event-timeline quality, publication and live: `docs/history/V1.1.0-EVENT-TIMELINE-QUALITY.md`
+- v1.2.0 console, blips and dynamic-port moves: `docs/history/V1.2.0-CONSOLE-AND-BLIPS.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v1.1.0` / `mjmalleo/hostsleuth:1.1.0`, published from exact source `e2eecd68aaa236b730b43268696eb836106afd0e`.
+Stable/public/live/recovery are aligned on `v1.2.0` / `mjmalleo/hostsleuth:1.2.0`, published from exact source `91d31eafc9957a0a655a229200c4bfb7199d6e4a`.
 
-Candidate next: collapse a reboot's returning-listener wave into one summary event (not started).
+Candidate next: pair loopback dynamic-port listener replacements outside reboots (a local process rotates them; about 25 lines in six days on OMV). Not started.
 
 Docker `1.0.1` and `latest` resolve to verified OCI index `sha256:ae747aac332d953eed7826f27ee67548d8295da2638cd553461804c4ebbefe36`.
 
