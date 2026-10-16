@@ -1,8 +1,27 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-10-15
+Last updated: 2026-10-15 (v1.2.0)
 
-## Stable / public / live / recovery state — v1.1.0
+## Stable / public / live / recovery state — v1.2.0
+
+Stable/public/live/recovery are aligned on `v1.2.0` / `mjmalleo/hostsleuth:1.2.0`, published from exact source `91d31eafc9957a0a655a229200c4bfb7199d6e4a` (PRs #90 and #91) by release workflow `38844421236`.
+
+v1.2.0 (record: `docs/history/V1.2.0-CONSOLE-AND-BLIPS.md`):
+
+- a reboot's listener wave is one summary line; listeners that do not return keep their warning;
+- after a recorded reboot, listeners on dynamically assigned ports that are replaced on the same protocol/address/port range are one line, so Reboot Story no longer reports NFS/RPC helpers as "not recovered";
+- unhealthy/restarting/stopped containers lead Overview; every view linkable; Changes filters and day headings; Host search, grouping by reach, folded container networks/routes; favicon.
+
+PR #90 was merged by the owner before review; it was reviewed afterwards and before release (see the history record).
+
+Verified live 2026-10-15: assets match `SHA256SUMS`; amd64 reports `v1.2.0 (91d31eafc995)`; OMV pulled `mjmalleo/hostsleuth:1.2.0` through the HomeCommander-Claude compose sync (healthy); `/api/about` = `v1.2.0` / `91d31eafc995`; Reboot Story recovery issues 8 → 0 (10 dynamic-port moves paired); the Changes window now reaches back to 2026-10-09 (was about one day) and shows the 2026-10-14 reboot and kernel `7.0.14-23-pve -> 7.0.14-24-pve`; LAN Action API 403; security headers present. Recovery: `OMV-Docker-Rebuild` PR #139 merged at `50cc84a00b4c70443d47de049c5ccd52983bec2e`.
+
+Open observations from live (not implemented):
+
+- a local process rotates loopback TCP listeners on random high ports (about 25 appeared/disappeared lines in six days); pairing loopback dynamic-port replacements outside reboots is the next candidate;
+- `192.168.2.181:8080` and `:8118` went away and came back six times on 2026-10-13/14, consistent with a container restarting; this is real evidence, not noise.
+
+## Previous state — v1.1.0
 
 Stable/public/live/recovery are aligned on `v1.1.0` / `mjmalleo/hostsleuth:1.1.0`, published from exact source `e2eecd68aaa236b730b43268696eb836106afd0e` (PR #88) by release workflow `38840544147`.
 
@@ -17,7 +36,7 @@ No schema, record format, API shape, Evidence Bundle, Safe Action or privilege c
 
 Verified 2026-10-15: native amd64/arm64 assets match `SHA256SUMS`; amd64 reports `v1.1.0 (e2eecd68aaa2)`; OMV pulled `mjmalleo/hostsleuth:1.1.0` from Docker Hub through the HomeCommander-Claude compose sync (healthy); live `/api/about` = `v1.1.0` / `e2eecd68aaa2`; schema 4 / Docker mode; LAN Action API 403; security headers present. Live timeline before: 94 of 100 events were churn. After: zero churn; container-health history visible again. Recovery: `OMV-Docker-Rebuild` PR #138 merged at `18f7f5e615fb1f6d3e6c5d4327eb878f88cc74f4`.
 
-Open observation: after a reboot, real service listeners returning (about 85 on OMV) still fill most of the 100-event window. Collapsing a reboot's listener wave into one summary event is the natural next improvement; it is not implemented.
+Open observation at the time (resolved in v1.2.0): after a reboot, real service listeners returning still filled most of the 100-event window.
 
 Record: `docs/history/V1.1.0-EVENT-TIMELINE-QUALITY.md`.
 
