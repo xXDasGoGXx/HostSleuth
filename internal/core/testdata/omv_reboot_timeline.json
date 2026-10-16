@@ -1,0 +1,709 @@
+[
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "system",
+  "severity": "warning",
+  "summary": "host reboot detected: current boot started 2026-10-14T22:32:55Z"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:5902"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:5903"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:5904"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:5905"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:60407"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:61208"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:6969"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:8191"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:8989"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:9696"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 0.0.0.0:9999"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 127.0.0.1:32401"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 127.0.0.1:32600"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 127.0.0.1:36647"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 127.0.0.1:42161"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 127.0.0.1:56451"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 127.0.0.1:8088"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 127.0.0.1:9697"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 192.0.2.10:8080"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 192.0.2.10:8118"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 192.0.2.10:8787"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 192.0.2.10:8789"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 192.0.2.10:9117"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:13378"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:3000"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:3001"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:3552"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:42039"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:42075"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:45309"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:6969"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:8191"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:8989"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:9696"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp [::]:9999"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: udp 0.0.0.0:1901"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: udp 0.0.0.0:32410"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: udp 0.0.0.0:32412"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: udp 0.0.0.0:32413"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: udp 0.0.0.0:32414"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: udp 127.0.0.1:5353"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:33:08.035840643Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: udp 127.0.0.1:769"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app1: running (health: starting) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app2: running (health: starting) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app3: running (health: starting) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app4: running (health: starting) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app5: running (health: starting) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app6: running (health: starting) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app7: running (health: starting) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:13378"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:3000"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:3001"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:32400"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:3552"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:5900"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:5902"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:5903"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:5904"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:5905"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:61208"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:6969"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:8191"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:8989"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:9696"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 0.0.0.0:9999"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 127.0.0.1:32401"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 127.0.0.1:32600"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 127.0.0.1:35099"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 127.0.0.1:40031"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 127.0.0.1:8088"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 127.0.0.1:9697"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 192.0.2.10:8080"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 192.0.2.10:8118"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 192.0.2.10:8787"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 192.0.2.10:8789"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 192.0.2.10:9117"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:13378"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:3000"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:3001"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:3552"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:6969"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:8191"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:8989"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:9696"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp [::]:9999"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: udp 0.0.0.0:1901"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: udp 0.0.0.0:32410"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: udp 0.0.0.0:32412"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: udp 0.0.0.0:32413"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: udp 0.0.0.0:32414"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:34:08.913193269Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: udp 127.0.0.1:5353"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T22:35:08.892800294Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app8: running (health: starting) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-14T23:04:08.892747729Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 127.0.0.1:35099"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-15T02:39:08.892709922Z",
+  "category": "container",
+  "severity": "warning",
+  "summary": "container changed: app6: running (healthy) -> running (unhealthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-15T02:40:08.868970818Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app6: running (unhealthy) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-15T22:34:08.892791629Z",
+  "category": "container",
+  "severity": "warning",
+  "summary": "container changed: app3: running (healthy) -> running (unhealthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-15T22:35:08.893247557Z",
+  "category": "container",
+  "severity": "warning",
+  "summary": "container changed: app8: running (healthy) -> running (unhealthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-15T22:40:08.893566227Z",
+  "category": "container",
+  "severity": "info",
+  "summary": "container changed: app8: running (unhealthy) -> running (healthy)"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-16T02:33:23.880045638Z",
+  "category": "listener",
+  "severity": "warning",
+  "summary": "listener disappeared: tcp 192.0.2.10:8787"
+ },
+ {
+  "schema_version": 1,
+  "at": "2026-10-16T02:34:24.063329745Z",
+  "category": "listener",
+  "severity": "info",
+  "summary": "listener appeared: tcp 192.0.2.10:8787"
+ }
+]

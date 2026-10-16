@@ -174,7 +174,7 @@ func runServiceStory(args []string) {
 	if err != nil {
 		snap = core.Collect(ctx)
 	}
-	events, err := store.ReadEvents(200)
+	events, err := store.ReadDetailedEvents(200)
 	if err != nil {
 		events = nil
 	}
@@ -303,6 +303,7 @@ func runServe(args []string) {
 	appCSS, appJS = appendActionAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleV2Assets(appCSS, appJS)
+	appCSS, appJS = appendConsoleV3Assets(appCSS, appJS)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/about", func(w http.ResponseWriter, r *http.Request) {
@@ -357,7 +358,7 @@ func runServe(args []string) {
 		if err != nil {
 			s = core.Collect(r.Context())
 		}
-		events, err := store.ReadEvents(200)
+		events, err := store.ReadDetailedEvents(200)
 		if err != nil {
 			events = nil
 		}

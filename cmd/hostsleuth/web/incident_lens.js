@@ -12,7 +12,7 @@ function installIncidentLensUI() {
   if (!changes || byId("incidentLensForm")) return;
 
   changes.insertAdjacentHTML("beforeend", `
-    <section class="panel incident-lens-panel">
+    <section class="panel section-panel incident-lens-panel">
       <p class="eyebrow">INCIDENT LENS</p>
       <h2>What changed around the time this broke?</h2>
       <p class="section-copy">Anchor a ±15 minute evidence window on an exact time, recorded change, or completed diagnosis. Nearby events are context only—not proof that they caused the incident.</p>

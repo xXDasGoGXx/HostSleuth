@@ -157,10 +157,12 @@ func actionCapability(enabled bool, mode, actionID, title, description, emptyRea
 		AllowedTargets: targets,
 	}
 	switch {
+	case strings.TrimSpace(mode) == dockerDeploymentMode:
+		// Checked first: in Docker mode no flag can make these actions
+		// available, so suggesting --enable-actions would mislead.
+		capability.Reason = "systemd service actions are unavailable in Docker deployment mode"
 	case !enabled:
 		capability.Reason = "actions are disabled; start HostSleuth with --enable-actions to opt in"
-	case strings.TrimSpace(mode) == dockerDeploymentMode:
-		capability.Reason = "systemd service actions are unavailable in Docker deployment mode"
 	case len(targets) == 0:
 		capability.Reason = emptyReason
 	}
