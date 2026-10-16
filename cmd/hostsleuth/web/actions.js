@@ -6,6 +6,7 @@ async function actionRequest(path, options = {}) {
     const message = typeof payload === "string" ? payload.trim() : payload?.error || payload?.result?.summary || `request failed (${response.status})`;
     const error = new Error(message || `request failed (${response.status})`);
     error.payload = payload;
+    error.status = response.status;
     throw error;
   }
   return payload;
@@ -235,11 +236,36 @@ async function installActionsUI() {
     if (!capabilities.length) throw new Error("No action capabilities were returned.");
     actionSelect.addEventListener("change", refreshActionSelection);
     refreshActionSelection();
+    if (!capabilities.some((capability) => capability.available)) {
+      const reasons = [...new Set(capabilities.map((capability) => capability.reason).filter(Boolean))];
+      showActionsUnavailable("No Safe Action is available on this host", reasons.join(" ") || "No action has an allowlisted service.");
+    }
   } catch (error) {
-    capabilityBox.replaceChildren(makeEmpty(error.message || "Action API unavailable. If this UI is being accessed over the LAN, use an SSH tunnel for Optional Safe Actions."));
+    if (error.status === 403) {
+      showActionsUnavailable(
+        "Safe Actions only work on the host itself",
+        "You are viewing HostSleuth over the network. Restart and reload are deliberately limited to the host's own loopback address (or an SSH tunnel to it), so nothing on the LAN can change a service. Everything else in HostSleuth works from here.",
+        true
+      );
+    } else {
+      capabilityBox.replaceChildren(makeEmpty(error.message || "Action API unavailable."));
+    }
     previewButton.disabled = true;
     actionSelect.replaceChildren();
     targetSelect.replaceChildren();
+  }
+
+  function showActionsUnavailable(title, detail, hideAudit = false) {
+    const box = document.createElement("div");
+    box.className = "actions-unavailable";
+    const strong = document.createElement("strong");
+    strong.textContent = title;
+    const p = document.createElement("p");
+    p.textContent = detail;
+    box.append(strong, p);
+    capabilityBox.replaceChildren(box);
+    byId("actionPreviewForm")?.closest("section")?.classList.add("hidden");
+    if (hideAudit) byId("actionAudit")?.closest(".action-grid")?.classList.add("hidden");
   }
 
   byId("actionPreviewForm").addEventListener("submit", async (event) => {

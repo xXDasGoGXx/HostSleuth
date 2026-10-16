@@ -126,9 +126,21 @@ func (s Store) compactEventsIfLarge() error {
 }
 
 // ReadEvents returns the newest `limit` meaningful events, oldest first.
-// Routine listener churn recorded by earlier versions is skipped before
-// the limit is applied, so it can never crowd out real history.
+// Routine listener churn recorded by earlier versions is skipped and
+// listeners that went away and came back are collapsed into one summary
+// per snapshot, both before the limit is applied, so neither can crowd out
+// real history such as a reboot.
 func (s Store) ReadEvents(limit int) ([]Event, error) {
+	events, err := s.readEventFile()
+	if err != nil {
+		return nil, err
+	}
+	return newestEvents(CollapseListenerBlips(MeaningfulEvents(events)), limit), nil
+}
+
+// ReadDetailedEvents is ReadEvents without blip collapsing, for stories
+// that correlate individual listener events with one service or port.
+func (s Store) ReadDetailedEvents(limit int) ([]Event, error) {
 	events, err := s.readEventFile()
 	if err != nil {
 		return nil, err

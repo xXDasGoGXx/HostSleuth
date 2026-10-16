@@ -18,7 +18,7 @@ function installRebootStoryUI() {
   section.id = "view-reboot";
   section.dataset.viewPanel = "reboot";
   section.innerHTML = `
-    <section class="panel reboot-story-panel">
+    <section class="panel section-panel reboot-story-panel">
       <div class="reboot-story-heading">
         <div>
           <p class="eyebrow">REBOOT STORY</p>
@@ -87,6 +87,11 @@ function installRebootStoryUI() {
   main.append(section);
   byId("rebootStoryButton").addEventListener("click", runRebootStory);
   byId("rebootCopyEvidence").addEventListener("click", copyRebootEvidence);
+  // Opening the view answers the question; the button stays for a refresh.
+  document.addEventListener("hostsleuth:view", (event) => {
+    const button = byId("rebootStoryButton");
+    if (event.detail === "reboot" && !lastRebootStory && button && !button.disabled) runRebootStory();
+  });
 }
 
 function rebootRelativeTime(value, bootStartedAt) {
@@ -329,7 +334,7 @@ async function runRebootStory() {
     errorPanel.classList.remove("hidden");
   } finally {
     button.disabled = false;
-    button.textContent = "Build reboot story";
+    button.textContent = lastRebootStory ? "Refresh" : "Build reboot story";
   }
 }
 

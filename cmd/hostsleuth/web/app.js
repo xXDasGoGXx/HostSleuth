@@ -3,6 +3,9 @@ const state = {
   events: [],
   about: null,
   lastDiagnosis: null,
+  changeFilter: { category: "", warningsOnly: false },
+  showRoutineListeners: false,
+  listenerQuery: "",
 };
 
 const checkNames = {
@@ -91,6 +94,7 @@ function syncViewAccessibility(name = activeViewName()) {
 }
 
 function showView(name) {
+  if (!document.querySelector(`[data-view-panel="${CSS.escape(name)}"]`)) name = "overview";
   document.querySelectorAll("[data-view-panel]").forEach((panel) => {
     panel.classList.toggle("active", panel.dataset.viewPanel === name);
   });
@@ -98,9 +102,19 @@ function showView(name) {
     button.classList.toggle("active", button.dataset.view === name);
   });
   syncViewAccessibility(name);
-  window.location.hash = name;
+  if (window.location.hash !== `#${name}`) window.location.hash = name;
   const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
   window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+  document.dispatchEvent(new CustomEvent("hostsleuth:view", { detail: name }));
+}
+
+// Every view, including ones added by later scripts, is reachable by link,
+// and the browser back/forward buttons move between views.
+function routeFromHash() {
+  const name = decodeURIComponent(window.location.hash.replace("#", ""));
+  if (!name) return;
+  if (name === activeViewName() && document.querySelector(`[data-view-panel="${CSS.escape(name)}"].active`)) return;
+  showView(name);
 }
 
 function installNavigationAccessibility() {
@@ -142,6 +156,12 @@ function formatTime(value) {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function formatClock(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return formatTime(value);
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 function formatBytes(value) {
@@ -226,13 +246,124 @@ function openContractForTarget(target) {
 
 function listenerScope(address) {
   const value = String(address || "").toLowerCase();
-  if (value.includes("127.0.0.1:") || value.includes("[::1]:") || value.startsWith("::1:")) {
+  const parts = splitListenerAddress(value);
+  const host = parts?.host ?? "";
+  if (host === "::1" || /^127\./.test(host) || parts?.zone === "lo") {
     return { key: "loopback", label: "Loopback" };
   }
-  if (value.includes("0.0.0.0:") || value.includes("[::]:") || value.startsWith("*:") || value.startsWith(":::")) {
+  if (host === "0.0.0.0" || host === "::" || host === "*" || value.startsWith(":::")) {
     return { key: "wildcard", label: "Wildcard" };
   }
   return { key: "specific", label: "Specific" };
+}
+
+const ROUTINE_DISCOVERY_PORTS = { udp: [1900, 3702, 5353, 5355], tcp: [5355, 5357] };
+const FIXED_HIGH_UDP_PORTS = [41641, 51820];
+
+function splitListenerAddress(address) {
+  const value = String(address || "").trim();
+  const split = value.lastIndexOf(":");
+  if (split <= 0) return null;
+  const port = Number(value.slice(split + 1));
+  if (!Number.isInteger(port)) return null;
+  let host = value.slice(0, split);
+  let zone = "";
+  const pct = host.indexOf("%");
+  if (pct >= 0) {
+    zone = host.slice(pct + 1).replace(/[[\]]/g, "");
+    host = host.slice(0, pct);
+  }
+  host = host.replace(/^\[/, "").replace(/\]$/, "").toLowerCase();
+  return { host, zone, port };
+}
+
+// Interface and client churn: link-local and multicast sockets, discovery
+// binds on one interface address, and ephemeral UDP client sockets. They
+// are still listed under Host evidence on request.
+function isRoutineListener(listener) {
+  const protocol = String(listener?.protocol || "").toLowerCase();
+  const parts = splitListenerAddress(listener?.address);
+  if (!parts) return false;
+  const { host, zone, port } = parts;
+  const wildcard = host === "*" || host === "0.0.0.0" || host === "::";
+  if (!wildcard && !host.includes(":") && !/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return false;
+  const linkLocalOrMulticast =
+    /^fe[89ab][0-9a-f]:/.test(host) || /^ff[0-9a-f]{2}:/.test(host) || /^169\.254\./.test(host) ||
+    /^(22[4-9]|23[0-9])\./.test(host);
+  if (!wildcard && linkLocalOrMulticast) return true;
+  const loopback = host === "::1" || /^127\./.test(host);
+  if (!wildcard && (ROUTINE_DISCOVERY_PORTS[protocol] || []).includes(port) && (zone || !loopback)) return true;
+  return protocol === "udp" && port >= 32768 && port <= 60999 && !FIXED_HIGH_UDP_PORTS.includes(port);
+}
+
+function listenerPort(listener) {
+  return splitListenerAddress(listener?.address)?.port ?? 0;
+}
+
+// Most useful first: reachable beyond loopback, TCP before UDP, low ports.
+function compareListeners(a, b) {
+  const order = { wildcard: 0, specific: 1, loopback: 2 };
+  const rank = (listener) => order[listenerScope(listener.address).key];
+  return rank(a) - rank(b) ||
+    String(a.protocol).localeCompare(String(b.protocol)) ||
+    listenerPort(a) - listenerPort(b) ||
+    String(a.address || "").localeCompare(String(b.address || ""));
+}
+
+// A hint, not evidence: the conventional service for a well-known port.
+const WELL_KNOWN_PORTS = {
+  tcp: { 21: "FTP", 22: "SSH", 25: "SMTP", 53: "DNS", 80: "HTTP", 110: "POP3", 111: "RPC portmapper", 139: "NetBIOS/SMB",
+    143: "IMAP", 443: "HTTPS", 445: "SMB", 465: "SMTPS", 587: "SMTP submission", 631: "IPP printing", 993: "IMAPS",
+    995: "POP3S", 2049: "NFS", 3306: "MySQL", 5432: "PostgreSQL", 5900: "VNC", 6379: "Redis", 8080: "HTTP alt", 8443: "HTTPS alt" },
+  udp: { 53: "DNS", 67: "DHCP", 68: "DHCP client", 69: "TFTP", 111: "RPC portmapper", 123: "NTP", 137: "NetBIOS", 161: "SNMP",
+    323: "chrony", 500: "IKE", 514: "syslog", 1900: "SSDP", 2049: "NFS", 3702: "WS-Discovery", 4500: "IPsec NAT-T",
+    5353: "mDNS", 5355: "LLMNR", 41641: "Tailscale", 51820: "WireGuard" },
+};
+
+function wellKnownService(protocol, port) {
+  return WELL_KNOWN_PORTS[String(protocol || "").toLowerCase()]?.[port] || "";
+}
+
+// One row per dual-stack wildcard service instead of 0.0.0.0:P and [::]:P.
+function mergeDualStack(listeners) {
+  const byKey = new Map();
+  const out = [];
+  listeners.forEach((listener) => {
+    const parts = splitListenerAddress(listener.address);
+    const wildcard = parts && (parts.host === "0.0.0.0" || parts.host === "::" || parts.host === "*");
+    if (!wildcard) {
+      out.push(listener);
+      return;
+    }
+    const key = `${listener.protocol} ${parts.port}`;
+    const existing = byKey.get(key);
+    if (existing) {
+      existing.dualStack = true;
+      existing.address = `*:${parts.port}`;
+      if (!existing.process && listener.process) existing.process = listener.process;
+      return;
+    }
+    const copy = { ...listener };
+    byKey.set(key, copy);
+    out.push(copy);
+  });
+  return out;
+}
+
+function containerHealth(container) {
+  const status = String(container?.status || "").toLowerCase();
+  if (status.includes("(unhealthy)")) return "unhealthy";
+  if (status.startsWith("restarting")) return "restarting";
+  if (status.startsWith("exited") || status.startsWith("dead")) return "stopped";
+  if (status.includes("(paused)") || status.startsWith("paused")) return "paused";
+  if (status.startsWith("up")) return "running";
+  return "other";
+}
+
+function formatMemory(value) {
+  const match = String(value || "").match(/^(\d+)\s*kB$/i);
+  if (!match) return value || "—";
+  return `${(Number(match[1]) / 1048576).toFixed(1)} GiB`;
 }
 
 function listenerTarget(address) {
@@ -254,7 +385,19 @@ function renderEvents(container, events, limit = null) {
     return;
   }
 
+  let lastDay = "";
   list.forEach((event) => {
+    if (!limit) {
+      const date = new Date(event.at);
+      const day = Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
+      if (day && day !== lastDay) {
+        const heading = document.createElement("h3");
+        heading.className = "timeline-day";
+        heading.textContent = day;
+        container.append(heading);
+        lastDay = day;
+      }
+    }
     const item = document.createElement("article");
     item.className = `timeline-item ${event.severity || ""}`;
 
@@ -272,7 +415,8 @@ function renderEvents(container, events, limit = null) {
 
     const when = document.createElement("time");
     when.className = "timeline-time";
-    when.textContent = formatTime(event.at);
+    when.textContent = limit ? formatTime(event.at) : formatClock(event.at);
+    when.title = formatTime(event.at);
 
     item.append(marker, body, when);
     container.append(item);
@@ -289,22 +433,55 @@ function renderChangeSummary(events) {
     const key = event.category || "change";
     counts.set(key, (counts.get(key) || 0) + 1);
   });
+  const warnings = events.filter((event) => event.severity === "warning").length;
+  const filter = state.changeFilter;
 
+  const chip = (label, count, active, onClick) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `change-chip${active ? " active" : ""}`;
+    button.setAttribute("aria-pressed", String(active));
+    const strong = document.createElement("strong");
+    strong.textContent = count;
+    button.append(strong, document.createTextNode(` ${label}`));
+    button.addEventListener("click", onClick);
+    return button;
+  };
+
+  container.append(chip("all", events.length, !filter.category && !filter.warningsOnly, () => {
+    state.changeFilter = { category: "", warningsOnly: false };
+    renderChangesView();
+  }));
   [...counts.entries()]
     .sort((a, b) => b[1] - a[1])
     .forEach(([category, count]) => {
-      const chip = document.createElement("span");
-      chip.className = "change-chip";
-      const strong = document.createElement("strong");
-      strong.textContent = count;
-      chip.append(strong, document.createTextNode(` ${category}`));
-      container.append(chip);
+      container.append(chip(category, count, filter.category === category, () => {
+        state.changeFilter.category = filter.category === category ? "" : category;
+        renderChangesView();
+      }));
     });
+  if (warnings) {
+    const warn = chip(warnings === 1 ? "warning" : "warnings", warnings, filter.warningsOnly, () => {
+      state.changeFilter.warningsOnly = !filter.warningsOnly;
+      renderChangesView();
+    });
+    warn.classList.add("warning-chip");
+    container.append(warn);
+  }
+}
+
+function renderChangesView() {
+  const filter = state.changeFilter;
+  const events = state.events.filter((event) =>
+    (!filter.category || (event.category || "change") === filter.category) &&
+    (!filter.warningsOnly || event.severity === "warning"));
+  renderChangeSummary(state.events);
+  renderEvents(byId("allEvents"), events);
 }
 
 function renderListenerList(container, listeners, limit = null) {
   container.replaceChildren();
-  const ordered = [...listeners].sort((a, b) => String(a.address || "").localeCompare(String(b.address || "")));
+  const ordered = mergeDualStack(listeners).sort(compareListeners);
   const list = limit ? ordered.slice(0, limit) : ordered;
 
   if (!list.length) {
@@ -328,7 +505,12 @@ function renderListenerList(container, listeners, limit = null) {
     address.textContent = listener.address || "Unknown address";
     const meta = document.createElement("span");
     meta.className = "surface-meta";
-    meta.textContent = [listener.protocol, listener.process].filter(Boolean).join(" · ") || "Listener evidence";
+    const hint = wellKnownService(listener.protocol, listenerPort(listener));
+    meta.textContent = [
+      listener.protocol,
+      listener.dualStack ? "IPv4 + IPv6" : "",
+      listener.process || (hint ? `usually ${hint}` : ""),
+    ].filter(Boolean).join(" · ") || "Listener evidence";
     main.append(address, meta);
 
     const action = document.createElement("button");
@@ -351,9 +533,77 @@ function renderListenerList(container, listeners, limit = null) {
   if (limit && ordered.length > limit) {
     const more = document.createElement("div");
     more.className = "empty-state";
-    more.textContent = `${ordered.length - limit} more listening sockets are available under Host evidence.`;
+    more.textContent = `${ordered.length - limit} more listening sockets are under Host evidence.`;
     container.append(more);
   }
+}
+
+function isVirtualInterface(name) {
+  return /^(veth|vnet|tap|cali|flannel|cni|lxc[^b]|virbr\d+-nic)/.test(String(name || ""));
+}
+
+function interfaceRow(item) {
+  const row = document.createElement("article");
+  row.className = "stack-item";
+  const head = document.createElement("div");
+  head.className = "stack-item-head";
+  const title = document.createElement("span");
+  title.className = "stack-item-title";
+  title.textContent = item.name || "Interface";
+  const meta = document.createElement("span");
+  meta.className = `stack-item-meta iface-state ${item.state === "up" ? "up" : "down"}`;
+  meta.textContent = item.state || "unknown";
+  head.append(title, meta);
+  const body = document.createElement("div");
+  body.className = "stack-item-body";
+  body.textContent = (item.addresses || []).join(" · ") || "No addresses reported";
+  row.append(head, body);
+  return row;
+}
+
+function renderHostListeners() {
+  const container = byId("listenerList");
+  if (!container) return;
+  const all = state.snapshot?.listeners || [];
+  const routine = all.filter(isRoutineListener).length;
+  const query = state.listenerQuery.trim().toLowerCase();
+  const visible = all.filter((listener) =>
+    (state.showRoutineListeners || !isRoutineListener(listener)) &&
+    (!query || `${listener.protocol} ${listener.address} ${listener.process || ""}`.toLowerCase().includes(query)));
+
+  let tools = byId("listenerTools");
+  if (!tools) {
+    tools = document.createElement("div");
+    tools.id = "listenerTools";
+    tools.className = "listener-tools";
+    const search = document.createElement("input");
+    search.type = "search";
+    search.id = "listenerSearch";
+    search.placeholder = "Filter by port, address or process";
+    search.setAttribute("aria-label", "Filter listening sockets");
+    search.addEventListener("input", () => {
+      state.listenerQuery = search.value;
+      renderHostListeners();
+    });
+    const toggle = document.createElement("label");
+    toggle.className = "listener-routine-toggle";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.id = "listenerShowRoutine";
+    box.addEventListener("change", () => {
+      state.showRoutineListeners = box.checked;
+      renderHostListeners();
+    });
+    toggle.append(box, document.createTextNode(" Show routine sockets"));
+    const count = document.createElement("span");
+    count.id = "listenerCount";
+    count.className = "listener-count";
+    tools.append(search, toggle, count);
+    container.before(tools);
+  }
+  text(byId("listenerCount"), `${visible.length} shown · ${routine} routine ${state.showRoutineListeners ? "included" : "hidden"}`);
+  byId("listenerShowRoutine").title = "Link-local and multicast sockets, discovery binds on single interfaces, and ephemeral UDP client sockets";
+  renderListenerList(container, visible);
 }
 
 function renderInterfaces(interfaces) {
@@ -363,24 +613,21 @@ function renderInterfaces(interfaces) {
     container.append(makeEmpty("No interface information is available."));
     return;
   }
-  interfaces.forEach((item) => {
-    const row = document.createElement("article");
-    row.className = "stack-item";
-    const head = document.createElement("div");
-    head.className = "stack-item-head";
-    const title = document.createElement("span");
-    title.className = "stack-item-title";
-    title.textContent = item.name || "Interface";
-    const meta = document.createElement("span");
-    meta.className = "stack-item-meta";
-    meta.textContent = item.state || "unknown";
-    head.append(title, meta);
-    const body = document.createElement("div");
-    body.className = "stack-item-body";
-    body.textContent = (item.addresses || []).join(" · ") || "No addresses reported";
-    row.append(head, body);
-    container.append(row);
-  });
+  const routable = (item) => (item.addresses || []).some((address) => !/^(fe80:|::1\/|127\.)/i.test(address));
+  const rank = (item) => (item.name === "lo" ? 3 : routable(item) ? (/^(br-|docker|podman|lxcbr|virbr)/.test(item.name) ? 1 : 0) : 2);
+  const primary = interfaces.filter((item) => !isVirtualInterface(item.name))
+    .sort((a, b) => rank(a) - rank(b) || String(a.name).localeCompare(String(b.name)));
+  const virtual = interfaces.filter((item) => isVirtualInterface(item.name));
+  primary.forEach((item) => container.append(interfaceRow(item)));
+  if (virtual.length) {
+    const details = document.createElement("details");
+    details.className = "stack-fold";
+    const summary = document.createElement("summary");
+    summary.textContent = `${virtual.length} container and VM link ${virtual.length === 1 ? "interface" : "interfaces"} (veth, vnet, tap)`;
+    details.append(summary);
+    virtual.forEach((item) => details.append(interfaceRow(item)));
+    container.append(details);
+  }
 }
 
 function renderRoutes(routes) {
@@ -390,18 +637,19 @@ function renderRoutes(routes) {
     container.append(makeEmpty("No route information is available."));
     return;
   }
-  routes.forEach((route, index) => {
+  routes.forEach((route) => {
     const row = document.createElement("article");
     row.className = "stack-item";
     const head = document.createElement("div");
     head.className = "stack-item-head";
     const title = document.createElement("span");
     title.className = "stack-item-title";
-    title.textContent = index === 0 ? "Routing table" : "Route";
+    const [destination, ...rest] = String(route || "").trim().split(/\s+/);
+    title.textContent = destination === "default" ? "Default route" : destination || "Route";
     head.append(title);
     const body = document.createElement("div");
     body.className = "stack-item-body";
-    body.textContent = route;
+    body.textContent = rest.join(" ") || route;
     row.append(head, body);
     container.append(row);
   });
@@ -414,9 +662,13 @@ function renderContainers(containers) {
     container.append(makeEmpty("No Docker containers are visible in the current snapshot."));
     return;
   }
-  containers.forEach((item) => {
+  const healthRank = { unhealthy: 0, restarting: 0, stopped: 1, paused: 1, other: 2, running: 3 };
+  const ordered = [...containers].sort((a, b) =>
+    healthRank[containerHealth(a)] - healthRank[containerHealth(b)] || String(a.name).localeCompare(String(b.name)));
+  ordered.forEach((item) => {
+    const health = containerHealth(item);
     const row = document.createElement("article");
-    row.className = "stack-item";
+    row.className = `stack-item container-${health}`;
     const head = document.createElement("div");
     head.className = "stack-item-head";
     const title = document.createElement("span");
@@ -470,7 +722,7 @@ function renderFilesystems(filesystems, dockerMode = false) {
   });
 }
 
-function renderAttention({ dockerMode, failedServices, exposedListeners, recentChanges }) {
+function renderAttention({ dockerMode, failedServices, exposedListeners, recentChanges, troubledContainers = [] }) {
   const strip = byId("attentionStrip");
   const action = byId("attentionAction");
   strip.classList.remove("problem", "caution");
@@ -489,9 +741,19 @@ function renderAttention({ dockerMode, failedServices, exposedListeners, recentC
     return;
   }
 
+  if (troubledContainers.length) {
+    strip.classList.add("problem");
+    const names = troubledContainers.map((item) => `${item.name || item.id} (${containerHealth(item)})`);
+    const shown = names.slice(0, 3).join(", ") + (names.length > 3 ? ` and ${names.length - 3} more` : "");
+    text(byId("attentionTitle"), `${troubledContainers.length} ${troubledContainers.length === 1 ? "container is" : "containers are"} not healthy: ${shown}`);
+    text(byId("attentionDetail"), "Docker reports this right now. Changes shows when it started; Host evidence lists every container with problems first.");
+    setAction("Inspect containers", "host");
+    return;
+  }
+
   if (recentChanges > 0 && exposedListeners > 0) {
     strip.classList.add("caution");
-    text(byId("attentionTitle"), `${recentChanges} meaningful ${recentChanges === 1 ? "change" : "changes"} in 24h while ${exposedListeners} sockets listen beyond loopback`);
+    text(byId("attentionTitle"), `${recentChanges} meaningful ${recentChanges === 1 ? "change" : "changes"} in 24h · ${exposedListeners} service ${exposedListeners === 1 ? "socket listens" : "sockets listen"} beyond loopback`);
     text(byId("attentionDetail"), "This is context, not an alarm. The timeline and reachability surface show exactly what HostSleuth observed.");
     setAction("Review changes", "changes");
     return;
@@ -545,7 +807,10 @@ function renderHost(snapshot) {
   const interfaces = snapshot.interfaces || [];
   const failedServices = services.filter((service) => service.active === "failed").length;
   const runningContainers = containers.filter((container) => String(container.status || "").toLowerCase().startsWith("up")).length;
-  const exposedListeners = listeners.filter((listener) => listenerScope(listener.address).key !== "loopback").length;
+  const troubledContainers = containers.filter((container) => ["unhealthy", "restarting", "stopped"].includes(containerHealth(container)));
+  const serviceListeners = listeners.filter((listener) => !isRoutineListener(listener));
+  const routineListeners = listeners.length - serviceListeners.length;
+  const exposedListeners = serviceListeners.filter((listener) => listenerScope(listener.address).key !== "loopback").length;
   const recentChanges = state.events.filter((event) => isRecent(event.at, 24)).length;
 
   text(byId("hostName"), host.hostname || "This host");
@@ -557,25 +822,34 @@ function renderHost(snapshot) {
   text(byId("hostSummary"), summaryParts.filter(Boolean).join(" · ") || "Host snapshot loaded.");
 
   const storyParts = [
-    `${listeners.length} ${listeners.length === 1 ? "listener" : "listeners"}`,
+    `${serviceListeners.length} service ${serviceListeners.length === 1 ? "listener" : "listeners"}${routineListeners ? ` (+${routineListeners} routine)` : ""}`,
     `${interfaces.length} ${interfaces.length === 1 ? "interface" : "interfaces"}`,
-    containers.length ? `${runningContainers}/${containers.length} containers running` : "no visible containers",
+    containers.length
+      ? `${runningContainers}/${containers.length} containers running${troubledContainers.length ? `, ${troubledContainers.length} not healthy` : ""}`
+      : "no visible containers",
     recentChanges ? `${recentChanges} meaningful changes in 24h` : "no meaningful changes in 24h",
   ];
   text(byId("hostStoryLine"), `Right now HostSleuth sees ${storyParts.join(" · ")}.`);
 
   text(byId("exposedListenerCount"), exposedListeners);
-  text(byId("exposedListenerNote"), exposedListeners ? `${listeners.length - exposedListeners} loopback-only` : "Loopback-only surface");
+  text(byId("exposedListenerNote"), exposedListeners
+    ? `${serviceListeners.length - exposedListeners} loopback-only${routineListeners ? ` · ${routineListeners} routine hidden` : ""}`
+    : "Loopback-only surface");
   text(byId("failedServiceCount"), dockerMode ? "—" : failedServices);
   text(byId("failedServiceNote"), dockerMode ? "Unavailable in Docker mode" : failedServices ? `${failedServices} need attention` : "No failed services");
   byId("failedServiceNote").className = `signal-note ${!dockerMode && failedServices ? "problem" : !dockerMode ? "good" : ""}`;
   text(byId("containerCount"), containers.length);
-  text(byId("containerNote"), containers.length ? `${runningContainers} running` : "No containers found");
+  text(byId("containerNote"), !containers.length
+    ? "No containers found"
+    : troubledContainers.length
+      ? `${troubledContainers.length} not healthy · ${runningContainers} running`
+      : `${runningContainers} running, all healthy`);
+  byId("containerNote").className = `signal-note ${troubledContainers.length ? "problem" : containers.length ? "good" : ""}`;
   text(byId("change24hCount"), recentChanges);
   text(byId("change24hNote"), recentChanges ? `${state.events.length} retained total` : "No recent meaningful changes");
   byId("change24hNote").className = `signal-note ${recentChanges ? "warning" : "good"}`;
 
-  renderAttention({ dockerMode, failedServices, exposedListeners, recentChanges });
+  renderAttention({ dockerMode, failedServices, exposedListeners, recentChanges, troubledContainers });
 
   const snapshotState = byId("snapshotState");
   snapshotState.classList.remove("bad");
@@ -588,7 +862,7 @@ function renderHost(snapshot) {
     ["Kernel", host.kernel || "—"],
     ["Architecture", host.architecture || "—"],
     ["CPU", host.cpu_count ? `${host.cpu_count} logical CPUs` : "—"],
-    ["Memory", host.memory_total || "—"],
+    ["Memory", formatMemory(host.memory_total)],
     ["Uptime", host.uptime || "—"],
     ["Snapshot", formatTime(snapshot.captured_at)],
   ];
@@ -607,8 +881,8 @@ function renderHost(snapshot) {
     hostFacts.append(item);
   });
 
-  renderListenerList(byId("overviewListeners"), listeners, 6);
-  renderListenerList(byId("listenerList"), listeners);
+  renderListenerList(byId("overviewListeners"), serviceListeners, 6);
+  renderHostListeners();
   renderInterfaces(interfaces);
   renderRoutes(snapshot.routes || []);
   renderContainers(containers);
@@ -778,8 +1052,7 @@ async function loadDashboard() {
     state.events = await eventsResponse.json();
     renderHost(state.snapshot);
     renderEvents(byId("overviewEvents"), state.events, 5);
-    renderEvents(byId("allEvents"), state.events);
-    renderChangeSummary(state.events);
+    renderChangesView();
   } catch (error) {
     snapshotState.classList.add("bad");
     snapshotState.lastElementChild.textContent = "Could not load host snapshot";
@@ -839,12 +1112,10 @@ byId("diagnoseForm").addEventListener("submit", (event) => {
 
 installNavigationAccessibility();
 
-const initialView = window.location.hash.replace("#", "");
-if (["overview", "diagnose", "changes", "host"].includes(initialView)) {
-  showView(initialView);
-} else {
-  syncViewAccessibility("overview");
-}
+syncViewAccessibility("overview");
+window.addEventListener("hashchange", routeFromHash);
+if (document.readyState === "complete") routeFromHash();
+else window.addEventListener("load", routeFromHash);
 
 loadAbout();
 loadDashboard();
