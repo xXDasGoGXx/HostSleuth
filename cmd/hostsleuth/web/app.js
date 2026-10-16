@@ -489,46 +489,7 @@ function renderListenerList(container, listeners, limit = null) {
     return;
   }
 
-  list.forEach((listener) => {
-    const scope = listenerScope(listener.address);
-    const item = document.createElement("article");
-    item.className = "surface-item";
-
-    const badge = document.createElement("span");
-    badge.className = `surface-scope ${scope.key}`;
-    badge.textContent = scope.label;
-
-    const main = document.createElement("div");
-    main.className = "surface-main";
-    const address = document.createElement("span");
-    address.className = "surface-address";
-    address.textContent = listener.address || "Unknown address";
-    const meta = document.createElement("span");
-    meta.className = "surface-meta";
-    const hint = wellKnownService(listener.protocol, listenerPort(listener));
-    meta.textContent = [
-      listener.protocol,
-      listener.dualStack ? "IPv4 + IPv6" : "",
-      listener.process || (hint ? `usually ${hint}` : ""),
-    ].filter(Boolean).join(" · ") || "Listener evidence";
-    main.append(address, meta);
-
-    const action = document.createElement("button");
-    action.className = "surface-action";
-    action.type = "button";
-    action.textContent = "Diagnose";
-    const target = listenerTarget(listener.address);
-    action.disabled = !target;
-    action.addEventListener("click", () => {
-      if (!target) return;
-      byId("diagnoseTarget").value = target;
-      showView("diagnose");
-      byId("diagnoseTarget").focus();
-    });
-
-    item.append(badge, main, action);
-    container.append(item);
-  });
+  list.forEach((listener) => container.append(listenerItem(listener)));
 
   if (limit && ordered.length > limit) {
     const more = document.createElement("div");
@@ -536,6 +497,83 @@ function renderListenerList(container, listeners, limit = null) {
     more.textContent = `${ordered.length - limit} more listening sockets are under Host evidence.`;
     container.append(more);
   }
+}
+
+function listenerItem(listener) {
+  const scope = listenerScope(listener.address);
+  const item = document.createElement("article");
+  item.className = "surface-item";
+
+  const badge = document.createElement("span");
+  badge.className = `surface-scope ${scope.key}`;
+  badge.textContent = scope.label;
+
+  const main = document.createElement("div");
+  main.className = "surface-main";
+  const address = document.createElement("span");
+  address.className = "surface-address";
+  address.textContent = listener.address || "Unknown address";
+  const meta = document.createElement("span");
+  meta.className = "surface-meta";
+  const hint = wellKnownService(listener.protocol, listenerPort(listener));
+  meta.textContent = [
+    listener.protocol,
+    listener.dualStack ? "IPv4 + IPv6" : "",
+    listener.process || (hint ? `usually ${hint}` : ""),
+  ].filter(Boolean).join(" · ") || "Listener evidence";
+  main.append(address, meta);
+
+  const action = document.createElement("button");
+  action.className = "surface-action";
+  action.type = "button";
+  action.textContent = "Diagnose";
+  const target = listenerTarget(listener.address);
+  action.disabled = !target;
+  action.addEventListener("click", () => {
+    if (!target) return;
+    byId("diagnoseTarget").value = target;
+    showView("diagnose");
+    byId("diagnoseTarget").focus();
+  });
+
+  item.append(badge, main, action);
+  return item;
+}
+
+// Host evidence groups sockets by who can reach them. Loopback-only
+// sockets cannot be reached from other machines, so they start folded.
+const LISTENER_GROUPS = [
+  { key: "wildcard", title: "Every interface", note: "Bound to all addresses: reachable on any network this host is on, unless a firewall says otherwise." },
+  { key: "specific", title: "One address", note: "Reachable only on the address shown." },
+  { key: "loopback", title: "This host only", note: "Loopback: not reachable from other machines.", fold: true },
+];
+
+function renderGroupedListeners(container, listeners, expandAll) {
+  container.replaceChildren();
+  const ordered = mergeDualStack(listeners).sort(compareListeners);
+  if (!ordered.length) {
+    container.append(makeEmpty("No listening sockets match."));
+    return;
+  }
+  LISTENER_GROUPS.forEach((group) => {
+    const members = ordered.filter((listener) => listenerScope(listener.address).key === group.key);
+    if (!members.length) return;
+    const wrap = document.createElement(group.fold ? "details" : "section");
+    wrap.className = "surface-group";
+    if (group.fold && expandAll) wrap.open = true;
+    const head = document.createElement(group.fold ? "summary" : "div");
+    head.className = "surface-group-head";
+    const title = document.createElement("strong");
+    title.textContent = `${group.title} · ${members.length}`;
+    const note = document.createElement("span");
+    note.textContent = group.note;
+    head.append(title, note);
+    const body = document.createElement("div");
+    body.className = "surface-list full-surface";
+    members.forEach((listener) => body.append(listenerItem(listener)));
+    wrap.append(head, body);
+    container.append(wrap);
+  });
 }
 
 function isVirtualInterface(name) {
@@ -603,7 +641,8 @@ function renderHostListeners() {
   }
   text(byId("listenerCount"), `${visible.length} shown · ${routine} routine ${state.showRoutineListeners ? "included" : "hidden"}`);
   byId("listenerShowRoutine").title = "Link-local and multicast sockets, discovery binds on single interfaces, and ephemeral UDP client sockets";
-  renderListenerList(container, visible);
+  container.classList.remove("surface-list", "full-surface");
+  renderGroupedListeners(container, visible, Boolean(query));
 }
 
 function renderInterfaces(interfaces) {
@@ -613,21 +652,33 @@ function renderInterfaces(interfaces) {
     container.append(makeEmpty("No interface information is available."));
     return;
   }
-  const routable = (item) => (item.addresses || []).some((address) => !/^(fe80:|::1\/|127\.)/i.test(address));
-  const rank = (item) => (item.name === "lo" ? 3 : routable(item) ? (/^(br-|docker|podman|lxcbr|virbr)/.test(item.name) ? 1 : 0) : 2);
-  const primary = interfaces.filter((item) => !isVirtualInterface(item.name))
-    .sort((a, b) => rank(a) - rank(b) || String(a.name).localeCompare(String(b.name)));
-  const virtual = interfaces.filter((item) => isVirtualInterface(item.name));
+  const byName = (a, b) => String(a.name).localeCompare(String(b.name), undefined, { numeric: true });
+  const addressed = (item) => (item.addresses || []).some((address) => !/^fe80:/i.test(address));
+  const networks = interfaces.filter((item) => isContainerNetwork(item.name)).sort(byName);
+  const links = interfaces.filter((item) => isVirtualInterface(item.name)).sort(byName);
+  const rest = interfaces.filter((item) => !isContainerNetwork(item.name) && !isVirtualInterface(item.name));
+  const primary = rest.filter(addressed).sort((a, b) => (a.name === "lo") - (b.name === "lo") || byName(a, b));
+  const bare = rest.filter((item) => !addressed(item)).sort(byName);
   primary.forEach((item) => container.append(interfaceRow(item)));
-  if (virtual.length) {
-    const details = document.createElement("details");
-    details.className = "stack-fold";
-    const summary = document.createElement("summary");
-    summary.textContent = `${virtual.length} container and VM link ${virtual.length === 1 ? "interface" : "interfaces"} (veth, vnet, tap)`;
-    details.append(summary);
-    virtual.forEach((item) => details.append(interfaceRow(item)));
-    container.append(details);
-  }
+  const down = bare.filter((item) => item.state !== "up").length;
+  appendFold(container, bare, `${bare.length} without an IP address (bridge ports, VLANs${down ? `, ${down} down` : ""})`, interfaceRow);
+  appendFold(container, networks, `${networks.length} container and VM ${networks.length === 1 ? "network" : "networks"} (Docker, Podman, LXC, libvirt)`, interfaceRow);
+  appendFold(container, links, `${links.length} container and VM link ${links.length === 1 ? "interface" : "interfaces"} (veth, vnet, tap)`, interfaceRow);
+}
+
+function isContainerNetwork(name) {
+  return /^(br-[0-9a-f]{12}$|docker\d+$|podman\d+$|lxcbr\d+$|virbr\d+$|cni\d*$|flannel|cali|cilium|kube-)/.test(String(name || ""));
+}
+
+function appendFold(container, items, label, makeRow) {
+  if (!items.length) return;
+  const details = document.createElement("details");
+  details.className = "stack-fold";
+  const summary = document.createElement("summary");
+  summary.textContent = label;
+  details.append(summary);
+  items.forEach((item) => details.append(makeRow(item)));
+  container.append(details);
 }
 
 function renderRoutes(routes) {
@@ -637,22 +688,27 @@ function renderRoutes(routes) {
     container.append(makeEmpty("No route information is available."));
     return;
   }
-  routes.forEach((route) => {
-    const row = document.createElement("article");
-    row.className = "stack-item";
-    const head = document.createElement("div");
-    head.className = "stack-item-head";
-    const title = document.createElement("span");
-    title.className = "stack-item-title";
-    const [destination, ...rest] = String(route || "").trim().split(/\s+/);
-    title.textContent = destination === "default" ? "Default route" : destination || "Route";
-    head.append(title);
-    const body = document.createElement("div");
-    body.className = "stack-item-body";
-    body.textContent = rest.join(" ") || route;
-    row.append(head, body);
-    container.append(row);
-  });
+  const device = (route) => (String(route).match(/\bdev\s+(\S+)/) || [])[1] || "";
+  const containerRoutes = routes.filter((route) => isContainerNetwork(device(route)));
+  routes.filter((route) => !isContainerNetwork(device(route))).forEach((route) => container.append(routeRow(route)));
+  appendFold(container, containerRoutes, `${containerRoutes.length} container and VM network ${containerRoutes.length === 1 ? "route" : "routes"}`, routeRow);
+}
+
+function routeRow(route) {
+  const row = document.createElement("article");
+  row.className = "stack-item";
+  const head = document.createElement("div");
+  head.className = "stack-item-head";
+  const title = document.createElement("span");
+  title.className = "stack-item-title";
+  const [destination, ...rest] = String(route || "").trim().split(/\s+/);
+  title.textContent = destination === "default" ? "Default route" : destination || "Route";
+  head.append(title);
+  const body = document.createElement("div");
+  body.className = "stack-item-body";
+  body.textContent = rest.join(" ") || route;
+  row.append(head, body);
+  return row;
 }
 
 function renderContainers(containers) {
