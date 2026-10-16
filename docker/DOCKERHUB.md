@@ -64,7 +64,10 @@ HostSleuth can combine evidence for:
 - systemd service state in native mode;
 - recent package and selected configuration changes;
 - reboot context and incident timelines;
-- certificate rollout mismatches across explicit endpoints.
+- certificate rollout mismatches across explicit endpoints;
+- container restarts with Docker's exit reason, out-of-memory kills and image updates (Container Story).
+
+Every result has **Share redacted**: a paste-ready copy with host names, addresses, container names, paths and secrets replaced by consistent aliases.
 
 ## Linux flight recorder
 
@@ -74,7 +77,7 @@ Depending on deployment mode, that can include:
 
 - network interfaces and routes;
 - listening sockets;
-- Docker container state and published ports;
+- Docker container state, published ports, image updates and restarts;
 - systemd services;
 - package installation, update, and removal history;
 - fingerprints of selected high-value configuration files;

@@ -84,6 +84,7 @@
 
         <div class="dns-handoff-actions">
           <button class="secondary-button" id="dnsCopyEvidence" type="button">Copy evidence summary</button>
+          <button class="secondary-button share-button" id="dnsCopyEvidenceShare" type="button">Share redacted</button>
           <button class="secondary-button" id="dnsToDiagnose" type="button">Diagnose endpoint</button>
           <button class="secondary-button" id="dnsToContract" type="button">Build expectation</button>
           <span class="copy-status" id="dnsCopyStatus" aria-live="polite"></span>
@@ -104,6 +105,7 @@
     byId("dnsAddResolver").addEventListener("click", () => addDNSResolverRow(""));
     byId("dnsDetectiveForm").addEventListener("submit", runDNSDetective);
     byId("dnsCopyEvidence").addEventListener("click", copyDNSEvidence);
+    byId("dnsCopyEvidenceShare").addEventListener("click", () => shareRedacted(() => dnsEvidenceSummary(lastDNSDetective), "dns"));
     byId("dnsToDiagnose").addEventListener("click", () => dnsHandoff("diagnose"));
     byId("dnsToContract").addEventListener("click", () => dnsHandoff("contracts"));
 

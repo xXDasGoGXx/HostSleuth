@@ -62,6 +62,8 @@ func main() {
 		runEvidence(os.Args[2:])
 	case "events":
 		runEvents(os.Args[2:])
+	case "containers":
+		runContainers(os.Args[2:])
 	case "serve":
 		runServe(os.Args[2:])
 	case "version":
@@ -74,7 +76,7 @@ func main() {
 
 func usage() {
 	fmt.Println("HostSleuth - local-first Linux change recorder and diagnostics")
-	fmt.Println("usage: hostsleuth <snapshot|diagnose|contract|dns|proxy|permissions|starttls|cert-rollout|service|incident|reboot|workbench|action|evidence|events|serve|version> [options]")
+	fmt.Println("usage: hostsleuth <snapshot|diagnose|contract|dns|proxy|permissions|starttls|cert-rollout|service|incident|reboot|containers|workbench|action|evidence|events|serve|version> [options]")
 }
 
 func buildRevision() string {
@@ -303,6 +305,7 @@ func runServe(args []string) {
 	appCSS, appJS = appendActionAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleAssets(appCSS, appJS)
 	appCSS, appJS = appendAdminConsoleV2Assets(appCSS, appJS)
+	appCSS, appJS = appendContainerStoryAssets(appCSS, appJS)
 	appCSS, appJS = appendConsoleV3Assets(appCSS, appJS)
 
 	mux := http.NewServeMux()
@@ -389,6 +392,8 @@ func runServe(args []string) {
 		_ = json.NewEncoder(w).Encode(core.BuildIncidentLens(r.Context(), anchor, r.URL.Query().Get("target"), s, events))
 	})
 	registerRebootStoryAPI(mux, store)
+	registerContainerStoryAPI(mux, store)
+	registerShareAPI(mux, store)
 	registerEndpointContractAPI(mux, store)
 	registerDNSDetectiveAPI(mux)
 	registerProxyStoryAPI(mux, store)

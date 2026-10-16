@@ -97,11 +97,15 @@ Redaction reduces disclosure risk but cannot guarantee anonymity. Timing, packag
 
 Full design/threat model: `docs/design/REDACTED-EVIDENCE-BUNDLE.md`.
 
+## Share redacted boundary
+
+`POST /api/share` redacts text the browser sends (an evidence summary the person is already looking at) and returns the redacted copy. It stores nothing, calls nothing external, accepts at most 64 KiB, and uses the same redaction as the Redacted Evidence Bundle, seeded with the current snapshot's names and addresses. It is available wherever the Web UI is bound; it reveals nothing beyond what the snapshot API already shows to the same client. Redaction lowers disclosure risk but cannot guarantee anonymity.
+
 ## Docker socket
 
 The supported Docker deployment mounts `/var/run/docker.sock` so HostSleuth can inventory Docker containers. Access to the Docker daemon socket is a powerful host capability: mounting the socket path read-only does not make Docker API access inherently read-only.
 
-HostSleuth currently uses the socket only through read-only inventory commands such as `docker ps`. M11 does not use it for actions and does not request a writable socket. A compromised process with access to the socket could still potentially control the Docker daemon, so only use the Docker deployment when you trust the HostSleuth image/source and the host's Docker daemon is appropriate to expose to this container.
+HostSleuth uses the socket only through read-only queries: `docker ps`, a field-limited `docker inspect` (image ID, `org.opencontainers.image.version` label, restart count, start/finish time, exit code, OOM flag, health failing streak) and `docker events` limited to `die`/`oom` events, reading only time, action, container name and exit code. Its templates never select container environment variables, commands, mounts or host configuration, which commonly hold secrets; a unit test enforces that. M11 does not use it for actions and does not request a writable socket. A compromised process with access to the socket could still potentially control the Docker daemon, so only use the Docker deployment when you trust the HostSleuth image/source and the host's Docker daemon is appropriate to expose to this container.
 
 For the smallest HostSleuth security surface and fullest systemd/filesystem visibility, use the native systemd deployment.
 

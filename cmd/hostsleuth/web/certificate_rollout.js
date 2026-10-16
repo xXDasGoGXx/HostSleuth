@@ -64,6 +64,7 @@
 
         <div class="result-actions">
           <button class="secondary-button" id="certificateRolloutCopyEvidence" type="button">Copy evidence summary</button>
+          <button class="secondary-button share-button" id="certificateRolloutCopyEvidenceShare" type="button">Share redacted</button>
           <span class="copy-status" id="certificateRolloutCopyStatus" aria-live="polite"></span>
         </div>
 
@@ -121,6 +122,7 @@
     byId("certificateRolloutSource").addEventListener("change", updateCertificateRolloutSourceUI);
     byId("certificateRolloutForm").addEventListener("submit", runCertificateRollout);
     byId("certificateRolloutCopyEvidence").addEventListener("click", copyCertificateRolloutEvidence);
+    byId("certificateRolloutCopyEvidenceShare").addEventListener("click", () => shareRedacted(() => certificateRolloutEvidenceSummary(lastCertificateRollout), "cert-rollout"));
     updateCertificateRolloutSourceUI();
     if (window.location.hash === "#cert-rollout") showView("cert-rollout");
   }

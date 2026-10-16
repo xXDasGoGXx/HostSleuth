@@ -25,6 +25,7 @@ func DiffSnapshots(oldSnap, newSnap Snapshot) []Event {
 	}
 	events = append(events, diffNamedStates(at, "service", serviceMap(oldSnap.Services), serviceMap(newSnap.Services))...)
 	events = append(events, diffNamedStates(at, "container", containerMap(oldSnap.Containers), containerMap(newSnap.Containers))...)
+	events = append(events, diffContainerRuntime(at, oldSnap.CapturedAt, oldSnap.Containers, newSnap.Containers)...)
 	events = append(events, diffSet(at, "listener", listenerSet(oldSnap.Listeners), listenerSet(newSnap.Listeners))...)
 	if oldSnap.SchemaVersion >= packageHistorySchemaVersion {
 		events = append(events, diffPackageChanges(oldSnap.PackageChanges, newSnap.PackageChanges)...)
