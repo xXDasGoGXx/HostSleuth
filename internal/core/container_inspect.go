@@ -9,10 +9,13 @@ import (
 )
 
 // dockerInspectFormat selects only the runtime fields HostSleuth reports.
+// Docker evaluates inspect templates against the raw JSON as a map and
+// treats a missing key as an error, so optional objects (Health exists only
+// with a healthcheck) are read with `index`, which tolerates absent keys.
 // It must never select .Config.Env, .Config.Cmd, .Mounts or .HostConfig:
 // container configuration routinely carries passwords and tokens, and a
 // field-limited template keeps them out of process memory and snapshots.
-const dockerInspectFormat = `{{.Id}}{{"\t"}}{{.Image}}{{"\t"}}{{.RestartCount}}{{"\t"}}{{.State.OOMKilled}}{{"\t"}}{{.State.ExitCode}}{{"\t"}}{{.State.StartedAt}}{{"\t"}}{{.State.FinishedAt}}{{"\t"}}{{if .State.Health}}{{.State.Health.FailingStreak}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "org.opencontainers.image.version"}}{{end}}`
+const dockerInspectFormat = `{{.Id}}{{"\t"}}{{.Image}}{{"\t"}}{{.RestartCount}}{{"\t"}}{{.State.OOMKilled}}{{"\t"}}{{.State.ExitCode}}{{"\t"}}{{.State.StartedAt}}{{"\t"}}{{.State.FinishedAt}}{{"\t"}}{{with index .State "Health"}}{{index . "FailingStreak"}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "org.opencontainers.image.version"}}{{end}}`
 
 // enrichContainers adds runtime evidence to containers listed by
 // `docker ps`. One `docker inspect` call covers every container; if it

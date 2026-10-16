@@ -3,6 +3,7 @@ package core
 import (
 	"strings"
 	"testing"
+	"text/template"
 	"time"
 )
 
@@ -173,6 +174,42 @@ func TestContainerRestartWithoutExitEvidenceAndBaselines(t *testing.T) {
 	for _, e := range DiffSnapshots(runtimeSnap(t0, old), runtimeSnap(t1, down)) {
 		if strings.HasPrefix(e.Summary, containerRestartedPrefix) {
 			t.Fatalf("stopped container reported as restarted: %+v", e)
+		}
+	}
+}
+
+// Docker executes inspect templates on the decoded JSON map with missing
+// keys as errors. Containers without a healthcheck have no State.Health.
+func TestDockerInspectFormatToleratesMissingOptionalKeys(t *testing.T) {
+	tmpl, err := template.New("").Option("missingkey=error").Parse(dockerInspectFormat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	noHealth := map[string]any{
+		"Id": "abc", "Image": "sha256:x", "RestartCount": float64(2),
+		"State":  map[string]any{"OOMKilled": false, "ExitCode": float64(0), "StartedAt": "2026-10-15T00:00:00Z", "FinishedAt": "0001-01-01T00:00:00Z"},
+		"Config": map[string]any{"Labels": nil},
+	}
+	withHealth := map[string]any{
+		"Id": "def", "Image": "sha256:y", "RestartCount": float64(0),
+		"State":  map[string]any{"OOMKilled": true, "ExitCode": float64(137), "StartedAt": "s", "FinishedAt": "f", "Health": map[string]any{"Status": "unhealthy", "FailingStreak": float64(4)}},
+		"Config": map[string]any{"Labels": map[string]any{"org.opencontainers.image.version": "1.2.3"}},
+	}
+	for name, data := range map[string]map[string]any{"no health": noHealth, "health": withHealth} {
+		var b strings.Builder
+		if err := tmpl.Execute(&b, data); err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		cs := []ContainerInfo{{ID: data["Id"].(string)}}
+		applyDockerInspect(cs, b.String())
+		if cs[0].ImageID == "" || cs[0].StartedAt == "" {
+			t.Fatalf("%s: output %q did not parse: %+v", name, b.String(), cs[0])
+		}
+		if name == "health" && (cs[0].HealthFailingStreak != 4 || cs[0].ImageVersion != "1.2.3" || !cs[0].OOMKilled || cs[0].ExitCode != 137) {
+			t.Fatalf("health fields: %+v", cs[0])
+		}
+		if name == "no health" && (cs[0].ImageVersion != "" || cs[0].RestartCount != 2) {
+			t.Fatalf("no-health fields: %+v", cs[0])
 		}
 	}
 }
