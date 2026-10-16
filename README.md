@@ -161,7 +161,7 @@ HostSleuth periodically captures useful local state including:
 - bounded Debian/Ubuntu package install, update, and removal history from local `dpkg` logs, with `apt` history as a fallback, in native mode;
 - SHA-256 fingerprints for a small explicit set of high-value configuration files in native mode, storing path/state/fingerprint/size rather than file contents.
 
-It compares snapshots and records meaningful service/container/listener/package/configuration changes in one local event timeline. A reboot event is recorded only when a previously known kernel boot ID changes to another known boot ID. Known noisy changes such as Docker uptime progression are suppressed. Package history, configuration fingerprints, and boot identity are baselined across schema upgrades so pre-existing or newly introduced evidence is not falsely replayed as a change.
+It compares snapshots and records meaningful service/container/listener/package/configuration changes in one local event timeline. A reboot event is recorded only when a previously known kernel boot ID changes to another known boot ID. Known noisy changes such as Docker uptime progression are suppressed. Listener churn that follows interfaces or client activity rather than services is kept as current evidence but not recorded as a change: link-local and multicast sockets, discovery-protocol binds on one specific interface address (mDNS, LLMNR, SSDP, WS-Discovery), and UDP sockets in the Linux ephemeral port range (except fixed services such as WireGuard 51820 and Tailscale 41641). On a Docker host this is the difference between a timeline of real events and hundreds of per-veth socket lines after every reboot; churn recorded by older versions is skipped when the timeline is read. TCP listeners are always recorded. The timeline file is compacted automatically past 4 MiB, keeping the newest 5,000 meaningful events. Package history, configuration fingerprints, and boot identity are baselined across schema upgrades so pre-existing or newly introduced evidence is not falsely replayed as a change.
 
 Configuration fingerprinting currently covers `/etc/hosts`, `/etc/fstab`, `/etc/ssh/sshd_config`, `/etc/docker/daemon.json`, and `/etc/nftables.conf`. Missing or unreadable files remain truthful and quiet, and HostSleuth does not recursively crawl `/etc`.
 
@@ -495,10 +495,11 @@ Export the bounded redacted bundle to a local ZIP:
 hostsleuth evidence export --output hostsleuth-evidence.zip
 ```
 
-Show recent events:
+Show recent events (add `--all` to include routine listener churn; the Web API equivalent is `/api/events?all=1`):
 
 ```bash
 hostsleuth events
+hostsleuth events --all
 ```
 
 Show the installed version:

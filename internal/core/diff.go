@@ -228,6 +228,9 @@ func containerStatusPrefixThroughParen(status, fallback string) string {
 func listenerSet(in []Listener) map[string]bool {
 	m := map[string]bool{}
 	for _, l := range in {
+		if IsRoutineListener(l.Protocol, l.Address) {
+			continue
+		}
 		m[l.Protocol+" "+l.Address] = true
 	}
 	return m
