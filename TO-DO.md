@@ -50,6 +50,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] Align live Arcane production and `OMV-Docker-Rebuild` recovery on `mjmalleo/hostsleuth:1.0.1`.
 - [x] v1.1.0 event-timeline quality + build revision (PR #88), published from `e2eecd68aaa236b730b43268696eb836106afd0e`, live on OMV, recovery PR #138.
 - [x] v1.2.0 reboot-wave folding, Reboot Story dynamic-port fix and console rework (PRs #90, #91), published from `91d31eafc9957a0a655a229200c4bfb7199d6e4a`, live on OMV, recovery PR #139.
+- [x] v1.3.0 Container Story, container updates, Share redacted and README front page (PR #93), published from `c9dc7bc420c6a712608f43f717c1ce435b10178c`, live on OMV, recovery PR #140.
 
 ## Records
 
@@ -91,10 +92,11 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v1.0.1 production/recovery alignment: `docs/history/V1.0.1-PRODUCTION-ALIGNMENT.md`
 - v1.1.0 event-timeline quality, publication and live: `docs/history/V1.1.0-EVENT-TIMELINE-QUALITY.md`
 - v1.2.0 console, blips and dynamic-port moves: `docs/history/V1.2.0-CONSOLE-AND-BLIPS.md`
+- v1.3.0 containers, share and README: `docs/history/V1.3.0-CONTAINERS-SHARE-README.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v1.2.0` / `mjmalleo/hostsleuth:1.2.0`, published from exact source `91d31eafc9957a0a655a229200c4bfb7199d6e4a`.
+Stable/public/live/recovery are aligned on `v1.3.0` / `mjmalleo/hostsleuth:1.3.0`, published from exact source `c9dc7bc420c6a712608f43f717c1ce435b10178c`.
 
 Candidate next: pair loopback dynamic-port listener replacements outside reboots (a local process rotates them; about 25 lines in six days on OMV). Not started.
 

@@ -1,8 +1,27 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-10-15 (v1.2.0)
+Last updated: 2026-10-16 (v1.3.0)
 
-## Stable / public / live / recovery state — v1.2.0
+## Stable / public / live / recovery state — v1.3.0
+
+Stable/public/live/recovery are aligned on `v1.3.0` / `mjmalleo/hostsleuth:1.3.0`, published from exact source `c9dc7bc420c6a712608f43f717c1ce435b10178c` (PR #93) by release workflow `38849643515`.
+
+v1.3.0 (record: `docs/history/V1.3.0-CONTAINERS-SHARE-README.md`):
+
+- container image updates, recreations, and restarts with Docker's own reason (crash and exit code, out-of-memory kill, SIGTERM/SIGKILL), from a field-limited `docker inspect` and die/oom `docker events`; never reads env, cmd, mounts or host config;
+- Containers view, `/api/containers`, `/api/container-story`, `hostsleuth containers [NAME]`;
+- Share redacted on every result view (`POST /api/share`, Evidence Bundle redaction, stores nothing);
+- README rewritten as a short front page with screenshots from a sanitized demo dataset; reference moved to `docs/INSTALL.md`, `FEATURES.md`, `CLI.md`, `PROJECT.md`;
+- CI runs a real crash-looping container in Docker smoke (it caught a `docker inspect` template bug before release).
+
+Verified live 2026-10-15/16: assets match `SHA256SUMS`; amd64 reports `v1.3.0 (c9dc7bc420c6)`; OMV pulled `mjmalleo/hostsleuth:1.3.0` through the compose sync (healthy; live compose byte-identical to GitHub); `/api/about` = `v1.3.0` / `c9dc7bc420c6`; inspect evidence on 25 of 25 containers; no env/cmd/mount/config keys in the snapshot; Containers lists backblaze-snapshotter (unhealthy) first, then backblaze-uploader and qbittorrent-vpn (unstable); `/api/share` redacts host name, LAN address and container names; LAN Action API 403. First real events overnight: `container restarted: chaptarr (stopped cleanly, exit code 0)` and `container updated: searxng: searxng/searxng:latest, version 2026.10.15-b00212a83 → 2026.10.16-ff8f5ddcc`. Recovery: `OMV-Docker-Rebuild` PR #140 merged at `34610c7d51b7aad69305943872e0bb70ff1a31dd`; The Bridge synced to it.
+
+Known limitations seen live:
+
+- some images inherit `org.opencontainers.image.version` from their base image (chaptarr shows "24.04", the Ubuntu base), so a version label is a hint, not proof;
+- `docker/DOCKERHUB.md` is updated, but the public Docker Hub page only changes when the optional manual metadata sync is run with a dedicated `DOCKERHUB_METADATA_TOKEN`.
+
+## Previous state — v1.2.0
 
 Stable/public/live/recovery are aligned on `v1.2.0` / `mjmalleo/hostsleuth:1.2.0`, published from exact source `91d31eafc9957a0a655a229200c4bfb7199d6e4a` (PRs #90 and #91) by release workflow `38844421236`.
 
