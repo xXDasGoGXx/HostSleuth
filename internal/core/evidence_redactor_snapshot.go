@@ -55,6 +55,12 @@ func (r *evidenceRedactor) snapshot(in Snapshot) Snapshot {
 		out.Containers[i].ImageID = r.alias("id", container.ImageID)
 		out.Containers[i].ImageVersion = r.freeform(container.ImageVersion)
 		out.Containers[i].ComposeProject = r.alias("network", container.ComposeProject)
+		out.Containers[i].HealthCheck = r.freeform(container.HealthCheck)
+		if container.HealthLast != nil {
+			last := *container.HealthLast
+			last.Output = r.freeform(last.Output)
+			out.Containers[i].HealthLast = &last
+		}
 		networks := splitList(container.Networks)
 		for j, network := range networks {
 			if network != "bridge" && network != "host" && network != "none" {

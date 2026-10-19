@@ -60,6 +60,7 @@
           <button class="secondary-button share-button" id="containerCopyEvidenceShare" type="button">Share redacted</button>
           <span class="copy-status" id="containerCopyStatus" aria-live="polite"></span>
         </div>
+        <div class="context-card container-why hidden" id="containerStoryWhy" aria-live="polite"></div>
         <div class="reboot-story-grid">
           <div class="context-card">
             <p class="subsection-label">What happened to it (newest first)</p>
@@ -196,6 +197,8 @@
     if (current.restart_count) meta.push(`Docker restart count ${current.restart_count}`);
     text(byId("containerStoryMeta"), meta.join(" · "));
 
+    renderWhy(story.why);
+
     const timeline = byId("containerStoryTimeline");
     timeline.replaceChildren();
     const events = [...(story.timeline || [])].reverse();
@@ -217,6 +220,48 @@
     });
   }
 
+  // Why an unhealthy container is failing: HostSleuth's suggestion, what its
+  // check requires, clues from its history, and Docker's last check result.
+  function renderWhy(why) {
+    const box = byId("containerStoryWhy");
+    box.replaceChildren();
+    box.classList.toggle("hidden", !why);
+    if (!why) return;
+    const el = (tag, cls, value) => {
+      const node = document.createElement(tag);
+      if (cls) node.className = cls;
+      if (value != null) node.textContent = value;
+      return node;
+    };
+    const list = (items) => {
+      const ul = el("ul", "container-why-list");
+      items.forEach((item) => ul.append(el("li", "", item)));
+      return ul;
+    };
+    box.append(el("p", "subsection-label", "Why it is unhealthy"), el("p", "container-why-summary", why.summary));
+    if (why.needs?.length) box.append(el("p", "container-why-lead", "Its check passes only when:"), list(why.needs));
+    if (why.clues?.length) box.append(el("p", "container-why-lead", "Clues:"), list(why.clues));
+    if (why.last_exit != null) {
+      const when = why.last_at ? `Last check at ${formatTime(new Date(why.last_at).toISOString())}` : "Last check";
+      box.append(el("p", "container-why-last", `${when}: exit code ${why.last_exit}, ${why.last_output ? `printed “${why.last_output}”` : "printed nothing"}.`));
+    }
+    if (why.check) {
+      const p = el("p", "container-why-cmd");
+      p.append(el("span", "", "Check "), el("code", "", why.check));
+      box.append(p);
+    }
+  }
+
+  function whyLines(why) {
+    if (!why) return [];
+    const lines = ["", `Why it is unhealthy: ${why.summary}`];
+    if (why.needs?.length) lines.push("Its check passes only when:", ...why.needs.map((n) => `  - ${n}`));
+    if (why.clues?.length) lines.push("Clues:", ...why.clues.map((c) => `  - ${c}`));
+    if (why.last_exit != null) lines.push(`Last check: exit code ${why.last_exit}${why.last_output ? `, printed "${why.last_output}"` : ", printed nothing"}`);
+    if (why.check) lines.push(`Check: ${why.check}`);
+    return lines;
+  }
+
   function containerEvidenceSummary(story) {
     if (!story) return "";
     const lines = [
@@ -227,6 +272,7 @@
     if (current.image) lines.push(`Image: ${current.image}${current.image_version ? ` (version ${current.image_version})` : ""}`);
     if (current.status) lines.push(`Docker status: ${current.status}`);
     if (current.restart_count) lines.push(`Docker restart count: ${current.restart_count}`);
+    lines.push(...whyLines(story.why));
     lines.push("", "Changes (newest first):");
     const events = [...(story.timeline || [])].reverse();
     if (!events.length) lines.push("  none in 7 days");

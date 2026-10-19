@@ -59,6 +59,8 @@ type ContainerStory struct {
 	Timeline   []Event          `json:"timeline"`
 	Nearby     []Event          `json:"nearby_listener_changes"`
 	Notes      []string         `json:"notes"`
+	// Why is set when the container is unhealthy now.
+	Why *HealthWhy `json:"why,omitempty"`
 }
 
 // containerEventName returns the container an event is about and the kind
@@ -258,6 +260,13 @@ func BuildContainerStory(snap Snapshot, events []Event, name string) ContainerSt
 	}
 	story.Found = true
 	story.Current = current
+	if containerHealthFromStatus(current.Status) == "unhealthy" {
+		for _, p := range BuildReplay(snap, events).Parts {
+			if p.ID == name {
+				story.Why = p.Why
+			}
+		}
+	}
 	story.Summary = summarizeContainer(*current, events, now)
 	story.Status, story.Conclusion = containerConclusion(story.Summary, *current)
 	if current.StartedAt == "" && current.ImageID == "" {

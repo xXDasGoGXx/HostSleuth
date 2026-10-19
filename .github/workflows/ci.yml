@@ -492,6 +492,49 @@ jobs:
           print("container story:", story["conclusion"])
           PY
           docker rm -f hs-crashloop
+      - name: Verify Why it is unhealthy against real Docker health checks
+        run: |
+          set -eu
+          # A container whose file check fails because a problem file is not
+          # empty, and one whose check carries a password that must be masked.
+          docker run -d --name hs-sick --health-cmd 'test -f /tmp/READY && test ! -s /tmp/ERRORS.txt' \
+            --health-interval 2s --health-retries 1 --health-start-period 0s \
+            alpine:3.20 sh -c 'touch /tmp/READY; echo disk full > /tmp/ERRORS.txt; sleep 900'
+          docker run -d --name hs-secret --health-cmd 'wget -q -O- http://admin:hunter2pass@127.0.0.1:9/ping || exit 1' \
+            --health-interval 2s --health-retries 1 --health-start-period 0s \
+            alpine:3.20 sleep 900
+          python3 - <<'PY'
+          import json, time, urllib.request
+          def get(path):
+              with urllib.request.urlopen("http://127.0.0.1:8787" + path, timeout=20) as r:
+                  return json.load(r)
+          def fail(message):
+              print(message)
+              print("::error title=Why unhealthy check::" + message.replace("%", "%25").replace("\r", "").replace("\n", "%0A")[:3000])
+              raise SystemExit(1)
+          deadline = time.time() + 240
+          while True:
+              sick = get("/api/container-story?name=hs-sick")
+              secret = get("/api/container-story?name=hs-secret")
+              if sick.get("why") and secret.get("why"):
+                  break
+              if time.time() > deadline:
+                  fail("no explanation: sick=%s secret=%s" % (json.dumps(sick.get("current"))[:800], json.dumps(secret.get("current"))[:800]))
+              time.sleep(10)
+          why = sick["why"]
+          print("hs-sick:", why["summary"])
+          if not why["summary"].startswith("Most likely /tmp/ERRORS.txt is not empty."):
+              fail("hs-sick summary: %r" % why)
+          if why.get("needs") != ["/tmp/READY exists", "/tmp/ERRORS.txt is empty or missing"] or why.get("last_exit") != 1:
+              fail("hs-sick details: %r" % why)
+          raw = json.dumps(get("/api/snapshot")) + json.dumps(secret) + json.dumps(get("/api/replay"))
+          if "hunter2pass" in raw:
+              fail("health-check password leaked")
+          if "[REDACTED]@127.0.0.1" not in secret["why"].get("check", ""):
+              fail("hs-secret check not masked as expected: %r" % secret["why"])
+          print("hs-secret:", secret["why"]["summary"], "|", secret["why"]["check"])
+          PY
+          docker rm -f hs-sick hs-secret
       - name: Verify Share redacted endpoint
         run: |
           set -eu

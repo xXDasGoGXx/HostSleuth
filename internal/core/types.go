@@ -83,6 +83,11 @@ type ContainerInfo struct {
 	HealthFailingStreak int    `json:"health_failing_streak,omitempty"`
 	ComposeProject      string `json:"compose_project,omitempty"`
 
+	// The health check's command and Docker's newest check result, both
+	// masked for secrets and bounded (see container_health.go).
+	HealthCheck string             `json:"health_check,omitempty"`
+	HealthLast  *HealthCheckResult `json:"health_last,omitempty"`
+
 	// Exits Docker reported in the bounded window before this snapshot
 	// (`docker events`, die/oom only), oldest first.
 	RecentExits []ContainerExit `json:"recent_exits,omitempty"`

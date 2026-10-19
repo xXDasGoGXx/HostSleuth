@@ -17,6 +17,7 @@ The home screen is **Replay**: your containers drawn as a blueprint, grouped by 
 | You ask | HostSleuth shows |
 | --- | --- |
 | **What happened to this box this week?** | Replay: rewind the drawing to any moment. *"All 8 containers with a health check restarted at the same moment. That pattern fits a Docker restart."* |
+| **Why is this container unhealthy?** | Docker's own check and its last result, read for you: *"Most likely /work/staging/UNCLASSIFIED.txt is not empty. Its check prints nothing, so Docker records no reason…"*, with what the check requires and what changed just before. |
 | **Why can't I reach `nas:8443`?** | DNS → route → TCP → local listener → Docker publication → TLS, with the first failure called out: *"Docker publishes the port but TCP still failed: nextcloud (unhealthy)"*. |
 | **Why does this container keep restarting?** | Every restart with Docker's own reason—crash and exit code, out-of-memory kill, clean stop—plus health changes and which of its ports went down with it. |
 | **Did that update break it?** | Image updates as they happen: *"jellyfin updated 10.10.2 → 10.10.3"*, next to what changed right after. Works for `:latest` too. |
