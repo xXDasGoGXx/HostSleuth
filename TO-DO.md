@@ -52,6 +52,7 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - [x] v1.2.0 reboot-wave folding, Reboot Story dynamic-port fix and console rework (PRs #90, #91), published from `91d31eafc9957a0a655a229200c4bfb7199d6e4a`, live on OMV, recovery PR #139.
 - [x] v1.3.0 Container Story, container updates, Share redacted and README front page (PR #93), published from `c9dc7bc420c6a712608f43f717c1ce435b10178c`, live on OMV, recovery PR #140.
 - [x] v1.4.0 Replay home screen (PR #95), published from `b8c3218b3502e568b2b3ab354808c30441a69d52`, live on OMV, recovery PR #142.
+- [x] v1.5.0 why a container is unhealthy (PR #97), published from `7869173340f86720a712370e537a8e2c82000032`, live on OMV, recovery PR #208.
 
 ## Records
 
@@ -95,10 +96,11 @@ This file stays intentionally short. Completed milestone detail belongs in `docs
 - v1.2.0 console, blips and dynamic-port moves: `docs/history/V1.2.0-CONSOLE-AND-BLIPS.md`
 - v1.3.0 containers, share and README: `docs/history/V1.3.0-CONTAINERS-SHARE-README.md`
 - v1.4.0 Replay: `docs/history/V1.4.0-REPLAY.md`
+- v1.5.0 why unhealthy: `docs/history/V1.5.0-WHY-UNHEALTHY.md`
 
 ## Current state
 
-Stable/public/live/recovery are aligned on `v1.4.0` / `mjmalleo/hostsleuth:1.4.0`, published from exact source `b8c3218b3502e568b2b3ab354808c30441a69d52`.
+Stable/public/live/recovery are aligned on `v1.5.0` / `mjmalleo/hostsleuth:1.5.0`, published from exact source `7869173340f86720a712370e537a8e2c82000032`.
 
 Candidate next: pair loopback dynamic-port listener replacements outside reboots (a local process rotates them; about 25 lines in six days on OMV). Not started.
 

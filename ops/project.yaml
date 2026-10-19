@@ -10,8 +10,8 @@ project:
   license: MIT
 
 current_state:
-  stable_release: v1.4.0
-  stable_source_commit: b8c3218b3502e568b2b3ab354808c30441a69d52
+  stable_release: v1.5.0
+  stable_source_commit: 7869173340f86720a712370e537a8e2c82000032
   canonical_handoff: CURRENT-HANDOFF.md
   human_operations_map: docs/OPERATIONS.md
 
@@ -107,12 +107,12 @@ deployment:
   web_default_bind: 127.0.0.1:8787
   production:
     platform: Arcane-managed Docker
-    image: mjmalleo/hostsleuth:1.4.0
-    exact_acceptance_record: docs/history/V1.4.0-REPLAY.md
+    image: mjmalleo/hostsleuth:1.5.0
+    exact_acceptance_record: docs/history/V1.5.0-WHY-UNHEALTHY.md
 
 recovery:
   repository: https://github.com/xXDasGoGXx/OMV-Docker-Rebuild
-  current_image_pin: mjmalleo/hostsleuth:1.4.0
+  current_image_pin: mjmalleo/hostsleuth:1.5.0
   policy: Recovery must not be moved ahead of live production acceptance.
 
 security_boundaries:
