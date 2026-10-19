@@ -121,13 +121,23 @@
 #view-replay .rp-state { font-weight: 700; }
 #view-replay .rp-state.bad { color: var(--rp-fault); }
 #view-replay .rp-week { max-width: 52ch; }
-#view-replay .rp-detail ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+#view-replay .rp-detail ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; align-content: start; }
 #view-replay .rp-detail li { display: grid; grid-template-columns: 3.2em 8.8em minmax(0, 1fr); gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--rp-ink-3); font-size: .9rem; }
 #view-replay .rp-detail li .d { font-family: var(--rp-mono); color: var(--rp-rev); font-weight: 700; }
 #view-replay .rp-detail li .t { color: var(--rp-ink-2); font-variant-numeric: tabular-nums; }
 #view-replay .rp-detail li.later { opacity: .38; }
 #view-replay .rp-detail li.fault .w { color: var(--rp-fault); }
 #view-replay .rp-empty { color: var(--rp-ink-2); }
+#view-replay .rp-why { margin: 10px 0 12px; padding: 12px 14px; border: 1.5px solid var(--rp-fault); border-radius: 6px; background: var(--rp-fault-soft); }
+#view-replay .rp-why h3 { margin: 0 0 6px; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--rp-fault); }
+#view-replay .rp-why .rp-why-sum { margin: 0 0 8px; font-weight: 700; color: var(--rp-ink); }
+#view-replay .rp-why .rp-why-lead { margin: 8px 0 2px; color: var(--rp-ink-2); font-size: .85rem; }
+#view-replay .rp-why ul { margin: 0; padding-left: 1.2em; display: grid; gap: 2px; font-size: .9rem; }
+#view-replay .rp-why li { display: list-item; padding: 0; border: 0; font-size: .9rem; grid-template-columns: none; }
+#view-replay .rp-why .rp-why-last { margin: 8px 0 0; color: var(--rp-ink-2); font-size: .85rem; overflow-wrap: anywhere; }
+#view-replay .rp-why .rp-why-cmd { margin: 6px 0 0; font-size: .8rem; color: var(--rp-ink-2); overflow-wrap: anywhere; }
+#view-replay .rp-why .rp-why-cmd span { text-transform: uppercase; letter-spacing: .06em; margin-right: 6px; }
+#view-replay .rp-why code { font-family: var(--rp-mono); color: var(--rp-ink); font-size: .78rem; }
 @media (max-width: 760px) {
   #view-replay .rp-sheet { padding: 14px 12px 18px; }
   #view-replay .rp-detail { grid-template-columns: 1fr; }

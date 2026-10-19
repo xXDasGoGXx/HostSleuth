@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"text/template"
@@ -30,8 +31,11 @@ func TestDockerInspectFormatNeverSelectsConfigSecrets(t *testing.T) {
 			t.Errorf("Docker format selects %s", forbidden)
 		}
 	}
-	if strings.Contains(dockerInspectFormat, "{{json") || strings.Contains(dockerExitFormat, "{{json") {
-		t.Error("Docker formats must select fields, not whole objects")
+	// json is allowed only to quote the health check's command and output.
+	rest := strings.ReplaceAll(dockerInspectFormat, `json (index . "Test")`, "")
+	rest = strings.ReplaceAll(rest, `json (index . "Output")`, "")
+	if strings.Contains(rest, "json") || strings.Contains(dockerExitFormat, "json") {
+		t.Error("json may only quote Healthcheck.Test and a health result's Output")
 	}
 }
 
@@ -181,7 +185,15 @@ func TestContainerRestartWithoutExitEvidenceAndBaselines(t *testing.T) {
 // Docker executes inspect templates on the decoded JSON map with missing
 // keys as errors. Containers without a healthcheck have no State.Health.
 func TestDockerInspectFormatToleratesMissingOptionalKeys(t *testing.T) {
-	tmpl, err := template.New("").Option("missingkey=error").Parse(dockerInspectFormat)
+	// Docker's own template function; HTML escaping off like Docker's.
+	dockerJSON := func(v any) string {
+		var b strings.Builder
+		enc := json.NewEncoder(&b)
+		enc.SetEscapeHTML(false)
+		_ = enc.Encode(v)
+		return strings.TrimSpace(b.String())
+	}
+	tmpl, err := template.New("").Option("missingkey=error").Funcs(template.FuncMap{"json": dockerJSON}).Parse(dockerInspectFormat)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -192,8 +204,12 @@ func TestDockerInspectFormatToleratesMissingOptionalKeys(t *testing.T) {
 	}
 	withHealth := map[string]any{
 		"Id": "def", "Image": "sha256:y", "RestartCount": float64(0),
-		"State":  map[string]any{"OOMKilled": true, "ExitCode": float64(137), "StartedAt": "s", "FinishedAt": "f", "Health": map[string]any{"Status": "unhealthy", "FailingStreak": float64(4)}},
-		"Config": map[string]any{"Labels": map[string]any{"org.opencontainers.image.version": "1.2.3", "com.docker.compose.project": "media"}},
+		"State": map[string]any{"OOMKilled": true, "ExitCode": float64(137), "StartedAt": "s", "FinishedAt": "f", "Health": map[string]any{"Status": "unhealthy", "FailingStreak": float64(4), "Log": []any{
+			map[string]any{"Start": "a", "End": "2026-10-16T16:40:00Z", "ExitCode": float64(0), "Output": ""},
+			map[string]any{"Start": "b", "End": "2026-10-16T16:45:00.5Z", "ExitCode": float64(7), "Output": "curl: (7) Failed to connect\tto localhost port 8080 | after 0 ms\nretry with --password=hunter2\n"},
+		}}},
+		"Config": map[string]any{"Labels": map[string]any{"org.opencontainers.image.version": "1.2.3", "com.docker.compose.project": "media"},
+			"Healthcheck": map[string]any{"Test": []any{"CMD-SHELL", "curl -fsS -u admin:s3cret http://localhost:8080/health || exit 1"}, "Interval": float64(30e9)}},
 	}
 	for name, data := range map[string]map[string]any{"no health": noHealth, "health": withHealth} {
 		var b strings.Builder
@@ -207,6 +223,18 @@ func TestDockerInspectFormatToleratesMissingOptionalKeys(t *testing.T) {
 		}
 		if name == "health" && (cs[0].HealthFailingStreak != 4 || cs[0].ImageVersion != "1.2.3" || !cs[0].OOMKilled || cs[0].ExitCode != 137 || cs[0].ComposeProject != "media") {
 			t.Fatalf("health fields: %+v", cs[0])
+		}
+		if name == "health" {
+			if cs[0].HealthCheck != "curl -fsS -u [REDACTED] http://localhost:8080/health || exit 1" {
+				t.Fatalf("health check command: %q", cs[0].HealthCheck)
+			}
+			last := cs[0].HealthLast
+			if last == nil || last.ExitCode != 7 || last.At != "2026-10-16T16:45:00.5Z" || last.Output != "curl: (7) Failed to connect to localhost port 8080 | after 0 ms retry with --password=[REDACTED]" {
+				t.Fatalf("newest health result: %+v", last)
+			}
+		}
+		if name == "no health" && (cs[0].HealthCheck != "" || cs[0].HealthLast != nil) {
+			t.Fatalf("no-health check fields: %+v", cs[0])
 		}
 		if name == "no health" && (cs[0].ImageVersion != "" || cs[0].RestartCount != 2 || cs[0].ComposeProject != "") {
 			t.Fatalf("no-health fields: %+v", cs[0])

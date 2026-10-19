@@ -15,7 +15,10 @@ import (
 // It must never select .Config.Env, .Config.Cmd, .Mounts or .HostConfig:
 // container configuration routinely carries passwords and tokens, and a
 // field-limited template keeps them out of process memory and snapshots.
-const dockerInspectFormat = `{{.Id}}{{"\t"}}{{.Image}}{{"\t"}}{{.RestartCount}}{{"\t"}}{{.State.OOMKilled}}{{"\t"}}{{.State.ExitCode}}{{"\t"}}{{.State.StartedAt}}{{"\t"}}{{.State.FinishedAt}}{{"\t"}}{{with index .State "Health"}}{{index . "FailingStreak"}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "org.opencontainers.image.version"}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "com.docker.compose.project"}}{{end}}`
+// The last two fields are the health check's own command (Healthcheck.Test)
+// and Docker's retained check results (exit code, end time, output); both are
+// masked for secrets before they are kept (see container_health.go).
+const dockerInspectFormat = `{{.Id}}{{"\t"}}{{.Image}}{{"\t"}}{{.RestartCount}}{{"\t"}}{{.State.OOMKilled}}{{"\t"}}{{.State.ExitCode}}{{"\t"}}{{.State.StartedAt}}{{"\t"}}{{.State.FinishedAt}}{{"\t"}}{{with index .State "Health"}}{{index . "FailingStreak"}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "org.opencontainers.image.version"}}{{end}}{{"\t"}}{{with .Config.Labels}}{{index . "com.docker.compose.project"}}{{end}}{{"\t"}}{{with index .Config "Healthcheck"}}{{json (index . "Test")}}{{end}}{{"\t"}}{{with index .State "Health"}}{{range index . "Log"}}{{index . "ExitCode"}}|{{index . "End"}}|{{json (index . "Output")}}{{"\x1e"}}{{end}}{{end}}`
 
 // enrichContainers adds runtime evidence to containers listed by
 // `docker ps`. One `docker inspect` call covers every container; if it
@@ -130,6 +133,10 @@ func applyDockerInspect(containers []ContainerInfo, text string) {
 			c.ImageVersion = boundedLabel(f[8])
 			if len(f) > 9 {
 				c.ComposeProject = boundedLabel(f[9])
+			}
+			if len(f) > 11 {
+				c.HealthCheck = healthCheckCommand(f[10])
+				c.HealthLast = healthLastResult(f[11])
 			}
 			break
 		}

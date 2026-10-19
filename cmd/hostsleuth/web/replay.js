@@ -193,7 +193,8 @@
     else if (fresh && at - lastEv.t < 5 * 60e3) say = lastEv.text;
     else if (sick.length) {
       say = `${sick[0][0].id} has been failing its health check for ${dur(at - sick[0][1].since)}.`;
-      if (lastEv) more = `Last change ${ago(at - lastEv.t)}: ${lastEv.text}`;
+      if (live && sick[0][0].why) more = sick[0][0].why.summary;
+      else if (lastEv) more = `Last change ${ago(at - lastEv.t)}: ${lastEv.text}`;
     } else if (fresh) say = `${cap(ago(at - lastEv.t))}: ${lastEv.text}`;
     else say = lastEv ? `All quiet. Last change ${ago(at - lastEv.t)}: ${lastEv.text}` : "All quiet this week.";
     $("rpSay").textContent = say;
@@ -244,6 +245,24 @@
     tape.setAttribute("aria-valuetext", fmtWhen(at));
   }
 
+  // ---- why it is unhealthy ------------------------------------------------
+  function whyBlock(w) {
+    const list = (items) => `<ul>${items.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
+    let last = "";
+    if (w.last_exit != null) {
+      const when = w.last_at ? `Last check ${ago(NOW - w.last_at)}` : "Last check";
+      last = `${when}: exit code ${w.last_exit}, ${w.last_output ? `printed “${w.last_output}”` : "printed nothing"}.`;
+    }
+    return `<section class="rp-why" aria-label="Why it is unhealthy">
+        <h3>Why it is unhealthy</h3>
+        <p class="rp-why-sum">${esc(w.summary)}</p>
+        ${w.needs?.length ? `<p class="rp-why-lead">Its check passes only when:</p>${list(w.needs)}` : ""}
+        ${w.clues?.length ? `<p class="rp-why-lead">Clues:</p>${list(w.clues)}` : ""}
+        ${last ? `<p class="rp-why-last">${esc(last)}</p>` : ""}
+        ${w.check ? `<p class="rp-why-cmd"><span>Check</span> <code>${esc(w.check)}</code></p>` : ""}
+      </section>`;
+  }
+
   // ---- detail -----------------------------------------------------------
   function drawDetail(at) {
     const box = $("rpDetail"), p = byId[sel];
@@ -271,6 +290,7 @@
         <h2>${esc(p.id)}</h2>
         <div class="rp-img">${esc([p.base, versionAt(p, at)].filter(Boolean).join(" "))} · ${esc(p.stack)} stack</div>
         <p>At this moment: <span class="rp-state ${st.s === "up" ? "" : "bad"}">${esc(st.label)}</span></p>
+        ${NOW - at < 60e3 && p.why ? whyBlock(p.why) : ""}
         <p class="rp-week">${esc(week)}</p>
         <p><button type="button" id="rpOpenStory">Open its Container Story</button></p>
       </div>

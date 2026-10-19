@@ -62,6 +62,8 @@ type ReplayPart struct {
 	Streak        int          `json:"streak,omitempty"`
 	HealthChecked bool         `json:"hc"`
 	Flags         []ReplayFlag `json:"flags"`
+	// Why is set for a container that is unhealthy in the snapshot.
+	Why *HealthWhy `json:"why,omitempty"`
 }
 
 // ReplayTransition is [time, from, to] on the wire, matching the UI.
@@ -417,6 +419,18 @@ func BuildReplay(snap Snapshot, events []Event) Replay {
 	}
 	for i := range r.Events {
 		r.Events[i].N = i + 1
+	}
+
+	// Why each currently unhealthy container is failing.
+	stackOf := map[string]string{}
+	for _, p := range r.Parts {
+		stackOf[p.ID] = p.Stack
+	}
+	for i := range r.Parts {
+		p := &r.Parts[i]
+		if c, ok := known[p.ID]; ok && containerHealthFromStatus(c.Status) == "unhealthy" {
+			p.Why = explainUnhealthy(c, p.Stack, r.Events, stackOf)
+		}
 	}
 	return r
 }

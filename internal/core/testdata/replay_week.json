@@ -173,7 +173,12 @@
     "networks": "none",
     "compose_project": "backup",
     "started_at": "2026-10-14T22:33:07.8Z",
-    "health_failing_streak": 210
+    "health_failing_streak": 210,
+    "health_check": "test -f /work/staging/READY && test ! -f /work/staging/SNAPSHOT_FAILED && test ! -s /work/staging/UNCLASSIFIED.txt",
+    "health_last": {
+     "at": "2026-10-16T15:58:12.4Z",
+     "exit_code": 1
+    }
    },
    {
     "id": "0000005d48bc",

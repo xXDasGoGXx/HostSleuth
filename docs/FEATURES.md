@@ -20,6 +20,8 @@ A tape below covers the last seven days of recorded changes. Drag it, step with 
 
 The rules recognise a host reboot (anchored at the boot time, with the kernel change when one was recorded), an all-container restart that fits a Docker restart (at least four containers and 60% of the health-checked ones entering *starting* in the same minute, away from a reboot), crashes with exit codes, clean stops, health failures and recoveries, containers that took over 30 minutes to become healthy, image updates and recreations, and package and configuration changes. When an autoheal container runs on the host, a quick restart after a health failure says so.
 
+When the latest snapshot has an unhealthy container, the line under the headline says why (see *Why it is unhealthy* below), and so does its panel.
+
 Tap a container to see its week; **Open its Container Story** goes to the full Container Story. Tap a connector to highlight everything bound the same way. While on the latest moment, Replay refreshes every minute.
 
 API: `GET /api/replay`. The drawing uses the B612 typeface (SIL Open Font License, `/assets/fonts/OFL.txt`), served by HostSleuth itself; nothing loads from outside.
@@ -245,6 +247,22 @@ Evidence comes from a field-limited `docker inspect` (image ID, version label, r
 CLI: `hostsleuth containers` (all) or `hostsleuth containers NAME`. API: `GET /api/containers`, `GET /api/container-story?name=NAME`.
 
 ![Container Story](images/container-story.png)
+
+### Why it is unhealthy
+
+Question answered:
+
+> Docker says *unhealthy*. Why?
+
+Docker runs each container's own health check and keeps its last few results, but only shows the word *unhealthy*. HostSleuth reads the check's command and its newest result (exit code and what it printed), masks anything that looks like a password or token, and explains the failure with fixed rules:
+
+- **What the check printed:** nothing listening (connection refused), a timeout, a name (DNS) failure, an HTTP error code, or the check's own tool missing after an image update.
+- **What the check requires**, when it only tests files and prints nothing: "/staging/READY exists", "UNCLASSIFIED.txt is empty or missing". If a condition is a file a program writes to report trouble (names with *failed*, *error*, *unclassified*, *lock* and similar), HostSleuth says that is the most likely cause.
+- **Waiting to catch up:** a check that compares two files (for example "the newest backup has been uploaded") is reported as catching up, with how long it took to clear before.
+- **What changed just before:** the container itself, another container in the same compose project, or the host (reboot, Docker restart, packages, configuration), within ten minutes.
+- **Whether it has done this before** this week, and how long it took to clear.
+
+Every suggestion is worded as *most likely* or *probably*; HostSleuth never runs anything inside the container to confirm it. It appears in Replay, in Container Story (and its Copy/Share summary), and in `hostsleuth containers NAME` and `GET /api/container-story` as `why`.
 
 ### Share redacted
 
