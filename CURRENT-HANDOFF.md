@@ -1,8 +1,16 @@
 # HostSleuth — Current Handoff
 
-Last updated: 2026-10-16 (v1.4.0)
+Last updated: 2026-10-19 (v1.5.0)
 
-## Stable / public / live / recovery state — v1.4.0
+## Stable / public / live / recovery state — v1.5.0
+
+Stable/public/live/recovery are aligned on `v1.5.0` / `mjmalleo/hostsleuth:1.5.0`, published from exact source `7869173340f86720a712370e537a8e2c82000032` (PR #97) by release workflow `39295943111`.
+
+v1.5.0 (record: `docs/history/V1.5.0-WHY-UNHEALTHY.md`): unhealthy containers are explained. The field-limited inspect reads each container's health-check command and Docker's newest check result (masked for secrets); fixed rules say why in Replay, Container Story and the API (`why`).
+
+Verified live 2026-10-19: assets match `SHA256SUMS`; amd64 reports `v1.5.0 (7869173340f8)`; OMV compose sync pulled `mjmalleo/hostsleuth:1.5.0` and came up healthy (backup `compose-backups/hostsleuth/20261019T174230Z.yaml`); live compose byte-identical to GitHub; `/api/about` = `v1.5.0` / `7869173340f8`; health check and newest result recorded for all 8 health-checked containers (25 total), no secrets in them; LAN Action API 403. Nothing was unhealthy at deployment, so no live explanation was shown; the backup containers' exact checks are covered by the tests. Recovery: `OMV-Docker-Rebuild` PR #208 merged at `d73f1d47db1a9c7469dfcb9085a8146e5df24a13`; The Bridge synced to it.
+
+## Previous release — v1.4.0
 
 Stable/public/live/recovery are aligned on `v1.4.0` / `mjmalleo/hostsleuth:1.4.0`, published from exact source `b8c3218b3502e568b2b3ab354808c30441a69d52` (PR #95) by release workflow `38933415430`.
 
